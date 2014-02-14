@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import functools
 
 from webargs import core
 
@@ -34,3 +35,28 @@ class DjangoParser(core.Parser):
             return req.COOKIES.get(name, None)
         except AttributeError:
             return None
+
+    def use_args(self, argmap, req=None, targets=core.DEFAULT_TARGETS):
+        """Decorator that injects parsed arguments into a view function or method.
+
+        Example: ::
+
+            @parser.use_args({'name': 'World'})
+            def myview(request, args):
+                return HttpResponse('Hello ' + args['name'])
+
+        :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param tuple targets: Where on the request to search for values.
+        """
+        def decorator(func):
+            @functools.wraps(func)
+            def wrapper(obj, *args, **kwargs):
+                # The first argument is either `self` or `request`
+                try:  # get self.request
+                    request = obj.request
+                except AttributeError:  # first arg is request
+                    request = obj
+                parsed_args = self.parse(argmap, req=request, targets=targets)
+                return func(obj, parsed_args, *args, **kwargs)
+            return wrapper
+        return decorator
