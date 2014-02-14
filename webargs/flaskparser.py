@@ -47,11 +47,15 @@ class FlaskParser(core.Parser):
         return req.headers.get(name, None)
 
     def parse_cookies(self, req, name):
+        """Pull the value from the cookiejar."""
         return req.cookies.get(name, None)
 
     def handle_error(self, error):
         abort(400, message=error)
 
     def parse(self, argmap, req=None, *args, **kwargs):
-        req_obj = req or request
+        """Parses the request using the given arguments map.
+        Uses Flask's context-local request object if req=None.
+        """
+        req_obj = req or request  # Default to context-local request
         return super(FlaskParser, self).parse(argmap, req_obj, *args, **kwargs)
