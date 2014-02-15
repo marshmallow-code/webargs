@@ -4,11 +4,12 @@ import json
 import mock
 
 from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
 import pytest
 
 from webargs import Arg
 from webargs.compat import text_type
-from webargs.flaskparser import FlaskParser, use_args
+from webargs.flaskparser import FlaskParser, use_args, abort
 
 class TestAppConfig:
     TESTING = True
@@ -147,3 +148,8 @@ def test_unicode_arg(testapp):
     with testapp.test_request_context('/foo?name=Früd'):
         args = parser.parse(hello_args)
         assert args['name'] == 'Früd'
+
+def test_abort_with_message():
+    with pytest.raises(HTTPException) as excinfo:
+        abort(400, message='custom error message')
+    assert excinfo.value.data['message'] == 'custom error message'

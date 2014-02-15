@@ -1,4 +1,23 @@
 # -*- coding: utf-8 -*-
+"""Django request argument parsing.
+
+Example usage: ::
+
+    from django.views.generic import View
+    from django.http import HttpResponse
+    from webargs import Arg
+    from webargs.djangoparser import use_args
+
+    hello_args = {
+        'name': Arg(str, default='World')
+    }
+
+    class MyView(View):
+
+        @use_args(hello_args)
+        def get(self, args, request):
+            return HttpResponse('Hello ' + args['name'])
+"""
 import json
 import functools
 
@@ -10,17 +29,11 @@ class DjangoParser(core.Parser):
 
     def parse_querystring(self, req, name):
         """Pull the querystring value from the request."""
-        try:
-            return req.GET.get(name, None)
-        except AttributeError:
-            return None
+        return req.GET.get(name, None)
 
     def parse_form(self, req, name):
         """Pull the form value from the request."""
-        try:
-            return req.POST.get(name, None)
-        except AttributeError:
-            return None
+        return req.POST.get(name, None)
 
     def parse_json(self, req, name):
         """Pull a json value from the request body."""
@@ -32,10 +45,7 @@ class DjangoParser(core.Parser):
 
     def parse_cookies(self, req, name):
         """Pull the value from the cookiejar."""
-        try:
-            return req.COOKIES.get(name, None)
-        except AttributeError:
-            return None
+        return req.COOKIES.get(name, None)
 
     def parse_headers(self, req, name):
         raise NotImplementedError('Header parsing not supported by {0}'

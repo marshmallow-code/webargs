@@ -24,7 +24,8 @@ HTTP Request Argument Parsing, Simplified
     def index(args):
         return 'Hello ' + args['name']
 
-    app.run()
+    if __name__ == '__main__':
+        app.run()
 
     # curl http://localhost:5000/\?name\='World'
     # Hello World

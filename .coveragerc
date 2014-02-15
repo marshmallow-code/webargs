@@ -1,0 +1,6 @@
+[run]
+include =
+    webargs/*
+omit =
+    webargs/compat.py
+

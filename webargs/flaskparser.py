@@ -1,4 +1,23 @@
 # -*- coding: utf-8 -*-
+"""Flask request argument parsing module.
+
+Example: ::
+
+    from flask import Flask
+    from webargs import Arg
+    from webargs.flaskparser import use_args
+
+    app = Flask(__name__)
+
+    hello_args = {
+        'name': Arg(str, required=True)
+    }
+
+    @app.route('/')
+    @use_args(hello_args)
+    def index(args):
+        return 'Hello ' + args['name']
+"""
 from flask import request
 from flask import abort as flask_abort
 from werkzeug.exceptions import HTTPException

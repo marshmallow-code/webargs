@@ -6,4 +6,4 @@ Changelog
 
 * First release.
 * Parses JSON, querystring, forms, headers, and cookies
-* Support for Flask.
+* Support for Flask and Django.

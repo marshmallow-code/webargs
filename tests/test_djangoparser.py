@@ -79,3 +79,7 @@ def test_parse_headers_raises_not_implemented_error(mockrequest):
     with pytest.raises(NotImplementedError) as excinfo:
         p.parse_arg('foo', arg, req=mockrequest, targets=('headers',))
     assert 'Header parsing not supported by DjangoParser' in str(excinfo)
+
+def test_parse_cookies(testapp):
+    res = testapp.get('/cookieview/')
+    assert res.json == {'name': 'Joe'}

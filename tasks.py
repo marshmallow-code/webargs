@@ -6,8 +6,11 @@ docs_dir = 'docs'
 build_dir = os.path.join(docs_dir, '_build')
 
 @task
-def test():
-    run("python setup.py test", pty=True)
+def test(coverage=False):
+    cmd = 'py.test'
+    if coverage:
+        cmd += ' --cov=webargs --cov-report=term --cov-report=html'
+    run(cmd, pty=True)
 
 @task
 def clean():

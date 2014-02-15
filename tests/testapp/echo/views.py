@@ -49,6 +49,11 @@ def simpleview(request):
     args = parser.parse(hello_args, request)
     return render_json_response(args)
 
+def cookieview(request):
+    request.COOKIES['name'] = 'Joe'
+    args = parser.parse(hello_args, request, targets=('cookies',))
+    return render_json_response(args)
+
 @parser.use_args(hello_args)
 def simpleview_with_param(request, args, pid):
     return render_json_response(args)

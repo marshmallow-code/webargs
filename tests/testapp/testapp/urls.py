@@ -8,5 +8,6 @@ urlpatterns = patterns('',
     url(r'^simplecbvview/$', SimpleCBV.as_view()),
     url(r'^simplecbvview/(?P<pid>\d+)/$', SimpleCBVWithParam.as_view()),
     url(r'^decoratedview/', 'tests.testapp.echo.views.decoratedview'),
-    url(r'^decoratedcbv/', SimpleDecoratedCBV.as_view())
+    url(r'^decoratedcbv/', SimpleDecoratedCBV.as_view()),
+    url(r'^cookieview/$', 'tests.testapp.echo.views.cookieview'),
 )
