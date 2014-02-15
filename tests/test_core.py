@@ -47,6 +47,18 @@ def test_conversion_to_str():
     arg = Arg(str)
     assert arg.validated(42) == '42'
 
+def test_use_param():
+    arg = Arg(use=lambda x: x.upper())
+    assert arg.validated('foo') == 'FOO'
+
+def test_convert_and_use_params():
+    arg = Arg(int, use=lambda x: x + 1)
+    assert arg.validated('41') == 42
+
+def test_error_raised_if_use_is_uncallable():
+    with pytest.raises(ValueError) as excinfo:
+        Arg(use='bad')
+    assert '{0!r} is not callable.'.format('bad') in str(excinfo)
 # Parser tests
 
 @mock.patch('webargs.core.Parser.parse_json')

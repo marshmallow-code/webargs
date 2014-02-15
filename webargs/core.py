@@ -13,6 +13,14 @@ class ValidationError(WebargsError):
     def __init__(self, underlying_exception):
         super(ValidationError, self).__init__(str(underlying_exception))
 
+def _callable(obj):
+    """Makes sure an object is callable if it is not ``None``. If not
+    callable, a ValueError is raised.
+    """
+    if obj and not callable(obj):
+        raise ValueError('{0!r} is not callable.'.format(obj))
+    else:
+        return obj
 
 class Arg(object):
     """A request argument.
@@ -27,13 +35,12 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     """
     def __init__(self, type_=None, default=None, required=False,
-                 validate=None, error=None):
+                 validate=None, use=None, error=None):
         self.type = type_
         self.default = default
-        if validate and not callable(validate):
-            raise ValueError('validate parameter is not callable')
         self.required = required
-        self.validate = validate
+        self.validate = _callable(validate)
+        self.use = _callable(use)
         self.error = error
 
     def validated(self, value):
@@ -50,6 +57,8 @@ class Arg(object):
                 self.validate.__name__, ret
             )
             raise ValidationError(self.error or msg)
+        if self.use:
+            ret = self.use(ret)
         return ret
 
 DEFAULT_TARGETS = ('json', 'querystring', 'form')
