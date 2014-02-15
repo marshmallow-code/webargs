@@ -50,10 +50,7 @@ class FlaskParser(core.Parser):
 
     def parse_querystring(self, req, name):
         """Pull the querystring value from the request."""
-        try:
-            return req.args.get(name, None)
-        except AttributeError:
-            return None
+        return req.args.get(name, None)
 
     def parse_form(self, req, name):
         """Pull the form value from the request."""

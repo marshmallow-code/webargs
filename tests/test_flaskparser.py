@@ -144,6 +144,11 @@ def test_parsing_cookies(testapp):
     res = testclient.get('/getcookiearg')
     assert json.loads(res.data.decode('utf-8')) == {'name': 'Fred'}
 
+def test_parse_form_returns_none_if_no_form():
+    req = mock.Mock()
+    req.form.get.side_effect = AttributeError('no form')
+    assert parser.parse_form(req, 'foo') is None
+
 def test_unicode_arg(testapp):
     with testapp.test_request_context('/foo?name=Früd'):
         args = parser.parse(hello_args)

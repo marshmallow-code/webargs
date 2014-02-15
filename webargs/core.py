@@ -196,12 +196,12 @@ class Parser(object):
         return None
 
     def handle_error(self, error):
-        """Called if an error occurs while parsing args
+        """Called if an error occurs while parsing args.
         """
         raise error
 
     def fallback(self, req, name):
         """Called if all other parsing functions (parse_json, parse_form...) return
-        ``None``. Returns the
+        ``None``.
         """
         return None
