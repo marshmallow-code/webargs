@@ -20,6 +20,7 @@ def abort(http_status_code, **kwargs):
 
 
 class FlaskParser(core.Parser):
+    """Flask request argument parser."""
 
     def parse_json(self, req, name):
         """Pull the json value from the request."""

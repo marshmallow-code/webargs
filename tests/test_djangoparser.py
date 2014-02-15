@@ -2,9 +2,12 @@
 from __future__ import unicode_literals
 
 import pytest
+import mock
 from webtest import TestApp
 
 from tests.testapp.testapp.wsgi import application
+from webargs import Arg
+from webargs.djangoparser import DjangoParser
 
 
 @pytest.fixture
@@ -12,6 +15,10 @@ def testapp():
     """A webtest app that wraps the django wsgi app.
     """
     return TestApp(application)
+
+@pytest.fixture
+def mockrequest():
+    return mock.Mock()
 
 # Parametrize each test with a route that uses a function view and a route that
 # uses a class-based view
@@ -65,3 +72,10 @@ def test_decorated_view(route, testapp):
 def test_decorated_with_url_param(route, testapp):
     res = testapp.get(route)
     assert res.json == {'name': 'Fred'}
+
+def test_parse_headers_raises_not_implemented_error(mockrequest):
+    arg = Arg()
+    p = DjangoParser()
+    with pytest.raises(NotImplementedError) as excinfo:
+        p.parse_arg('foo', arg, req=mockrequest, targets=('headers',))
+    assert 'Header parsing not supported by DjangoParser' in str(excinfo)

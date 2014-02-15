@@ -6,6 +6,7 @@ from webargs import core
 
 
 class DjangoParser(core.Parser):
+    """Django request argument parser."""
 
     def parse_querystring(self, req, name):
         """Pull the querystring value from the request."""
@@ -35,6 +36,10 @@ class DjangoParser(core.Parser):
             return req.COOKIES.get(name, None)
         except AttributeError:
             return None
+
+    def parse_headers(self, req, name):
+        raise NotImplementedError('Header parsing not supported by {0}'
+            .format(self.__class__.__name__))
 
     def use_args(self, argmap, req=None, targets=core.DEFAULT_TARGETS):
         """Decorator that injects parsed arguments into a view function or method.
