@@ -6,3 +6,4 @@ invoke
 Flask
 mock
 webtest
+Django>=1.6.2

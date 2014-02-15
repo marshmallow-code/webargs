@@ -8,7 +8,7 @@ import pytest
 
 from webargs import Arg
 from webargs.compat import text_type
-from webargs.flaskparser import FlaskParser
+from webargs.flaskparser import FlaskParser, use_args
 
 class TestAppConfig:
     TESTING = True
@@ -84,12 +84,12 @@ def test_abort_called_on_type_conversion_error(mock_abort, testapp):
         assert mock_abort.called_once_with(400)
 
 def test_use_args_decorator(testapp):
-    @testapp.route('/foo', methods=['post', 'get'])
+    @testapp.route('/foo/', methods=['post', 'get'])
     @parser.use_args({'myvalue': Arg(type_=int)})
     def echo(args):
         return jsonify(args)
     test_client = testapp.test_client()
-    res = test_client.post('/foo', data={'myvalue': 23})
+    res = test_client.post('/foo/', data={'myvalue': 23})
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
 
 def test_use_args_decorator_with_url_parameters(testapp):
@@ -101,6 +101,15 @@ def test_use_args_decorator_with_url_parameters(testapp):
     test_client = testapp.test_client()
     res = test_client.post('/foo/42', data={'myvalue': 23})
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
+
+def test_use_args_singleton(testapp):
+    @testapp.route('/foo/')
+    @use_args({'myvalue': Arg(int)})
+    def echo(args):
+        return jsonify(args)
+    test_client = testapp.test_client()
+    res = test_client.get('/foo/?myvalue=42')
+    assert json.loads(res.data.decode('utf-8')) == {'myvalue': 42}
 
 def test_use_args_doesnt_change_docstring(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])

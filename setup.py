@@ -6,9 +6,8 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 # Requirements
-REQUIRES = [
-
-]
+REQUIREMENTS = []
+TEST_REQUIREMENTS =['pytest', 'mock', 'flask', 'django', 'webtest']
 PUBLISH_CMD = "python setup.py register sdist bdist_wheel upload"
 TEST_PUBLISH_CMD = 'python setup.py register -r test sdist bdist_wheel upload -r test'
 
@@ -78,7 +77,7 @@ setup(
     packages=find_packages(exclude=("test*", )),
     package_dir={'webargs': 'webargs'},
     include_package_data=True,
-    install_requires=REQUIRES,
+    install_requires=REQUIREMENTS,
     license=read("LICENSE"),
     zip_safe=False,
     keywords='webargs',
@@ -94,6 +93,6 @@ setup(
         'Programming Language :: Python :: 3.3',
     ],
     test_suite='tests',
-    tests_require=['pytest', 'mock', 'flask'],
+    tests_require=TEST_REQUIREMENTS,
     cmdclass={'test': PyTest}
 )

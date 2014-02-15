@@ -11,17 +11,16 @@ HTTP Request Argument Parsing, Simplified
 
     from flask import Flask
     from webargs import Arg
-    from webargs.flaskparser import FlaskParser
+    from webargs.flaskparser import use_args
 
     app = Flask(__name__)
-    parser = FlaskParser()
 
     hello_args = {
         'name': Arg(str, required=True)
     }
 
     @app.route('/')
-    @parser.use_args(hello_args)
+    @use_args(hello_args)
     def index(args):
         return 'Hello ' + args['name']
 
@@ -41,6 +40,7 @@ Parses
 Framework support
 
 * Flask
+* Django
 
 Documentation
 -------------

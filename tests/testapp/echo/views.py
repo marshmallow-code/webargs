@@ -21,7 +21,6 @@ class SimpleCBVWithParam(View):
 
     @parser.use_args(hello_args)
     def get(self, args, request, pid):
-        # assert int(pid) == 42
         return render_json_response(args)
 
 class SimpleCBV(View):
@@ -52,7 +51,6 @@ def simpleview(request):
 
 @parser.use_args(hello_args)
 def simpleview_with_param(request, args, pid):
-    # assert int(pid) == 42
     return render_json_response(args)
 
 @parser.use_args(hello_args)
