@@ -24,7 +24,7 @@ class DjangoParser(core.Parser):
     def parse_json(self, req, name):
         """Pull a json value from the request body."""
         try:
-            reqdata = json.loads(req.body)
+            reqdata = json.loads(req.body.decode('utf-8'))
             return reqdata.get(name, None)
         except Exception:
             return None
@@ -60,3 +60,5 @@ class DjangoParser(core.Parser):
                 return func(obj, parsed_args, *args, **kwargs)
             return wrapper
         return decorator
+
+use_args = DjangoParser().use_args
