@@ -59,6 +59,12 @@ def test_error_raised_if_use_is_uncallable():
     with pytest.raises(ValueError) as excinfo:
         Arg(use='bad')
     assert '{0!r} is not callable.'.format('bad') in str(excinfo)
+
+def test_use_is_called_before_validate():
+    arg = Arg(use=lambda x: x + 1, validate=lambda x: x == 41)
+    with pytest.raises(ValidationError):
+        arg.validated(41)
+
 # Parser tests
 
 @mock.patch('webargs.core.Parser.parse_json')

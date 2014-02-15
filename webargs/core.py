@@ -13,6 +13,7 @@ class ValidationError(WebargsError):
     def __init__(self, underlying_exception):
         super(ValidationError, self).__init__(str(underlying_exception))
 
+
 def _callable(obj):
     """Makes sure an object is callable if it is not ``None``. If not
     callable, a ValueError is raised.
@@ -21,6 +22,7 @@ def _callable(obj):
         raise ValueError('{0!r} is not callable.'.format(obj))
     else:
         return obj
+
 
 class Arg(object):
     """A request argument.
@@ -51,14 +53,15 @@ class Arg(object):
                 ret = self.type(value)
             except ValueError as error:
                 raise ValidationError(self.error or error)
+        # Then call `use`
+        if self.use:
+            ret = self.use(ret)
         # Then call validation function
         if self.validate and not self.validate(ret):
             msg = 'Validator {0}({1}) is not True'.format(
                 self.validate.__name__, ret
             )
             raise ValidationError(self.error or msg)
-        if self.use:
-            ret = self.use(ret)
         return ret
 
 DEFAULT_TARGETS = ('json', 'querystring', 'form')
@@ -110,7 +113,7 @@ class Parser(object):
         for target in self._validated_targets(targets):
             method_name = self.TARGET_MAP.get(target, None)
             if method_name:
-                method = getattr(self, method_name, None)
+                method = getattr(self, method_name)
                 value = method(req, name)
             # Found the value; validate and return it
             if value is not None:
