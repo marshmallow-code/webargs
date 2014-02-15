@@ -26,7 +26,7 @@ class DjangoParser(core.Parser):
         try:
             reqdata = json.loads(req.body.decode('utf-8'))
             return reqdata.get(name, None)
-        except Exception:
+        except (AttributeError, ValueError):
             return None
 
     def parse_cookies(self, req, name):
