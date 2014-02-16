@@ -1,9 +1,6 @@
 Contributing guidelines
 =======================
 
-In General
-----------
-
 - `PEP 8`_, when sensible.
 - Test ruthlessly. Write docs for new features.
 - Even more important than Test-Driven Development--*Human-Driven Development*.

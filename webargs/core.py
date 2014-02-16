@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import functools
 
 
@@ -29,11 +28,13 @@ class Arg(object):
 
     :param default: Default value for the argument. Used if the value is not found
         on the request.
-    :param type type_: Value type. Will try to convert the passed in value to this
+    :param type type\_: Value type. Will try to convert the passed in value to this
         type. If ``None``, no type conversion will be performed.
-    :param callable validate: Callable (function or object with __call__ method
+    :param callable validate: Callable (function or object with ``__call__`` method
         defined) used for custom validation. Returns whether or not the
         value is valid.
+    :param callable use: Callable used for converting or pre-processing the value.
+        Example: ``use=lambda s: s.lower()``
     :param str error: Custom error message to use if validation fails.
     """
     def __init__(self, type_=None, default=None, required=False,
@@ -46,6 +47,12 @@ class Arg(object):
         self.error = error
 
     def validated(self, value):
+        """Convert and validate the given value according to the ``type_``,
+        ``use``, and ``validate`` attributes.
+
+        :returns: The validated, converted value
+        :raises: ValidationError if validation fails
+        """
         ret = value
         if self.type:
             # First try to convert to self.type
@@ -64,7 +71,7 @@ class Arg(object):
             raise ValidationError(self.error or msg)
         return ret
 
-DEFAULT_TARGETS = ('json', 'querystring', 'form')
+DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
 
 class Parser(object):
@@ -133,7 +140,8 @@ class Parser(object):
         :param dict argmap: Dictionary of argname:Arg object pairs.
         :param req: The request object to parse.
         :param tuple targets: Where on the request to search for values.
-            Can include one or more of ``('json', 'querystring', 'form').
+            Can include one or more of ``('json', 'querystring', 'form',
+            'headers', 'cookies')``.
         :return: A dictionary of parsed arguments
         """
         try:

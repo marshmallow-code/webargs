@@ -68,6 +68,9 @@ class FlaskParser(core.Parser):
         return req.cookies.get(name, None)
 
     def handle_error(self, error):
+        """Handles errors during parsing. Aborts the current HTTP request and
+        responds with a 400 response.
+        """
         abort(400, message=error)
 
     def parse(self, argmap, req=None, *args, **kwargs):

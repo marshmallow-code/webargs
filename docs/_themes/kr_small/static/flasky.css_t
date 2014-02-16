@@ -8,18 +8,24 @@
  * :license: BSD, see LICENSE for details.
  *
  */
- 
+
 @import url("basic.css");
- 
+@import url(http://fonts.googleapis.com/css?family=Varela+Round);
+@import url(http://fonts.googleapis.com/css?family=PT+Serif);
+
 /* -- page layout ----------------------------------------------------------- */
- 
+
 body {
-    font-family: 'Georgia', serif;
+    font-family: 'PT Serif', 'Georgia', serif;
     font-size: 17px;
     color: #000;
     background: white;
     margin: 0;
     padding: 0;
+}
+
+.contents li {
+    list-style: none;
 }
 
 div.documentwrapper {
@@ -35,7 +41,7 @@ div.bodywrapper {
 hr {
     border: 1px solid #B1B4B6;
 }
- 
+
 div.body {
     background-color: #ffffff;
     color: #3E4349;
@@ -46,7 +52,7 @@ img.floatingflask {
     padding: 0 0 10px 10px;
     float: right;
 }
- 
+
 div.footer {
     text-align: right;
     color: #888;
@@ -55,12 +61,12 @@ div.footer {
     width: 650px;
     margin: 0 auto 40px auto;
 }
- 
+
 div.footer a {
     color: #888;
     text-decoration: underline;
 }
- 
+
 div.related {
     line-height: 32px;
     color: #888;
@@ -69,58 +75,62 @@ div.related {
 div.related ul {
     padding: 0 0 0 10px;
 }
- 
+
 div.related a {
     color: #444;
 }
- 
+
 /* -- body styles ----------------------------------------------------------- */
- 
+
 a {
     color: #004B6B;
-    text-decoration: underline;
+    text-decoration: none;
 }
- 
+
 a:hover {
     color: #6D4100;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 div.body {
     padding-bottom: 40px; /* saved for footer */
 }
- 
+
+h1 {
+    font-size: 3em;
+}
+
 div.body h1,
 div.body h2,
 div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-    font-family: 'Garamond', 'Georgia', serif;
+    font-family: 'Varela Round', 'Lucida Grande', sans-serif;
     font-weight: normal;
     margin: 30px 0px 10px 0px;
     padding: 0;
 }
 
 
- 
+
 div.body h2 { font-size: 180%; }
 div.body h3 { font-size: 150%; }
 div.body h4 { font-size: 130%; }
 div.body h5 { font-size: 100%; }
 div.body h6 { font-size: 100%; }
- 
+
 a.headerlink {
     color: white;
     padding: 0 4px;
     text-decoration: none;
 }
- 
+
 a.headerlink:hover {
     color: #444;
     background: #eaeaea;
 }
- 
+
 div.body p, div.body dd, div.body li {
     line-height: 1.4em;
 }
@@ -158,25 +168,25 @@ div.note {
     background-color: #eee;
     border: 1px solid #ccc;
 }
- 
+
 div.seealso {
     background-color: #ffc;
     border: 1px solid #ff6;
 }
- 
+
 div.topic {
     background-color: #eee;
 }
- 
+
 div.warning {
     background-color: #ffe4e4;
     border: 1px solid #f66;
 }
- 
+
 p.admonition-title {
     display: inline;
 }
- 
+
 p.admonition-title:after {
     content: ":";
 }
@@ -248,7 +258,7 @@ dl {
 dl dd {
     margin-left: 30px;
 }
- 
+
 pre {
     padding: 0;
     margin: 15px -30px;

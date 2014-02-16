@@ -5,7 +5,9 @@ webargs
 .. image:: https://badge.fury.io/py/webargs.png
     :target: http://badge.fury.io/py/webargs
 
-HTTP Request Argument Parsing, Simplified
+Homepage: https://webargs.readthedocs.org/
+
+`Webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.`
 
 .. code-block:: python
 
@@ -30,30 +32,23 @@ HTTP Request Argument Parsing, Simplified
     # curl http://localhost:5000/\?name\='World'
     # Hello World
 
-Parses
+Install
+-------
 
-* Form data
-* Request arguments
-* Querystrings
-* Headers
-* Cookies
+::
 
-Framework support
+    pip install -U webargs
 
-* Flask
-* Django
+webargs supports Python >= 2.6 or >= 3.3.
+
 
 Documentation
 -------------
 
 Full documentation is available at https://webargs.readthedocs.org/.
 
-Requirements
-------------
-
-- Python >= 2.6 or >= 3.3
 
 License
 -------
 
-MIT licensed. See the bundled `LICENSE <https://github.com/sloria/webargs/blob/master/LICENSE>`_ file for more details.
+MIT licensed. See the `LICENSE <https://github.com/sloria/webargs/blob/master/LICENSE>`_ file for more details.

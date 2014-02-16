@@ -1,6 +1,0 @@
-.. _quickstart:
-
-Quickstart
-==========
-
-TODO
