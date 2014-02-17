@@ -9,7 +9,7 @@ python:
   - "pypy"
 
 install:
-    - pip install -U -r dev-requirements.txt
+    - pip install -U pytest mock flask django webtest
     - pip install -U .
 
 script: py.test
