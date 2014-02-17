@@ -68,7 +68,9 @@ def read(fname):
 setup(
     name='webargs',
     version=__version__,
-    description='HTTP Request Argument Parsing, Simplified',
+    description=('A utility library for parsing HTTP request arguments, '
+        'with built-in support for popular web frameworks, including '
+        'Flask and Django.'),
     long_description=(read("README.rst") + '\n\n' +
                         read("HISTORY.rst")),
     author='Steven Loria',
