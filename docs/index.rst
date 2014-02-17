@@ -173,7 +173,7 @@ When using the ``use_args`` decorator, the arguments dictionary will be *before*
     def user_detail(args, uid):
         return ('The user page for user {uid}, '
                 'showing {per_page} posts.').format(uid=uid,
-                                                    per_page=args['uid'])
+                                                    per_page=args['per_page'])
 
 
 Django Support

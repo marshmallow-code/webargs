@@ -61,6 +61,7 @@ class DjangoParser(core.Parser):
                 return HttpResponse('Hello ' + args['name'])
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param req: The request object to parse
         :param tuple targets: Where on the request to search for values.
         """
         def decorator(func):
