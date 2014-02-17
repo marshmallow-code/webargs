@@ -79,7 +79,7 @@ setup(
     install_requires=REQUIREMENTS,
     license=read("LICENSE"),
     zip_safe=False,
-    keywords='webargs',
+    keywords=('webargs', 'http', 'flask', 'django', 'request', 'arguments'),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

@@ -8,6 +8,8 @@ python:
   - "2.6"
   - "pypy"
 
-install: pip install -U .
+install:
+    - pip install -U -r dev-requirements.txt
+    - pip install -U .
 
 script: py.test
