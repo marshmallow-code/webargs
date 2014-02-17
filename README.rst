@@ -5,6 +5,9 @@ webargs
 .. image:: https://badge.fury.io/py/webargs.png
     :target: http://badge.fury.io/py/webargs
 
+.. image:: https://travis-ci.org/sloria/webargs.png?branch=master
+    :target: https://travis-ci.org/sloria/webargs
+
 Homepage: https://webargs.readthedocs.org/
 
 `Webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.`
