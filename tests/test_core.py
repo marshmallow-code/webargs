@@ -179,3 +179,10 @@ def test_handle_error_reraises_errors():
     p = Parser()
     with pytest.raises(ValidationError):
         p.handle_error(ValidationError('error raised'))
+
+def test_passing_exception_as_error_argument():
+    arg = Arg(int, validate=lambda n: n == 42,
+        error=AttributeError('an error occurred.'))
+    with pytest.raises(ValidationError) as excinfo:
+        arg.validated(41)
+    assert 'an error occurred' in str(excinfo)
