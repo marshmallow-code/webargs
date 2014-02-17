@@ -8,8 +8,9 @@ from werkzeug.exceptions import HTTPException
 import pytest
 
 from webargs import Arg
-from webargs.compat import text_type
 from webargs.flaskparser import FlaskParser, use_args, abort
+
+from .compat import text_type
 
 class TestAppConfig:
     TESTING = True
