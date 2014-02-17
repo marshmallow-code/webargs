@@ -17,7 +17,7 @@ Release v\ |version|. (:ref:`Changelog <changelog>`)
 Useful Links:
 
 `webargs @ Github <http://github.com/sloria/webargs>`_ |
-`webargs @ PyPI <http://http://pypi.python.org/pypi/webargs>`_ |
+`webargs @ PyPI <http://pypi.python.org/pypi/webargs>`_ |
 `Issue Tracker <http://github.com/sloria/webargs/issues>`_
 
 Hello Webargs
