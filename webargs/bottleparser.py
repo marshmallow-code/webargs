@@ -1,5 +1,20 @@
 # -*- coding: utf-8 -*-
 """Bottle request argument parsing module.
+
+Example: ::
+
+    from bottle import route
+    from webargs import Arg
+    from webargs.bottleparser import use_args
+
+    hello_args = {
+        'name': Arg(str, default='World')
+    }
+
+    @route('/', method=['GET', 'POST'])
+    @use_args(hello_args)
+    def index(args)
+        return 'Hello ' + args['name']
 """
 from bottle import abort, request
 

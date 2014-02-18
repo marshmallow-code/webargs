@@ -68,6 +68,12 @@ and, optionally:
 - Headers
 - Cookies
 
+**Framework support**
+
+- Flask
+- Django
+- Bottle
+
 
 Why Use It
 ==========
@@ -258,6 +264,12 @@ webargs.djangoparser
 --------------------
 
 .. automodule:: webargs.djangoparser
+    :inherited-members:
+
+webargs.bottleparser
+--------------------
+
+.. automodule:: webargs.bottleparser
     :inherited-members:
 
 
