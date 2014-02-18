@@ -8,7 +8,7 @@ from webtest import TestApp
 from webargs import Arg
 from webargs.bottleparser import BottleParser
 
-from .compat import text_type, b
+from .compat import text_type
 
 hello_args = {
     'name': Arg(text_type, default='World', validate=lambda n: len(n) >= 3),
@@ -69,7 +69,7 @@ def test_parsing_headers(app, testapp):
     def echo2():
         args = parser.parse(hello_args, request, targets=('headers',))
         return args
-    assert testapp.get('/echo2', headers={'name': b('Fred')}).json \
+    assert testapp.get('/echo2', headers={'name': 'Fred'}).json \
             == {'name': 'Fred'}
 
 def test_parsing_cookies(app, testapp):
