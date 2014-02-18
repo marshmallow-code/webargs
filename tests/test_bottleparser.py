@@ -75,7 +75,7 @@ def test_parsing_headers(app, testapp):
 def test_parsing_cookies(app, testapp):
     @app.route('/setcookie')
     def setcookie():
-        response.set_cookie(b('name'), b('Fred'))
+        response.set_cookie('name', 'Fred')
         return {}
 
     @app.route('/echocookie')
