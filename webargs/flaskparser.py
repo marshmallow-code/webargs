@@ -42,34 +42,34 @@ class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
     def parse_json(self, req, name):
-        """Pull the json value from the request."""
+        """Pull a json value from the request."""
         try:
             return req.json.get(name, None)
         except AttributeError:
             return None
 
     def parse_querystring(self, req, name):
-        """Pull the querystring value from the request."""
+        """Pull a querystring value from the request."""
         return req.args.get(name, None)
 
     def parse_form(self, req, name):
-        """Pull the form value from the request."""
+        """Pull a form value from the request."""
         try:
             return req.form.get(name, None)
         except AttributeError:
             return None
 
     def parse_headers(self, req, name):
-        """Pull the value from the header data."""
+        """Pull a value from the header data."""
         return req.headers.get(name, None)
 
     def parse_cookies(self, req, name):
-        """Pull the value from the cookiejar."""
+        """Pull a value from the cookiejar."""
         return req.cookies.get(name, None)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
-        responds with a 400 response.
+        responds with a 400 error.
         """
         abort(400, message=error)
 

@@ -7,7 +7,7 @@ from setuptools.command.test import test as TestCommand
 
 # Requirements
 REQUIREMENTS = []
-TEST_REQUIREMENTS =['pytest', 'mock', 'flask', 'django', 'webtest']
+TEST_REQUIREMENTS =['pytest', 'mock', 'flask', 'django', 'webtest', 'bottle']
 PUBLISH_CMD = "python setup.py register sdist bdist_wheel upload"
 TEST_PUBLISH_CMD = 'python setup.py register -r test sdist bdist_wheel upload -r test'
 

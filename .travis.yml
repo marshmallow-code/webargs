@@ -9,7 +9,7 @@ python:
   - "pypy"
 
 install:
-    - pip install -U pytest mock flask django webtest
+    - pip install -U pytest mock flask django webtest bottle
     - pip install -U .
 
 script: py.test
