@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
+import sys
 import functools
+
+PY2 = sys.version_info[0] == 2
+
+if not PY2:
+    iteritems = lambda d: iter(d.items())
+else:
+    iteritems = lambda d: d.iteritems()
 
 
 class WebargsError(Exception):
@@ -151,9 +159,11 @@ class Parser(object):
         :return: A dictionary of parsed arguments
         """
         try:
-            return dict([(argname, self.parse_arg(argname, argobj, req,
-                            targets=targets or self.targets))
-                    for argname, argobj in argmap.items()])
+            return dict(
+                (argname, self.parse_arg(argname, argobj, req,
+                    targets=targets or self.targets))
+                for argname, argobj in iteritems(argmap)
+            )
         except Exception as error:
             self.handle_error(error)
 
