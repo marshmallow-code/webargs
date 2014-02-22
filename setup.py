@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
 import sys
-import subprocess
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 # Requirements
 REQUIREMENTS = []
 TEST_REQUIREMENTS =['pytest', 'mock', 'flask', 'django', 'webtest', 'bottle']
-PUBLISH_CMD = "python setup.py register sdist bdist_wheel upload"
-TEST_PUBLISH_CMD = 'python setup.py register -r test sdist bdist_wheel upload -r test'
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -40,24 +37,6 @@ def find_version(fname):
     return version
 
 __version__ = find_version("webargs/__init__.py")
-
-if 'publish' in sys.argv:
-    try:
-        __import__('wheel')
-    except ImportError:
-        print("wheel required. Run `pip install wheel`.")
-        sys.exit(1)
-    status = subprocess.call(PUBLISH_CMD, shell=True)
-    sys.exit(status)
-
-if 'publish_test' in sys.argv:
-    try:
-        __import__('wheel')
-    except ImportError:
-        print("wheel required. Run `pip install wheel`.")
-        sys.exit(1)
-    status = subprocess.call(TEST_PUBLISH_CMD, shell=True)
-    sys.exit()
 
 
 def read(fname):
