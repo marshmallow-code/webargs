@@ -23,6 +23,10 @@ def _callable(obj):
         return obj
 
 
+def noop(x):
+    return x
+
+
 class Arg(object):
     """A request argument.
 
@@ -34,16 +38,17 @@ class Arg(object):
         defined) used for custom validation. Returns whether or not the
         value is valid.
     :param callable use: Callable used for converting or pre-processing the value.
+        Defaults to noop.
         Example: ``use=lambda s: s.lower()``
     :param str error: Custom error message to use if validation fails.
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, error=None):
-        self.type = type_
+        self.type = type_ or noop  # default to no type conversion
         self.default = default
         self.required = required
-        self.validate = _callable(validate)
-        self.use = _callable(use)
+        self.validate = _callable(validate) or (lambda x: True)
+        self.use = _callable(use) or noop
         self.error = error
 
     def validated(self, value):
@@ -54,17 +59,13 @@ class Arg(object):
         :raises: ValidationError if validation fails
         """
         ret = value
-        if self.type:
-            # First try to convert to self.type
-            try:
-                ret = self.type(value)
-            except ValueError as error:
-                raise ValidationError(self.error or error)
-        # Then call `use`
-        if self.use:
-            ret = self.use(ret)
+        # First convert the value
+        try:
+            ret = self.use(self.type(value))
+        except ValueError as error:
+            raise ValidationError(self.error or error)
         # Then call validation function
-        if self.validate and not self.validate(ret):
+        if not self.validate(ret):
             msg = 'Validator {0}({1}) is not True'.format(
                 self.validate.__name__, ret
             )

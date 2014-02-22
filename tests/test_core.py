@@ -65,6 +65,14 @@ def test_use_is_called_before_validate():
     with pytest.raises(ValidationError):
         arg.validated(41)
 
+def test_use_can_be_none():
+    arg = Arg(use=None)
+    assert arg.validated(41) == 41
+
+def test_validate_can_be_none():
+    arg = Arg(validate=None)
+    assert arg.validated(41) == 41
+
 # Parser tests
 
 @mock.patch('webargs.core.Parser.parse_json')
