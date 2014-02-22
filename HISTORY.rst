@@ -5,6 +5,7 @@ Changelog
 ++++++++++++++++++
 
 * Bottle support.
+* Add ``targets`` param to ``Parser``. Allows setting default targets
 
 0.1.0 (2014-02-16)
 ++++++++++++++++++

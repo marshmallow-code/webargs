@@ -186,3 +186,9 @@ def test_passing_exception_as_error_argument():
     with pytest.raises(ValidationError) as excinfo:
         arg.validated(41)
     assert 'an error occurred' in str(excinfo)
+
+@mock.patch('webargs.core.Parser.parse_headers')
+def test_targets_as_init_arguments(parse_headers, request):
+    p = Parser(targets=('headers',))
+    p.parse({'foo': Arg()}, request)
+    assert parse_headers.called

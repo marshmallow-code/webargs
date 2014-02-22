@@ -80,6 +80,8 @@ class Parser(object):
 
     Descendant classes must provide lower-level implementations for parsing
     different targets, e.g. ``parse_json``, ``parse_querystring``, etc.
+
+    :param tuple targets: Default targets to parse.
     """
 
     #: Maps target => method name
@@ -90,6 +92,9 @@ class Parser(object):
         'headers': 'parse_headers',
         'cookies': 'parse_cookies',
     }
+
+    def __init__(self, targets=DEFAULT_TARGETS):
+        self.targets = targets
 
     def _validated_targets(self, targets):
         """Ensure that the given targets argument is valid.
@@ -106,7 +111,7 @@ class Parser(object):
             raise ValueError(msg)
         return targets
 
-    def parse_arg(self, name, argobj, req, targets=DEFAULT_TARGETS):
+    def parse_arg(self, name, argobj, req, targets=None):
         """Parse a single argument.
 
         :param str name: The name of the value.
@@ -117,7 +122,7 @@ class Parser(object):
         :return: The argument value.
         """
         value = None
-        for target in self._validated_targets(targets):
+        for target in self._validated_targets(targets or self.targets):
             method_name = self.TARGET_MAP.get(target, None)
             if method_name:
                 method = getattr(self, method_name)
@@ -134,7 +139,7 @@ class Parser(object):
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value
 
-    def parse(self, argmap, req, targets=DEFAULT_TARGETS):
+    def parse(self, argmap, req, targets=None):
         """Main request parsing method.
 
         :param dict argmap: Dictionary of argname:Arg object pairs.
@@ -145,7 +150,8 @@ class Parser(object):
         :return: A dictionary of parsed arguments
         """
         try:
-            return dict([(argname, self.parse_arg(argname, argobj, req, targets=targets))
+            return dict([(argname, self.parse_arg(argname, argobj, req,
+                            targets=targets or self.targets))
                     for argname, argobj in argmap.items()])
         except Exception as error:
             self.handle_error(error)
