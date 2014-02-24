@@ -51,6 +51,10 @@ class DjangoParser(core.Parser):
         raise NotImplementedError('Header parsing not supported by {0}'
             .format(self.__class__.__name__))
 
+    def parse_files(self, req, name):
+        """Pull a file from the request."""
+        return req.FILES.get(name, None)
+
     def use_args(self, argmap, req=None, targets=core.DEFAULT_TARGETS):
         """Decorator that injects parsed arguments into a view function or method.
 

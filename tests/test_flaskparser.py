@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import json
 import mock
+import io
 
 from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
@@ -159,3 +160,12 @@ def test_abort_with_message():
     with pytest.raises(HTTPException) as excinfo:
         abort(400, message='custom error message')
     assert excinfo.value.data['message'] == 'custom error message'
+
+
+def test_parse_files(testapp):
+    payload = {'myfile': (io.BytesIO(b'bar'), 'baz.txt')}
+    file_args = {'myfile': Arg()}
+    with testapp.test_request_context('/foo', method='POST',
+            data=payload):
+        args = parser.parse(file_args, targets=('files', ))
+        assert args['myfile'].read() == b'bar'

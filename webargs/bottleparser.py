@@ -47,6 +47,10 @@ class BottleParser(core.Parser):
         """Pull a value from the cookiejar."""
         return req.get_cookie(name)
 
+    def parse_files(self, req, name):
+        """Pull a file from the request."""
+        return req.files.get(name, None)
+
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current request with a
         400 error.

@@ -67,6 +67,10 @@ class FlaskParser(core.Parser):
         """Pull a value from the cookiejar."""
         return req.cookies.get(name, None)
 
+    def parse_files(self, req, name):
+        """Pull a file from the request."""
+        return req.files.get(name, None)
+
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
@@ -79,5 +83,6 @@ class FlaskParser(core.Parser):
         """
         req_obj = req or request  # Default to context-local request
         return super(FlaskParser, self).parse(argmap, req_obj, *args, **kwargs)
+
 
 use_args = FlaskParser().use_args

@@ -100,6 +100,7 @@ class Parser(object):
         'form': 'parse_form',
         'headers': 'parse_headers',
         'cookies': 'parse_cookies',
+        'files': 'parse_files',
     }
 
     def __init__(self, targets=DEFAULT_TARGETS):
@@ -155,7 +156,7 @@ class Parser(object):
         :param req: The request object to parse.
         :param tuple targets: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
-            'headers', 'cookies')``.
+            'headers', 'cookies', 'files')``.
         :return: A dictionary of parsed arguments
         """
         try:
@@ -216,6 +217,12 @@ class Parser(object):
 
     def parse_cookies(self, req, name):
         """Pulls a cookie value from the request or returns ``None`` if the value
+        cannot be found.
+        """
+        return None
+
+    def parse_files(self, req, name):
+        """Pull a file from the request or return ``None`` if the value file
         cannot be found.
         """
         return None

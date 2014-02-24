@@ -200,3 +200,9 @@ def test_targets_as_init_arguments(parse_headers, request):
     p = Parser(targets=('headers',))
     p.parse({'foo': Arg()}, request)
     assert parse_headers.called
+
+@mock.patch('webargs.core.Parser.parse_files')
+def test_parse_files(parse_files, request):
+    p = Parser()
+    p.parse({'foo': Arg()}, request, targets=('files',))
+    assert parse_files.called

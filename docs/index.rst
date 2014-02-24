@@ -67,6 +67,7 @@ and, optionally:
 
 - Headers
 - Cookies
+- Files
 
 **Framework support**
 
@@ -80,6 +81,8 @@ Why Use It
 
 * *Simple to use*. Can't remember if you're supposed to pull an argument from ``request.form``, ``request.data``, ``request.args``, or ``request.json``? No problem; webargs will find the value for you.
 * *Code reusability*. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
+
+Inspired by `Flask-RESTful's <http://flask-restful.readthedocs.org/en/latest/>`_ reqparser, webargs offers a lightweight, cross-framework solution to request parsing that's simple and fun to use.
 
 Install
 =======

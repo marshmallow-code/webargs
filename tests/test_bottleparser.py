@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import mock
+import io
 
 import pytest
 from bottle import Bottle, debug, request, response
@@ -69,8 +70,8 @@ def test_parsing_headers(app, testapp):
     def echo2():
         args = parser.parse(hello_args, request, targets=('headers',))
         return args
-    assert testapp.get('/echo2', headers={'name': 'Fred'}).json \
-            == {'name': 'Fred'}
+    res = testapp.get('/echo2', headers={'name': 'Fred'}).json
+    assert res == {'name': 'Fred'}
 
 def test_parsing_cookies(app, testapp):
     @app.route('/setcookie')
