@@ -31,6 +31,15 @@ def _callable(obj):
         return obj
 
 
+def get_value(d, name, multiple):
+    if multiple:
+        if hasattr(d, 'getlist'):
+            return d.getlist(name)
+        else:
+            return [d.get(name)]
+    return d.get(name)
+
+
 def noop(x):
     return x
 
