@@ -9,6 +9,9 @@ parser = DjangoParser()
 hello_args = {
     'name': Arg(str, default='World')
 }
+hello_multi = {
+    'name': Arg(multiple=True)
+}
 
 def render_json_response(data):
     return HttpResponse(
@@ -33,6 +36,15 @@ class SimpleCBV(View):
         args = parser.parse(hello_args, self.request)
         return render_json_response(args)
 
+class SimpleCBVMulti(View):
+
+    def get(self, request):
+        args = parser.parse(hello_multi, self.request)
+        return render_json_response(args)
+
+    def post(self, request):
+        args = parser.parse(hello_multi, self.request)
+        return render_json_response(args)
 
 class SimpleDecoratedCBV(View):
 
@@ -47,6 +59,10 @@ class SimpleDecoratedCBV(View):
 
 def simpleview(request):
     args = parser.parse(hello_args, request)
+    return render_json_response(args)
+
+def simpleview_multi(request):
+    args = parser.parse(hello_multi, request)
     return render_json_response(args)
 
 def cookieview(request):

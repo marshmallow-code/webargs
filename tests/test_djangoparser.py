@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import pytest
 import mock
 from webtest import TestApp
-
 from tests.testapp.testapp.wsgi import application
 from webargs import Arg
 from webargs.djangoparser import DjangoParser
@@ -83,3 +82,20 @@ def test_parse_headers_raises_not_implemented_error(mockrequest):
 def test_parse_cookies(testapp):
     res = testapp.get('/cookieview/')
     assert res.json == {'name': 'Joe'}
+
+@pytest.mark.parametrize("route", [
+    '/simpleview_multi/?name=steve&name=Loria',
+    '/simplecbv_multi/?name=steve&name=Loria'
+])
+def test_parse_multiple_querystring(route, testapp):
+    res = testapp.get(route)
+    assert res.json == {'name': ['steve', 'Loria']}
+
+@pytest.mark.parametrize('route', [
+    '/simpleview_multi/',
+    '/simplecbv_multi/'
+])
+def test_parse_multiple_form(route, testapp):
+    payload = {'name': ['steve', 'Loria']}
+    res = testapp.post(route, payload)
+    assert res.json == {'name': ['steve', 'Loria']}

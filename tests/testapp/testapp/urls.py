@@ -1,6 +1,8 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, url
 
-from tests.testapp.echo.views import SimpleCBV, SimpleDecoratedCBV, SimpleCBVWithParam
+from tests.testapp.echo.views import (SimpleCBV, SimpleDecoratedCBV,
+    SimpleCBVWithParam, SimpleCBVMulti
+)
 
 urlpatterns = patterns('',
     url(r'^simpleview/$', 'tests.testapp.echo.views.simpleview'),
@@ -10,4 +12,6 @@ urlpatterns = patterns('',
     url(r'^decoratedview/', 'tests.testapp.echo.views.decoratedview'),
     url(r'^decoratedcbv/', SimpleDecoratedCBV.as_view()),
     url(r'^cookieview/$', 'tests.testapp.echo.views.cookieview'),
+    url(r'^simpleview_multi/$', 'tests.testapp.echo.views.simpleview_multi'),
+    url(r'^simplecbv_multi/$', SimpleCBVMulti.as_view())
 )

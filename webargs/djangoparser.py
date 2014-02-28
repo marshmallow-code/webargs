@@ -29,23 +29,23 @@ class DjangoParser(core.Parser):
 
     def parse_querystring(self, req, name, arg):
         """Pull the querystring value from the request."""
-        return req.GET.get(name, None)
+        return core.get_value(req.GET, name, arg.multiple)
 
     def parse_form(self, req, name, arg):
         """Pull the form value from the request."""
-        return req.POST.get(name, None)
+        return core.get_value(req.POST, name, arg.multiple)
 
     def parse_json(self, req, name, arg):
         """Pull a json value from the request body."""
         try:
             reqdata = json.loads(req.body.decode('utf-8'))
-            return reqdata.get(name, None)
+            return core.get_value(reqdata, name, arg.multiple)
         except (AttributeError, ValueError):
             return None
 
     def parse_cookies(self, req, name, arg):
         """Pull the value from the cookiejar."""
-        return req.COOKIES.get(name, None)
+        return core.get_value(req.COOKIES, name, arg.multiple)
 
     def parse_headers(self, req, name, arg):
         raise NotImplementedError('Header parsing not supported by {0}'
@@ -53,7 +53,7 @@ class DjangoParser(core.Parser):
 
     def parse_files(self, req, name, arg):
         """Pull a file from the request."""
-        return req.FILES.get(name, None)
+        return core.get_value(req.FILES, name, arg.multiple)
 
     def use_args(self, argmap, req=None, targets=core.DEFAULT_TARGETS):
         """Decorator that injects parsed arguments into a view function or method.
