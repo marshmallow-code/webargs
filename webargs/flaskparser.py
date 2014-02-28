@@ -41,35 +41,43 @@ def abort(http_status_code, **kwargs):
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
-    def parse_json(self, req, name):
+    def parse_json(self, req, name, arg):
         """Pull a json value from the request."""
         try:
-            return req.json.get(name, None)
+            return self._get_value(req.json, name, arg.multiple)
         except AttributeError:
             return None
 
-    def parse_querystring(self, req, name):
+    def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
-        return req.args.get(name, None)
+        return self._get_value(req.args, name, arg.multiple)
 
-    def parse_form(self, req, name):
+    def parse_form(self, req, name, arg):
         """Pull a form value from the request."""
         try:
-            return req.form.get(name, None)
+            return self._get_value(req.form, name, arg.multiple)
         except AttributeError:
             return None
 
-    def parse_headers(self, req, name):
+    def parse_headers(self, req, name, arg):
         """Pull a value from the header data."""
-        return req.headers.get(name, None)
+        return self._get_value(req.headers, name, arg.multiple)
 
-    def parse_cookies(self, req, name):
+    def parse_cookies(self, req, name, arg):
         """Pull a value from the cookiejar."""
-        return req.cookies.get(name, None)
+        return self._get_value(req.cookies, name, arg.multiple)
 
-    def parse_files(self, req, name):
+    def parse_files(self, req, name, arg):
         """Pull a file from the request."""
-        return req.files.get(name, None)
+        return self._get_value(req.files, name, arg.multiple)
+
+    def _get_value(self, d, name, multiple):
+        if multiple:
+            if hasattr(d, 'getlist'):
+                return d.getlist(name)
+            else:
+                return [d.get(name)]
+        return d.get(name)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and

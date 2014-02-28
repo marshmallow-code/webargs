@@ -4,8 +4,9 @@ import json
 import mock
 import io
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from werkzeug.exceptions import HTTPException
+from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
 from webargs import Arg
@@ -149,7 +150,7 @@ def test_parsing_cookies(testapp):
 def test_parse_form_returns_none_if_no_form():
     req = mock.Mock()
     req.form.get.side_effect = AttributeError('no form')
-    assert parser.parse_form(req, 'foo') is None
+    assert parser.parse_form(req, 'foo', Arg()) is None
 
 def test_unicode_arg(testapp):
     with testapp.test_request_context('/foo?name=Früd'):
@@ -169,3 +170,23 @@ def test_parse_files(testapp):
             data=payload):
         args = parser.parse(file_args, targets=('files', ))
         assert args['myfile'].read() == b'bar'
+
+@pytest.mark.parametrize('context', [
+    # querystring
+    {'path': '/foo?name=steve&name=Loria'},
+    # form
+    {'path': '/foo', 'method': 'POST', 'data': ImmutableMultiDict(
+        [('name', 'steve'), ('name', 'Loria')])},
+])
+def test_parse_multiple(context, testapp):
+    multargs = {'name': Arg(multiple=True)}
+    with testapp.test_request_context(**context):
+        args = parser.parse(multargs)
+        assert args['name'] == ['steve', 'Loria']
+
+def test_parse_multiple_json(testapp):
+    multargs = {'name': Arg(multiple=True)}
+    with testapp.test_request_context('/foo', data=json.dumps({'name': 'steve'}),
+            content_type='application/json', method='POST'):
+        args = parser.parse(multargs, targets=('json',))
+        assert args['name'] == ['steve']

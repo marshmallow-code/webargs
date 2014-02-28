@@ -51,13 +51,14 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     """
     def __init__(self, type_=None, default=None, required=False,
-                 validate=None, use=None, error=None):
+                 validate=None, use=None, multiple=False, error=None):
         self.type = type_ or noop  # default to no type conversion
         self.default = default
         self.required = required
         self.validate = _callable(validate) or (lambda x: True)
         self.use = _callable(use) or noop
         self.error = error
+        self.multiple = multiple
 
     def validated(self, value):
         """Convert and validate the given value according to the ``type_``,
@@ -136,7 +137,9 @@ class Parser(object):
             method_name = self.TARGET_MAP.get(target, None)
             if method_name:
                 method = getattr(self, method_name)
-                value = method(req, name)
+                value = method(req, name, argobj)
+            if argobj.multiple and not len(value):
+                continue
             # Found the value; validate and return it
             if value is not None:
                 return argobj.validated(value)
