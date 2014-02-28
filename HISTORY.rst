@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.3.0 (unreleased)
+++++++++++++++++++
+
+* Add support for repeated parameters (#1).
+* *Backwards-incompatible*: All `parse_*` methods take `arg` as their fourth argument.
+
 0.2.0 (2014-02-26)
 ++++++++++++++++++
 

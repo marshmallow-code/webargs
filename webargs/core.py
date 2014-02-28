@@ -147,7 +147,7 @@ class Parser(object):
             if argobj.default:
                 value = argobj.default
             else:
-                value = self.fallback(req, name)
+                value = self.fallback(req, name, argobj)
             if value is None and argobj.required:
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value
@@ -194,37 +194,37 @@ class Parser(object):
 
     # Abstract Methods
 
-    def parse_json(self, req, name):
+    def parse_json(self, req, name, arg):
         """Pulls a JSON value from a request object or returns ``None`` if the
         value cannot be found.
         """
         return None
 
-    def parse_querystring(self, req, name):
+    def parse_querystring(self, req, name, arg):
         """Pulls a value from the query string of a request object or returns ``None`` if
         the value cannot be found.
         """
         return None
 
-    def parse_form(self, req, name):
+    def parse_form(self, req, name, arg):
         """Pulls a value from the form data of a request object or returns
         ``None`` if the value cannot be found.
         """
         return None
 
-    def parse_headers(self, req, name):
+    def parse_headers(self, req, name, arg):
         """Pulls a value from the headers or returns ``None`` if the value
         cannot be found.
         """
         return None
 
-    def parse_cookies(self, req, name):
+    def parse_cookies(self, req, name, arg):
         """Pulls a cookie value from the request or returns ``None`` if the value
         cannot be found.
         """
         return None
 
-    def parse_files(self, req, name):
+    def parse_files(self, req, name, arg):
         """Pull a file from the request or return ``None`` if the value file
         cannot be found.
         """
@@ -235,7 +235,7 @@ class Parser(object):
         """
         raise error
 
-    def fallback(self, req, name):
+    def fallback(self, req, name, arg):
         """Called if all other parsing functions (parse_json, parse_form...) return
         ``None``.
         """

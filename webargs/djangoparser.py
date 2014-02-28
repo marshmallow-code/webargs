@@ -27,15 +27,15 @@ from webargs import core
 class DjangoParser(core.Parser):
     """Django request argument parser."""
 
-    def parse_querystring(self, req, name):
+    def parse_querystring(self, req, name, arg):
         """Pull the querystring value from the request."""
         return req.GET.get(name, None)
 
-    def parse_form(self, req, name):
+    def parse_form(self, req, name, arg):
         """Pull the form value from the request."""
         return req.POST.get(name, None)
 
-    def parse_json(self, req, name):
+    def parse_json(self, req, name, arg):
         """Pull a json value from the request body."""
         try:
             reqdata = json.loads(req.body.decode('utf-8'))
@@ -43,15 +43,15 @@ class DjangoParser(core.Parser):
         except (AttributeError, ValueError):
             return None
 
-    def parse_cookies(self, req, name):
+    def parse_cookies(self, req, name, arg):
         """Pull the value from the cookiejar."""
         return req.COOKIES.get(name, None)
 
-    def parse_headers(self, req, name):
+    def parse_headers(self, req, name, arg):
         raise NotImplementedError('Header parsing not supported by {0}'
             .format(self.__class__.__name__))
 
-    def parse_files(self, req, name):
+    def parse_files(self, req, name, arg):
         """Pull a file from the request."""
         return req.FILES.get(name, None)
 

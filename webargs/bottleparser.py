@@ -24,30 +24,30 @@ from webargs import core
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
 
-    def parse_querystring(self, req, name):
+    def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
         return req.query.getunicode(name, None)
 
-    def parse_form(self, req, name):
+    def parse_form(self, req, name, arg):
         """Pull a form value from the request."""
         return req.forms.getunicode(name, None)
 
-    def parse_json(self, req, name):
+    def parse_json(self, req, name, arg):
         """Pull a json value from the request."""
         try:
             return req.json.get(name, None)
         except AttributeError:
             return None
 
-    def parse_headers(self, req, name):
+    def parse_headers(self, req, name, arg):
         """Pull a value from the header data."""
         return req.headers.get(name, None)
 
-    def parse_cookies(self, req, name):
+    def parse_cookies(self, req, name, arg):
         """Pull a value from the cookiejar."""
         return req.get_cookie(name)
 
-    def parse_files(self, req, name):
+    def parse_files(self, req, name, arg):
         """Pull a file from the request."""
         return req.files.get(name, None)
 
