@@ -26,22 +26,23 @@ class BottleParser(core.Parser):
 
     def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
-        return req.query.getunicode(name, None)
+        return core.get_value(req.query, name, arg.multiple)
+
 
     def parse_form(self, req, name, arg):
         """Pull a form value from the request."""
-        return req.forms.getunicode(name, None)
+        return core.get_value(req.forms, name, arg.multiple)
 
     def parse_json(self, req, name, arg):
         """Pull a json value from the request."""
         try:
-            return req.json.get(name, None)
+            return core.get_value(req.json, name, arg.multiple)
         except AttributeError:
             return None
 
     def parse_headers(self, req, name, arg):
         """Pull a value from the header data."""
-        return req.headers.get(name, None)
+        return core.get_value(req.headers, name, arg.multiple)
 
     def parse_cookies(self, req, name, arg):
         """Pull a value from the cookiejar."""
@@ -49,7 +50,7 @@ class BottleParser(core.Parser):
 
     def parse_files(self, req, name, arg):
         """Pull a file from the request."""
-        return req.files.get(name, None)
+        return core.get_value(req.files, name, arg.multiple)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current request with a

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import mock
-import io
 
 import pytest
 from bottle import Bottle, debug, request, response
@@ -14,6 +13,9 @@ from .compat import text_type
 hello_args = {
     'name': Arg(text_type, default='World', validate=lambda n: len(n) >= 3),
 }
+hello_multiple = {
+    'name': Arg(multiple=True)
+}
 
 parser = BottleParser()
 
@@ -24,6 +26,9 @@ def app():
     @app.route('/echo', method=['GET', 'POST'])
     def index():
         return parser.parse(hello_args, request)
+    @app.route('/echomulti/', method=['GET', 'POST'])
+    def multi():
+        return parser.parse(hello_multiple, request)
     debug(True)
     return app
 
@@ -33,6 +38,14 @@ def testapp(app):
 
 def test_parse_querystring_args(testapp):
     assert testapp.get('/echo?name=Fred').json == {'name': 'Fred'}
+
+def test_parse_querystring_multiple(testapp):
+    expected = {'name': ['steve', 'Loria']}
+    assert testapp.get('/echomulti/?name=steve&name=Loria').json == expected
+
+def test_parse_form_multiple(testapp):
+    expected = {'name': ['steve', 'Loria']}
+    assert testapp.post('/echomulti/', {'name': ['steve', 'Loria']}).json == expected
 
 def test_parse_form(testapp):
     assert testapp.post('/echo', {'name': 'Joe'}).json == {'name': 'Joe'}

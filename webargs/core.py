@@ -31,13 +31,17 @@ def _callable(obj):
         return obj
 
 
-def get_value(d, name, multiple):
+def get_value(d, name, multiple, method='get'):
+    func = getattr(d, method)
+    val = func(name)
     if multiple:
         if hasattr(d, 'getlist'):
             return d.getlist(name)
+        elif hasattr(d, 'getall'):
+            return d.getall(name)
         else:
-            return [d.get(name)]
-    return d.get(name)
+            return [val]
+    return val
 
 
 def noop(x):
