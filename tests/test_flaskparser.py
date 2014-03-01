@@ -173,16 +173,30 @@ def test_parse_files(testapp):
 
 @pytest.mark.parametrize('context', [
     # querystring
-    {'path': '/foo?name=steve&name=Loria'},
+    {'path': '/foo?name=steve&name=Loria&nums=4&nums=2'},
     # form
     {'path': '/foo', 'method': 'POST', 'data': ImmutableMultiDict(
-        [('name', 'steve'), ('name', 'Loria')])},
+        [('name', 'steve'), ('name', 'Loria'),
+         ('nums', 4), ('nums', 2)])},
 ])
 def test_parse_multiple(context, testapp):
-    multargs = {'name': Arg(multiple=True)}
+    multargs = {'name': Arg(multiple=True), 'nums': Arg(int, multiple=True)}
     with testapp.test_request_context(**context):
         args = parser.parse(multargs)
         assert args['name'] == ['steve', 'Loria']
+        assert args['nums'] == [4, 2]
+
+def test_parse_multiple_arg_with_single_value(testapp):
+    multargs = {'name': Arg(multiple=True)}
+    with testapp.test_request_context('/foo?name=steve'):
+        args = parser.parse(multargs)
+        assert args['name'] == ['steve']
+
+def test_parse_multiple_arg_defaults_to_empty_list(testapp):
+    multargs = {'name': Arg(multiple=True)}
+    with testapp.test_request_context('/foo'):
+        args = parser.parse(multargs)
+        assert args['name'] == []
 
 def test_parse_multiple_json(testapp):
     multargs = {'name': Arg(multiple=True)}

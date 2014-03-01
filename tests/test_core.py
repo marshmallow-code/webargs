@@ -73,6 +73,14 @@ def test_validate_can_be_none():
     arg = Arg(validate=None)
     assert arg.validated(41) == 41
 
+def test_multiple_with_type_arg():
+    arg = Arg(int, multiple=True)
+    assert arg.validated(['1', 2, 3.0]) == [1, 2, 3]
+
+def test_multiple_with_use_arg():
+    arg = Arg(multiple=True, use=lambda x: x.upper())
+    assert arg.validated(['foo', 'bar']) == ['FOO', 'BAR']
+
 # Parser tests
 
 @mock.patch('webargs.core.Parser.parse_json')
@@ -81,7 +89,6 @@ def test_parse_json_called_by_parse_arg(parse_json, request):
     p = Parser()
     p.parse_arg('foo', arg, request)
     assert parse_json.called
-
 
 @mock.patch('webargs.core.Parser.parse_querystring')
 def test_parse_querystring_called_by_parse_arg(parse_querystring, request):
@@ -154,6 +161,18 @@ def test_parse_required_arg(parse_json, request):
     p = Parser()
     result = p.parse_arg('foo', arg, request, targets=('json', ))
     assert result == 42
+
+@mock.patch('webargs.core.Parser.parse_form')
+def test_parse_required_multiple_arg(parse_form, request):
+    parse_form.return_value = []
+    arg = Arg(multiple=True, required=True)
+    p = Parser()
+    with pytest.raises(ValidationError):
+        p.parse_arg('foo', arg, request)
+
+    parse_form.return_value = None
+    with pytest.raises(ValidationError):
+        p.parse_arg('foo', arg, request)
 
 def test_default_targets():
     assert set(DEFAULT_TARGETS) == set(['json', 'querystring', 'form'])

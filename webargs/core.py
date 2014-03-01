@@ -61,25 +61,26 @@ class Arg(object):
     :param callable use: Callable used for converting or pre-processing the value.
         Defaults to noop.
         Example: ``use=lambda s: s.lower()``
+    :param bool multiple: Return a list of values for the argument. Useful for
+        querystrings or forms that pass multiple values to the same parameter,
+        e.g. `/?name=foo&name=bar
     :param str error: Custom error message to use if validation fails.
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None):
         self.type = type_ or noop  # default to no type conversion
-        self.default = default
+        if multiple and default is None:
+            self.default = []
+        else:
+            self.default = default
         self.required = required
         self.validate = _callable(validate) or (lambda x: True)
         self.use = _callable(use) or noop
         self.error = error
         self.multiple = multiple
 
-    def validated(self, value):
-        """Convert and validate the given value according to the ``type_``,
-        ``use``, and ``validate`` attributes.
-
-        :returns: The validated, converted value
-        :raises: ValidationError if validation fails
-        """
+    def _validate(self, value):
+        """Perform conversion and validation on ``value``."""
         ret = value
         # First convert the value
         try:
@@ -93,6 +94,20 @@ class Arg(object):
             )
             raise ValidationError(self.error or msg)
         return ret
+
+    def validated(self, value):
+        """Convert and validate the given value according to the ``type_``,
+        ``use``, and ``validate`` attributes.
+
+        :returns: The validated, converted value
+        :raises: ValidationError if validation fails
+        """
+        print('in validated')
+        print(value)
+        if self.multiple and isinstance(value, list):
+            return [self._validate(each) for each in value]
+        else:
+            return self._validate(value)
 
 DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
@@ -147,21 +162,21 @@ class Parser(object):
         """
         value = None
         for target in self._validated_targets(targets or self.targets):
-            method_name = self.TARGET_MAP.get(target, None)
+            method_name = self.TARGET_MAP.get(target)
             if method_name:
                 method = getattr(self, method_name)
                 value = method(req, name, argobj)
-            if argobj.multiple and not len(value):
+            if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it
             if value is not None:
                 return argobj.validated(value)
         if value is None:
-            if argobj.default:
+            if argobj.default is not None:
                 value = argobj.default
             else:
                 value = self.fallback(req, name, argobj)
-            if value is None and argobj.required:
+            if not value and argobj.required:
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value
 
