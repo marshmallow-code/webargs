@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.3.0 (unreleased)
+0.3.0 (2014-03-02)
 ++++++++++++++++++
 
 * Add support for repeated parameters (#1).
