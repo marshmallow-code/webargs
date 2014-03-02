@@ -111,7 +111,10 @@ Arguments are specified as a dictionary of name -> :class:`Arg <webargs.Arg>` pa
         'fullname': Arg(str, use=lambda n: n.lower()),
 
         # Default value
-        'display_per_page': Arg(int, default=10)
+        'display_per_page': Arg(int, default=10),
+
+        # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
+        'nickname': Arg(str, multiple=True)
     }
 
 To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` method of a :class:`Parser <webargs.core.Parser>` object.

@@ -63,7 +63,7 @@ class Arg(object):
         Example: ``use=lambda s: s.lower()``
     :param bool multiple: Return a list of values for the argument. Useful for
         querystrings or forms that pass multiple values to the same parameter,
-        e.g. `/?name=foo&name=bar
+        e.g. ``/?name=foo&name=bar``
     :param str error: Custom error message to use if validation fails.
     """
     def __init__(self, type_=None, default=None, required=False,
