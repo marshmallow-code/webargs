@@ -120,6 +120,7 @@ class Parser(object):
     different targets, e.g. ``parse_json``, ``parse_querystring``, etc.
 
     :param tuple targets: Default targets to parse.
+    :param callable error_handler: Custom error handler function.
     """
 
     #: Maps target => method name
@@ -132,8 +133,9 @@ class Parser(object):
         'files': 'parse_files',
     }
 
-    def __init__(self, targets=DEFAULT_TARGETS):
+    def __init__(self, targets=DEFAULT_TARGETS, error_handler=None):
         self.targets = targets
+        self.error_handler = _callable(error_handler)
 
     def _validated_targets(self, targets):
         """Ensure that the given targets argument is valid.
@@ -197,7 +199,10 @@ class Parser(object):
                 for argname, argobj in iteritems(argmap)
             )
         except Exception as error:
-            self.handle_error(error)
+            if self.error_handler:
+                self.error_handler(error)
+            else:
+                self.handle_error(error)
 
     def use_args(self, argmap, req=None, targets=DEFAULT_TARGETS):
         """Decorator that injects parsed arguments into a view function or method.
