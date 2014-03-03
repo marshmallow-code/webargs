@@ -37,7 +37,7 @@ class BottleParser(core.Parser):
         """Pull a json value from the request."""
         try:
             return core.get_value(req.json, name, arg.multiple)
-        except AttributeError:
+        except (AttributeError, ValueError):
             return None
 
     def parse_headers(self, req, name, arg):
