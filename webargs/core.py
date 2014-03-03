@@ -102,8 +102,6 @@ class Arg(object):
         :returns: The validated, converted value
         :raises: ValidationError if validation fails
         """
-        print('in validated')
-        print(value)
         if self.multiple and isinstance(value, list):
             return [self._validate(each) for each in value]
         else:
