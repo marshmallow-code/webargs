@@ -4,7 +4,7 @@ Changelog
 0.3.2 (unreleased)
 ++++++++++++++++++
 
-* Fix bug in parsing JSON with bottleparser.
+* Fix bug with parsing JSON in Flask and Bottle.
 
 0.3.0 (2014-03-02)
 ++++++++++++++++++

@@ -4,7 +4,7 @@ import json
 import mock
 import io
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.datastructures import ImmutableMultiDict
 import pytest
@@ -60,6 +60,13 @@ def test_parsing_json_default(testapp):
                                     content_type='application/json'):
         args = parser.parse(hello_args)
         assert args == {'name': 'World'}
+
+
+def test_parsing_json_if_no_json(testapp):
+    with testapp.test_request_context('/myendpoint', method='post'):
+        args = parser.parse(hello_args)
+        assert args == {'name': 'World'}
+
 
 def test_parsing_form(testapp):
     test_client = testapp.test_client()
