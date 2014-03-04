@@ -1,10 +1,15 @@
 Changelog
 ---------
 
-0.3.2 (unreleased)
+0.3.2 (2014-03-04)
 ++++++++++++++++++
 
 * Fix bug with parsing JSON in Flask and Bottle.
+
+0.3.1 (2014-03-03)
+++++++++++++++++++
+
+* Remove print statements in core.py. Oops.
 
 0.3.0 (2014-03-02)
 ++++++++++++++++++
