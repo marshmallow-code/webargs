@@ -202,7 +202,7 @@ class Parser(object):
             else:
                 self.handle_error(error)
 
-    def use_args(self, argmap, req=None, targets=DEFAULT_TARGETS):
+    def use_args(self, argmap, req=None, targets=DEFAULT_TARGETS, as_kwargs=False):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -219,9 +219,17 @@ class Parser(object):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 parsed_args = self.parse(argmap, req=req, targets=targets)
-                return func(parsed_args, *args, **kwargs)
+                if as_kwargs:
+                    kwargs.update(parsed_args)
+                    return func(*args, **kwargs)
+                else:
+                    return func(parsed_args, *args, **kwargs)
             return wrapper
         return decorator
+
+    def use_kwargs(self, *args, **kwargs):
+        kwargs['as_kwargs'] = True
+        return self.use_args(*args, **kwargs)
 
     # Abstract Methods
 

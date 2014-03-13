@@ -84,5 +84,6 @@ class FlaskParser(core.Parser):
         req_obj = req or request  # Default to context-local request
         return super(FlaskParser, self).parse(argmap, req_obj, *args, **kwargs)
 
-
-use_args = FlaskParser().use_args
+parser = FlaskParser()
+use_args = parser.use_args
+use_kwargs = parser.use_kwargs

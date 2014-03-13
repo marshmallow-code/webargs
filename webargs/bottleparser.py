@@ -65,4 +65,6 @@ class BottleParser(core.Parser):
         req_obj = req or request  # Default to context-local request
         return super(BottleParser, self).parse(argmap, req_obj, *args, **kwargs)
 
-use_args = BottleParser().use_args
+parser = BottleParser()
+use_args = parser.use_args
+use_kwargs = parser.use_kwargs

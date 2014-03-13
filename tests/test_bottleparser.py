@@ -78,6 +78,20 @@ def test_use_args_with_url_params(app, testapp):
         return args
     assert testapp.get('/foo/Fred?myvalue=42').json == {'myvalue': 42}
 
+def test_use_kwargs_decorator(app, testapp):
+    @app.route('/foo/', method=['GET', 'POST'])
+    @parser.use_kwargs({'myvalue': Arg(int)})
+    def echo2(myvalue):
+        return {'myvalue': myvalue}
+    assert testapp.post('/foo/', {'myvalue': 23}).json == {'myvalue': 23}
+
+def test_use_kwargs_with_url_params(app, testapp):
+    @app.route('/foo/<name>')
+    @parser.use_kwargs({'myvalue': Arg(int)})
+    def foo(myvalue, name):
+        return {'myvalue': myvalue}
+    assert testapp.get('/foo/Fred?myvalue=42').json == {'myvalue': 42}
+
 def test_parsing_headers(app, testapp):
     @app.route('/echo2')
     def echo2():
