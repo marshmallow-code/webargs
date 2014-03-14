@@ -81,4 +81,6 @@ class DjangoParser(core.Parser):
             return wrapper
         return decorator
 
-use_args = DjangoParser().use_args
+parser = DjangoParser()
+use_args = parser.use_args
+use_kwargs = parser.use_kwargs

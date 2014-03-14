@@ -10,7 +10,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
 from webargs import Arg
-from webargs.flaskparser import FlaskParser, use_args, abort
+from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
 from .compat import text_type
 
@@ -125,6 +125,42 @@ def test_use_args_singleton(testapp):
 def test_use_args_doesnt_change_docstring(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
     @parser.use_args({'myvalue': Arg(type_=int)})
+    def echo(args, id):
+        """Echo docstring."""
+        return jsonify(args)
+    assert echo.__doc__ == 'Echo docstring.'
+
+def test_use_kwargs_decorator(testapp):
+    @testapp.route('/foo/', methods=['post', 'get'])
+    @parser.use_kwargs({'myvalue': Arg(type_=int)})
+    def echo(myvalue):
+        return jsonify(myvalue=myvalue)
+    test_client = testapp.test_client()
+    res = test_client.post('/foo/', data={'myvalue': 23})
+    assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
+
+def test_use_kwargs_decorator_with_url_parameters(testapp):
+    @testapp.route('/foo/<int:id>', methods=['post', 'get'])
+    @parser.use_kwargs({'myvalue': Arg(type_=int)})
+    def echo(myvalue, id):
+        assert id == 42
+        return jsonify(myvalue=myvalue)
+    test_client = testapp.test_client()
+    res = test_client.post('/foo/42', data={'myvalue': 23})
+    assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
+
+def test_use_kwargs_singleton(testapp):
+    @testapp.route('/foo/')
+    @use_kwargs({'myvalue': Arg(int)})
+    def echo(myvalue):
+        return jsonify(myvalue=myvalue)
+    test_client = testapp.test_client()
+    res = test_client.get('/foo/?myvalue=42')
+    assert json.loads(res.data.decode('utf-8')) == {'myvalue': 42}
+
+def test_use_kwargs_doesnt_change_docstring(testapp):
+    @testapp.route('/foo/', methods=['post', 'get'])
+    @parser.use_kwargs({'myvalue': Arg(type_=int)})
     def echo(args, id):
         """Echo docstring."""
         return jsonify(args)

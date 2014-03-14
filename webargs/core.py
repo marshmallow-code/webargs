@@ -202,7 +202,7 @@ class Parser(object):
             else:
                 self.handle_error(error)
 
-    def use_args(self, argmap, req=None, targets=DEFAULT_TARGETS):
+    def use_args(self, argmap, req=None, targets=DEFAULT_TARGETS, as_kwargs=False):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -214,14 +214,34 @@ class Parser(object):
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param tuple targets: Where on the request to search for values.
+        :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         """
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 parsed_args = self.parse(argmap, req=req, targets=targets)
-                return func(parsed_args, *args, **kwargs)
+                if as_kwargs:
+                    kwargs.update(parsed_args)
+                    return func(*args, **kwargs)
+                else:
+                    return func(parsed_args, *args, **kwargs)
             return wrapper
         return decorator
+
+    def use_kwargs(self, *args, **kwargs):
+        """Decorator that injects parsed arguments into a view function or method as keyword arguments.
+
+        This is a shortcut to :py:func:`use_args` with as_kwargs=True
+
+        Example usage with Flask: ::
+
+            @app.route('/echo', methods=['get', 'post'])
+            @parser.use_kwargs({'name': Arg(type_=str)})
+            def greet(name):
+                return 'Hello ' + name
+        """
+        kwargs['as_kwargs'] = True
+        return self.use_args(*args, **kwargs)
 
     # Abstract Methods
 
