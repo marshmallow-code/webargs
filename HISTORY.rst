@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.3.3 (unreleased)
+++++++++++++++++++
+
+* Add ``use_kwargs`` decorator. Thanks @venuatu.
+
 0.3.2 (2014-03-04)
 ++++++++++++++++++
 
