@@ -6,7 +6,7 @@ from setuptools.command.test import test as TestCommand
 
 # Requirements
 REQUIREMENTS = []
-TEST_REQUIREMENTS =['pytest', 'mock', 'flask', 'django', 'webtest', 'bottle']
+TEST_REQUIREMENTS =['pytest', 'mock', 'flask', 'django', 'webtest', 'bottle', 'tornado']
 
 class PyTest(TestCommand):
     def finalize_options(self):
