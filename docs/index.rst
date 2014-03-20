@@ -69,6 +69,7 @@ and, optionally:
 - Flask
 - Django
 - Bottle
+- Tornado
 
 
 Why Use It
@@ -237,6 +238,58 @@ When using the ``use_args`` decorator, the arguments dictionary will always be t
           return render_to_response('post_template.html',
                                     {'post': blog_post})
 
+Tornado Support
+===============
+
+Tornado argument parsing is available via the :mod:`webargs.tornadoparser` module.
+
+Only a `tornado.httpserver.HTTPRequest` object is needed to parse all needed
+arguments, but it can also be used on a handler function directly by using the
+:meth:`webargs.tornadoparser.Parser.use_args` or :meth:`webargs.tornadoparser.Parser.use_kwargs` decorators.
+
+
+.. code-block:: python
+
+    from webargs import Arg
+    from webargs.tornadoparser import parser
+
+    account_args = {
+        'username': Arg(str),
+        'password': Arg(str)
+    }
+
+    ...
+
+    def get(self):
+        parsed_args = parser.parse(account_args, self.request)
+
+
+Decorator Usage
+---------------
+
+When using the :meth:`webargs.tornadoparser.Parser.use_args`, the decorated
+function will get an extra positional argument at the begining.
+
+.. code-block:: python
+
+    import tornado
+    from webargs import Arg
+    from webargs.tornadoparser import use_args
+
+    account_args = {
+        'username': Arg(str),
+        'password': Arg(str)
+    }
+
+    @use_args(account_args)
+    class Handler(tornado.web.RequestHandler):
+        def get(self, parsed_args):
+            self.write('Hello')
+
+
+With :meth:`webargs.tornadoparser.Parser.use_args`, the parsed arguments will
+go through the ``**kwargs`` dictionary.
+
 API Reference
 =============
 
@@ -272,6 +325,12 @@ webargs.bottleparser
 --------------------
 
 .. automodule:: webargs.bottleparser
+    :inherited-members:
+
+webargs.tornadoparser
+---------------------
+
+.. automodule:: webargs.tornadoparser
     :inherited-members:
 
 
