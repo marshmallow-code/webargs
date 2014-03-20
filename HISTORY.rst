@@ -7,6 +7,7 @@ Changelog
 * Awesome contributions from the open-source community!
 * Add ``use_kwargs`` decorator. Thanks @venuatu.
 * Tornado support thanks to @jvrsantacruz.
+* Tested on Python 3.4.
 
 
 0.3.2 (2014-03-04)

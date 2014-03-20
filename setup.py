@@ -60,7 +60,7 @@ setup(
     install_requires=REQUIREMENTS,
     license=read("LICENSE"),
     zip_safe=False,
-    keywords=('webargs', 'http', 'flask', 'django', 'bottle',
+    keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado',
      'request', 'arguments', 'parameters', 'rest', 'api'),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -72,6 +72,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
