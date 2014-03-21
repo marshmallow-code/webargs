@@ -249,7 +249,7 @@ Tornado Support
 
 Tornado argument parsing is available via the :mod:`webargs.tornadoparser` module.
 
-Only a `tornado.httpserver.HTTPRequest` object is needed to parse all needed
+Only a ``tornado.httpserver.HTTPRequest`` object is needed to parse all needed
 arguments, but it can also be used on a handler function directly by using the
 :meth:`webargs.tornadoparser.Parser.use_args` or :meth:`webargs.tornadoparser.Parser.use_kwargs` decorators.
 
@@ -293,7 +293,7 @@ function will get an extra positional argument at the begining.
             self.write('Hello')
 
 
-With :meth:`webargs.tornadoparser.Parser.use_args`, the parsed arguments will
+With :meth:`webargs.tornadoparser.Parser.use_kwargs`, the parsed arguments will
 go through the ``**kwargs`` dictionary.
 
 API Reference
