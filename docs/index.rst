@@ -2,7 +2,7 @@
 webargs
 *******
 
-`Webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.`
+`webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.`
 
 Release v\ |version|. (:ref:`Changelog <changelog>`)
 
@@ -83,7 +83,7 @@ Inspired by `Flask-RESTful's <http://flask-restful.readthedocs.org/en/latest/>`_
 Install
 =======
 
-Webargs is *small*. It has no hard dependencies, so you can easily vendorize it within your project or install the latest version from the PyPI:
+webargs is *small*. It has no hard dependencies, so you can easily vendorize it within your project or install the latest version from the PyPI:
 ::
 
    pip install -U webargs
@@ -251,7 +251,7 @@ Tornado argument parsing is available via the :mod:`webargs.tornadoparser` modul
 
 Only a ``tornado.httpserver.HTTPRequest`` object is needed to parse all needed
 arguments, but it can also be used on a handler function directly by using the
-:meth:`webargs.tornadoparser.Parser.use_args` or :meth:`webargs.tornadoparser.Parser.use_kwargs` decorators.
+:meth:`webargs.tornadoparser.TornadoParser.use_args` or :meth:`webargs.tornadoparser.TornadoParser.use_kwargs` decorators.
 
 
 .. code-block:: python
