@@ -133,17 +133,23 @@ To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` me
         return register_user(args['username'], args['password'],
             fullname=args['fullname'], per_page=args['display_per_page'])
 
-Alternatively, you can decorate your view with ``use_args``. The parsed arguments dictionary will be injected as a parameter of your view function.
+Alternatively, you can decorate your view with ``use_args`` or ``use_kwargs``. The parsed arguments dictionary will be injected as a parameter of your view function or as keyword arguments, respectively.
 
 .. code-block:: python
 
-    from webargs.flaskparser import use_args
+    from webargs.flaskparser import use_args, use_kwargs
 
     @app.route('/register')
-    @use_args(user_args)
+    @use_args(user_args)  # Injects args dictionary
     def register(args):
         return register_user(args['username'], args['password'],
             fullname=args['fullname'], per_page=args['display_per_page'])
+
+    @app.route('/settings')
+    @use_kwargs(user_args)  # Injects keyword arguments
+    def user_settings(username, password, fullname, display_per_page, nickname):
+        return render_template('settings.html', username=username, nickname=nickname)
+
 
 By default, webargs will search for arguments from the URL querystring (e.g. ``"/?name=foo"``), form data, and JSON data (in that order). You can explicitly specify which targets to search, like so:
 

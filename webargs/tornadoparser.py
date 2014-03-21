@@ -93,7 +93,7 @@ class TornadoParser(core.Parser):
 def get_value(d, name, multiple):
     """Handle gets from 'multidicts' made of lists
 
-    It handles cases: `{"key": [value]}` and `{"key": value}`
+    It handles cases: ``{"key": [value]}`` and ``{"key": value}``
     """
     value = d.get(name)
 
