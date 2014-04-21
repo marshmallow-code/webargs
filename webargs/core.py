@@ -224,6 +224,10 @@ class Parser(object):
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)
                 else:
+                    # Wrapped function is a method, so inject parsed_args
+                    # after 'self'
+                    if args and args[0]:
+                        return func(args[0], parsed_args, *args[1:], **kwargs)
                     return func(parsed_args, *args, **kwargs)
             return wrapper
         return decorator

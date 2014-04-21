@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.3.4 (unreleased)
+++++++++++++++++++
+
+* Fix bug that caused ``use_args` to fail on class-based views in Flask.
+
 0.3.3 (2014-03-20)
 ++++++++++++++++++
 

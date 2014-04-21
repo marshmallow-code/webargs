@@ -5,6 +5,7 @@ import mock
 import io
 
 from flask import Flask, jsonify
+from flask.views import MethodView
 from werkzeug.exceptions import HTTPException
 from werkzeug.datastructures import ImmutableMultiDict
 import pytest
@@ -102,6 +103,18 @@ def test_use_args_decorator(testapp):
     test_client = testapp.test_client()
     res = test_client.post('/foo/', data={'myvalue': 23})
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
+
+
+def test_use_args_decorator_on_a_method(testapp):
+    class MyMethodView(MethodView):
+        @parser.use_args({'myvalue': Arg(int)})
+        def post(self, args):
+            return jsonify(args)
+    testapp.add_url_rule('/methodview/',
+        view_func=MyMethodView.as_view(str('mymethodview')))
+    test_client = testapp.test_client()
+    res = test_client.post('/methodview/', data={'myvalue': 42})
+    assert json.loads(res.data.decode('utf-8')) == {'myvalue': 42}
 
 def test_use_args_decorator_with_url_parameters(testapp):
     @testapp.route('/foo/<int:id>', methods=['post', 'get'])
