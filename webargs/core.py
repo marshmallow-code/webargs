@@ -65,9 +65,12 @@ class Arg(object):
         querystrings or forms that pass multiple values to the same parameter,
         e.g. ``/?name=foo&name=bar``
     :param str error: Custom error message to use if validation fails.
+    :param bool allow_missing: If the argument's value is ``None``, don't
+        include it in the returned arguments dictionary.
     """
     def __init__(self, type_=None, default=None, required=False,
-                 validate=None, use=None, multiple=False, error=None):
+                 validate=None, use=None, multiple=False, error=None,
+                 allow_missing=False):
         self.type = type_ or noop  # default to no type conversion
         if multiple and default is None:
             self.default = []
@@ -78,6 +81,9 @@ class Arg(object):
         self.use = _callable(use) or noop
         self.error = error
         self.multiple = multiple
+        if required and allow_missing:
+            raise ValueError('"required" and "allow_missing" cannot both be True.')
+        self.allow_missing = allow_missing
 
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
@@ -191,11 +197,16 @@ class Parser(object):
         :return: A dictionary of parsed arguments
         """
         try:
-            return dict(
-                (argname, self.parse_arg(argname, argobj, req,
-                    targets=targets or self.targets))
-                for argname, argobj in iteritems(argmap)
-            )
+            parsed = {}
+            for argname, argobj in iteritems(argmap):
+                parsed_value = self.parse_arg(argname, argobj, req,
+                    targets=targets or self.targets)
+                # Skip missing values
+                if parsed_value is None and argobj.allow_missing:
+                    continue
+                else:
+                    parsed[argname] = parsed_value
+            return parsed
         except Exception as error:
             if self.error_handler:
                 self.error_handler(error)

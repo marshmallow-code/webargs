@@ -187,6 +187,15 @@ def test_abort_called_when_required_arg_not_present(mock_abort, testapp):
         parser.parse(args)
         assert mock_abort.called_once_with(400)
 
+def test_arg_allowed_missing(testapp):
+    # 'last' argument is allowed to be missing
+    args = {'first': Arg(str), 'last': Arg(str, allow_missing=True)}
+    with testapp.test_request_context('/foo', method='post',
+            data=json.dumps({'first': 'Fred'}), content_type='application/json'):
+        args = parser.parse(args)
+        assert 'first' in args
+        assert 'last' not in args
+
 def test_parsing_headers(testapp):
     with testapp.test_request_context('/foo', headers={'Name': 'Fred'}):
         args = parser.parse(hello_args, targets=('headers',))
@@ -260,3 +269,5 @@ def test_parse_multiple_json(testapp):
             content_type='application/json', method='POST'):
         args = parser.parse(multargs, targets=('json',))
         assert args['name'] == ['steve']
+
+

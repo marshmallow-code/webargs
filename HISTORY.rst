@@ -4,7 +4,8 @@ Changelog
 0.3.4 (unreleased)
 ++++++++++++++++++
 
-* Fix bug that caused ``use_args` to fail on class-based views in Flask.
+* Fix bug that caused ``use_args`` to fail on class-based views in Flask.
+* Add ``allow_missing`` parameter to ``Arg``.
 
 0.3.3 (2014-03-20)
 ++++++++++++++++++
