@@ -44,7 +44,10 @@ class FlaskParser(core.Parser):
     def parse_json(self, req, name, arg):
         """Pull a json value from the request."""
         if req.content_type == 'application/json' and hasattr(req, 'json'):
-            return core.get_value(req.json, name, arg.multiple)
+            try:
+                return core.get_value(req.json, name, arg.multiple)
+            except AttributeError:
+                return None
         else:
             return None
 
