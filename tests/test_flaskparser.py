@@ -116,6 +116,20 @@ def test_use_args_decorator_on_a_method(testapp):
     res = test_client.post('/methodview/', data={'myvalue': 42})
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 42}
 
+def test_use_kwargs_decorator_on_a_method(testapp):
+
+    class MyMethodView(MethodView):
+        @parser.use_kwargs({'myvalue': Arg(int)})
+        def post(self, myvalue):
+            return jsonify({'myvalue': myvalue})
+
+    testapp.add_url_rule('/methodview/',
+        view_func=MyMethodView.as_view(str('mymethodview')))
+    test_client = testapp.test_client()
+    res = test_client.post('/methodview/', data={'myvalue': 42})
+    assert json.loads(res.data.decode('utf-8')) == {'myvalue': 42}
+
+
 def test_use_args_decorator_with_url_parameters(testapp):
     @testapp.route('/foo/<int:id>', methods=['post', 'get'])
     @parser.use_args({'myvalue': Arg(type_=int)})
