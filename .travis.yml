@@ -3,10 +3,11 @@
 language: python
 
 python:
-  - "3.3"
-  - "2.7"
-  - "2.6"
-  - "pypy"
+    - "3.4"
+    - "3.3"
+    - "2.7"
+    - "2.6"
+    - "pypy"
 
 install:
     - pip install -U pytest mock flask django webtest bottle tornado
