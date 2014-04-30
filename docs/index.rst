@@ -77,6 +77,7 @@ Why Use It
 
 * *Simple to use*. Can't remember if you're supposed to pull an argument from ``request.form``, ``request.data``, ``request.args``, or ``request.json``? No problem; webargs will find the value for you.
 * *Code reusability*. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
+* *Self-documentation*. Webargs makes it easy to find the expected arguments and ther types for your view functions.
 
 Inspired by `Flask-RESTful's <http://flask-restful.readthedocs.org/en/latest/>`_ reqparser, webargs offers a lightweight, cross-framework solution to request parsing that's simple and fun to use.
 
@@ -115,7 +116,10 @@ Arguments are specified as a dictionary of name -> :class:`Arg <webargs.Arg>` pa
         'display_per_page': Arg(int, default=10),
 
         # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
-        'nickname': Arg(str, multiple=True)
+        'nickname': Arg(str, multiple=True),
+
+        # When you know where an argument should be parsed from
+        'active': Arg(bool, target='querystring')
     }
 
 To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` method of a :class:`Parser <webargs.core.Parser>` object.

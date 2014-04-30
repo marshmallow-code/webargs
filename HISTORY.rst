@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.3.5 (unreleased)
+++++++++++++++++++
+
+* ``Args`` can define their request target via the ``Arg.target`` attribute.
+
 0.3.4 (2014-04-27)
 ++++++++++++++++++
 
