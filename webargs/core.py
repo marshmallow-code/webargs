@@ -70,7 +70,7 @@ class Arg(object):
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False):
+                 allow_missing=False, target=None):
         self.type = type_ or noop  # default to no type conversion
         if multiple and default is None:
             self.default = []
@@ -84,6 +84,7 @@ class Arg(object):
         if required and allow_missing:
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
+        self.target = target
 
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
@@ -156,6 +157,15 @@ class Parser(object):
             raise ValueError(msg)
         return targets
 
+    def __get_value(self, name, argobj, req, target):
+            method_name = self.TARGET_MAP.get(target)
+            if method_name:
+                method = getattr(self, method_name)
+                value = method(req, name, argobj)
+            else:
+                value = None
+            return value
+
     def parse_arg(self, name, argobj, req, targets=None):
         """Parse a single argument.
 
@@ -167,11 +177,13 @@ class Parser(object):
         :return: The argument value.
         """
         value = None
+        if argobj.target:
+            value = self.__get_value(name, argobj, req=req, target=argobj.target)
+            if value is not None:
+                return argobj.validated(value)
+
         for target in self._validated_targets(targets or self.targets):
-            method_name = self.TARGET_MAP.get(target)
-            if method_name:
-                method = getattr(self, method_name)
-                value = method(req, name, argobj)
+            value = self.__get_value(name, argobj, req=req, target=target)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it

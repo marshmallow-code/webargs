@@ -18,8 +18,7 @@ Example: ::
     def index(args):
         return 'Hello ' + args['name']
 """
-from flask import request
-from flask import abort as flask_abort
+from flask import request, abort as flask_abort
 from werkzeug.exceptions import HTTPException
 
 from webargs import core

@@ -112,3 +112,16 @@ def test_parsing_cookies(app, testapp):
         return args
     testapp.get('/setcookie')
     assert testapp.get('/echocookie').json == {'name': 'Fred'}
+
+def test_arg_specific_targets(app, testapp):
+    testargs = {
+        'name': Arg(str, target='json'),
+        'age': Arg(int, target='querystring'),
+    }
+    @app.route('/echo', method=['POST'])
+    def echo():
+        args = parser.parse(testargs, request)
+        return args
+    resp = testapp.post_json('/echo?age=42', {'name': 'Fred'})
+    assert resp.json['age'] == 42
+    assert resp.json['name'] == 'Fred'
