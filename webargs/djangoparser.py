@@ -55,7 +55,7 @@ class DjangoParser(core.Parser):
         """Pull a file from the request."""
         return core.get_value(req.FILES, name, arg.multiple)
 
-    def use_args(self, argmap, req=None, targets=core.DEFAULT_TARGETS):
+    def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example: ::

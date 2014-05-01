@@ -1,10 +1,11 @@
 Changelog
 ---------
 
-0.3.5 (unreleased)
+0.4.0 (unreleased)
 ++++++++++++++++++
 
 * ``Args`` can define their request target via the ``Arg.target`` attribute.
+* *Backwards-incompatible*: ``DEFAULT_TARGETS`` is now a class member of ``Parser``. This allows subclasses to override it.
 
 0.3.4 (2014-04-27)
 ++++++++++++++++++

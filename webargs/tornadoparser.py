@@ -60,7 +60,8 @@ class TornadoParser(core.Parser):
         self._parse_json_body(req)
         return super(TornadoParser, self).parse(argmap, req, *args, **kwargs)
 
-    def use_args(self, argmap, req=None, targets=core.DEFAULT_TARGETS, as_kwargs=False):
+    def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
+                as_kwargs=False):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example: ::

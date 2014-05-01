@@ -114,8 +114,6 @@ class Arg(object):
         else:
             return self._validate(value)
 
-DEFAULT_TARGETS = ('querystring', 'form', 'json',)
-
 
 class Parser(object):
     """Base parser class that provides high-level implementation for parsing
@@ -127,6 +125,7 @@ class Parser(object):
     :param tuple targets: Default targets to parse.
     :param callable error_handler: Custom error handler function.
     """
+    DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
     #: Maps target => method name
     TARGET_MAP = {
@@ -138,8 +137,8 @@ class Parser(object):
         'files': 'parse_files',
     }
 
-    def __init__(self, targets=DEFAULT_TARGETS, error_handler=None):
-        self.targets = targets
+    def __init__(self, targets=None, error_handler=None):
+        self.targets = targets or self.DEFAULT_TARGETS
         self.error_handler = _callable(error_handler)
 
     def _validated_targets(self, targets):

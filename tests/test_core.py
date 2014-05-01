@@ -3,7 +3,7 @@ import mock
 
 import pytest
 
-from webargs.core import Parser, Arg, ValidationError, DEFAULT_TARGETS
+from webargs.core import Parser, Arg, ValidationError
 
 @pytest.fixture
 def request():
@@ -175,7 +175,7 @@ def test_parse_required_multiple_arg(parse_form, request):
         p.parse_arg('foo', arg, request)
 
 def test_default_targets():
-    assert set(DEFAULT_TARGETS) == set(['json', 'querystring', 'form'])
+    assert set(Parser.DEFAULT_TARGETS) == set(['json', 'querystring', 'form'])
 
 def test_value_error_raised_if_invalid_target(request):
     arg = Arg()
