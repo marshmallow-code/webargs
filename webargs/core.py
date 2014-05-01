@@ -224,7 +224,7 @@ class Parser(object):
             else:
                 self.handle_error(error)
 
-    def use_args(self, argmap, req=None, targets=DEFAULT_TARGETS, as_kwargs=False):
+    def use_args(self, argmap, req=None, targets=None, as_kwargs=False):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -238,6 +238,7 @@ class Parser(object):
         :param tuple targets: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         """
+        targets = targets or self.DEFAULT_TARGETS
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
