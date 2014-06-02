@@ -262,7 +262,7 @@ def test_custom_target_handler(request):
 
     @parser.target_handler('data')
     def parse_data(req, name, arg):
-        return get_value(req.data, name, arg.multiple)
+        return req.data.get(name)
 
     result = parser.parse({'foo': Arg(int)}, request, targets=('data', ))
     assert result['foo'] == 42

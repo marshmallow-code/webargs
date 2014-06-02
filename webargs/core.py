@@ -158,18 +158,18 @@ class Parser(object):
         return targets
 
     def __get_value(self, name, argobj, req, target):
-            # Parsing function to call
-            # May be a method name (str) or a function
-            func = self.TARGET_MAP.get(target)
-            if func:
-                if inspect.isfunction(func):
-                    function = func
-                else:
-                    function = getattr(self, func)
-                value = function(req, name, argobj)
+        # Parsing function to call
+        # May be a method name (str) or a function
+        func = self.TARGET_MAP.get(target)
+        if func:
+            if inspect.isfunction(func):
+                function = func
             else:
-                value = None
-            return value
+                function = getattr(self, func)
+            value = function(req, name, argobj)
+        else:
+            value = None
+        return value
 
     def parse_arg(self, name, argobj, req, targets=None):
         """Parse a single argument.
@@ -294,15 +294,13 @@ class Parser(object):
         """
         def decorator(func):
             self.TARGET_MAP[name] = func
-            @functools.wraps(func)
-            def wrapper(request, name, arg):
-                return func(request, name, arg)
-            return wrapper
+            return func
         return decorator
 
     def error_handler(self, func):
         """Decorator that registers a custom error handling function. The
-        function should received the raised error.
+        function should received the raised error. Overrides
+        the parser's ``handle_error`` method.
 
         Example: ::
 
@@ -317,7 +315,6 @@ class Parser(object):
                 raise CustomError(error)
 
         :param callable func: The error callback to register.
-
         """
         self.error_callback = func
         return func

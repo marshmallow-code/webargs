@@ -294,5 +294,3 @@ def test_parse_multiple_json(testapp):
             content_type='application/json', method='POST'):
         args = parser.parse(multargs, targets=('json',))
         assert args['name'] == ['steve']
-
-
