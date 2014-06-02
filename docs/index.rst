@@ -174,7 +174,7 @@ Available targets include:
 - ``'cookies'``
 - ``'files'``
 
-Adding handlers
+Adding Handlers
 ---------------
 
 To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
@@ -193,6 +193,23 @@ To add your own custom target handler, write a function that receives a request,
     @parser.use_args({'per_page': Arg(int)}, targets=('data', ))
     def posts(args):
         return 'displaying {} posts'.format(args['per_page'])
+
+Handling Errors
+---------------
+
+Each parser has a default error handling method. To override the error handling callback, write a function that receives an error and handles it, then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
+
+.. code-block:: python
+
+    from webargs import core
+    parser = core.Parser()
+
+    class CustomError(Exception):
+        pass
+
+    @parser.error_handler
+    def handle_error(error):
+        raise CustomError(error)
 
 Flask Support
 =============

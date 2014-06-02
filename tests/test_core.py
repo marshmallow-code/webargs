@@ -239,6 +239,22 @@ def test_custom_error_handler(parse_json, request):
         p.parse({'foo': Arg()}, request)
 
 
+@mock.patch('webargs.core.Parser.parse_json')
+def test_custom_error_handler_decorator(parse_json, request):
+    class CustomError(Exception):
+        pass
+    parse_json.side_effect = AttributeError('parse_json failed')
+
+    parser = Parser()
+
+    @parser.error_handler
+    def handle_error(error):
+        raise CustomError(error)
+
+    with pytest.raises(CustomError):
+        parser.parse({'foo': Arg()}, request)
+
+
 def test_custom_target_handler(request):
     request.data = {'foo': 42}
 

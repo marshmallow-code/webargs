@@ -140,7 +140,7 @@ class Parser(object):
 
     def __init__(self, targets=None, error_handler=None):
         self.targets = targets or self.DEFAULT_TARGETS
-        self.error_handler = _callable(error_handler)
+        self.error_callback = _callable(error_handler)
 
     def _validated_targets(self, targets):
         """Ensure that the given targets argument is valid.
@@ -225,8 +225,8 @@ class Parser(object):
                     parsed[argname] = parsed_value
             return parsed
         except Exception as error:
-            if self.error_handler:
-                self.error_handler(error)
+            if self.error_callback:
+                self.error_callback(error)
             else:
                 self.handle_error(error)
 
@@ -289,6 +289,8 @@ class Parser(object):
             @parser.target_handler('name')
             def parse_data(request, name, arg):
                 return request.data.get(name)
+
+        :param str name: The name of the target to register.
         """
         def decorator(func):
             self.TARGET_MAP[name] = func
@@ -297,6 +299,28 @@ class Parser(object):
                 return func(request, name, arg)
             return wrapper
         return decorator
+
+    def error_handler(self, func):
+        """Decorator that registers a custom error handling function. The
+        function should received the raised error.
+
+        Example: ::
+
+            from webargs import core
+            parser = core.Parser()
+
+            class CustomError(Exception):
+                pass
+
+            @parser.error_handler
+            def handle_error(error):
+                raise CustomError(error)
+
+        :param callable func: The error callback to register.
+
+        """
+        self.error_callback = func
+        return func
 
     # Abstract Methods
 
