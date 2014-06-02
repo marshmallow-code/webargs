@@ -278,6 +278,17 @@ class Parser(object):
 
     def target_handler(self, name):
         """Decorator that registers a function that parses a request target.
+        The wrapped function receives a request, the name of the argument, and
+        the :class:`Arg <webargs.core.Arg>` object.
+
+        Example: ::
+
+            from webargs import core
+            parser = core.Parser()
+
+            @parser.target_handler('name')
+            def parse_data(request, name, arg):
+                return request.data.get(name)
         """
         def decorator(func):
             self.TARGET_MAP[name] = func

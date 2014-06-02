@@ -8,6 +8,7 @@ Release v\ |version|. (:ref:`Changelog <changelog>`)
 
 .. contents::
    :local:
+   :depth: 1
 
 Useful Links:
 
@@ -172,6 +173,26 @@ Available targets include:
 - ``'headers'``
 - ``'cookies'``
 - ``'files'``
+
+Adding handlers
+---------------
+
+To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
+
+
+.. code-block:: python
+
+    from webargs.flaskparser import parser
+
+    @parser.target_handler('data')
+    def parse_data(request, name, arg):
+        return request.data.get('name')
+
+    # Now 'data' can be specified as a target
+
+    @parser.use_args({'per_page': Arg(int)}, targets=('data', ))
+    def posts(args):
+        return 'displaying {} posts'.format(args['per_page'])
 
 Flask Support
 =============

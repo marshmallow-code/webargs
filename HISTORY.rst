@@ -4,6 +4,7 @@ Changelog
 0.4.0 (unreleased)
 ++++++++++++++++++
 
+* Custom target handlers can be defined using the ``Parser.target_handler`` decorator.
 * ``Args`` can define their request target via the ``Arg.target`` attribute.
 * *Backwards-incompatible*: ``DEFAULT_TARGETS`` is now a class member of ``Parser``. This allows subclasses to override it.
 

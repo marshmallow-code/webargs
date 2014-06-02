@@ -3,7 +3,7 @@ import mock
 
 import pytest
 
-from webargs.core import Parser, Arg, ValidationError
+from webargs.core import Parser, Arg, ValidationError, get_value
 
 @pytest.fixture
 def request():
@@ -246,8 +246,7 @@ def test_custom_target_handler(request):
 
     @parser.target_handler('data')
     def parse_data(req, name, arg):
-        return req.data[name]
-
+        return get_value(req.data, name, arg.multiple)
 
     result = parser.parse({'foo': Arg(int)}, request, targets=('data', ))
     assert result['foo'] == 42
