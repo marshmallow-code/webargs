@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import functools
+import inspect
 
 PY2 = sys.version_info[0] == 2
 
@@ -157,10 +158,15 @@ class Parser(object):
         return targets
 
     def __get_value(self, name, argobj, req, target):
-            method_name = self.TARGET_MAP.get(target)
-            if method_name:
-                method = getattr(self, method_name)
-                value = method(req, name, argobj)
+            # Parsing function to call
+            # May be a method name (str) or a function
+            func = self.TARGET_MAP.get(target)
+            if func:
+                if inspect.isfunction(func):
+                    function = func
+                else:
+                    function = getattr(self, func)
+                value = function(req, name, argobj)
             else:
                 value = None
             return value
@@ -269,6 +275,17 @@ class Parser(object):
         """
         kwargs['as_kwargs'] = True
         return self.use_args(*args, **kwargs)
+
+    def target_handler(self, name):
+        """Decorator that registers a function that parses a request target.
+        """
+        def decorator(func):
+            self.TARGET_MAP[name] = func
+            @functools.wraps(func)
+            def wrapper(request, name, arg):
+                return func(request, name, arg)
+            return wrapper
+        return decorator
 
     # Abstract Methods
 

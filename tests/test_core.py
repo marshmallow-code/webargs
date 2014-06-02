@@ -237,3 +237,17 @@ def test_custom_error_handler(parse_json, request):
     p = Parser(error_handler=error_handler)
     with pytest.raises(CustomError):
         p.parse({'foo': Arg()}, request)
+
+
+def test_custom_target_handler(request):
+    request.data = {'foo': 42}
+
+    parser = Parser()
+
+    @parser.target_handler('data')
+    def parse_data(req, name, arg):
+        return req.data[name]
+
+
+    result = parser.parse({'foo': Arg(int)}, request, targets=('data', ))
+    assert result['foo'] == 42
