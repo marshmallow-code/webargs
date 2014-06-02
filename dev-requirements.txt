@@ -3,9 +3,9 @@ tox>=1.5.0
 sphinx
 wheel
 invoke
-Flask
+Flask==0.10.1
 mock
 webtest
 Django>=1.6.2
 bottle>=0.12.3
-tornado
+tornado==3.2.1
