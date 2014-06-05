@@ -157,7 +157,7 @@ class Parser(object):
             raise ValueError(msg)
         return targets
 
-    def __get_value(self, name, argobj, req, target):
+    def _get_value(self, name, argobj, req, target):
         # Parsing function to call
         # May be a method name (str) or a function
         func = self.TARGET_MAP.get(target)
@@ -183,12 +183,12 @@ class Parser(object):
         """
         value = None
         if argobj.target:
-            value = self.__get_value(name, argobj, req=req, target=argobj.target)
+            value = self._get_value(name, argobj, req=req, target=argobj.target)
             if value is not None:
                 return argobj.validated(value)
 
         for target in self._validated_targets(targets or self.targets):
-            value = self.__get_value(name, argobj, req=req, target=target)
+            value = self._get_value(name, argobj, req=req, target=target)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it

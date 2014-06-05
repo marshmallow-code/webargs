@@ -1,12 +1,12 @@
 Changelog
 ---------
 
-0.4.0 (unreleased)
+0.4.0 (2014-05-04)
 ++++++++++++++++++
 
 * Custom target handlers can be defined using the ``Parser.target_handler`` decorator.
 * Error handler can be specified using the ``Parser.error_handler`` decorator.
-* ``Args`` can define their request target via the ``Arg.target`` attribute.
+* ``Args`` can define their request target by passing in a ``target`` argument.
 * *Backwards-incompatible*: ``DEFAULT_TARGETS`` is now a class member of ``Parser``. This allows subclasses to override it.
 
 0.3.4 (2014-04-27)
