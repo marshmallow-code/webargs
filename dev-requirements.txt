@@ -6,6 +6,6 @@ invoke
 Flask==0.10.1
 mock
 webtest
-Django>=1.6.2
+Django==1.6.5
 bottle>=0.12.3
-tornado==3.2.1
+tornado==3.2.2
