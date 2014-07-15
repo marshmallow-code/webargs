@@ -59,8 +59,8 @@ class Arg(object):
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) used for custom validation. Returns whether or not the
         value is valid.
-    :param callable use: Callable used for converting or pre-processing the value.
-        Defaults to noop.
+    :param callable use: Preprocessing function used for converting or
+        pre-processing the value. Defaults to noop.
         Example: ``use=lambda s: s.lower()``
     :param bool multiple: Return a list of values for the argument. Useful for
         querystrings or forms that pass multiple values to the same parameter,
@@ -68,6 +68,9 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     :param bool allow_missing: If the argument's value is ``None``, don't
         include it in the returned arguments dictionary.
+
+    .. versionchanged:: 0.5.0
+        The ``use`` callable is called before type conversion.
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
@@ -92,7 +95,7 @@ class Arg(object):
         ret = value
         # First convert the value
         try:
-            ret = self.use(self.type(value))
+            ret = self.type(self.use(value))
         except ValueError as error:
             raise ValidationError(self.error or error)
         # Then call validation function

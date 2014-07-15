@@ -52,8 +52,8 @@ def test_use_param():
     assert arg.validated('foo') == 'FOO'
 
 def test_convert_and_use_params():
-    arg = Arg(int, use=lambda x: x + 1)
-    assert arg.validated('41') == 42
+    arg = Arg(float, use=lambda val: val + 1)
+    assert arg.validated(41) == 42.0
 
 def test_error_raised_if_use_is_uncallable():
     with pytest.raises(ValueError) as excinfo:
