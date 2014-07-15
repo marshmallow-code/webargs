@@ -1,10 +1,11 @@
 Changelog
 ---------
 
-0.4.1 (unreleased)
+0.5.0 (unreleased)
 ******************
 
 * Fix JSON parsing in Flask parser when Content-Type header contains more than just `application/json`. Thanks Samir Uppaluru for reporting.
+* *Backwards-incompatible*: The ``use`` parameter to ``Arg`` is called before type conversion occurs. Thanks Eric Wang for the suggestion.
 
 0.4.0 (2014-05-04)
 ++++++++++++++++++
