@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.4.1 (unreleased)
+******************
+
+* Fix JSON parsing in Flask parser when Content-Type header contains more than just `application/json`. Thanks Samir Uppaluru for reporting.
+
 0.4.0 (2014-05-04)
 ++++++++++++++++++
 

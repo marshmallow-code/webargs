@@ -54,6 +54,13 @@ def test_parsing_json_in_request_context(testapp):
         args = parser.parse(hello_args)
         assert args['name'] == 'Fred'
 
+def test_parsing_json_with_charset(testapp):
+    with testapp.test_request_context('/myendpoint', method='post',
+                                      data=json.dumps({'name': 'Fred'}),
+                                      content_type='application/json;charset=UTF-8'):
+        args = parser.parse(hello_args)
+        assert args == {'name': 'Fred'}
+
 def test_arg_with_target(testapp):
     testargs = {
         'name': Arg(str, target='json'),
