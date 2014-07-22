@@ -8,4 +8,4 @@ mock
 webtest
 Django==1.6.5
 bottle>=0.12.3
-tornado==3.2.2
+tornado>=4.0
