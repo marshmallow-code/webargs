@@ -7,11 +7,13 @@ try:
 except ImportError:
     from urllib.parse import urlencode  # python3
 
+import mock
 import pytest
 
 import tornado.web
 import tornado.httputil
 import tornado.httpserver
+import tornado.http1connection
 
 from webargs import Arg
 from webargs.tornadoparser import parser, use_args, use_kwargs
@@ -406,11 +408,19 @@ def make_request(uri=None, body=None, headers=None, files=None):
     uri = uri if uri is not None else u''
     body = body if body is not None else u''
     method = 'POST' if body else 'GET'
-
-    request = tornado.httpserver.HTTPRequest(
-        method=method, uri=uri, body=body, headers=headers, files=files)
-
+    # Need to make a mock connection right now because Tornado 4.0 requires a
+    # remote_ip in the context attribute. 4.1 addresses this, and this
+    # will be unnecessary once it is released
+    # https://github.com/tornadoweb/tornado/issues/1118
+    mock_connection = mock.Mock(spec=tornado.http1connection.HTTP1Connection)
+    mock_connection.context = mock.Mock()
+    mock_connection.remote_ip = None
     content_type = headers.get('Content-Type', u'') if headers else u''
+    request = tornado.httputil.HTTPServerRequest(
+        method=method, uri=uri, body=body, headers=headers, files=files,
+        connection=mock_connection
+    )
+
 
     tornado.httputil.parse_body_arguments(
         content_type=content_type,
