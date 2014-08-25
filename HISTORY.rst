@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.5.1 (unreleased)
+******************
+
+* Fix bug in tornadoparser that caused parsing JSON arguments to fail.
+
 0.5.0 (2014-07-27)
 ******************
 
