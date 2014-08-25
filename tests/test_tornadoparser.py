@@ -18,6 +18,9 @@ import tornado.http1connection
 from webargs import Arg
 from webargs.tornadoparser import parser, use_args, use_kwargs
 
+name = 'name'
+bvalue = b'value'
+value = 'value'
 
 class TestQueryArgs(object):
     def test_it_should_get_single_values(self):
@@ -345,11 +348,6 @@ class TestUseArgs(object):
         assert result is True
 
 
-name = 'name'
-bvalue = b'value'
-value = 'value'
-
-
 def make_uri(args):
     return '/test?' + urlencode(args)
 
@@ -379,7 +377,7 @@ def make_json_request(args):
     return make_request(
         body=make_json_body(args),
         headers={
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json; charset=UTF-8'
         }
     )
 
@@ -420,7 +418,6 @@ def make_request(uri=None, body=None, headers=None, files=None):
         method=method, uri=uri, body=body, headers=headers, files=files,
         connection=mock_connection
     )
-
 
     tornado.httputil.parse_body_arguments(
         content_type=content_type,

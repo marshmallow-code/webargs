@@ -47,8 +47,12 @@ class TornadoParser(core.Parser):
         raise tornado.web.HTTPError(400, error)
 
     def _parse_json_body(self, req):
-        if req.headers.get('Content-Type') == 'application/json':
-            self.json = json.loads(req.body)
+        body = req.body
+        content_type = req.headers.get('Content-Type')
+        if content_type and 'application/json' in req.headers.get('Content-Type'):
+            if isinstance(req.body, bytes):
+                body = body.decode('utf-8')
+            self.json = json.loads(body)
         else:
             self.json = {}
 

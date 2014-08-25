@@ -298,45 +298,69 @@ arguments, but it can also be used on a handler function directly by using the
 
 .. code-block:: python
 
+    import tornado.ioloop
+    import tornado.web
+
     from webargs import Arg
     from webargs.tornadoparser import parser
 
-    account_args = {
-        'username': Arg(str),
-        'password': Arg(str)
-    }
+    class HelloHandler(tornado.web.RequestHandler):
 
-    ...
+        @use_args({
+            'name': Arg(str),
+        })
+        def post(self, id):
+            reqargs = parser.parse(account_args, self.request)
+            response = {
+                'message': 'Hello {}'.format(reqargs['name'])
+            }
+            self.write(response)
 
-    def get(self):
-        parsed_args = parser.parse(account_args, self.request)
+    application = tornado.web.Application([
+        (r"/hello/([0-9]+)", HelloHandler),
+    ], debug=True)
 
+    if __name__ == "__main__":
+        application.listen(8888)
+        tornado.ioloop.IOLoop.instance().start()
 
 Decorator Usage
 ---------------
 
-When using the :meth:`webargs.tornadoparser.Parser.use_args`, the decorated
-function will get an extra positional argument at the begining.
+When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>`, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self``.
+
 
 .. code-block:: python
 
-    import tornado
     from webargs import Arg
     from webargs.tornadoparser import use_args
 
-    account_args = {
-        'username': Arg(str),
-        'password': Arg(str)
-    }
+    class HelloHandler(tornado.web.RequestHandler):
 
-    @use_args(account_args)
-    class Handler(tornado.web.RequestHandler):
-        def get(self, parsed_args):
-            self.write('Hello')
+        @use_args({
+            'name': Arg(str),
+        })
+        def post(self, reqargs, id):
+            response = {
+                'message': 'Hello {}'.format(reqargs['name'])
+            }
+            self.write(response)
 
 
-With :meth:`webargs.tornadoparser.Parser.use_kwargs`, the parsed arguments will
-go through the ``**kwargs`` dictionary.
+With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the parsed arguments will be injected as keyword arguments.
+
+.. code-block:: python
+
+    class HelloHandler(tornado.web.RequestHandler):
+
+        @use_kwargs({
+            'name': Arg(str),
+        })
+        def post(self, id, name):
+            response = {
+                'message': 'Hello {}'.format(name)
+            }
+            self.write(response)
 
 API Reference
 =============
