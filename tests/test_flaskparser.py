@@ -228,6 +228,12 @@ def test_arg_allowed_missing(testapp):
         assert 'first' in args
         assert 'last' not in args
 
+def test_multiple_arg_allowed_missing(testapp):
+    args = {'name': Arg(str, multiple=True, allow_missing=True)}
+    with testapp.test_request_context(path='/foo', method='post'):
+        args = parser.parse(args)
+        assert 'name' not in args
+
 def test_parsing_headers(testapp):
     with testapp.test_request_context('/foo', headers={'Name': 'Fred'}):
         args = parser.parse(hello_args, targets=('headers',))

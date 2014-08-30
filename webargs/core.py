@@ -222,7 +222,9 @@ class Parser(object):
                 parsed_value = self.parse_arg(argname, argobj, req,
                     targets=targets or self.targets)
                 # Skip missing values
-                if parsed_value is None and argobj.allow_missing:
+                can_skip = parsed_value is None or (argobj.multiple
+                                                    and not len(parsed_value))
+                if argobj.allow_missing and can_skip:
                     continue
                 else:
                     parsed[argname] = parsed_value
