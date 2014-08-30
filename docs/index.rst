@@ -291,10 +291,7 @@ Tornado Support
 
 Tornado argument parsing is available via the :mod:`webargs.tornadoparser` module.
 
-Only a ``tornado.httpserver.HTTPRequest`` object is needed to parse all needed
-arguments, but it can also be used on a handler function directly by using the
-:meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` or :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>` decorators.
-
+The :class:`webargs.tornadoparser.TornadoParser` parses arguments from a :class:`tornado.httpserver.HTTPRequest` object. The :class:`TornadoParser` can be used directly, or you can decorate handler methods with :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` or :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`.
 
 .. code-block:: python
 

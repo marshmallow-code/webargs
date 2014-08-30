@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+"""Tornado request argument parsing module.
+
+Example: ::
+
+    import tornado.web
+    from webargs import Arg
+    from webargs.tornadoparser import use_args
+
+    class HelloHandler(tornado.web.RequestHandler):
+
+        @use_args({'name': Arg(str)})
+        def get(self, args):
+            response = {'message': 'Hello {}'.format(args['name'])}
+            self.write(response)
+"""
 
 import json
 import functools
