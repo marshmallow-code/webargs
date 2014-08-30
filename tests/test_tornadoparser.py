@@ -14,9 +14,11 @@ import tornado.web
 import tornado.httputil
 import tornado.httpserver
 import tornado.http1connection
+import tornado.ioloop
+from tornado.testing import AsyncHTTPTestCase
 
 from webargs import Arg
-from webargs.tornadoparser import parser, use_args, use_kwargs
+from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json
 
 name = 'name'
 bvalue = b'value'
@@ -427,3 +429,35 @@ def make_request(uri=None, body=None, headers=None, files=None):
     )
 
     return request
+
+class EchoHandler(tornado.web.RequestHandler):
+
+    @use_args({
+        'name': Arg(str)
+    })
+    def post(self, args):
+        self.write(args)
+
+echo_app = tornado.web.Application([
+    (r'/echo', EchoHandler)
+])
+
+class TestApp(AsyncHTTPTestCase):
+
+    def get_app(self):
+        return echo_app
+
+    def test_post(self):
+        res = self.fetch('/echo', method='POST', headers={'Content-Type': 'application/json'},
+                        body=json.dumps({'name': 'Steve'}))
+        json_body = parse_json(res.body)
+        assert json_body['name'] == 'Steve'
+        res = self.fetch('/echo', method='POST', headers={'Content-Type': 'application/json'},
+                        body=json.dumps({}))
+        json_body = parse_json(res.body)
+        assert json_body['name'] is None
+
+
+if __name__ == '__main__':
+    echo_app.listen(8888)
+    tornado.ioloop.IOLoop.instance().start()

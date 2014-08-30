@@ -8,6 +8,11 @@ import tornado.web
 from webargs import core
 
 
+def parse_json(s):
+    if isinstance(s, bytes):
+        s = s.decode('utf-8')
+    return json.loads(s)
+
 class TornadoParser(core.Parser):
     """Tornado request argument parser."""
 
@@ -47,12 +52,9 @@ class TornadoParser(core.Parser):
         raise tornado.web.HTTPError(400, error)
 
     def _parse_json_body(self, req):
-        body = req.body
         content_type = req.headers.get('Content-Type')
         if content_type and 'application/json' in req.headers.get('Content-Type'):
-            if isinstance(req.body, bytes):
-                body = body.decode('utf-8')
-            self.json = json.loads(body)
+            self.json = parse_json(req.body)
         else:
             self.json = {}
 
