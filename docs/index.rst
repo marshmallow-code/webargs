@@ -78,7 +78,7 @@ Why Use It
 
 * *Simple to use*. Can't remember if you're supposed to pull an argument from ``request.form``, ``request.data``, ``request.args``, or ``request.json``? No problem; webargs will find the value for you.
 * *Code reusability*. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
-* *Self-documentation*. Webargs makes it easy to find the expected arguments and ther types for your view functions.
+* *Self-documentation*. Webargs makes it easy to understand the expected arguments and their types for your view functions.
 
 Inspired by `Flask-RESTful's <http://flask-restful.readthedocs.org/en/latest/>`_ reqparser, webargs offers a lightweight, cross-framework solution to request parsing that's simple and fun to use.
 
@@ -289,11 +289,13 @@ When using the ``use_args`` decorator, the arguments dictionary will always be t
 Tornado Support
 ===============
 
+.. module:: webargs.tornadoparser
+
 Tornado argument parsing is available via the :mod:`webargs.tornadoparser` module.
 
 Only a ``tornado.httpserver.HTTPRequest`` object is needed to parse all needed
 arguments, but it can also be used on a handler function directly by using the
-:meth:`webargs.tornadoparser.TornadoParser.use_args` or :meth:`webargs.tornadoparser.TornadoParser.use_kwargs` decorators.
+:meth:`use_args <TornadoParser.use_args>` or :meth:`use_kwargs <TornadoParser.use_kwargs>` decorators.
 
 
 .. code-block:: python
@@ -327,7 +329,7 @@ arguments, but it can also be used on a handler function directly by using the
 Decorator Usage
 ---------------
 
-When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>`, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self``.
+When using the :meth:`use_args <TornadoParser.use_args>` decorator, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self``.
 
 
 .. code-block:: python
@@ -347,7 +349,7 @@ When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>`, 
             self.write(response)
 
 
-With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the parsed arguments will be injected as keyword arguments.
+With :meth:`use_kwargs <TornadoParser.use_kwargs>`, the parsed arguments will be injected as keyword arguments.
 
 .. code-block:: python
 
@@ -356,7 +358,7 @@ With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the pa
         @use_kwargs({
             'name': Arg(str),
         })
-        def post(self, id, name):
+        def post(self, id, name):  # "name" is injected
             response = {
                 'message': 'Hello {}'.format(name)
             }
