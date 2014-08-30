@@ -1,9 +1,10 @@
 Changelog
 ---------
 
-0.5.1 (unreleased)
+0.5.1 (2014-08-30)
 ******************
 
+* Fix behavior of ``Arg's`` ``allow_missing`` parameter when ``multiple=True``.
 * Fix bug in tornadoparser that caused parsing JSON arguments to fail.
 
 0.5.0 (2014-07-27)

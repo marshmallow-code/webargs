@@ -10,7 +10,7 @@ webargs
 
 Homepage: https://webargs.readthedocs.org/
 
-`Webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.`
+*webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask, Django, and Tornado.*
 
 .. code-block:: python
 
