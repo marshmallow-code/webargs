@@ -2,7 +2,7 @@
 webargs
 *******
 
-`webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.`
+*webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask and Django.*
 
 Release v\ |version|. (:ref:`Changelog <changelog>`)
 
@@ -289,13 +289,11 @@ When using the ``use_args`` decorator, the arguments dictionary will always be t
 Tornado Support
 ===============
 
-.. module:: webargs.tornadoparser
-
 Tornado argument parsing is available via the :mod:`webargs.tornadoparser` module.
 
 Only a ``tornado.httpserver.HTTPRequest`` object is needed to parse all needed
 arguments, but it can also be used on a handler function directly by using the
-:meth:`use_args <TornadoParser.use_args>` or :meth:`use_kwargs <TornadoParser.use_kwargs>` decorators.
+:meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` or :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>` decorators.
 
 
 .. code-block:: python
@@ -306,13 +304,15 @@ arguments, but it can also be used on a handler function directly by using the
     from webargs import Arg
     from webargs.tornadoparser import parser
 
+
     class HelloHandler(tornado.web.RequestHandler):
 
-        @use_args({
+        hello_args = {
             'name': Arg(str),
-        })
+        }
+
         def post(self, id):
-            reqargs = parser.parse(account_args, self.request)
+            reqargs = parser.parse(self.hello_args, self.request)
             response = {
                 'message': 'Hello {}'.format(reqargs['name'])
             }
@@ -329,7 +329,7 @@ arguments, but it can also be used on a handler function directly by using the
 Decorator Usage
 ---------------
 
-When using the :meth:`use_args <TornadoParser.use_args>` decorator, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self``.
+When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` decorator, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self``.
 
 
 .. code-block:: python
@@ -339,9 +339,7 @@ When using the :meth:`use_args <TornadoParser.use_args>` decorator, the decorate
 
     class HelloHandler(tornado.web.RequestHandler):
 
-        @use_args({
-            'name': Arg(str),
-        })
+        @use_args({'name': Arg(str)})
         def post(self, reqargs, id):
             response = {
                 'message': 'Hello {}'.format(reqargs['name'])
@@ -349,15 +347,13 @@ When using the :meth:`use_args <TornadoParser.use_args>` decorator, the decorate
             self.write(response)
 
 
-With :meth:`use_kwargs <TornadoParser.use_kwargs>`, the parsed arguments will be injected as keyword arguments.
+With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the parsed arguments will be injected as keyword arguments.
 
 .. code-block:: python
 
     class HelloHandler(tornado.web.RequestHandler):
 
-        @use_kwargs({
-            'name': Arg(str),
-        })
+        @use_kwargs({'name': Arg(str)})
         def post(self, id, name):  # "name" is injected
             response = {
                 'message': 'Hello {}'.format(name)

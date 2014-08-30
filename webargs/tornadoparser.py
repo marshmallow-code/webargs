@@ -13,6 +13,21 @@ def parse_json(s):
         s = s.decode('utf-8')
     return json.loads(s)
 
+def get_value(d, name, multiple):
+    """Handle gets from 'multidicts' made of lists
+
+    It handles cases: ``{"key": [value]}`` and ``{"key": value}``
+    """
+    value = d.get(name)
+
+    if multiple:
+        return [] if value is None else value
+
+    if value and isinstance(value, list):
+        return value[0]
+
+    return value
+
 class TornadoParser(core.Parser):
     """Tornado request argument parser."""
 
@@ -70,16 +85,10 @@ class TornadoParser(core.Parser):
                 as_kwargs=False):
         """Decorator that injects parsed arguments into a view function or method.
 
-        Example: ::
-
-            @parser.use_kwargs({'name': Arg(type_=str)})
-            def myview(request, args):
-                self.write('Hello ' + args['name'])
-
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param req: The request object to parse
         :param tuple targets: Where on the request to search for values.
-        :param as_kwargs: Wether to pass arguments to the handler as kwargs
+        :param as_kwargs: Whether to pass arguments to the handler as kwargs
         """
         def decorator(func):
             @functools.wraps(func)
@@ -95,22 +104,6 @@ class TornadoParser(core.Parser):
                 return func(obj, *args, **kwargs)
             return wrapper
         return decorator
-
-
-def get_value(d, name, multiple):
-    """Handle gets from 'multidicts' made of lists
-
-    It handles cases: ``{"key": [value]}`` and ``{"key": value}``
-    """
-    value = d.get(name)
-
-    if multiple:
-        return [] if value is None else value
-
-    if value and isinstance(value, list):
-        return value[0]
-
-    return value
 
 
 parser = TornadoParser()
