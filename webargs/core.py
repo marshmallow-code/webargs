@@ -66,8 +66,9 @@ class Arg(object):
         querystrings or forms that pass multiple values to the same parameter,
         e.g. ``/?name=foo&name=bar``
     :param str error: Custom error message to use if validation fails.
-    :param bool allow_missing: If the argument's value is ``None``, don't
-        include it in the returned arguments dictionary.
+    :param bool allow_missing: If the argument's value is not found or is ``None``,
+        don't include it in the returned arguments dictionary.
+    :param str target: Where to pull the value off the request, e.g. ``'json'``.
 
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
@@ -88,6 +89,7 @@ class Arg(object):
         if required and allow_missing:
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
+        self.allow_none = allow_none
         self.target = target
 
     def _validate(self, value):
