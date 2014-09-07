@@ -365,16 +365,8 @@ API Reference
 webargs.core
 ------------
 
-.. autoclass:: Arg
-    :members:
-
-.. autoclass:: webargs.core.Parser
-    :members:
-
-.. autoexception:: webargs.core.WebargsError
-
-.. autoexception:: webargs.core.ValidationError
-
+.. automodule:: webargs.core
+    :inherited-members:
 
 webargs.flaskparser
 -------------------
