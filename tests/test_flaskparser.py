@@ -10,7 +10,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
-from webargs import Arg
+from webargs import Arg, Missing
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
 from .compat import text_type
@@ -228,6 +228,22 @@ def test_arg_allowed_missing(testapp):
         assert 'first' in args
         assert 'last' not in args
 
+def test_arg_allowed_missing_when_none_is_passed(testapp):
+    # 'last' argument is allowed to be missing
+    args = {'first': Arg(str), 'last': Arg(allow_missing=True)}
+    with testapp.test_request_context('/foo', method='post',
+            data=json.dumps({'first': 'Fred', 'last': None}), content_type='application/json'):
+        args = parser.parse(args)
+        assert 'first' in args
+        assert args['last'] is None
+
+def test_arg_allow_missing_false(testapp):
+    args = {'first': Arg(str), 'last': Arg(str, allow_missing=False)}
+    with testapp.test_request_context('/foo', method='post',
+            data=json.dumps({'first': 'Fred'}), content_type='application/json'):
+        args = parser.parse(args)
+        assert args['last'] is None
+
 def test_multiple_arg_allowed_missing(testapp):
     args = {'name': Arg(str, multiple=True, allow_missing=True)}
     with testapp.test_request_context(path='/foo', method='post'):
@@ -250,10 +266,10 @@ def test_parsing_cookies(testapp):
     res = testclient.get('/getcookiearg')
     assert json.loads(res.data.decode('utf-8')) == {'name': 'Fred'}
 
-def test_parse_form_returns_none_if_no_form():
+def test_parse_form_returns_missing_if_no_form():
     req = mock.Mock()
     req.form.get.side_effect = AttributeError('no form')
-    assert parser.parse_form(req, 'foo', Arg()) is None
+    assert parser.parse_form(req, 'foo', Arg()) is Missing
 
 def test_unicode_arg(testapp):
     with testapp.test_request_context('/foo?name=Früd'):

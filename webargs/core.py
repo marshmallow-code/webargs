@@ -31,10 +31,33 @@ def _callable(obj):
     else:
         return obj
 
+class _Missing(object):
+    """Represents a value that is missing from the set of passed in request
+    arguments.
+    """
 
-def get_value(d, name, multiple, method='get'):
-    func = getattr(d, method)
-    val = func(name)
+    def __bool__(self):
+        return False
+
+    __nonzero__ = __bool__  # py2 compatibility
+
+    def __repr__(self):
+        return '<webargs.core.missing>'
+
+
+#: Singleton object that represents a value that cannot be found on a request.
+Missing = _Missing()
+
+
+def get_value(d, name, multiple):
+    """Get a value from a dictionary. Handles ``MultiDict`` types when
+    ``multiple=True``. If the value is not found, return `missing`.
+
+    :param dict d: Dictionary to pull the value from.
+    :param str name: Name of the key.
+    :param bool multiple: Whether to handle multiple values.
+    """
+    val = d.get(name, Missing)
     if multiple:
         if hasattr(d, 'getlist'):
             return d.getlist(name)
@@ -89,7 +112,6 @@ class Arg(object):
         if required and allow_missing:
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
-        self.allow_none = allow_none
         self.target = target
 
     def _validate(self, value):
@@ -115,6 +137,9 @@ class Arg(object):
         :returns: The validated, converted value
         :raises: ValidationError if validation fails
         """
+        # Prevent "missing" placeholder from getting converted
+        if value is Missing:
+            return value
         if self.multiple and isinstance(value, list):
             return [self._validate(each) for each in value]
         else:
@@ -184,7 +209,11 @@ class Parser(object):
         :param req: The request object to parse.
         :param tuple targets: The targets ('json', 'querystring', etc.) where
             to search for the value.
-        :return: The argument value.
+        :return: The argument value or `Missing` if the value cannot be found
+            on the request.
+
+        :raises: ValidationError if a validation function returns `False` or
+            if a required argument is missing.
         """
         value = None
         if argobj.target:
@@ -197,14 +226,12 @@ class Parser(object):
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it
-            if value is not None:
+            if value is not Missing:
                 return argobj.validated(value)
-        if value is None:
+        if value is Missing:
             if argobj.default is not None:
                 value = argobj.default
-            else:
-                value = self.fallback(req, name, argobj)
-            if not value and argobj.required:
+            if argobj.required:
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value
 
@@ -224,11 +251,13 @@ class Parser(object):
                 parsed_value = self.parse_arg(argname, argobj, req,
                     targets=targets or self.targets)
                 # Skip missing values
-                can_skip = parsed_value is None or (argobj.multiple
+                can_skip = parsed_value is Missing or (argobj.multiple
                                                     and not len(parsed_value))
                 if argobj.allow_missing and can_skip:
                     continue
                 else:
+                    if parsed_value is Missing:
+                        parsed_value = self.fallback(req, argname, argobj)
                     parsed[argname] = parsed_value
             return parsed
         except Exception as error:
@@ -329,40 +358,40 @@ class Parser(object):
     # Abstract Methods
 
     def parse_json(self, req, name, arg):
-        """Pulls a JSON value from a request object or returns ``None`` if the
+        """Pull a JSON value from a request object or return `Missing` if the
         value cannot be found.
         """
-        return None
+        return Missing
 
     def parse_querystring(self, req, name, arg):
-        """Pulls a value from the query string of a request object or returns ``None`` if
+        """Pull a value from the query string of a request object or return `Missing` if
         the value cannot be found.
         """
-        return None
+        return Missing
 
     def parse_form(self, req, name, arg):
-        """Pulls a value from the form data of a request object or returns
-        ``None`` if the value cannot be found.
+        """Pull a value from the form data of a request object or return
+        `Missing` if the value cannot be found.
         """
-        return None
+        return Missing
 
     def parse_headers(self, req, name, arg):
-        """Pulls a value from the headers or returns ``None`` if the value
+        """Pull a value from the headers or return `Missing` if the value
         cannot be found.
         """
-        return None
+        return Missing
 
     def parse_cookies(self, req, name, arg):
-        """Pulls a cookie value from the request or returns ``None`` if the value
+        """Pull a cookie value from the request or return `Missing` if the value
         cannot be found.
         """
-        return None
+        return Missing
 
     def parse_files(self, req, name, arg):
-        """Pull a file from the request or return ``None`` if the value file
+        """Pull a file from the request or return `Missing` if the value file
         cannot be found.
         """
-        return None
+        return Missing
 
     def handle_error(self, error):
         """Called if an error occurs while parsing args.
@@ -371,6 +400,6 @@ class Parser(object):
 
     def fallback(self, req, name, arg):
         """Called if all other parsing functions (parse_json, parse_form...) return
-        ``None``.
+        `Missing`.
         """
         return None

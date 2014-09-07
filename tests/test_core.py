@@ -147,11 +147,12 @@ def test_parse(parse_json, request):
     ret = p.parse(argmap, request)
     assert {'username': 42, 'password': 42} == ret
 
+@mock.patch('webargs.core.Parser.parse_json')
 def test_parse_required_arg_raises_validation_error(request):
     arg = Arg(required=True)
     p = Parser()
     with pytest.raises(ValidationError) as excinfo:
-        p.parse_arg('foo', arg, request)
+        result = p.parse_arg('foo', arg, request)
     assert 'Required parameter ' + repr('foo') + ' not found.' in str(excinfo)
 
 @mock.patch('webargs.core.Parser.parse_json')

@@ -47,7 +47,7 @@ class FlaskParser(core.Parser):
         if json_data:
             return core.get_value(json_data, name, arg.multiple)
         else:
-            return None
+            return core.Missing
 
     def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
@@ -58,7 +58,8 @@ class FlaskParser(core.Parser):
         try:
             return core.get_value(req.form, name, arg.multiple)
         except AttributeError:
-            return None
+            pass
+        return core.Missing
 
     def parse_headers(self, req, name, arg):
         """Pull a value from the header data."""
