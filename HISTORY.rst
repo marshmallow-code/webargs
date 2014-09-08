@@ -4,8 +4,8 @@ Changelog
 0.6.0 (unreleased)
 ******************
 
-* If `allow_missing=True` on an `Arg` for which `None` is explicitly passed, the value will be present in the parsed arguments dictionary.
-* `Parser` methods must return `webargs.core.Missing` if the value cannot be found on the request.
+* If ``allow_missing`` is ``True`` on an ``Arg`` for which ``None`` is explicitly passed, the value will still be present in the parsed arguments dictionary.
+* *Backwards-incompatible*: ``Parser`` methods return ``webargs.core.Missing`` if the value cannot be found on the request.
 
 0.5.1 (2014-08-30)
 ******************

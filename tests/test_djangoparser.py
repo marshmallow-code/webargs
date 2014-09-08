@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import sys
 
 import pytest
 import mock
 from webtest import TestApp
-from tests.testapp.testapp.wsgi import application
 from webargs import Arg
 from webargs.djangoparser import DjangoParser
 
+PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
+if not PY26:
+    from tests.testapp.testapp.wsgi import application
+
+pytestmark = pytest.mark.skipif(PY26, reason='Django is not compatible with python 2.6')
 
 @pytest.fixture
 def testapp():
