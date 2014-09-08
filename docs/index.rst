@@ -2,7 +2,7 @@
 webargs
 *******
 
-*webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask, Django, and Tornado.*
+*webargs is a Python utility library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask, Django, Bottle, and Tornado.*
 
 Release v\ |version|. (:ref:`Changelog <changelog>`)
 
@@ -76,7 +76,7 @@ and, optionally:
 Why Use It
 ==========
 
-* *Simple to use*. Can't remember if you're supposed to pull an argument from ``request.form``, ``request.data``, ``request.args``, or ``request.json``? No problem; webargs will find the value for you.
+* *Simple to use*. Uncertain whether user input will be present on ``request.form``, ``request.data``, ``request.args``, or ``request.json``? No problem; webargs will find the value for you.
 * *Code reusability*. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
 * *Self-documentation*. Webargs makes it easy to understand the expected arguments and their types for your view functions.
 
@@ -174,8 +174,8 @@ Available targets include:
 - ``'cookies'``
 - ``'files'``
 
-Adding Handlers
----------------
+Adding Custom Target Handlers
+-----------------------------
 
 To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
 

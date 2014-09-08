@@ -89,8 +89,8 @@ class Arg(object):
         querystrings or forms that pass multiple values to the same parameter,
         e.g. ``/?name=foo&name=bar``
     :param str error: Custom error message to use if validation fails.
-    :param bool allow_missing: If the argument's value is not found or is ``None``,
-        don't include it in the returned arguments dictionary.
+    :param bool allow_missing: If the argument is not found on the request,
+        don't include it in the parsed arguments dictionary.
     :param str target: Where to pull the value off the request, e.g. ``'json'``.
 
     .. versionchanged:: 0.5.0
