@@ -38,7 +38,8 @@ class BottleParser(core.Parser):
         try:
             return core.get_value(req.json, name, arg.multiple)
         except (AttributeError, ValueError):
-            return None
+            pass
+        return core.Missing
 
     def parse_headers(self, req, name, arg):
         """Pull a value from the header data."""

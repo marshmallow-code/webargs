@@ -3,7 +3,7 @@ import mock
 
 import pytest
 
-from webargs.core import Parser, Arg, ValidationError, get_value
+from webargs.core import Parser, Arg, ValidationError, get_value, Missing
 
 @pytest.fixture
 def request():
@@ -133,7 +133,7 @@ def test_parse_cookies_called_when_cookies_is_a_target(parse_cookies, request):
 def test_fallback_used_if_all_other_functions_return_none(fallback, request):
     arg = Arg()
     p = Parser()
-    p.parse_arg('foo', arg, request)
+    p.parse({'foo': arg}, request)
     assert fallback.called
 
 @mock.patch('webargs.core.Parser.parse_json')
@@ -148,9 +148,10 @@ def test_parse(parse_json, request):
     assert {'username': 42, 'password': 42} == ret
 
 @mock.patch('webargs.core.Parser.parse_json')
-def test_parse_required_arg_raises_validation_error(request):
+def test_parse_required_arg_raises_validation_error(parse_json, request):
     arg = Arg(required=True)
     p = Parser()
+    parse_json.return_value = Missing
     with pytest.raises(ValidationError) as excinfo:
         result = p.parse_arg('foo', arg, request)
     assert 'Required parameter ' + repr('foo') + ' not found.' in str(excinfo)
@@ -267,3 +268,7 @@ def test_custom_target_handler(request):
 
     result = parser.parse({'foo': Arg(int)}, request, targets=('data', ))
     assert result['foo'] == 42
+
+
+def test_missing_is_falsy():
+    assert bool(Missing) is False

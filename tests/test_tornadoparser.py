@@ -17,7 +17,7 @@ import tornado.http1connection
 import tornado.ioloop
 from tornado.testing import AsyncHTTPTestCase
 
-from webargs import Arg
+from webargs import Arg, Missing
 from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json
 
 name = 'name'
@@ -43,14 +43,14 @@ class TestQueryArgs(object):
 
         assert result == [bvalue, bvalue]
 
-    def test_it_should_return_none_if_not_present(self):
+    def test_it_should_return_missing_if_not_present(self):
         query = []
         arg = Arg(multiple=False)
         request = make_get_request(query)
 
         result = parser.parse_querystring(request, name, arg)
 
-        assert result == None
+        assert result is Missing
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []
@@ -81,14 +81,14 @@ class TestFormArgs(object):
 
         assert result == [bvalue, bvalue]
 
-    def test_it_should_return_none_if_not_present(self):
+    def test_it_should_return_missing_if_not_present(self):
         query = []
         arg = Arg(multiple=False)
         request = make_form_request(query)
 
         result = parser.parse_form(request, name, arg)
 
-        assert result == None
+        assert result is Missing
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []
@@ -121,7 +121,7 @@ class TestJSONArgs(object):
 
         assert result == [value, value]
 
-    def test_it_should_return_none_if_not_present(self):
+    def test_it_should_return_missing_if_not_present(self):
         query = {}
         arg = Arg(multiple=False)
         request = make_json_request(query)
@@ -129,7 +129,7 @@ class TestJSONArgs(object):
         parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
-        assert result == None
+        assert result is Missing
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = {}
@@ -161,14 +161,14 @@ class TestHeadersArgs(object):
 
         assert result == [value, value]
 
-    def test_it_should_return_none_if_not_present(self):
+    def test_it_should_return_missing_if_not_present(self):
         query = {}
         arg = Arg(multiple=False)
         request = make_request(headers=query)
 
         result = parser.parse_headers(request, name, arg)
 
-        assert result == None
+        assert result is Missing
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = {}
@@ -199,14 +199,14 @@ class TestFilesArgs(object):
 
         assert result == [value, value]
 
-    def test_it_should_return_none_if_not_present(self):
+    def test_it_should_return_missing_if_not_present(self):
         query = []
         arg = Arg(multiple=False)
         request = make_files_request(query)
 
         result = parser.parse_files(request, name, arg)
 
-        assert result == None
+        assert result is Missing
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []

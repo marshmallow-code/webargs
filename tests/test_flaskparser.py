@@ -305,17 +305,26 @@ def test_parse_multiple(context, testapp):
         assert args['name'] == ['steve', 'Loria']
         assert args['nums'] == [4, 2]
 
-def test_parse_multiple_arg_with_single_value(testapp):
-    multargs = {'name': Arg(multiple=True)}
-    with testapp.test_request_context('/foo?name=steve'):
-        args = parser.parse(multargs)
-        assert args['name'] == ['steve']
 
 def test_parse_multiple_arg_defaults_to_empty_list(testapp):
     multargs = {'name': Arg(multiple=True)}
     with testapp.test_request_context('/foo'):
         args = parser.parse(multargs)
         assert args['name'] == []
+
+@mock.patch('webargs.flaskparser.abort')
+def test_multiple_required_arg(mock_abort, testapp):
+    multargs = {'name': Arg(required=True, multiple=True)}
+    with testapp.test_request_context('/foo'):
+        args = parser.parse(multargs)
+    assert mock_abort.called_once
+
+def test_multiple_allow_missing(testapp):
+    multargs = {'name': Arg(allow_missing=True, multiple=True)}
+    with testapp.test_request_context('/foo'):
+        args = parser.parse(multargs)
+        assert 'name' not in args
+
 
 def test_parse_multiple_json(testapp):
     multargs = {'name': Arg(multiple=True)}

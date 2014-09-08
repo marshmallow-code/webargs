@@ -33,10 +33,10 @@ def get_value(d, name, multiple):
 
     It handles cases: ``{"key": [value]}`` and ``{"key": value}``
     """
-    value = d.get(name)
+    value = d.get(name, core.Missing)
 
     if multiple:
-        return [] if value is None else value
+        return [] if value is core.Missing else value
 
     if value and isinstance(value, list):
         return value[0]
@@ -48,7 +48,7 @@ class TornadoParser(core.Parser):
 
     def parse_json(self, req, name, arg):
         """Pull a json value from the request."""
-        return self.json.get(name, [] if arg.multiple else None)
+        return get_value(self.json, name, arg.multiple)
 
     def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""

@@ -41,7 +41,8 @@ class DjangoParser(core.Parser):
             reqdata = json.loads(req.body.decode('utf-8'))
             return core.get_value(reqdata, name, arg.multiple)
         except (AttributeError, ValueError):
-            return None
+            pass
+        return core.Missing
 
     def parse_cookies(self, req, name, arg):
         """Pull the value from the cookiejar."""
