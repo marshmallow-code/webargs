@@ -6,6 +6,7 @@ Changelog
 
 * If ``allow_missing`` is ``True`` on an ``Arg`` for which ``None`` is explicitly passed, the value will still be present in the parsed arguments dictionary.
 * *Backwards-incompatible*: ``Parser`` methods return ``webargs.core.Missing`` if the value cannot be found on the request.
+* Fix bug with parsing empty request bodies with ``TornadoParser``.
 
 0.5.1 (2014-08-30)
 ******************

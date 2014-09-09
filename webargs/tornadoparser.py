@@ -84,7 +84,10 @@ class TornadoParser(core.Parser):
     def _parse_json_body(self, req):
         content_type = req.headers.get('Content-Type')
         if content_type and 'application/json' in req.headers.get('Content-Type'):
-            self.json = parse_json(req.body)
+            try:
+                self.json = parse_json(req.body)
+            except ValueError:
+                self.json = {}
         else:
             self.json = {}
 

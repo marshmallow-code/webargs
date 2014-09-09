@@ -431,10 +431,15 @@ def make_request(uri=None, body=None, headers=None, files=None):
     return request
 
 class EchoHandler(tornado.web.RequestHandler):
-
-    @use_args({
+    ARGS = {
         'name': Arg(str)
-    })
+    }
+
+    @use_args(ARGS)
+    def get(self, args):
+        self.write(args)
+
+    @use_args(ARGS)
     def post(self, args):
         self.write(args)
 
@@ -454,6 +459,11 @@ class TestApp(AsyncHTTPTestCase):
         assert json_body['name'] == 'Steve'
         res = self.fetch('/echo', method='POST', headers={'Content-Type': 'application/json'},
                         body=json.dumps({}))
+        json_body = parse_json(res.body)
+        assert json_body['name'] is None
+
+    def test_get_with_no_json_body(self):
+        res = self.fetch('/echo', method='GET', headers={'Content-Type': 'application/json'})
         json_body = parse_json(res.body)
         assert json_body['name'] is None
 
