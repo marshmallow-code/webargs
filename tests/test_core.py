@@ -3,11 +3,17 @@ import mock
 
 import pytest
 
-from webargs.core import Parser, Arg, ValidationError, get_value, Missing
+from webargs.core import Parser, Arg, ValidationError, get_value, Missing, get_value
 
 @pytest.fixture
 def request():
     return mock.Mock()
+
+class MockRequestParser(Parser):
+    """A minimal parser implementation that parses mock requests."""
+
+    def parse_json(self, request, name, arg):
+        return get_value(request.json, name, arg.multiple)
 
 # Arg tests
 
@@ -272,3 +278,15 @@ def test_custom_target_handler(request):
 
 def test_missing_is_falsy():
     assert bool(Missing) is False
+
+def test_full_input_validation(request):
+
+    request.json = {'foo': 41, 'bar': 42}
+
+    parser = MockRequestParser()
+    args = {'foo': Arg(int), 'bar': Arg(int)}
+    with pytest.raises(ValidationError):
+        # Test that `validate` receives dictionary of args
+        parser.parse(args, request, targets=('json', ),
+                     validate=lambda args: args['foo'] > args['bar'])
+

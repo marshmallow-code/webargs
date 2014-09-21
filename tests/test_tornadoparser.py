@@ -349,6 +349,18 @@ class TestUseArgs(object):
 
         assert result is True
 
+    def test_it_should_be_validate_arguments_when_validator_is_passed(self):
+        class Handler(object):
+            request = make_json_request({'foo': 41})
+
+            @use_kwargs({'foo': Arg(int)}, validate=lambda args: args['foo'] > 42)
+            def get(self, args):
+                return True
+
+        handler = Handler()
+        with pytest.raises(tornado.web.HTTPError):
+            handler.get()
+
 
 def make_uri(args):
     return '/test?' + urlencode(args)

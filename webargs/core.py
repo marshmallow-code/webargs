@@ -235,7 +235,7 @@ class Parser(object):
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value
 
-    def parse(self, argmap, req, targets=None):
+    def parse(self, argmap, req, targets=None, validate=None):
         """Main request parsing method.
 
         :param dict argmap: Dictionary of argname:Arg object pairs.
@@ -243,6 +243,9 @@ class Parser(object):
         :param tuple targets: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
             'headers', 'cookies', 'files')``.
+        :param callable validate: Validation function that receives the dictionary
+            of parsed arguments. If the function returns ``False``, the parser
+            will raise a :exc:`ValidationError`.
         :return: A dictionary of parsed arguments
         """
         try:
@@ -259,6 +262,13 @@ class Parser(object):
                     if parsed_value is Missing:
                         parsed_value = self.fallback(req, argname, argobj)
                     parsed[argname] = parsed_value
+            if _callable(validate):
+                if not validate(parsed):
+                    raise ValidationError('')
+                    msg = 'Validator {0}({1}) is not True'.format(
+                        validate.__name__, parsed
+                    )
+                    raise ValidationError(self.error or msg)
             return parsed
         except Exception as error:
             if self.error_callback:
@@ -266,7 +276,7 @@ class Parser(object):
             else:
                 self.handle_error(error)
 
-    def use_args(self, argmap, req=None, targets=None, as_kwargs=False):
+    def use_args(self, argmap, req=None, targets=None, as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -279,12 +289,16 @@ class Parser(object):
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param tuple targets: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
+        :param callable validate: Validation function that receives the dictionary
+            of parsed arguments. If the function returns ``False``, the parser
+            will raise a :exc:`ValidationError`.
         """
         targets = targets or self.DEFAULT_TARGETS
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
-                parsed_args = self.parse(argmap, req=req, targets=targets)
+                parsed_args = self.parse(argmap, req=req, targets=targets,
+                                         validate=validate)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)
@@ -300,7 +314,7 @@ class Parser(object):
     def use_kwargs(self, *args, **kwargs):
         """Decorator that injects parsed arguments into a view function or method as keyword arguments.
 
-        This is a shortcut to :py:func:`use_args` with as_kwargs=True
+        This is a shortcut to :meth:`use_args` with ``as_kwargs=True``.
 
         Example usage with Flask: ::
 
@@ -308,6 +322,8 @@ class Parser(object):
             @parser.use_kwargs({'name': Arg(type_=str)})
             def greet(name):
                 return 'Hello ' + name
+
+        Receives the same ``args`` and ``kwargs`` as :meth:`use_args`.
         """
         kwargs['as_kwargs'] = True
         return self.use_args(*args, **kwargs)

@@ -100,19 +100,22 @@ class TornadoParser(core.Parser):
         return super(TornadoParser, self).parse(argmap, req, *args, **kwargs)
 
     def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
-                as_kwargs=False):
+                 as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param req: The request object to parse
         :param tuple targets: Where on the request to search for values.
         :param as_kwargs: Whether to pass arguments to the handler as kwargs
+        :param callable validate: Validation function that receives the dictionary
+            of parsed arguments. If the function returns ``False``, the parser
+            will raise a :exc:`ValidationError`.
         """
         def decorator(func):
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
                 parsed_args = self.parse(
-                    argmap, req=obj.request, targets=targets)
+                    argmap, req=obj.request, targets=targets, validate=validate)
 
                 if as_kwargs:
                     kwargs.update(parsed_args)

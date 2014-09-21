@@ -123,6 +123,17 @@ def test_use_args_decorator(testapp):
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
 
 
+def test_use_args_with_validate_parameter(testapp):
+    @testapp.route('/foo/', methods=['post', 'get'])
+    @parser.use_args({'myvalue': Arg(int)}, validate=lambda args: args['myvalue'] > 42)
+    def echo(args):
+        return jsonify(args)
+
+    test_client = testapp.test_client()
+    res = test_client.post('/foo/', data={'myvalue': 41})
+    assert res.status_code == 400
+
+
 def test_use_args_decorator_on_a_method(testapp):
     class MyMethodView(MethodView):
         @parser.use_args({'myvalue': Arg(int)})

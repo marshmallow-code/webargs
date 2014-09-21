@@ -71,6 +71,16 @@ def test_use_args_decorator(app, testapp):
         return args
     assert testapp.post('/foo/', {'myvalue': 23}).json == {'myvalue': 23}
 
+def test_use_args_with_validation(app, testapp):
+    @app.route('/foo/', method=['GET', 'POST'])
+    @parser.use_args({'myvalue': Arg(int)}, validate=lambda args: args['myvalue'] > 42)
+    def echo(args):
+        return args
+    result = testapp.post('/foo/', {'myvalue': 43}, expect_errors=True)
+    assert result.status_code == 200
+    result = testapp.post('/foo/', {'myvalue': 41}, expect_errors=True)
+    assert result.status_code == 400
+
 def test_use_args_with_url_params(app, testapp):
     @app.route('/foo/<name>')
     @parser.use_args({'myvalue': Arg(int)})
