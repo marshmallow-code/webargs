@@ -225,7 +225,8 @@ The full arguments dictionary can also be validated by passing ``validate`` to :
     }
 
     # ...
-    result = parser.parse(args, validate=lambda args: args['years_employed'] < args['age'])
+    result = parser.parse(args,
+                          validate=lambda args: args['years_employed'] < args['age'])
 
 
 Handling Errors
@@ -431,7 +432,7 @@ Project Info
 ============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    license
    changelog

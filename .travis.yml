@@ -10,7 +10,7 @@ python:
     - "pypy"
 
 install:
-    - pip install -U pytest mock flask django webtest bottle tornado
+    - pip install -U pytest flake8 mock flask django webtest bottle tornado
     - pip install -U .
 
 before_script: flake8 webargs
