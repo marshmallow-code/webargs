@@ -1,4 +1,5 @@
 pytest
+flake8
 tox>=1.5.0
 sphinx
 wheel

@@ -294,6 +294,7 @@ class Parser(object):
             will raise a :exc:`ValidationError`.
         """
         targets = targets or self.DEFAULT_TARGETS
+
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):

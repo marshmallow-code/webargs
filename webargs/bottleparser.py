@@ -28,7 +28,6 @@ class BottleParser(core.Parser):
         """Pull a querystring value from the request."""
         return core.get_value(req.query, name, arg.multiple)
 
-
     def parse_form(self, req, name, arg):
         """Pull a form value from the request."""
         return core.get_value(req.forms, name, arg.multiple)
