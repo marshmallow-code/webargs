@@ -8,7 +8,7 @@ Release v\ |version|. (:ref:`Changelog <changelog>`)
 
 .. contents::
    :local:
-   :depth: 1
+   :depth: 2
 
 Useful Links:
 
@@ -92,8 +92,11 @@ webargs is *small*. It has no hard dependencies, so you can easily vendorize it 
 
 webargs supports Python >= 2.6 or >= 3.3.
 
-Usage
-=====
+Usage Guide
+===========
+
+Basic Usage
+-----------
 
 Arguments are specified as a dictionary of name -> :class:`Arg <webargs.Arg>` pairs. :class:`Arg <webargs.Arg>` objects take a number of optional arguments, e.g. for type conversion and validation.
 
@@ -138,7 +141,7 @@ To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` me
         return register_user(args['username'], args['password'],
             fullname=args['fullname'], per_page=args['display_per_page'])
 
-Alternatively, you can decorate your view with ``use_args`` or ``use_kwargs``. The parsed arguments dictionary will be injected as a parameter of your view function or as keyword arguments, respectively.
+Alternatively, you can decorate your view with :meth:`use_args <webargs.core.Parser.use_args>` or :meth:`use_kwargs <webargs.core.Parser.use_kwargs>`. The parsed arguments dictionary will be injected as a parameter of your view function or as keyword arguments, respectively.
 
 .. code-block:: python
 
@@ -186,13 +189,44 @@ To add your own custom target handler, write a function that receives a request,
 
     @parser.target_handler('data')
     def parse_data(request, name, arg):
-        return request.data.get('name')
+        return request.data.get(name)
 
     # Now 'data' can be specified as a target
 
     @parser.use_args({'per_page': Arg(int)}, targets=('data', ))
     def posts(args):
         return 'displaying {} posts'.format(args['per_page'])
+
+
+Validation
+----------
+
+Each `Arg` object can be validated individually by passing the ``validate`` argument.
+
+.. code-block:: python
+
+    from webargs import Arg
+
+    args = {
+        'age': Arg(int, validate=lambda val: val > 0)
+    }
+
+The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse`, :meth:`Parser.use_args`, :meth:`Parser.use_kwargs`.
+
+
+.. code-block:: python
+
+    from webargs import Arg
+    from webargs.flaskparser import parser
+
+    args = {
+        'age': Arg(int),
+        'years_employed': Arg(int),
+    }
+
+    # ...
+    result = parser.parse(args, validate=lambda args: args['years_employed'] < args['age'])
+
 
 Handling Errors
 ---------------

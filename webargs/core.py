@@ -282,7 +282,7 @@ class Parser(object):
         Example usage with Flask: ::
 
             @app.route('/echo', methods=['get', 'post'])
-            @parser.use_args({'name': Arg(type_=str)})
+            @parser.use_args({'name': Arg(str)})
             def greet(args):
                 return 'Hello ' + args['name']
 
@@ -319,7 +319,7 @@ class Parser(object):
         Example usage with Flask: ::
 
             @app.route('/echo', methods=['get', 'post'])
-            @parser.use_kwargs({'name': Arg(type_=str)})
+            @parser.use_kwargs({'name': Arg(str)})
             def greet(name):
                 return 'Hello ' + name
 
