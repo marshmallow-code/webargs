@@ -82,9 +82,8 @@ class Arg(object):
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) used for custom validation. Returns whether or not the
         value is valid.
-    :param callable use: Preprocessing function used for converting or
-        pre-processing the value. Defaults to noop.
-        Example: ``use=lambda s: s.lower()``
+    :param callable use: Function used for converting or pre-processing the value.
+        Defaults to noop. Example: ``use=lambda s: s.lower()``
     :param bool multiple: Return a list of values for the argument. Useful for
         querystrings or forms that pass multiple values to the same parameter,
         e.g. ``/?name=foo&name=bar``

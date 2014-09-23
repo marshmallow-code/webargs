@@ -1,12 +1,12 @@
 Changelog
 ---------
 
-0.6.0 (unreleased)
+0.6.0 (2014-09-23)
 ******************
 
-* Add ``validate`` parameter to ``Parser.parse`` and ``Parser.use_args``. Allows validation of the full parsed arguments dictionary.
+* Add ``validate`` parameter to ``Parser.parse`` and ``Parser.use_args``. Allows validation of the full parsed output.
 * If ``allow_missing`` is ``True`` on an ``Arg`` for which ``None`` is explicitly passed, the value will still be present in the parsed arguments dictionary.
-* *Backwards-incompatible*: ``Parser`` methods return ``webargs.core.Missing`` if the value cannot be found on the request.
+* *Backwards-incompatible*: ``Parser's`` ``parse_*`` methods return ``webargs.core.Missing`` if the value cannot be found on the request. NOTE: ``webargs.core.Missing`` will *not* show up in the final output of ``Parser.parse``.
 * Fix bug with parsing empty request bodies with ``TornadoParser``.
 
 0.5.1 (2014-08-30)
