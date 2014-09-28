@@ -67,7 +67,7 @@ def test_arg_with_target(testapp):
         'age': Arg(int, target='querystring'),
     }
     with testapp.test_request_context('/myendpoint?age=42', method='post',
-        data=json.dumps({'name': 'Fred'}), content_type='application/json'):
+            data=json.dumps({'name': 'Fred'}), content_type='application/json'):
         args = parser.parse(testargs)
         assert args['name'] == 'Fred'
         assert args['age'] == 42
@@ -79,6 +79,20 @@ def test_parsing_json_default(testapp):
                                     content_type='application/json'):
         args = parser.parse(hello_args)
         assert args == {'name': 'World'}
+
+def test_parsing_arg_with_default_and_set_target(testapp):
+    # Regression test for issue #11
+    page = {
+        'p': Arg(int,
+                default=1,
+                validate=lambda p: p > 0,
+                error=u"La page demandée n'existe pas",
+                target='querystring'),
+    }
+    with testapp.test_request_context('/myendpoint', method='post',
+            data=json.dumps({}), content_type='application/json'):
+        args = parser.parse(page)
+        assert args['p'] == 1
 
 
 def test_parsing_json_if_no_json(testapp):

@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.6.1 (2014-09-28)
+******************
+
+* Fix regression with parsing an ``Arg`` with both ``default`` and ``target`` set (see issue #11).
+
 0.6.0 (2014-09-23)
 ******************
 

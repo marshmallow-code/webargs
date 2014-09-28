@@ -216,11 +216,11 @@ class Parser(object):
         """
         value = None
         if argobj.target:
-            value = self._get_value(name, argobj, req=req, target=argobj.target)
-            if value is not None:
-                return argobj.validated(value)
+            targets_to_check = self._validated_targets([argobj.target])
+        else:
+            targets_to_check = self._validated_targets(targets or self.targets)
 
-        for target in self._validated_targets(targets or self.targets):
+        for target in targets_to_check:
             value = self._get_value(name, argobj, req=req, target=target)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
