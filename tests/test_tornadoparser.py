@@ -479,6 +479,43 @@ class TestApp(AsyncHTTPTestCase):
         json_body = parse_json(res.body)
         assert json_body['name'] is None
 
+class ValidateHandler(tornado.web.RequestHandler):
+    ARGS = {
+        'name': Arg(str, required=True)
+    }
+
+    @use_args(ARGS)
+    def post(self, args):
+        self.write(args)
+
+validate_app = tornado.web.Application([
+    (r'/echo', ValidateHandler)
+])
+
+class TestValidateApp(AsyncHTTPTestCase):
+
+    def get_app(self):
+        return validate_app
+
+    def test_required_field_provided(self):
+        res = self.fetch(
+            '/echo',
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=json.dumps({'name': 'johnny'}),
+        )
+        json_body = parse_json(res.body)
+        assert json_body['name'] == 'johnny'
+
+    def test_missing_required_field_throws_400(self):
+        res = self.fetch(
+            '/echo',
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=json.dumps({'occupation': 'pizza'}),
+        )
+        assert res.code == 400
+
 
 if __name__ == '__main__':
     echo_app.listen(8888)

@@ -79,7 +79,7 @@ class TornadoParser(core.Parser):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
-        raise tornado.web.HTTPError(400, error)
+        raise tornado.web.HTTPError(400, error.message)
 
     def _parse_json_body(self, req):
         content_type = req.headers.get('Content-Type')
