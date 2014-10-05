@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.6.2 (unreleased)
+******************
+
+* Fix bug in ``TornadoParser's`` ``handle_error`` method. Thanks Josh Carp.
+
 0.6.1 (2014-09-28)
 ******************
 
