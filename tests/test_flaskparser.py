@@ -13,7 +13,7 @@ import pytest
 from webargs import Arg, Missing
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
-from .compat import text_type
+from .compat import text_type, unicode
 
 class TestAppConfig:
     TESTING = True
@@ -29,6 +29,7 @@ hello_args = {
 def testapp():
     app = Flask(__name__)
     app.config.from_object(TestAppConfig)
+
     @app.route('/handleform', methods=['post'])
     def handleform():
         """View that just returns the jsonified args."""
@@ -115,7 +116,7 @@ def test_parsing_form_default(testapp):
 def test_abort_called_on_validation_error(mock_abort, testapp):
     argmap = {'value': Arg(validate=lambda x: x == 42, type_=int)}
     with testapp.test_request_context('/foo', method='post',
-        data=json.dumps({'value': 41}), content_type='application/json'):
+            data=json.dumps({'value': 41}), content_type='application/json'):
         parser.parse(argmap)
         assert mock_abort.called_once_with(400)
 
@@ -123,7 +124,7 @@ def test_abort_called_on_validation_error(mock_abort, testapp):
 def test_abort_called_on_type_conversion_error(mock_abort, testapp):
     argmap = {'value': Arg(type_=int)}
     with testapp.test_request_context('/foo', method='post',
-        data=json.dumps({'value': 'badinput'}), content_type='application/json'):
+            data=json.dumps({'value': 'badinput'}), content_type='application/json'):
         parser.parse(argmap)
         assert mock_abort.called_once_with(400)
 
@@ -240,7 +241,7 @@ def test_use_kwargs_doesnt_change_docstring(testapp):
 def test_abort_called_when_required_arg_not_present(mock_abort, testapp):
     args = {'required': Arg(required=True)}
     with testapp.test_request_context('/foo', method='post',
-        data=json.dumps({}), content_type='application/json'):
+            data=json.dumps({}), content_type='application/json'):
         parser.parse(args)
         assert mock_abort.called_once_with(400)
 
@@ -341,7 +342,7 @@ def test_parse_multiple_arg_defaults_to_empty_list(testapp):
 def test_multiple_required_arg(mock_abort, testapp):
     multargs = {'name': Arg(required=True, multiple=True)}
     with testapp.test_request_context('/foo'):
-        args = parser.parse(multargs)
+        parser.parse(multargs)
     assert mock_abort.called_once
 
 def test_multiple_allow_missing(testapp):
@@ -357,3 +358,11 @@ def test_parse_multiple_json(testapp):
             content_type='application/json', method='POST'):
         args = parser.parse(multargs, targets=('json',))
         assert args['name'] == ['steve']
+
+def test_parse_json_with_nonascii_characters(testapp):
+    args = {'text': Arg(unicode)}
+    text = u'øˆƒ£ºº∆ƒˆ∆'
+    with testapp.test_request_context('/foo', data=json.dumps({'text': text}),
+            content_type='application/json', method='POST'):
+        result = parser.parse(args, targets=('json', ))
+    assert result['text'] == text
