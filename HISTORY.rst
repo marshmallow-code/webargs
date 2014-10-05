@@ -1,12 +1,12 @@
 Changelog
 ---------
 
-0.6.2 (unreleased)
+0.6.2 (2014-10-05)
 ******************
 
 * Fix bug in ``TornadoParser's`` ``handle_error`` method. Thanks Josh Carp.
 * Add ``error`` parameter to ``Parser`` constructor that allows a custom error message to be used if schema-level validation fails.
-* Fix bug that raised a ``UnicodeEncodeError`` when an Arg's validator function receives non-ASCII input on Python 2.
+* Fix bug that raised a ``UnicodeEncodeError`` on Python 2 when an Arg's validator function received non-ASCII input.
 
 0.6.1 (2014-09-28)
 ******************
