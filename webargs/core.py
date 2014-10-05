@@ -263,7 +263,6 @@ class Parser(object):
                     parsed[argname] = parsed_value
             if _callable(validate):
                 if not validate(parsed):
-                    raise ValidationError('')
                     msg = 'Validator {0}({1}) is not True'.format(
                         validate.__name__, parsed
                     )
