@@ -180,7 +180,7 @@ Available targets include:
 Adding Custom Target Handlers
 -----------------------------
 
-To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
+To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.core.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
 
 
 .. code-block:: python
@@ -201,7 +201,7 @@ To add your own custom target handler, write a function that receives a request,
 Validation
 ----------
 
-Each `Arg` object can be validated individually by passing the ``validate`` argument.
+Each :class:`Arg <webargs.core.Arg>` object can be validated individually by passing the ``validate`` argument.
 
 .. code-block:: python
 
@@ -211,7 +211,7 @@ Each `Arg` object can be validated individually by passing the ``validate`` argu
         'age': Arg(int, validate=lambda val: val > 0)
     }
 
-The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse`, :meth:`Parser.use_args`, :meth:`Parser.use_kwargs`.
+The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse <webargs.core.Parser.parse>`, :meth:`Parser.use_args <webargs.core.Parser.use_args>`, :meth:`Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
 
 
 .. code-block:: python
@@ -254,7 +254,7 @@ Flask support is available via the :mod:`webargs.flaskparser` module.
 Decorator Usage
 ---------------
 
-When using the ``use_args`` decorator, the arguments dictionary will be *before* any URL variable parameters.
+When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decorator, the arguments dictionary will be *before* any URL variable parameters.
 
 .. code-block:: python
 
@@ -278,7 +278,7 @@ Webargs can parse Django request arguments in both function-based and class-base
 Decorator Usage
 ---------------
 
-When using the ``use_args`` decorator, the arguments dictionary will always be the second parameter (after ``self`` or ``request``).
+When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` decorator, the arguments dictionary will always be the second parameter (after ``self`` or ``request``).
 
 **Function-based Views**
 
@@ -326,7 +326,7 @@ Tornado Support
 
 Tornado argument parsing is available via the :mod:`webargs.tornadoparser` module.
 
-The :class:`webargs.tornadoparser.TornadoParser` parses arguments from a :class:`tornado.httpserver.HTTPRequest` object. The :class:`TornadoParser` can be used directly, or you can decorate handler methods with :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` or :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`.
+The :class:`webargs.tornadoparser.TornadoParser` parses arguments from a :class:`tornado.httpserver.HTTPRequest` object. The :class:`TornadoParser <webargs.tornadoparser.TornadoParser>` can be used directly, or you can decorate handler methods with :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` or :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`.
 
 .. code-block:: python
 

@@ -77,10 +77,12 @@ def noop(x):
 class Arg(object):
     """A request argument.
 
-    :param default: Default value for the argument. Used if the value is not found
-        on the request.
     :param type type\_: Value type. Will try to convert the passed in value to this
         type. If ``None``, no type conversion will be performed.
+    :param default: Default value for the argument. Used if the value is not found
+        on the request.
+    :param bool required: If ``True``, the :meth:`Parser.handle_error` method will be
+        invoked if this argument is missing from the request.
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) used for custom validation. Returns whether or not the
         value is valid.
