@@ -7,8 +7,10 @@ PY2 = sys.version_info[0] == 2
 
 if not PY2:
     iteritems = lambda d: iter(d.items())
+    unicode = str
 else:
     iteritems = lambda d: d.iteritems()
+    unicode = unicode
 
 
 class WebargsError(Exception):
@@ -19,7 +21,7 @@ class WebargsError(Exception):
 class ValidationError(WebargsError):
     """Raised in case of an argument validation error."""
     def __init__(self, underlying_exception):
-        super(ValidationError, self).__init__(str(underlying_exception))
+        super(ValidationError, self).__init__(unicode(underlying_exception))
 
 
 def _callable(obj):
@@ -123,7 +125,7 @@ class Arg(object):
             raise ValidationError(self.error or error)
         # Then call validation function
         if not self.validate(ret):
-            msg = 'Validator {0}({1}) is not True'.format(
+            msg = u'Validator {0}({1}) is not True'.format(
                 self.validate.__name__, ret
             )
             raise ValidationError(self.error or msg)
@@ -154,6 +156,7 @@ class Parser(object):
 
     :param tuple targets: Default targets to parse.
     :param callable error_handler: Custom error handler function.
+    :param str error: Custom error message to use if validation fails.
     """
     DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
@@ -167,9 +170,10 @@ class Parser(object):
         'files': 'parse_files',
     }
 
-    def __init__(self, targets=None, error_handler=None):
+    def __init__(self, targets=None, error_handler=None, error=None):
         self.targets = targets or self.DEFAULT_TARGETS
         self.error_callback = _callable(error_handler)
+        self.error = error
 
     def _validated_targets(self, targets):
         """Ensure that the given targets argument is valid.
@@ -263,7 +267,7 @@ class Parser(object):
                     parsed[argname] = parsed_value
             if _callable(validate):
                 if not validate(parsed):
-                    msg = 'Validator {0}({1}) is not True'.format(
+                    msg = u'Validator {0}({1}) is not True'.format(
                         validate.__name__, parsed
                     )
                     raise ValidationError(self.error or msg)

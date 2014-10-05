@@ -3,7 +3,10 @@ import mock
 
 import pytest
 
-from webargs.core import Parser, Arg, ValidationError, get_value, Missing, get_value
+from webargs.core import Parser, Arg, ValidationError, Missing, get_value, PY2
+
+if not PY2:
+    unicode = str
 
 @pytest.fixture
 def request():
@@ -26,6 +29,13 @@ def test_validated():
     assert arg.validated(42) == 42
     with pytest.raises(ValidationError):
         arg.validated(32)
+
+def test_validated_with_nonascii_input():
+    arg = Arg(validate=lambda t: False)
+    text = u'øˆ∆´ƒº'
+    with pytest.raises(ValidationError) as excinfo:
+        arg.validated(text)
+    assert text in unicode(excinfo)
 
 def test_validated_with_conversion():
     arg = Arg(validate=lambda x: x == 42, type_=int)
@@ -159,7 +169,7 @@ def test_parse_required_arg_raises_validation_error(parse_json, request):
     p = Parser()
     parse_json.return_value = Missing
     with pytest.raises(ValidationError) as excinfo:
-        result = p.parse_arg('foo', arg, request)
+        p.parse_arg('foo', arg, request)
     assert 'Required parameter ' + repr('foo') + ' not found.' in str(excinfo)
 
 @mock.patch('webargs.core.Parser.parse_json')
@@ -290,3 +300,22 @@ def test_full_input_validation(request):
         parser.parse(args, request, targets=('json', ),
                      validate=lambda args: args['foo'] > args['bar'])
 
+def test_full_input_validation_with_custom_error(request):
+    request.json = {'foo': 41}
+    parser = MockRequestParser(error='cool custom message')
+    args = {'foo': Arg(int)}
+    with pytest.raises(ValidationError) as excinfo:
+        # Test that `validate` receives dictionary of args
+        parser.parse(args, request, targets=('json', ),
+                     validate=lambda args: False)
+    assert 'cool custom message' in str(excinfo)
+
+def test_full_input_validator_receives_nonascii_input(request):
+    def validate(val):
+        return False
+    text = u'øœ∑∆∑'
+    request.json = {'text': text}
+    parser = MockRequestParser()
+    args = {'text': Arg(unicode)}
+    with pytest.raises(ValidationError):
+        parser.parse(args, request, targets=('json', ), validate=validate)
