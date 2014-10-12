@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import sys
 import functools
 import inspect
@@ -131,7 +133,7 @@ class Arg(object):
         except ValueError as error:
             raise ValidationError(self.error or error)
         # Then call validation function
-        if not self.validate(ret):
+        if self.validate(ret) is False:
             msg = u'Validator {0}({1}) is not True'.format(
                 self.validate.__name__, ret
             )
@@ -273,7 +275,7 @@ class Parser(object):
                         parsed_value = self.fallback(req, argname, argobj)
                     parsed[argname] = parsed_value
             if _callable(validate):
-                if not validate(parsed):
+                if validate(parsed) is False:
                     msg = u'Validator {0}({1}) is not True'.format(
                         validate.__name__, parsed
                     )
