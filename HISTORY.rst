@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.6.3 (unreleased)
+******************
+
+* Add ``source`` parameter to ``Arg`` constructor. Allows renaming of keys in the parsed arguments dictionary. Thanks Josh Carp.
+
 0.6.2 (2014-10-05)
 ******************
 

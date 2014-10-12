@@ -100,6 +100,8 @@ Basic Usage
 
 Arguments are specified as a dictionary of name -> :class:`Arg <webargs.Arg>` pairs. :class:`Arg <webargs.Arg>` objects take a number of optional arguments, e.g. for type conversion and validation.
 
+Below are a number of examples of the various parameters that :class:`Arg <webarsg.Arg>` objects can take.
+
 .. code-block:: python
 
     from webargs import Arg
@@ -124,6 +126,9 @@ Arguments are specified as a dictionary of name -> :class:`Arg <webargs.Arg>` pa
 
         # When you know where an argument should be parsed from
         'active': Arg(bool, target='querystring')
+
+        # When value is keyed on a variable unsafe name or you want to rename a key
+        'content_type': Arg(str, source='Content-Type')
     }
 
 To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` method of a :class:`Parser <webargs.core.Parser>` object.
