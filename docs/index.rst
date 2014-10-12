@@ -271,6 +271,28 @@ When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decor
         return ('The user page for user {uid}, '
                 'showing {per_page} posts.').format(uid=uid,
                                                     per_page=args['per_page'])
+Error Handling
+--------------
+
+Webargs uses Flask's ``abort`` function to raise an ``HTTPException`` when a validation error occurs. If you use the ``Flask.errorhandler`` method to handle errors, you can access validation messages from the ``data`` attribute of an error.
+
+Here is an example error handler that returns validation messages to the client as JSON.
+
+.. code-block:: python
+
+    from flask import jsonify
+
+    @app.errorhandler(400)
+    def handle_bad_request(err):
+        # webargs attaches additional metadata to the `data` attribute
+        data = getattr(err, 'data')
+        if data:
+            err_message = data['message']
+        else:
+            err_message = 'Invalid request'
+        return jsonify({
+            'message': err_message,
+        }), 400
 
 
 Django Support
