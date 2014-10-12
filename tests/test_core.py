@@ -150,14 +150,14 @@ def test_parse_cookies_called_when_cookies_is_a_target(parse_cookies, request):
     p.parse_arg('foo', arg, request)
     assert parse_cookies.call_count == 0
     p.parse_arg('foo', arg, request, targets=('cookies',))
-    assert parse_cookies.called
+    parse_cookies.assert_called
 
 @mock.patch('webargs.core.Parser.fallback')
 def test_fallback_used_if_all_other_functions_return_none(fallback, request):
     arg = Arg()
     p = Parser()
     p.parse({'foo': arg}, request)
-    assert fallback.called
+    fallback.assert_called
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse(parse_json, request):
@@ -222,7 +222,7 @@ def test_handle_error_called_when_parsing_raises_error(parse_json, handle_error,
     parse_json.side_effect = val_err
     p = Parser()
     p.parse({'foo': Arg()}, request, targets=('json',))
-    assert handle_error.called
+    handle_error.assert_called
     parse_json.side_effect = Exception('generic exception')
     p.parse({'foo': Arg()}, request, targets=('json',))
     assert handle_error.call_count == 2

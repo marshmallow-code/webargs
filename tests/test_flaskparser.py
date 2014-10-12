@@ -11,6 +11,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
 from webargs import Arg, Missing
+from webargs.core import ValidationError
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
 from .compat import text_type, unicode
@@ -114,11 +115,19 @@ def test_parsing_form_default(testapp):
 
 @mock.patch('webargs.flaskparser.abort')
 def test_abort_called_on_validation_error(mock_abort, testapp):
-    argmap = {'value': Arg(validate=lambda x: x == 42, type_=int)}
+    def validate(x):
+        return x == 42
+
+    argmap = {'value': Arg(validate=validate, type_=int)}
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({'value': 41}), content_type='application/json'):
         parser.parse(argmap)
-        assert mock_abort.called_once_with(400)
+    mock_abort.assert_called
+    abort_args, abort_kwargs = mock_abort.call_args
+    assert abort_args[0] == 400
+    expected_msg = u'Validator {0}({1}) is not True'.format(validate.__name__, 41)
+    assert abort_kwargs['message'] == expected_msg
+    assert type(abort_kwargs['exc']) == ValidationError
 
 @mock.patch('webargs.flaskparser.abort')
 def test_abort_called_on_type_conversion_error(mock_abort, testapp):
@@ -126,7 +135,10 @@ def test_abort_called_on_type_conversion_error(mock_abort, testapp):
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({'value': 'badinput'}), content_type='application/json'):
         parser.parse(argmap)
-        assert mock_abort.called_once_with(400)
+    mock_abort.assert_called_once
+    abort_args, abort_kwargs = mock_abort.call_args
+    assert 'invalid literal' in abort_kwargs['message']
+    assert type(abort_kwargs['exc']) == ValidationError
 
 def test_use_args_decorator(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])

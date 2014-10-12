@@ -22,6 +22,7 @@ from flask import request, abort as flask_abort
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
+from webargs.core import text_type
 
 def abort(http_status_code, **kwargs):
     """Raise a HTTPException for the given http_status_code. Attach any keyword
@@ -77,7 +78,7 @@ class FlaskParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        abort(400, message=error)
+        abort(400, message=text_type(error), exc=error)
 
     def parse(self, argmap, req=None, *args, **kwargs):
         """Parses the request using the given arguments map.
