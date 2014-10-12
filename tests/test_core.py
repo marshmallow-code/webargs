@@ -104,7 +104,14 @@ def test_parse_json_called_by_parse_arg(parse_json, request):
     arg = Arg()
     p = Parser()
     p.parse_arg('foo', arg, request)
-    assert parse_json.called
+    parse_json.assert_called_with(request, 'foo', arg)
+
+@mock.patch('webargs.core.Parser.parse_json')
+def test_parse_json_called_with_source(parse_json, request):
+    arg = Arg(source='bar')
+    p = Parser()
+    p.parse_arg('foo', arg, request)
+    parse_json.assert_called_with(request, 'bar', arg)
 
 @mock.patch('webargs.core.Parser.parse_querystring')
 def test_parse_querystring_called_by_parse_arg(parse_querystring, request):
@@ -319,3 +326,12 @@ def test_full_input_validator_receives_nonascii_input(request):
     args = {'text': Arg(unicode)}
     with pytest.raises(ValidationError):
         parser.parse(args, request, targets=('json', ), validate=validate)
+
+def test_parse_with_source(request):
+
+    request.json = {'foo': 41, 'bar': 42}
+
+    parser = MockRequestParser()
+    args = {'foo': Arg(int), 'baz': Arg(int, source='bar')}
+    parsed = parser.parse(args, request, targets=('json',))
+    assert parsed == {'foo': 41, 'baz': 42}

@@ -95,13 +95,15 @@ class Arg(object):
     :param bool allow_missing: If the argument is not found on the request,
         don't include it in the parsed arguments dictionary.
     :param str target: Where to pull the value off the request, e.g. ``'json'``.
+    :param str source: Key at which value is located, if different from key in
+        argmap
 
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, target=None):
+                 allow_missing=False, target=None, source=None):
         self.type = type_ or noop  # default to no type conversion
         if multiple and default is None:
             self.default = []
@@ -116,6 +118,7 @@ class Arg(object):
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
         self.target = target
+        self.source = source
 
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
@@ -201,7 +204,7 @@ class Parser(object):
                 function = func
             else:
                 function = getattr(self, func)
-            value = function(req, name, argobj)
+            value = function(req, argobj.source or name, argobj)
         else:
             value = None
         return value
