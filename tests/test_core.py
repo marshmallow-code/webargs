@@ -335,3 +335,9 @@ def test_parse_with_source(request):
     args = {'foo': Arg(int), 'baz': Arg(int, source='bar')}
     parsed = parser.parse(args, request, targets=('json',))
     assert parsed == {'foo': 41, 'baz': 42}
+
+def test_metadata_can_be_stored_on_args():
+    # Extra params are stored as metadata
+    arg = Arg(int, description='Just a number.')
+    assert arg.metadata['description'] == 'Just a number.'
+

@@ -101,13 +101,14 @@ class Arg(object):
     :param str target: Where to pull the value off the request, e.g. ``'json'``.
     :param str source: Key at which value is located, if different from key in
         argmap
+    :param metadata: Extra arguments to be stored as metadata.
 
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, target=None, source=None):
+                 allow_missing=False, target=None, source=None, **metadata):
         self.type = type_ or noop  # default to no type conversion
         if multiple and default is None:
             self.default = []
@@ -123,6 +124,7 @@ class Arg(object):
         self.allow_missing = allow_missing
         self.target = target
         self.source = source
+        self.metadata = metadata
 
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
