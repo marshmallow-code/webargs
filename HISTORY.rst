@@ -1,11 +1,12 @@
 Changelog
 ---------
 
-0.7.0 (unreleased)
+0.7.0 (2014-10-18)
 ******************
 
 * Add ``source`` parameter to ``Arg`` constructor. Allows renaming of keys in the parsed arguments dictionary. Thanks Josh Carp.
 * ``FlaskParser's`` ``handle_error`` method attaches the string representation of validation errors on ``err.data['message']``. The raised exception is stored on ``err.data['exc']``.
+* Additional keyword arguments passed to ``Arg`` are stored as metadata.
 
 0.6.2 (2014-10-05)
 ******************
