@@ -8,15 +8,20 @@ from webargs.core import Parser, Arg, ValidationError, Missing, get_value, PY2
 if not PY2:
     unicode = str
 
-@pytest.fixture
-def request():
-    return mock.Mock()
 
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
     def parse_json(self, request, name, arg):
         return get_value(request.json, name, arg.multiple)
+
+@pytest.fixture
+def request():
+    return mock.Mock()
+
+@pytest.fixture
+def parser():
+    return MockRequestParser()
 
 # Arg tests
 
@@ -341,3 +346,51 @@ def test_metadata_can_be_stored_on_args():
     arg = Arg(int, description='Just a number.')
     assert arg.metadata['description'] == 'Just a number.'
 
+def test_use_args(request, parser):
+    user_args = {
+        'username': Arg(str),
+        'password': Arg(str)
+    }
+    request.json = {'username': 'foo', 'password': 'bar'}
+
+    @parser.use_args(user_args, request)
+    def viewfunc(args):
+        return args
+    assert viewfunc() == {'username': 'foo', 'password': 'bar'}
+
+def test_use_kwargs(request, parser):
+    user_args = {
+        'username': Arg(str),
+        'password': Arg(str),
+    }
+    request.json = {'username': 'foo', 'password': 'bar'}
+
+    @parser.use_kwargs(user_args, request)
+    def viewfunc(username, password):
+        return {'username': username, 'password': password}
+    assert viewfunc() == {'username': 'foo', 'password': 'bar'}
+
+
+def test_use_kwargs_with_arg_missing(request, parser):
+    user_args = {
+        'username': Arg(str),
+        'password': Arg(str),
+    }
+    request.json = {'username': 'foo'}
+
+    @parser.use_kwargs(user_args, request)
+    def viewfunc(username, password):
+        return {'username': username, 'password': password}
+    assert viewfunc() == {'username': 'foo', 'password': None}
+
+def test_use_kwargs_with_arg_allowed_missing(request, parser):
+    user_args = {
+        'username': Arg(str),
+        'password': Arg(str, allow_missing=True),
+    }
+    request.json = {'username': 'foo'}
+
+    @parser.use_kwargs(user_args, request)
+    def viewfunc(username, password):
+        return {'username': username, 'password': password}
+    assert viewfunc() == {'username': 'foo', 'password': None}

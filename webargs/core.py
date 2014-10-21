@@ -249,7 +249,7 @@ class Parser(object):
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value
 
-    def parse(self, argmap, req, targets=None, validate=None):
+    def parse(self, argmap, req, targets=None, validate=None, force_all=False):
         """Main request parsing method.
 
         :param dict argmap: Dictionary of argname:Arg object pairs.
@@ -268,8 +268,9 @@ class Parser(object):
                 parsed_value = self.parse_arg(argname, argobj, req,
                     targets=targets or self.targets)
                 # Skip missing values
-                can_skip = parsed_value is Missing or (argobj.multiple
-                                                    and not len(parsed_value))
+                can_skip = (not force_all and
+                            parsed_value is Missing or (argobj.multiple
+                                                    and not len(parsed_value)))
                 if argobj.allow_missing and can_skip:
                     continue
                 else:
@@ -311,8 +312,10 @@ class Parser(object):
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
+                # if as_kwargs is passed, must include all args
+                force_all = as_kwargs
                 parsed_args = self.parse(argmap, req=req, targets=targets,
-                                         validate=validate)
+                                         validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)

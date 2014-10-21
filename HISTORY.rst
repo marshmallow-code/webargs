@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.7.1 (unreleased)
+++++++++++++++++++
+
+* Fix ``Parser.use_kwargs`` behavior when an ``Arg`` is allowed missing. The ``allow_missing`` attribute is ignored when ``use_kwargs`` is called.
+
 0.7.0 (2014-10-18)
 ******************
 

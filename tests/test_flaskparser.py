@@ -222,6 +222,16 @@ def test_use_kwargs_decorator(testapp):
     res = test_client.post('/foo/', data={'myvalue': 23})
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
 
+def test_use_kwargs_with_missing_data(testapp):
+    @testapp.route('/foo/', methods=['post', 'get'])
+    @parser.use_kwargs({'username': Arg(str), 'password': Arg(str)})
+    def echo(username, password):
+        return jsonify(username=username, password=password)
+    test_client = testapp.test_client()
+    res = test_client.post('/foo/', data={'username': 'foo'})
+    expected = {'username': 'foo', 'password': None}
+    assert json.loads(res.data.decode('utf-8')) == expected
+
 def test_use_kwargs_decorator_with_url_parameters(testapp):
     @testapp.route('/foo/<int:id>', methods=['post', 'get'])
     @parser.use_kwargs({'myvalue': Arg(type_=int)})
