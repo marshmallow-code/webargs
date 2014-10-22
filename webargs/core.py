@@ -175,6 +175,7 @@ class Parser(object):
     TARGET_MAP = {
         'json': 'parse_json',
         'querystring': 'parse_querystring',
+        'query': 'parse_querystring',
         'form': 'parse_form',
         'headers': 'parse_headers',
         'cookies': 'parse_cookies',
