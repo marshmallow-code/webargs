@@ -44,6 +44,11 @@ def test_parsing_get_args_in_request_context(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
+def test_parsing_get_args_with_query_target_specified(testapp):
+    with testapp.test_request_context('/myendpoint?name=Fred', method='get'):
+        args = parser.parse(hello_args, targets=('query', ))
+        assert args == {'name': 'Fred'}
+
 def test_parsing_get_args_default(testapp):
     with testapp.test_request_context('/myendpoint', method='get'):
         args = parser.parse(hello_args)

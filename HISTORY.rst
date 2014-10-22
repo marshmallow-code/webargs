@@ -1,10 +1,11 @@
 Changelog
 ---------
 
-0.7.1 (unreleased)
+0.8.0 (unreleased)
 ++++++++++++++++++
 
 * Fix ``Parser.use_kwargs`` behavior when an ``Arg`` is allowed missing. The ``allow_missing`` attribute is ignored when ``use_kwargs`` is called.
+* Log exceptions in FlaskParser.handle_error method.
 
 0.7.0 (2014-10-18)
 ******************
