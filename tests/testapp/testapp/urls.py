@@ -1,11 +1,13 @@
 from django.conf.urls import patterns, url
 
-from tests.testapp.echo.views import (SimpleCBV, SimpleDecoratedCBV,
+from tests.testapp.echo.views import (
+    SimpleCBV, SimpleDecoratedCBV,
     SimpleCBVWithParam, SimpleCBVMulti
 )
 
 urlpatterns = patterns('',
     url(r'^simpleview/$', 'tests.testapp.echo.views.simpleview'),
+    url(r'^simpleview_required/$', 'tests.testapp.echo.views.simpleview_with_required_arg'),
     url(r'^simpleview/(?P<pid>\d+)/$', 'tests.testapp.echo.views.simpleview_with_param'),
     url(r'^simplecbvview/$', SimpleCBV.as_view()),
     url(r'^simplecbvview/(?P<pid>\d+)/$', SimpleCBVWithParam.as_view()),

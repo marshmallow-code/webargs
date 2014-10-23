@@ -104,3 +104,9 @@ def test_parse_multiple_form(route, testapp):
     payload = {'name': ['steve', 'Loria']}
     res = testapp.post(route, payload)
     assert res.json == {'name': ['steve', 'Loria']}
+
+def test_500_response_returned_if_validation_error(testapp):
+    # Endpoint requires 'name'
+    url = '/simpleview_required/'
+    res = testapp.post_json(url, {}, expect_errors=True)
+    assert res.status_code == 500

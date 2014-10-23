@@ -61,6 +61,13 @@ def simpleview(request):
     args = parser.parse(hello_args, request)
     return render_json_response(args)
 
+required_args = {
+    'name': Arg(str, required=True)
+}
+def simpleview_with_required_arg(request):
+    args = parser.parse(required_args, request)
+    return render_json_response(args)
+
 def simpleview_multi(request):
     args = parser.parse(hello_multi, request)
     return render_json_response(args)
