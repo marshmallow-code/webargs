@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import sys
 import functools
 import inspect
+import logging
 
 PY2 = sys.version_info[0] == 2
 
@@ -16,6 +17,7 @@ else:
     unicode = unicode
     text_type = unicode
 
+logger = logging.getLogger(__name__)
 
 class WebargsError(Exception):
     """Base class for all webargs-related errors."""
@@ -428,8 +430,10 @@ class Parser(object):
         return Missing
 
     def handle_error(self, error):
-        """Called if an error occurs while parsing args.
+        """Called if an error occurs while parsing args. By default, just logs and
+        raises ``error``.
         """
+        logger.exception(error)
         raise error
 
     def fallback(self, req, name, arg):
