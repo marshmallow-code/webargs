@@ -8,7 +8,7 @@ Changelog
 * Allow ``ValidationError`` to specify a HTTP status code for the error response.
 * Errors are logged in ``handle_error``.
 * Add ``'query'`` as a valid target name.
-* Allow a list of validators to be passed to an ``Arg``.
+* Allow a list of validators to be passed to an ``Arg`` or ``Parser.parse``.
 
 0.7.0 (2014-10-18)
 ******************

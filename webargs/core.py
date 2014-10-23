@@ -48,7 +48,7 @@ class ValidationError(WebargsError):
         )
 
 
-def _callable(obj):
+def _callable_or_raise(obj):
     """Makes sure an object is callable if it is not ``None``. If not
     callable, a ValueError is raised.
     """
@@ -56,6 +56,19 @@ def _callable(obj):
         raise ValueError('{0!r} is not callable.'.format(obj))
     else:
         return obj
+
+def _ensure_list_of_callables(validate):
+    if validate:
+        if isinstance(validate, (list, tuple)):
+            validators = validate
+        elif callable(validate):
+            validators = [validate]
+        else:
+            raise ValueError('validate must be a callable or list of callables.')
+    else:
+        validators = []
+    return validators
+
 
 class _Missing(object):
     """Represents a value that is missing from the set of passed in request
@@ -135,16 +148,8 @@ class Arg(object):
         else:
             self.default = default
         self.required = required
-        if validate:
-            if isinstance(validate, (list, tuple)):
-                self.validators = validate
-            elif callable(validate):
-                self.validators = [validate]
-            else:
-                raise ValueError('validate must be a callable or list of callables.')
-        else:
-            self.validators = []
-        self.use = _callable(use) or noop
+        self.validators = _ensure_list_of_callables(validate)
+        self.use = _callable_or_raise(use) or noop
         self.error = error
         self.multiple = multiple
         if required and allow_missing:
@@ -213,7 +218,7 @@ class Parser(object):
 
     def __init__(self, targets=None, error_handler=None, error=None):
         self.targets = targets or self.DEFAULT_TARGETS
-        self.error_callback = _callable(error_handler)
+        self.error_callback = _callable_or_raise(error_handler)
         self.error = error
 
     def _validated_targets(self, targets):
@@ -287,11 +292,13 @@ class Parser(object):
         :param tuple targets: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
             'headers', 'cookies', 'files')``.
-        :param callable validate: Validation function that receives the dictionary
-            of parsed arguments. If the function returns ``False``, the parser
-            will raise a :exc:`ValidationError`.
-        :return: A dictionary of parsed arguments
+        :param callable validate: Validation function or list of validation functions
+            that receives the dictionary of parsed arguments. Validator either returns a
+            boolean or raises a :exc:`ValidationError`.
+
+         :return: A dictionary of parsed arguments
         """
+        validators = _ensure_list_of_callables(validate)
         try:
             parsed = {}
             for argname, argobj in iteritems(argmap):
@@ -307,10 +314,10 @@ class Parser(object):
                     if parsed_value is Missing:
                         parsed_value = self.fallback(req, argname, argobj)
                     parsed[argname] = parsed_value
-            if _callable(validate):
-                if validate(parsed) is False:
+            for validator in validators:
+                if validator(parsed) is False:
                     msg = u'Validator {0}({1}) is not True'.format(
-                        validate.__name__, parsed
+                        validator.__name__, parsed
                     )
                     raise ValidationError(self.error or msg)
             return parsed

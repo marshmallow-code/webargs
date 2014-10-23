@@ -313,6 +313,29 @@ def test_full_input_validation(request):
         parser.parse(args, request, targets=('json', ),
                      validate=lambda args: args['foo'] > args['bar'])
 
+def test_full_input_validation_with_multiple_validators(request, parser):
+    def validate1(args):
+        if args['a'] > args['b']:
+            raise ValidationError('b must be > a')
+
+    def validate2(args):
+        if args['b'] > args['a']:
+            raise ValidationError('a must be > b')
+
+    args = {'a': Arg(int), 'b': Arg(int)}
+    request.json = {'a': 2, 'b': 1}
+    validators = [validate1, validate2]
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, request, targets=('json', ),
+                validate=validators)
+    assert 'b must be > a' in str(excinfo)
+
+    request.json = {'a': 1, 'b': 2}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, request, targets=('json', ),
+                validate=validators)
+    assert 'a must be > b' in str(excinfo)
+
 def test_full_input_validation_with_custom_error(request):
     request.json = {'foo': 41}
     parser = MockRequestParser(error='cool custom message')
@@ -430,6 +453,10 @@ def test_multiple_validators_may_be_specified_for_an_arg(parser, request):
         parser.parse(args, request)
     assert 'Must have a digit.' in str(excinfo)
 
+def test_error_raised_if_validate_is_uncallable():
+    with pytest.raises(ValueError) as excinfo:
+        Arg(validate='uncallable')
+    assert 'validate must be a callable or list of callables.' in str(excinfo)
 
 class TestValidationError:
 
