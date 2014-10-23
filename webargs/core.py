@@ -108,8 +108,8 @@ class Arg(object):
     :param bool required: If ``True``, the :meth:`Parser.handle_error` method will be
         invoked if this argument is missing from the request.
     :param callable validate: Callable (function or object with ``__call__`` method
-        defined) used for custom validation. Returns whether or not the
-        value is valid.
+        defined) or list of callables. used for custom validation. A validator may return
+        a boolean or raise a :exc:`ValidationError`.
     :param callable use: Function used for converting or pre-processing the value.
         Defaults to noop. Example: ``use=lambda s: s.lower()``
     :param bool multiple: Return a list of values for the argument. Useful for
@@ -135,7 +135,15 @@ class Arg(object):
         else:
             self.default = default
         self.required = required
-        self.validate = _callable(validate) or (lambda x: True)
+        if validate:
+            if isinstance(validate, (list, tuple)):
+                self.validators = validate
+            elif callable(validate):
+                self.validators = [validate]
+            else:
+                raise ValueError('validate must be a callable or list of callables.')
+        else:
+            self.validators = []
         self.use = _callable(use) or noop
         self.error = error
         self.multiple = multiple
@@ -154,12 +162,13 @@ class Arg(object):
             ret = self.type(self.use(value))
         except ValueError as error:
             raise ValidationError(self.error or error)
-        # Then call validation function
-        if self.validate(ret) is False:
-            msg = u'Validator {0}({1}) is not True'.format(
-                self.validate.__name__, ret
-            )
-            raise ValidationError(self.error or msg)
+        # Then call validation functions
+        for validator in self.validators:
+            if validator(ret) is False:
+                msg = u'Validator {0}({1}) is not True'.format(
+                    validator.__name__, ret
+                )
+                raise ValidationError(self.error or msg)
         return ret
 
     def validated(self, value):

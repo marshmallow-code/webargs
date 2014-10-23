@@ -229,6 +229,10 @@ The validator may return either a `boolean` or raise a :exc:`ValidationError <we
         'id': Arg(int, validate=must_exist_in_db)
     }
 
+.. note::
+
+    You may also pass a list of validators to the ``validate`` parameter.
+
 The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse <webargs.core.Parser.parse>`, :meth:`Parser.use_args <webargs.core.Parser.use_args>`, :meth:`Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
 
 

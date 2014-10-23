@@ -409,6 +409,28 @@ def test_validation_errors_in_validator_are_passed_to_handle_error(parser, reque
     assert isinstance(exc, ValidationError)
     assert str(exc) == 'Something went wrong.'
 
+def test_multiple_validators_may_be_specified_for_an_arg(parser, request):
+    def validate_len(val):
+        if len(val) < 6:
+            raise ValidationError('Must be greater than 6 characters.')
+
+    def has_digit(val):
+        if not any(ch.isdigit() for ch in val):
+            raise ValidationError('Must have a digit.')
+    args = {
+        'password': Arg(validate=[validate_len, has_digit])
+    }
+    request.json = {'password': '123'}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, request)
+    assert 'Must be greater than 6 characters.' in str(excinfo)
+
+    request.json = {'password': 'abcdefhij'}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, request)
+    assert 'Must have a digit.' in str(excinfo)
+
+
 class TestValidationError:
 
     def test_can_store_status_code(self):
