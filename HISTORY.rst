@@ -5,6 +5,7 @@ Changelog
 ++++++++++++++++++
 
 * Fix ``Parser.use_kwargs`` behavior when an ``Arg`` is allowed missing. The ``allow_missing`` attribute is ignored when ``use_kwargs`` is called.
+* Allow ``ValidationError`` to specify a HTTP status code for the error response.
 * Errors are logged in ``handle_error``.
 * Add ``'query'`` as a valid target name.
 

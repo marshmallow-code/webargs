@@ -216,6 +216,19 @@ Each :class:`Arg <webargs.core.Arg>` object can be validated individually by pas
         'age': Arg(int, validate=lambda val: val > 0)
     }
 
+The validator may return either a `boolean` or raise a :exc:`ValidationError <webargs.core.ValidationError>`.
+
+.. code-block:: python
+
+    def must_exist_in_db(val):
+        if not User.query.get(val):
+            # Optionally pass a status_code
+            raise ValidationError('User does not exist', status_code=404)
+
+    args = {
+        'id': Arg(int, validate=must_exist_in_db)
+    }
+
 The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse <webargs.core.Parser.parse>`, :meth:`Parser.use_args <webargs.core.Parser.use_args>`, :meth:`Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
 
 
