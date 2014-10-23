@@ -16,7 +16,7 @@ import tornado.http1connection
 import tornado.ioloop
 from tornado.testing import AsyncHTTPTestCase
 
-from webargs import Arg, Missing
+from webargs import Arg, Missing, ValidationError
 from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json
 
 name = 'name'
@@ -487,8 +487,21 @@ class ValidateHandler(tornado.web.RequestHandler):
     def post(self, args):
         self.write(args)
 
+def always_fail(val):
+    raise ValidationError('something went wrong', status_code=401, extra='woops')
+
+class AlwaysFailHandler(tornado.web.RequestHandler):
+    ARGS = {
+        'name': Arg(str, validate=always_fail)
+    }
+
+    @use_args(ARGS)
+    def post(self, args):
+        self.write(args)
+
 validate_app = tornado.web.Application([
-    (r'/echo', ValidateHandler)
+    (r'/echo', ValidateHandler),
+    (r'/alwaysfail', AlwaysFailHandler),
 ])
 
 class TestValidateApp(AsyncHTTPTestCase):
@@ -514,6 +527,15 @@ class TestValidateApp(AsyncHTTPTestCase):
             body=json.dumps({'occupation': 'pizza'}),
         )
         assert res.code == 400
+
+    def test_validation_error_with_status_code_and_extra_data(self):
+        res = self.fetch(
+            '/alwaysfail',
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=json.dumps({'name': 'foo'})
+        )
+        assert res.code == 401
 
 
 if __name__ == '__main__':

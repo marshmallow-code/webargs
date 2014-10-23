@@ -5,7 +5,7 @@ Changelog
 ++++++++++++++++++
 
 * Fix ``Parser.use_kwargs`` behavior when an ``Arg`` is allowed missing. The ``allow_missing`` attribute is ignored when ``use_kwargs`` is called.
-* ValidationError are logged in ``handle_error``.
+* Errors are logged in ``handle_error``.
 * Add ``'query'`` as a valid target name.
 
 0.7.0 (2014-10-18)
@@ -101,3 +101,4 @@ Changelog
 * First release.
 * Parses JSON, querystring, forms, headers, and cookies.
 * Support for Flask and Django.
+

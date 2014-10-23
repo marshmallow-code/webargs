@@ -21,9 +21,10 @@ Example: ::
 """
 import logging
 
-from bottle import abort, request
+from bottle import request, HTTPError
 
 from webargs import core
+from webargs.core import unicode
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,10 @@ class BottleParser(core.Parser):
         400 error.
         """
         logger.exception(error)
-        return abort(400, str(error))
+        status = getattr(error, 'status_code', 400)
+        data = getattr(error, 'data', {})
+        raise HTTPError(status=status, body=unicode(error), headers=data.get('headers'),
+                exception=error)
 
     def parse(self, argmap, req=None, *args, **kwargs):
         """Parses the request using the given arguments map.

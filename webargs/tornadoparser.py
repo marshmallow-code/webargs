@@ -82,7 +82,9 @@ class TornadoParser(core.Parser):
         with a 400 error.
         """
         logger.exception(error)
-        raise tornado.web.HTTPError(400, error.args[0])
+        status_code = getattr(error, 'status_code', 400)
+        data = getattr(error, 'data', {})
+        raise tornado.web.HTTPError(status_code, error.args[0], **data)
 
     def _parse_json_body(self, req):
         content_type = req.headers.get('Content-Type')

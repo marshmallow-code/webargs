@@ -393,3 +393,15 @@ def test_parse_json_with_nonascii_characters(testapp):
             content_type='application/json', method='POST'):
         result = parser.parse(args, targets=('json', ))
     assert result['text'] == text
+
+def test_validation_error_with_status_code_and_data(testapp):
+    def always_fail(value):
+        raise ValidationError('something went wrong', status_code=401, extra='some data')
+    args = {'text': Arg(validate=always_fail)}
+    with testapp.test_request_context('/foo', data=json.dumps({'text': 'bar'}),
+            content_type='application/json', method='POST'):
+        with pytest.raises(HTTPException) as excinfo:
+            parser.parse(args, targets=('json', ))
+    exc = excinfo.value
+    assert exc.code == 401
+    assert exc.data['extra'] == 'some data'

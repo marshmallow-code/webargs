@@ -5,7 +5,7 @@ import pytest
 from bottle import Bottle, debug, request, response
 from webtest import TestApp
 
-from webargs import Arg
+from webargs import Arg, ValidationError
 from webargs.bottleparser import BottleParser
 
 from .compat import text_type
@@ -23,9 +23,11 @@ parser = BottleParser()
 @pytest.fixture
 def app():
     app = Bottle()
+
     @app.route('/echo', method=['GET', 'POST'])
     def index():
         return parser.parse(hello_args, request)
+
     @app.route('/echomulti/', method=['GET', 'POST'])
     def multi():
         return parser.parse(hello_multiple, request)
@@ -59,10 +61,21 @@ def test_parse_json_default(testapp):
 def test_parsing_form_default(testapp):
     assert testapp.post('/echo', {}).json == {'name': 'World'}
 
-@mock.patch('webargs.bottleparser.abort')
-def test_abort_called_on_validation_error(abort, testapp):
-    testapp.post('/echo', {'name': 'b'})
-    assert abort.called
+def test_abort_called_on_validation_error(testapp):
+    res = testapp.post('/echo', {'name': 'b'}, expect_errors=True)
+    assert res.status_code == 400
+
+def test_validation_error_with_status_code_and_data(app):
+    def always_fail(value):
+        raise ValidationError('something went wrong', status_code=401, extra='some data')
+    args = {'text': Arg(validate=always_fail)}
+
+    @app.route('/validated', method=['POST'])
+    def validated_route():
+        parser.parse(args)
+    vtestapp = TestApp(app)
+    res = vtestapp.post_json('/validated', {'text': 'bar'}, expect_errors=True)
+    assert res.status_code == 401
 
 def test_use_args_decorator(app, testapp):
     @app.route('/foo/', method=['GET', 'POST'])
@@ -128,6 +141,7 @@ def test_arg_specific_targets(app, testapp):
         'name': Arg(str, target='json'),
         'age': Arg(int, target='querystring'),
     }
+
     @app.route('/echo', method=['POST'])
     def echo():
         args = parser.parse(testargs, request)
