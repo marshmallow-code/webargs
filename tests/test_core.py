@@ -15,6 +15,7 @@ class MockRequestParser(Parser):
     def parse_json(self, request, name, arg):
         return get_value(request.json, name, arg.multiple)
 
+
 @pytest.fixture
 def request():
     return mock.Mock()
@@ -394,3 +395,34 @@ def test_use_kwargs_with_arg_allowed_missing(request, parser):
     def viewfunc(username, password):
         return {'username': username, 'password': password}
     assert viewfunc() == {'username': 'foo', 'password': None}
+
+def test_validation_errors_in_validator_are_passed_to_handle_error(parser, request):
+    def validate(value):
+        raise ValidationError('Something went wrong.')
+    args = {
+        'name': Arg(validate=validate, target='json')
+    }
+    request.json = {'name': 'invalid'}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, request)
+    exc = excinfo.value
+    assert isinstance(exc, ValidationError)
+    assert str(exc) == 'Something went wrong.'
+
+class TestValidationError:
+
+    def test_can_store_status_code(self):
+        err = ValidationError('foo', status_code=401)
+        assert err.status_code == 401
+
+    def test_can_store_extra_data(self):
+        err = ValidationError('foo', headers={'X-Food-Header': 'pizza'})
+        assert err.data['headers'] == {'X-Food-Header': 'pizza'}
+
+    def test_str(self):
+        err = ValidationError('foo', status_code=403)
+        assert str(err) == 'foo'
+
+    def test_repr(self):
+        err = ValidationError('foo', status_code=403)
+        assert repr(err) == 'ValidationError({0!r}, status_code=403)'.format('foo')

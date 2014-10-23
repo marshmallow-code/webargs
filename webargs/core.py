@@ -25,9 +25,27 @@ class WebargsError(Exception):
 
 
 class ValidationError(WebargsError):
-    """Raised in case of an argument validation error."""
-    def __init__(self, underlying_exception):
-        super(ValidationError, self).__init__(unicode(underlying_exception))
+    """Raised in case of an argument validation error.
+
+    :param error: Either a string message or an underlying :exc:`Exception`
+        object.
+    :param int status_code: HTTP status code.
+    :param data: Additional keyword arguments to store in the ``data`` attribute.
+
+    .. versionchanged:: 0.8.0
+
+        Store status_code and additonal data.
+    """
+    def __init__(self, error, status_code=400, **data):
+        self.message = unicode(error)
+        self.status_code = status_code
+        self.data = data
+        super(ValidationError, self).__init__(self.message)
+
+    def __repr__(self):
+        return 'ValidationError({0!r}, status_code={1})'.format(
+            self.message, self.status_code
+        )
 
 
 def _callable(obj):

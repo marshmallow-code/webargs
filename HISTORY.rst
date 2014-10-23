@@ -5,7 +5,7 @@ Changelog
 ++++++++++++++++++
 
 * Fix ``Parser.use_kwargs`` behavior when an ``Arg`` is allowed missing. The ``allow_missing`` attribute is ignored when ``use_kwargs`` is called.
-* Log exceptions in FlaskParser.handle_error method.
+* ValidationError are logged in ``handle_error``.
 * Add ``'query'`` as a valid target name.
 
 0.7.0 (2014-10-18)
