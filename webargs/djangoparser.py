@@ -20,12 +20,22 @@ Example usage: ::
 """
 import json
 import functools
+import logging
 
 from webargs import core
 
+logger = logging.getLogger(__name__)
 
 class DjangoParser(core.Parser):
-    """Django request argument parser."""
+    """Django request argument parser.
+
+    .. note::
+
+        The :class:`DjangoParser` does not override
+        :meth:`handle_error <webargs.core.Parser.handle_error>`, so your Django
+        views are responsible for catching any :exc:`ValidationErrors` raised by
+        the parser and returning the appropriate `HTTPResponse`.
+    """
 
     def parse_querystring(self, req, name, arg):
         """Pull the querystring value from the request."""

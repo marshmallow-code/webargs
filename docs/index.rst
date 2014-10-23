@@ -271,6 +271,7 @@ When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decor
         return ('The user page for user {uid}, '
                 'showing {per_page} posts.').format(uid=uid,
                                                     per_page=args['per_page'])
+
 Error Handling
 --------------
 
@@ -347,6 +348,27 @@ When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` dec
                                        author=args['author'])
           return render_to_response('post_template.html',
                                     {'post': blog_post})
+
+Error Handling
+--------------
+
+The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Parser.handle_error>`, so your Django views are responsible for catching any :exc:`ValidationErrors` raised by the parser and returning the appropriate `HTTPResponse`.
+
+.. code-block:: python
+
+    from django.http import JsonResponse
+
+    from webargs import Arg, ValidationError
+
+    args = {
+        'name': Arg(str, required=True)
+    }
+    def index(request):
+        try:
+            args = parser.parse(required_args, request)
+        except ValidationError as err:
+            return JsonResponse({'error': str(err)}, status=400)
+        return JsonResponse({'message': 'Hello {name}'.format(name=name)})
 
 Tornado Support
 ===============
