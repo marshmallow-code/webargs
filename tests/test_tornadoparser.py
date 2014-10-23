@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import itertools
 try:
     from urllib import urlencode  # python2
 except ImportError:
@@ -220,7 +219,7 @@ class TestFilesArgs(object):
 
 class TestErrorHandler(object):
     def test_it_should_fail_with_bad_request_on_error(self):
-        with pytest.raises(tornado.web.HTTPError) as error:
+        with pytest.raises(tornado.web.HTTPError):
             parser.parse(None, make_request())
 
 
@@ -232,7 +231,7 @@ class TestParse(object):
         }
 
         request = make_get_request([
-            ('string', 'value'),('integer', '1'), ('integer', '2')
+            ('string', 'value'), ('integer', '1'), ('integer', '2')
         ])
 
         parsed = parser.parse(attrs, request)
@@ -247,7 +246,7 @@ class TestParse(object):
         }
 
         request = make_form_request([
-            ('string', 'value'),('integer', '1'), ('integer', '2')
+            ('string', 'value'), ('integer', '1'), ('integer', '2')
         ])
 
         parsed = parser.parse(attrs, request)
@@ -294,7 +293,7 @@ class TestParse(object):
         }
 
         request = make_cookie_request([
-            ('string', 'value'),('integer', '1'), ('integer', '2')
+            ('string', 'value'), ('integer', '1'), ('integer', '2')
         ])
 
         parsed = parser.parse(attrs, request, targets=['cookies'])
@@ -309,7 +308,7 @@ class TestParse(object):
         }
 
         request = make_files_request([
-            ('string', 'value'),('integer', '1'), ('integer', '2')
+            ('string', 'value'), ('integer', '1'), ('integer', '2')
         ])
 
         parsed = parser.parse(attrs, request, targets=['files'])

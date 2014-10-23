@@ -3,7 +3,7 @@
 
 Example: ::
 
-    from bottle import route
+    from bottle import route, run
     from webargs import Arg
     from webargs.bottleparser import use_args
 
@@ -13,13 +13,19 @@ Example: ::
 
     @route('/', method=['GET', 'POST'])
     @use_args(hello_args)
-    def index(args)
+    def index(args):
         return 'Hello ' + args['name']
+
+    if __name__ == '__main__':
+        run(debug=True)
 """
+import logging
+
 from bottle import abort, request
 
 from webargs import core
 
+logger = logging.getLogger(__name__)
 
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
@@ -56,6 +62,7 @@ class BottleParser(core.Parser):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """
+        logger.exception(error)
         return abort(400, str(error))
 
     def parse(self, argmap, req=None, *args, **kwargs):

@@ -17,11 +17,13 @@ Example: ::
 
 import json
 import functools
+import logging
 
 import tornado.web
 
 from webargs import core
 
+logger = logging.getLogger(__name__)
 
 def parse_json(s):
     if isinstance(s, bytes):
@@ -79,6 +81,7 @@ class TornadoParser(core.Parser):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
+        logger.exception(error)
         raise tornado.web.HTTPError(400, error.args[0])
 
     def _parse_json_body(self, req):
