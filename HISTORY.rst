@@ -9,6 +9,7 @@ Changelog
 * Errors are logged in ``handle_error``.
 * Add ``'query'`` as a valid target name.
 * Allow a list of validators to be passed to an ``Arg`` or ``Parser.parse``.
+* A more useful ``__repr__`` for ``Arg``.
 
 0.7.0 (2014-10-18)
 ******************

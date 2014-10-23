@@ -159,6 +159,10 @@ class Arg(object):
         self.source = source
         self.metadata = metadata
 
+    def __repr__(self):
+        return ('<webargs.core.Arg(type_={self.type}, default={self.default!r}, '
+                'required={self.required})>').format(self=self)
+
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
         ret = value

@@ -458,6 +458,7 @@ def test_error_raised_if_validate_is_uncallable():
         Arg(validate='uncallable')
     assert 'validate must be a callable or list of callables.' in str(excinfo)
 
+
 class TestValidationError:
 
     def test_can_store_status_code(self):
@@ -476,3 +477,13 @@ class TestValidationError:
         err = ValidationError('foo', status_code=403)
         assert repr(err) == ('ValidationError({0!r}, '
                 'status_code=403)'.format(unicode('foo')))
+
+class TestArg:
+
+    def test_repr(self):
+        arg = Arg(str, default='foo', required=True)
+        r = repr(arg)
+        assert 'str' in r
+        assert '<webargs.core.Arg' in r
+        assert 'foo' in r
+        assert 'required=True' in r
