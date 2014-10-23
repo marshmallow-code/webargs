@@ -474,4 +474,5 @@ class TestValidationError:
 
     def test_repr(self):
         err = ValidationError('foo', status_code=403)
-        assert repr(err) == 'ValidationError({0!r}, status_code=403)'.format('foo')
+        assert repr(err) == ('ValidationError({0!r}, '
+                'status_code=403)'.format(unicode('foo')))
