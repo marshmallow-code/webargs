@@ -82,7 +82,7 @@ class FlaskParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        logger.exception(error)
+        logger.error(error)
         status_code = getattr(error, 'status_code', 400)
         data = getattr(error, 'data', {})
         abort(status_code, message=text_type(error), exc=error, **data)

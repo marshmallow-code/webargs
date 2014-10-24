@@ -471,7 +471,7 @@ class Parser(object):
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
         """
-        logger.exception(error)
+        logger.error(error)
         raise error
 
     def fallback(self, req, name, arg):

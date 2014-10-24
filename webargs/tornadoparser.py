@@ -81,7 +81,7 @@ class TornadoParser(core.Parser):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
-        logger.exception(error)
+        logger.error(error)
         status_code = getattr(error, 'status_code', 400)
         data = getattr(error, 'data', {})
         raise tornado.web.HTTPError(status_code, error.args[0], **data)

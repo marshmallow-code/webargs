@@ -62,7 +62,7 @@ class BottleParser(core.Parser):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """
-        logger.exception(error)
+        logger.error(error)
         status = getattr(error, 'status_code', 400)
         data = getattr(error, 'data', {})
         raise HTTPError(status=status, body=unicode(error), headers=data.get('headers'),
