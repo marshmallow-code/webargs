@@ -10,8 +10,7 @@ Example: ::
     hello_args = {
         'name': Arg(str, default='World')
     }
-
-    @route('/', method=['GET', 'POST'])
+    @route('/', method='GET')
     @use_args(hello_args)
     def index(args):
         return 'Hello ' + args['name']

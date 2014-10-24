@@ -10,6 +10,7 @@ Changelog
 * Add ``'query'`` as a valid target name.
 * Allow a list of validators to be passed to an ``Arg`` or ``Parser.parse``.
 * A more useful ``__repr__`` for ``Arg``.
+* Add examples and new docs.
 
 0.7.0 (2014-10-18)
 ******************

@@ -76,9 +76,10 @@ and, optionally:
 Why Use It
 ==========
 
-* *Simple to use*. Uncertain whether user input will be present on ``request.form``, ``request.data``, ``request.args``, or ``request.json``? No problem; webargs will find the value for you.
+* *Simple to use*. Parse your request arguments using a declarative syntax.
 * *Code reusability*. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
 * *Self-documentation*. Webargs makes it easy to understand the expected arguments and their types for your view functions.
+* *Cross-framework compatibility*: webargs provides a consistent request-parsing interface that will work across the major Python web frameworks.
 
 Inspired by `Flask-RESTful's <http://flask-restful.readthedocs.org/en/latest/>`_ reqparser, webargs offers a lightweight, cross-framework solution to request parsing that's simple and fun to use.
 
@@ -267,6 +268,12 @@ Each parser has a default error handling method. To override the error handling 
     @parser.error_handler
     def handle_error(error):
         raise CustomError(error)
+
+
+Examples
+========
+
+See the `examples/ directory <https://github.com/sloria/webargs/tree/dev/examples>`_ for full examples using webargs.
 
 Flask Support
 =============
@@ -457,6 +464,12 @@ With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the pa
                 'message': 'Hello {}'.format(name)
             }
             self.write(response)
+
+
+Suggested pairings
+==================
+
+If you are using webargs to handle input data for your HTTP API, you might consider using the `marshmallow <https://github.com/sloria/marshmallow>`_ library for formatting your output data.
 
 API Reference
 =============
