@@ -13,7 +13,6 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
 import datetime as dt
-import json
 
 from dateutil import parser
 from flask import Flask, jsonify
@@ -26,7 +25,7 @@ app = Flask(__name__)
 @app.errorhandler(400)
 def handle_validation_error(err):
     exc = err.data['exc']
-    return json.dumps({'message': str(exc)}), 400
+    return jsonify({'message': str(exc)}), 400
 
 hello_args = {
     'name': Arg(str, default='Friend')
@@ -54,7 +53,7 @@ def string_to_datetime(val):
 
 def validate_unit(val):
     if val not in ['minutes', 'days']:
-        raise ValidationError('Unit must be either "minutes" or "days".')
+        raise ValidationError("Unit must be either 'minutes' or 'days'.")
 
 dateadd_args = {
     'value': Arg(use=string_to_datetime),

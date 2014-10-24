@@ -53,7 +53,7 @@ def string_to_datetime(val):
 
 def validate_unit(val):
     if val not in ['minutes', 'days']:
-        raise ValidationError('Unit must be either "minutes" or "days".')
+        raise ValidationError("Unit must be either 'minutes' or 'days'.")
 
 dateadd_args = {
     'value': Arg(use=string_to_datetime),
