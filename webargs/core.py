@@ -117,7 +117,7 @@ class Arg(object):
     :param type type\_: Value type. Will try to convert the passed in value to this
         type. If ``None``, no type conversion will be performed.
     :param default: Default value for the argument. Used if the value is not found
-        on the request.
+        on the request. May be a callable.
     :param bool required: If ``True``, the :meth:`Parser.handle_error` method will be
         invoked if this argument is missing from the request.
     :param callable validate: Callable (function or object with ``__call__`` method
@@ -283,7 +283,10 @@ class Parser(object):
                 return argobj.validated(value)
         if value is Missing:
             if argobj.default is not None:
-                value = argobj.default
+                if callable(argobj.default):
+                    value = argobj.default()
+                else:
+                    value = argobj.default
             if argobj.required:
                 raise ValidationError('Required parameter {0!r} not found.'.format(name))
         return value

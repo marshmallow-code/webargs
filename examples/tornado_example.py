@@ -28,7 +28,8 @@ class BaseRequestHandler(RequestHandler):
         self.set_header('Content-Type', 'application/json')
         if 'exc_info' in kwargs:
             etype, value, traceback = kwargs['exc_info']
-            self.write({'message': str(value.log_message)})
+            msg = value.log_message or str(value)
+            self.write({'message': msg})
         self.finish()
 
 class HelloHandler(BaseRequestHandler):
@@ -68,7 +69,7 @@ class DateAddHandler(BaseRequestHandler):
     """A datetime adder endpoint."""
 
     dateadd_args = {
-        'value': Arg(use=string_to_datetime),
+        'value': Arg(default=dt.datetime.utcnow, use=string_to_datetime),
         'addend': Arg(int, required=True, validate=lambda val: val >= 0),
         'unit': Arg(str, validate=validate_unit)
     }

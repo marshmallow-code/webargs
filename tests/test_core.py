@@ -208,6 +208,12 @@ def test_parse_required_multiple_arg(parse_form, request):
 def test_default_targets():
     assert set(Parser.DEFAULT_TARGETS) == set(['json', 'querystring', 'form'])
 
+def test_callable_default(parser, request):
+    request.json = {}
+    args = {'val': Arg(default=lambda: 'pizza')}
+    result = parser.parse(args, request, targets=('json', ))
+    assert result['val'] == 'pizza'
+
 def test_value_error_raised_if_invalid_target(request):
     arg = Arg()
     p = Parser()

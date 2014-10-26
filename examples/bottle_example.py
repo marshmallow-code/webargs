@@ -50,7 +50,7 @@ def validate_unit(val):
         raise ValidationError("Unit must be either 'minutes' or 'days'.")
 
 dateadd_args = {
-    'value': Arg(use=string_to_datetime),
+    'value': Arg(default=dt.datetime.utcnow, use=string_to_datetime),
     'addend': Arg(int, required=True, validate=lambda val: val >= 0),
     'unit': Arg(str, validate=validate_unit)
 }
