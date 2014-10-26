@@ -122,7 +122,7 @@ Below are examples of the various parameters that :class:`Arg <webarsg.core.Arg>
         'password': Arg(str, validate=lambda p: len(p) > 6,
                         error='Invalid password'),
 
-        # Conversion function (`use`)
+        # Conversion/postprocessing function (`use`)
         'fullname': Arg(str, use=lambda n: n.lower()),
 
         # Default value
@@ -134,7 +134,7 @@ Below are examples of the various parameters that :class:`Arg <webarsg.core.Arg>
         # When you know where an argument should be parsed from
         'active': Arg(bool, target='query')
 
-        # When value is keyed on a variable unsafe name or you want to rename a key
+        # When value is keyed on a variable-unsafe name or you want to rename a key
         'content_type': Arg(str, source='Content-Type')
     }
 

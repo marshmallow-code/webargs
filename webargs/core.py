@@ -370,7 +370,8 @@ class Parser(object):
         return decorator
 
     def use_kwargs(self, *args, **kwargs):
-        """Decorator that injects parsed arguments into a view function or method as keyword arguments.
+        """Decorator that injects parsed arguments into a view function or method
+        as keyword arguments.
 
         This is a shortcut to :meth:`use_args` with ``as_kwargs=True``.
 

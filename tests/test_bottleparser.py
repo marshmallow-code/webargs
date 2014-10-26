@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import mock
 
 import pytest
 from bottle import Bottle, debug, request, response

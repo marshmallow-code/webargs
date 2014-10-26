@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import os, sys
+import os
+import sys
 from invoke import task, run
 
 docs_dir = 'docs'
