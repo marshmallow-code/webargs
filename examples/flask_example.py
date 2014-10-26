@@ -21,12 +21,6 @@ from webargs.flaskparser import use_args, use_kwargs
 
 app = Flask(__name__)
 
-# Return validation error as JSON
-@app.errorhandler(400)
-def handle_validation_error(err):
-    exc = err.data['exc']
-    return jsonify({'message': str(exc)}), 400
-
 hello_args = {
     'name': Arg(str, default='Friend')
 }
@@ -57,7 +51,7 @@ def validate_unit(val):
 
 dateadd_args = {
     'value': Arg(use=string_to_datetime),
-    'addend': Arg(int, validate=lambda val: val >= 0),
+    'addend': Arg(int, required=True, validate=lambda val: val >= 0),
     'unit': Arg(str, validate=validate_unit)
 }
 @app.route('/dateadd', methods=['POST'])
@@ -70,6 +64,13 @@ def dateadd(value, addend, unit):
         delta = dt.timedelta(days=addend)
     result = value + delta
     return jsonify({'result': result.isoformat()})
+
+# Return validation errors as JSON
+@app.errorhandler(400)
+def handle_validation_error(err):
+    exc = err.data['exc']
+    return jsonify({'message': str(exc)}), 400
+
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

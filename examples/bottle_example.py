@@ -21,12 +21,6 @@ from webargs import Arg, ValidationError
 from webargs.bottleparser import use_args, use_kwargs
 
 
-# Return validation error as JSON
-@error(400)
-def error400(err):
-    response.content_type = 'application/json'
-    return json.dumps({'message': str(err.body)})
-
 hello_args = {
     'name': Arg(str, default='Friend')
 }
@@ -57,7 +51,7 @@ def validate_unit(val):
 
 dateadd_args = {
     'value': Arg(use=string_to_datetime),
-    'addend': Arg(int, validate=lambda val: val >= 0),
+    'addend': Arg(int, required=True, validate=lambda val: val >= 0),
     'unit': Arg(str, validate=validate_unit)
 }
 @route('/dateadd', method='POST')
@@ -70,6 +64,12 @@ def dateadd(value, addend, unit):
         delta = dt.timedelta(days=addend)
     result = value + delta
     return {'result': result.isoformat()}
+
+# Return validation errors as JSON
+@error(400)
+def error400(err):
+    response.content_type = 'application/json'
+    return json.dumps({'message': str(err.body)})
 
 if __name__ == '__main__':
     run(port=5001, reloader=True, debug=True)

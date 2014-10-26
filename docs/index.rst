@@ -76,10 +76,11 @@ and, optionally:
 Why Use It
 ==========
 
-* *Simple to use*. Parse your request arguments using a declarative syntax.
-* *Code reusability*. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
-* *Self-documentation*. Webargs makes it easy to understand the expected arguments and their types for your view functions.
-* *Cross-framework compatibility*: webargs provides a consistent request-parsing interface that will work across the major Python web frameworks.
+* **Simple, declarative syntax**. Define your arguments as a mapping rather than imperatively pulling values off of request objects.
+* **Code reusability**. If you have multiple views that have the same request parameters, you only need to define your parameters once. You can also reuse validation and pre-processing routines.
+* **Self-documentation**. Webargs makes it easy to understand the expected arguments and their types for your view functions.
+* **Automatic documentation**. The metadata that webargs provides can serve as an aid for automatically generating API documentation.
+* **Cross-framework compatibility**. Webargs provides a consistent request-parsing interface that will work across the major Python web frameworks.
 
 Inspired by `Flask-RESTful's <http://flask-restful.readthedocs.org/en/latest/>`_ reqparser, webargs offers a lightweight, cross-framework solution to request parsing that's simple and fun to use.
 
@@ -93,15 +94,20 @@ webargs is *small*. It has no hard dependencies, so you can easily vendorize it 
 
 webargs supports Python >= 2.6 or >= 3.3.
 
+Examples
+========
+
+See the `examples directory <https://github.com/sloria/webargs/tree/dev/examples>`_ for full examples using webargs.
+
 Usage Guide
 ===========
 
 Basic Usage
 -----------
 
-Arguments are specified as a dictionary of name -> :class:`Arg <webargs.Arg>` pairs. :class:`Arg <webargs.Arg>` objects take a number of optional arguments, e.g. for type conversion and validation.
+Arguments are specified as a dictionary of name -> :class:`Arg <webargs.core.Arg>` pairs. :class:`Arg <webargs.core.Arg>` objects take a number of optional arguments, e.g. for type conversion and validation.
 
-Below are a number of examples of the various parameters that :class:`Arg <webarsg.Arg>` objects can take.
+Below are examples of the various parameters that :class:`Arg <webarsg.core.Arg>` objects can take.
 
 .. code-block:: python
 
@@ -126,7 +132,7 @@ Below are a number of examples of the various parameters that :class:`Arg <webar
         'nickname': Arg(str, multiple=True),
 
         # When you know where an argument should be parsed from
-        'active': Arg(bool, target='querystring')
+        'active': Arg(bool, target='query')
 
         # When value is keyed on a variable unsafe name or you want to rename a key
         'content_type': Arg(str, source='Content-Type')
@@ -176,7 +182,7 @@ By default, webargs will search for arguments from the URL querystring (e.g. ``"
 
 Available targets include:
 
-- ``'querystring'``
+- ``'querystring'`` (same as ``'query'``)
 - ``'json'``
 - ``'form'``
 - ``'headers'``
@@ -270,10 +276,6 @@ Each parser has a default error handling method. To override the error handling 
         raise CustomError(error)
 
 
-Examples
-========
-
-See the `examples/ directory <https://github.com/sloria/webargs/tree/dev/examples>`_ for full examples using webargs.
 
 Flask Support
 =============
@@ -466,11 +468,6 @@ With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the pa
             self.write(response)
 
 
-Suggested pairings
-==================
-
-If you are using webargs to handle input data for your HTTP API, you might consider using the `marshmallow <https://github.com/sloria/marshmallow>`_ library for formatting your output data.
-
 API Reference
 =============
 
@@ -515,3 +512,9 @@ Project Info
 
    license
    changelog
+
+Suggested pairings
+==================
+
+If you are using webargs to handle input data for your HTTP API, you might consider using the `marshmallow <https://github.com/sloria/marshmallow>`_ library for formatting your output data.
+

@@ -55,7 +55,7 @@ setup(
     author='Steven Loria',
     author_email='sloria1@gmail.com',
     url='https://github.com/sloria/webargs',
-    packages=find_packages(exclude=("test*", )),
+    packages=find_packages(exclude=("test*", 'examples')),
     package_dir={'webargs': 'webargs'},
     install_requires=REQUIREMENTS,
     license=read("LICENSE"),

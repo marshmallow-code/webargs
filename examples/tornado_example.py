@@ -69,7 +69,7 @@ class DateAddHandler(BaseRequestHandler):
 
     dateadd_args = {
         'value': Arg(use=string_to_datetime),
-        'addend': Arg(int, validate=lambda val: val >= 0),
+        'addend': Arg(int, required=True, validate=lambda val: val >= 0),
         'unit': Arg(str, validate=validate_unit)
     }
 
