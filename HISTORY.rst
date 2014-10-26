@@ -1,8 +1,8 @@
 Changelog
 ---------
 
-0.8.0 (unreleased)
-++++++++++++++++++
+0.8.0 (2014-10-26)
+******************
 
 * Fix ``Parser.use_kwargs`` behavior when an ``Arg`` is allowed missing. The ``allow_missing`` attribute is ignored when ``use_kwargs`` is called.
 * ``default`` may be a callable.
