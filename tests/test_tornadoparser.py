@@ -13,6 +13,7 @@ import tornado.web
 import tornado.httputil
 import tornado.httpserver
 import tornado.http1connection
+import tornado.concurrent
 import tornado.ioloop
 from tornado.testing import AsyncHTTPTestCase
 
@@ -139,6 +140,25 @@ class TestJSONArgs(object):
         result = parser.parse_json(request, name, arg)
 
         assert result == []
+
+    def test_it_should_handle_type_error_on_parse_json(self):
+        arg = Arg()
+        request = make_request(
+            body=tornado.concurrent.Future,
+            headers={'Content-Type': 'application/json'},
+        )
+        parser._parse_json_body(request)
+        result = parser.parse_json(request, name, arg)
+        assert parser.json == {}
+        assert result is Missing
+
+    def test_it_should_handle_value_error_on_parse_json(self):
+        arg = Arg()
+        request = make_request('this is json not')
+        parser._parse_json_body(request)
+        result = parser.parse_json(request, name, arg)
+        assert parser.json == {}
+        assert result is Missing
 
 
 class TestHeadersArgs(object):
@@ -434,7 +454,7 @@ def make_request(uri=None, body=None, headers=None, files=None):
 
     tornado.httputil.parse_body_arguments(
         content_type=content_type,
-        body=body.encode('latin-1'),  # Tornado expects bodies to be latin-1
+        body=body.encode('latin-1') if hasattr(body, 'encode') else body,
         arguments=request.body_arguments,
         files=request.files
     )
