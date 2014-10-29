@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.8.1 (unreleased)
+0.8.1 (2014-10-28)
 ******************
 
 * Fix bug in ``TornadoParser`` that raised an error when request body is not a string (e.g when it is a ``Future``). Thanks Josh Carp.
