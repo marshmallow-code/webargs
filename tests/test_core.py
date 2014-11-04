@@ -73,6 +73,10 @@ def test_use_param():
     arg = Arg(use=lambda x: x.upper())
     assert arg.validated('foo') == 'FOO'
 
+def test_use_can_be_list_of_callables():
+    arg = Arg(use=[lambda x: x.upper(), lambda x: x.strip()])
+    assert arg.validated('  foo  ') == 'FOO'
+
 def test_convert_and_use_params():
     arg = Arg(float, use=lambda val: val + 1)
     assert arg.validated(41) == 42.0
@@ -80,7 +84,7 @@ def test_convert_and_use_params():
 def test_error_raised_if_use_is_uncallable():
     with pytest.raises(ValueError) as excinfo:
         Arg(use='bad')
-    assert '{0!r} is not callable.'.format('bad') in str(excinfo)
+    assert '{0!r} is not a callable or list of callables'.format('bad') in str(excinfo)
 
 def test_use_is_called_before_validate():
     arg = Arg(use=lambda x: x + 1, validate=lambda x: x == 41)
@@ -462,7 +466,7 @@ def test_multiple_validators_may_be_specified_for_an_arg(parser, request):
 def test_error_raised_if_validate_is_uncallable():
     with pytest.raises(ValueError) as excinfo:
         Arg(validate='uncallable')
-    assert 'validate must be a callable or list of callables.' in str(excinfo)
+    assert '{0!r} is not a callable or list of callables.'.format('uncallable') in str(excinfo)
 
 
 class TestValidationError:

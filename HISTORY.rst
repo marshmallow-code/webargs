@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.9.0 (unreleased)
+******************
+
+* Allow ``use`` argument to be a list of functions.
+
 0.8.1 (2014-10-28)
 ******************
 

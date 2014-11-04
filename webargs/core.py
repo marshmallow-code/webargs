@@ -57,14 +57,14 @@ def _callable_or_raise(obj):
     else:
         return obj
 
-def _ensure_list_of_callables(validate):
-    if validate:
-        if isinstance(validate, (list, tuple)):
-            validators = validate
-        elif callable(validate):
-            validators = [validate]
+def _ensure_list_of_callables(obj):
+    if obj:
+        if isinstance(obj, (list, tuple)):
+            validators = obj
+        elif callable(obj):
+            validators = [obj]
         else:
-            raise ValueError('validate must be a callable or list of callables.')
+            raise ValueError('{0!r} is not a callable or list of callables.'.format(obj))
     else:
         validators = []
     return validators
@@ -123,8 +123,8 @@ class Arg(object):
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) or list of callables. used for custom validation. A validator may return
         a boolean or raise a :exc:`ValidationError`.
-    :param callable use: Function used for converting or pre-processing the value.
-        Defaults to noop. Example: ``use=lambda s: s.lower()``
+    :param callable use: Function or list of functions used for converting
+        or pre-processing the value.  Defaults to noop. Example: ``use=lambda s: s.lower()``
     :param bool multiple: Return a list of values for the argument. Useful for
         querystrings or forms that pass multiple values to the same parameter,
         e.g. ``/?name=foo&name=bar``
@@ -149,7 +149,7 @@ class Arg(object):
             self.default = default
         self.required = required
         self.validators = _ensure_list_of_callables(validate)
-        self.use = _callable_or_raise(use) or noop
+        self.use_funcs = _ensure_list_of_callables(use)
         self.error = error
         self.multiple = multiple
         if required and allow_missing:
@@ -166,9 +166,10 @@ class Arg(object):
     def _validate(self, value):
         """Perform conversion and validation on ``value``."""
         ret = value
-        # First convert the value
+        for func in self.use_funcs:
+            ret = func(ret)
         try:
-            ret = self.type(self.use(value))
+            ret = self.type(ret)
         except ValueError as error:
             raise ValidationError(self.error or error)
         # Then call validation functions
