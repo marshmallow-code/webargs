@@ -24,88 +24,96 @@ def request():
 def parser():
     return MockRequestParser()
 
-# Arg tests
+class TestArg:
 
-def test_bad_validate_param():
-    with pytest.raises(ValueError):
-        Arg(validate='bad')
+    def test_bad_validate_param(self):
+        with pytest.raises(ValueError):
+            Arg(validate='bad')
 
-def test_validated():
-    arg = Arg(validate=lambda x: x == 42)
-    assert arg.validated(42) == 42
-    with pytest.raises(ValidationError):
-        arg.validated(32)
+    def test_validated(self):
+        arg = Arg(validate=lambda x: x == 42)
+        assert arg.validated(42) == 42
+        with pytest.raises(ValidationError):
+            arg.validated(32)
 
-def test_validated_with_nonascii_input():
-    arg = Arg(validate=lambda t: False)
-    text = u'øˆ∆´ƒº'
-    with pytest.raises(ValidationError) as excinfo:
-        arg.validated(text)
-    assert text in unicode(excinfo)
+    def test_validated_with_nonascii_input(self):
+        arg = Arg(validate=lambda t: False)
+        text = u'øˆ∆´ƒº'
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated(text)
+        assert text in unicode(excinfo)
 
-def test_validated_with_conversion():
-    arg = Arg(validate=lambda x: x == 42, type_=int)
-    assert arg.validated('42') == 42
+    def test_validated_with_conversion(self):
+        arg = Arg(validate=lambda x: x == 42, type_=int)
+        assert arg.validated('42') == 42
 
-def test_validated_with_bad_type():
-    arg = Arg(type_=int)
-    assert arg.validated(42) == 42
-    with pytest.raises(ValidationError):
-        arg.validated('nonint')
+    def test_validated_with_bad_type(self):
+        arg = Arg(type_=int)
+        assert arg.validated(42) == 42
+        with pytest.raises(ValidationError):
+            arg.validated('nonint')
 
-def test_custom_error():
-    arg = Arg(type_=int, error='not an int!')
-    with pytest.raises(ValidationError) as excinfo:
-        arg.validated('badinput')
-    assert 'not an int!' in str(excinfo)
+    def test_custom_error(self):
+        arg = Arg(type_=int, error='not an int!')
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('badinput')
+        assert 'not an int!' in str(excinfo)
 
-def test_default_valdation_msg():
-    arg = Arg(validate=lambda x: x == 42)
-    with pytest.raises(ValidationError) as excinfo:
-        arg.validated(1)
-    assert 'Validator <lambda>(1) is not True' in str(excinfo)
+    def test_default_valdation_msg(self):
+        arg = Arg(validate=lambda x: x == 42)
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated(1)
+        assert 'Validator <lambda>(1) is not True' in str(excinfo)
 
-def test_conversion_to_str():
-    arg = Arg(str)
-    assert arg.validated(42) == '42'
+    def test_conversion_to_str(self):
+        arg = Arg(str)
+        assert arg.validated(42) == '42'
 
-def test_use_param():
-    arg = Arg(use=lambda x: x.upper())
-    assert arg.validated('foo') == 'FOO'
+    def test_use_param(self):
+        arg = Arg(use=lambda x: x.upper())
+        assert arg.validated('foo') == 'FOO'
 
-def test_use_can_be_list_of_callables():
-    arg = Arg(use=[lambda x: x.upper(), lambda x: x.strip()])
-    assert arg.validated('  foo  ') == 'FOO'
+    def test_use_can_be_list_of_callables(self):
+        arg = Arg(use=[lambda x: x.upper(), lambda x: x.strip()])
+        assert arg.validated('  foo  ') == 'FOO'
 
-def test_convert_and_use_params():
-    arg = Arg(float, use=lambda val: val + 1)
-    assert arg.validated(41) == 42.0
+    def test_convert_and_use_params(self):
+        arg = Arg(float, use=lambda val: val + 1)
+        assert arg.validated(41) == 42.0
 
-def test_error_raised_if_use_is_uncallable():
-    with pytest.raises(ValueError) as excinfo:
-        Arg(use='bad')
-    assert '{0!r} is not a callable or list of callables'.format('bad') in str(excinfo)
+    def test_error_raised_if_use_is_uncallable(self):
+        with pytest.raises(ValueError) as excinfo:
+            Arg(use='bad')
+        assert '{0!r} is not a callable or list of callables'.format('bad') in str(excinfo)
 
-def test_use_is_called_before_validate():
-    arg = Arg(use=lambda x: x + 1, validate=lambda x: x == 41)
-    with pytest.raises(ValidationError):
-        arg.validated(41)
+    def test_use_is_called_before_validate(self):
+        arg = Arg(use=lambda x: x + 1, validate=lambda x: x == 41)
+        with pytest.raises(ValidationError):
+            arg.validated(41)
 
-def test_use_can_be_none():
-    arg = Arg(use=None)
-    assert arg.validated(41) == 41
+    def test_use_can_be_none(self):
+        arg = Arg(use=None)
+        assert arg.validated(41) == 41
 
-def test_validate_can_be_none():
-    arg = Arg(validate=None)
-    assert arg.validated(41) == 41
+    def test_validate_can_be_none(self):
+        arg = Arg(validate=None)
+        assert arg.validated(41) == 41
 
-def test_multiple_with_type_arg():
-    arg = Arg(int, multiple=True)
-    assert arg.validated(['1', 2, 3.0]) == [1, 2, 3]
+    def test_multiple_with_type_arg(self):
+        arg = Arg(int, multiple=True)
+        assert arg.validated(['1', 2, 3.0]) == [1, 2, 3]
 
-def test_multiple_with_use_arg():
-    arg = Arg(multiple=True, use=lambda x: x.upper())
-    assert arg.validated(['foo', 'bar']) == ['FOO', 'BAR']
+    def test_multiple_with_use_arg(self):
+        arg = Arg(multiple=True, use=lambda x: x.upper())
+        assert arg.validated(['foo', 'bar']) == ['FOO', 'BAR']
+
+    def test_repr(self):
+        arg = Arg(str, default='foo', required=True)
+        r = repr(arg)
+        assert 'str' in r
+        assert '<webargs.core.Arg' in r
+        assert 'foo' in r
+        assert 'required=True' in r
 
 # Parser tests
 
@@ -487,13 +495,3 @@ class TestValidationError:
         err = ValidationError('foo', status_code=403)
         assert repr(err) == ('ValidationError({0!r}, '
                 'status_code=403)'.format(unicode('foo')))
-
-class TestArg:
-
-    def test_repr(self):
-        arg = Arg(str, default='foo', required=True)
-        r = repr(arg)
-        assert 'str' in r
-        assert '<webargs.core.Arg' in r
-        assert 'foo' in r
-        assert 'required=True' in r
