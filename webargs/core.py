@@ -9,7 +9,7 @@ import logging
 PY2 = sys.version_info[0] == 2
 
 if not PY2:
-    iteritems = lambda d: iter(d.items())
+    iteritems = lambda d: d.items()
     unicode = str
     text_type = str
 else:
