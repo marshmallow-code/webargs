@@ -329,7 +329,7 @@ class Parser(object):
                     )
                     raise ValidationError(self.error or msg)
             return parsed
-        except Exception as error:
+        except ValidationError as error:
             if self.error_callback:
                 self.error_callback(error)
             else:

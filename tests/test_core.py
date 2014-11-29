@@ -239,7 +239,7 @@ def test_handle_error_called_when_parsing_raises_error(parse_json, handle_error,
     p = Parser()
     p.parse({'foo': Arg()}, request, targets=('json',))
     handle_error.assert_called
-    parse_json.side_effect = Exception('generic exception')
+    parse_json.side_effect = ValidationError('another exception')
     p.parse({'foo': Arg()}, request, targets=('json',))
     assert handle_error.call_count == 2
 
@@ -274,7 +274,7 @@ def test_custom_error_handler(parse_json, request):
 
     def error_handler(error):
         raise CustomError(error)
-    parse_json.side_effect = AttributeError('parse_json failed')
+    parse_json.side_effect = ValidationError('parse_json failed')
     p = Parser(error_handler=error_handler)
     with pytest.raises(CustomError):
         p.parse({'foo': Arg()}, request)
@@ -284,7 +284,7 @@ def test_custom_error_handler(parse_json, request):
 def test_custom_error_handler_decorator(parse_json, request):
     class CustomError(Exception):
         pass
-    parse_json.side_effect = AttributeError('parse_json failed')
+    parse_json.side_effect = ValidationError('parse_json failed')
 
     parser = Parser()
 

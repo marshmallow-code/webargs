@@ -238,9 +238,10 @@ class TestFilesArgs(object):
 
 
 class TestErrorHandler(object):
-    def test_it_should_fail_with_bad_request_on_error(self):
+    def test_it_should_raise_httperror_on_failed_validation(self):
+        args = {'foo': Arg(validate=lambda x: False)}
         with pytest.raises(tornado.web.HTTPError):
-            parser.parse(None, make_request())
+            parser.parse(args, make_json_request({'foo': 42}))
 
 
 class TestParse(object):
