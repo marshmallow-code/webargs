@@ -5,7 +5,9 @@ Changelog
 ******************
 
 * Allow ``use`` argument to be a list of functions.
-* Parser will only pass ``ValidationErrors`` to its error handler function, rather than catching all generic Exceptions.
+* *Backwards-incompatible*: Parser will only pass ``ValidationErrors`` to its error handler function, rather than catching all generic Exceptions.
+* Add a short-lived cache to the ``Parser`` class that can be used to store processed request data for reuse.
+* Docs: Add example usage with Flask-RESTful.
 
 0.8.1 (2014-10-28)
 ******************
