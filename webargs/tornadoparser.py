@@ -54,7 +54,10 @@ class TornadoParser(core.Parser):
 
     def parse_json(self, req, name, arg):
         """Pull a json value from the request."""
-        return get_value(self.json, name, arg.multiple)
+        json_body = self._cache.get('json')
+        if json_body is None:
+            self._cache['json'] = self._parse_json_body(req)
+        return get_value(self._cache['json'], name, arg.multiple)
 
     def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
@@ -94,19 +97,10 @@ class TornadoParser(core.Parser):
         content_type = req.headers.get('Content-Type')
         if content_type and 'application/json' in req.headers.get('Content-Type'):
             try:
-                self.json = parse_json(req.body)
+                return parse_json(req.body)
             except (TypeError, ValueError):
-                self.json = {}
-        else:
-            self.json = {}
-
-    def parse(self, argmap, req, *args, **kwargs):
-        """Parses the request using the given arguments map.
-
-        Initializes :attr:`json` attribute.
-        """
-        self._parse_json_body(req)
-        return super(TornadoParser, self).parse(argmap, req, *args, **kwargs)
+                pass
+        return {}
 
     def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
                  as_kwargs=False, validate=None):
