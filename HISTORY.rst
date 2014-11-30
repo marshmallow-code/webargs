@@ -5,6 +5,7 @@ Changelog
 ******************
 
 * Allow ``use`` argument to be a list of functions.
+* Parser will only pass ``ValidationErrors`` to its error handler function, rather than catching all generic Exceptions.
 
 0.8.1 (2014-10-28)
 ******************
