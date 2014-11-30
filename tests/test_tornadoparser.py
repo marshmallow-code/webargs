@@ -118,8 +118,6 @@ class TestJSONArgs(object):
         query = {name: value}
         arg = Arg(multiple=False)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result == value
@@ -128,8 +126,6 @@ class TestJSONArgs(object):
         query = {name: [value, value]}
         arg = Arg(multiple=True)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result == [value, value]
@@ -138,8 +134,6 @@ class TestJSONArgs(object):
         query = {}
         arg = Arg(multiple=False)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result is Missing
@@ -148,8 +142,6 @@ class TestJSONArgs(object):
         query = {}
         arg = Arg(multiple=True)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result == []
@@ -160,7 +152,6 @@ class TestJSONArgs(object):
             body=tornado.concurrent.Future,
             headers={'Content-Type': 'application/json'},
         )
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
         assert parser._cache['json'] == {}
         assert result is Missing
@@ -168,7 +159,6 @@ class TestJSONArgs(object):
     def test_it_should_handle_value_error_on_parse_json(self):
         arg = Arg()
         request = make_request('this is json not')
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
         assert parser._cache['json'] == {}
         assert result is Missing

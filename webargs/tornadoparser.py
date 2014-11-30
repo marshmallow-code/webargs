@@ -30,6 +30,17 @@ def parse_json(s):
         s = s.decode('utf-8')
     return json.loads(s)
 
+def parse_json_body(req):
+    """Return the decoded JSON body from the request."""
+    content_type = req.headers.get('Content-Type')
+    if content_type and 'application/json' in req.headers.get('Content-Type'):
+        try:
+            return parse_json(req.body)
+        except (TypeError, ValueError):
+            pass
+    return {}
+
+
 def get_value(d, name, multiple):
     """Handle gets from 'multidicts' made of lists
 
@@ -56,7 +67,7 @@ class TornadoParser(core.Parser):
         """Pull a json value from the request."""
         json_body = self._cache.get('json')
         if json_body is None:
-            self._cache['json'] = self._parse_json_body(req)
+            self._cache['json'] = parse_json_body(req)
         return get_value(self._cache['json'], name, arg.multiple)
 
     def parse_querystring(self, req, name, arg):
@@ -92,15 +103,6 @@ class TornadoParser(core.Parser):
         status_code = getattr(error, 'status_code', 400)
         data = getattr(error, 'data', {})
         raise tornado.web.HTTPError(status_code, error.args[0], **data)
-
-    def _parse_json_body(self, req):
-        content_type = req.headers.get('Content-Type')
-        if content_type and 'application/json' in req.headers.get('Content-Type'):
-            try:
-                return parse_json(req.body)
-            except (TypeError, ValueError):
-                pass
-        return {}
 
     def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
                  as_kwargs=False, validate=None):

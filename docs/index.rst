@@ -514,7 +514,7 @@ Project Info
    changelog
    contributing
 
-Suggested pairings
+Suggested Pairings
 ==================
 
 If you are using webargs to handle input data for your HTTP API, you might consider using the `marshmallow <https://github.com/sloria/marshmallow>`_ library for formatting your output data.

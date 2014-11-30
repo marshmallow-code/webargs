@@ -225,8 +225,7 @@ class Parser(object):
         self.targets = targets or self.DEFAULT_TARGETS
         self.error_callback = _callable_or_raise(error_handler)
         self.error = error
-        #: A temporary cache to save parsed request bodies on. The cache is invalidated after
-        #   each call to :meth:`Parser.parse`.
+        #: A short-lived cache to store results from processing request bodies.
         self._cache = {}
 
     def _validated_targets(self, targets):
@@ -341,7 +340,7 @@ class Parser(object):
         return parsed
 
     def clear_cache(self):
-        """Invalidate the temporary request cache."""
+        """Invalidate the parser's cache."""
         self._cache = {}
         return None
 
