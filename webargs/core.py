@@ -19,6 +19,7 @@ else:
 
 logger = logging.getLogger(__name__)
 
+
 class WebargsError(Exception):
     """Base class for all webargs-related errors."""
     pass
@@ -56,6 +57,7 @@ def _callable_or_raise(obj):
         raise ValueError('{0!r} is not callable.'.format(obj))
     else:
         return obj
+
 
 def _ensure_list_of_callables(obj):
     if obj:
@@ -139,6 +141,21 @@ class Arg(object):
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """
+    JSON_TYPES = {
+        'list': 'array',
+        'tuple': 'array',
+        'bool': 'boolean',
+        'int': 'integer',
+        'float': 'number',
+        'long': 'number',
+        'NoneType': 'null',
+        'dict': 'object',
+        'str': 'string',
+        'unicode': 'string',
+    }
+
+    NON_NULLABLE_TYPES = (list, tuple, dict, bool)
+
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
                  allow_missing=False, target=None, source=None, **metadata):
@@ -163,15 +180,32 @@ class Arg(object):
         return ('<webargs.core.Arg(type_={self.type}, default={self.default!r}, '
                 'required={self.required})>').format(self=self)
 
-    def _validate(self, value):
+    def _validate(self, name, value):
         """Perform conversion and validation on ``value``."""
         ret = value
         for func in self.use_funcs:
             ret = func(ret)
-        try:
-            ret = self.type(ret)
-        except ValueError as error:
-            raise ValidationError(self.error or error)
+
+        if self.target == 'json':
+            if self.type != noop:
+                msg = ('Expected type {} for {}, got {}'
+                       .format(self.JSON_TYPES[self.type.__name__], name,
+                               # TODO: Handle types not known by JSON_TYPES
+                               self.JSON_TYPES[type(ret).__name__]))
+
+                # Allow simple types (string, integer, number) to receive null
+                if ret is None and self.type in self.NON_NULLABLE_TYPES:
+                    raise ValidationError(self.error or msg)
+                if not isinstance(ret, self.type):
+                    # For str/unicode interchangeability
+                    if not isinstance(ret, (str, unicode)):
+                        raise ValidationError(self.error or msg)
+        else:
+            try:
+                ret = self.type(ret)
+            except ValueError as error:
+                raise ValidationError(self.error or error)
+
         # Then call validation functions
         for validator in self.validators:
             if validator(ret) is False:
@@ -181,7 +215,7 @@ class Arg(object):
                 raise ValidationError(self.error or msg)
         return ret
 
-    def validated(self, value):
+    def validated(self, name, value):
         """Convert and validate the given value according to the ``type_``,
         ``use``, and ``validate`` attributes.
 
@@ -192,9 +226,9 @@ class Arg(object):
         if value is Missing:
             return value
         if self.multiple and isinstance(value, list):
-            return [self._validate(each) for each in value]
+            return [self._validate(name, each) for each in value]
         else:
-            return self._validate(value)
+            return self._validate(name, value)
 
 
 class Parser(object):
@@ -276,12 +310,13 @@ class Parser(object):
             targets_to_check = self._validated_targets(targets or self.targets)
 
         for target in targets_to_check:
+            argobj.target = target
             value = self._get_value(name, argobj, req=req, target=target)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it
             if value is not Missing:
-                return argobj.validated(value)
+                return argobj.validated(name, value)
         if value is Missing:
             if argobj.default is not None:
                 if callable(argobj.default):
