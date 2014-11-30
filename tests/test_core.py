@@ -316,6 +316,19 @@ def test_custom_target_handler(request):
     result = parser.parse({'foo': Arg(int)}, request, targets=('data', ))
     assert result['foo'] == 42
 
+def test_custom_target_handler_with_source(request):
+    request.data = {'X-Foo': 42}
+    parser = Parser()
+
+    @parser.target_handler('data')
+    def parse_data(req, name, arg):
+        # The source name is passed
+        assert name == 'X-Foo'
+        return req.data.get(name)
+
+    result = parser.parse({'x_foo': Arg(int, source='X-Foo')}, request, targets=('data', ))
+    assert result['x_foo'] == 42
+
 
 def test_missing_is_falsy():
     assert bool(Missing) is False
