@@ -142,19 +142,19 @@ class Arg(object):
         The ``use`` callable is called before type conversion.
     """
     JSON_TYPES = {
-        'list': 'array',
-        'tuple': 'array',
-        'bool': 'boolean',
-        'int': 'integer',
-        'float': 'number',
-        'long': 'number',
-        'NoneType': 'null',
-        'dict': 'object',
-        'str': 'string',
-        'unicode': 'string',
+        list: 'array',
+        tuple: 'array',
+        bool: 'boolean',
+        int: 'integer',
+        float: 'number',
+        long: 'number',
+        type(None): 'null',
+        dict: 'object',
+        str: 'string',
+        unicode: 'string',
     }
 
-    NON_NULLABLE_TYPES = (list, tuple, dict, bool)
+    NON_NULLABLE_TYPES = {list, tuple, dict, bool}
 
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
@@ -189,14 +189,13 @@ class Arg(object):
         if self.target == 'json':
             if self.type != noop:
                 msg = ('Expected type {} for {}, got {}'
-                       .format(self.JSON_TYPES[self.type.__name__], name,
+                       .format(self.JSON_TYPES[self.type], name,
                                # TODO: Handle types not known by JSON_TYPES
-                               self.JSON_TYPES[type(ret).__name__]))
-
+                               self.JSON_TYPES[type(ret)]))
                 # Allow simple types (string, integer, number) to receive null
                 if ret is None and self.type in self.NON_NULLABLE_TYPES:
                     raise ValidationError(self.error or msg)
-                if not isinstance(ret, self.type):
+                if ret is not None and not isinstance(ret, self.type):
                     # For str/unicode interchangeability
                     if not isinstance(ret, (str, unicode)):
                         raise ValidationError(self.error or msg)
