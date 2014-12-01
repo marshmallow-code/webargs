@@ -154,7 +154,7 @@ class Arg(object):
         unicode: 'string',
     }
 
-    NON_NULLABLE_TYPES = {list, tuple, dict, bool}
+    NON_NULLABLE_TYPES = set([list, tuple, dict, bool])
 
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
