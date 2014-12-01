@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Pyramid request argument parsing.
 """
+import functools
 import logging
 
 from webargs import core
@@ -38,6 +39,34 @@ class PyramidParser(core.Parser):
     def parse_files(self, req, name, arg):
         raise NotImplementedError('Files parsing not supported by {0}'
             .format(self.__class__.__name__))
+
+    def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
+                 validate=None):
+        """Decorator that injects parsed arguments into a view function or method.
+        Example: ::
+            @parser.use_args({'name': 'World'})
+            def myview(request, args):
+                return HttpResponse('Hello ' + args['name'])
+        :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param req: The request object to parse
+        :param tuple targets: Where on the request to search for values.
+        :param callable validate: Validation function that receives the dictionary
+            of parsed arguments. If the function returns ``False``, the parser
+            will raise a :exc:`ValidationError`.
+        """
+        def decorator(func):
+            @functools.wraps(func)
+            def wrapper(obj, *args, **kwargs):
+                # The first argument is either `self` or `request`
+                try:  # get self.request
+                    request = obj.request
+                except AttributeError:  # first arg is request
+                    request = obj
+                parsed_args = self.parse(argmap, req=request, targets=targets,
+                                         validate=None)
+                return func(obj, parsed_args, *args, **kwargs)
+            return wrapper
+        return decorator
 
 parser = PyramidParser()
 use_args = parser.use_args
