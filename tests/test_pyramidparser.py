@@ -46,7 +46,8 @@ def testapp():
 
     @parser.use_args({'myfile': Arg(multiple=True)}, targets=('files',))
     def echofile(request, args):
-        return dict((i.filename, i.file.getvalue()) for i in args['myfile'])
+        _value = lambda f: f.getvalue().decode('utf-8')
+        return dict((i.filename, _value(i.file)) for i in args['myfile'])
 
     @parser.use_args({'myvalue': Arg(int)})
     def foo(request, args):
@@ -116,7 +117,7 @@ def test_parsing_headers(testapp):
     assert res.json == {'name': 'Fred'}
 
 def test_parse_files(testapp):
-    payload = [('myfile', 'baz.txt', 'bar'), ('myfile', 'moo.txt', 'zoo')]
+    payload = [('myfile', 'baz.txt', b'bar'), ('myfile', 'moo.txt', b'zoo')]
     res = testapp.post('/echofile', upload_files=payload)
     assert res.json == {'baz.txt': 'bar', 'moo.txt': 'zoo'}
 
