@@ -124,7 +124,6 @@ JSON_TYPES = {
     dict: 'object',
     str: 'string',
     unicode: 'string',
-    noop: 'noop',
 }
 
 
