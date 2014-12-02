@@ -12,7 +12,7 @@ if not PY2:
     iteritems = lambda d: d.items()
     unicode = str
     text_type = str
-    long = int
+    long = float
 else:
     iteritems = lambda d: d.iteritems()
     unicode = unicode
