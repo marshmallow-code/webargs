@@ -12,10 +12,12 @@ if not PY2:
     iteritems = lambda d: d.items()
     unicode = str
     text_type = str
+    long = int
 else:
     iteritems = lambda d: d.iteritems()
     unicode = unicode
     text_type = unicode
+    long = long
 
 logger = logging.getLogger(__name__)
 
