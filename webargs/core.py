@@ -113,6 +113,24 @@ def noop(x):
     return x
 
 
+JSON_TYPES = {
+    list: 'array',
+    tuple: 'array',
+    bool: 'boolean',
+    int: 'integer',
+    float: 'number',
+    long: 'number',
+    type(None): 'null',
+    dict: 'object',
+    str: 'string',
+    unicode: 'string',
+    noop: '',
+}
+
+
+JSON_NON_NULLABLE_TYPES = set([list, tuple, dict, bool])
+
+
 class Arg(object):
     """A request argument.
 
@@ -141,20 +159,6 @@ class Arg(object):
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """
-    JSON_TYPES = {
-        list: 'array',
-        tuple: 'array',
-        bool: 'boolean',
-        int: 'integer',
-        float: 'number',
-        long: 'number',
-        type(None): 'null',
-        dict: 'object',
-        str: 'string',
-        unicode: 'string',
-    }
-
-    NON_NULLABLE_TYPES = set([list, tuple, dict, bool])
 
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
@@ -186,24 +190,18 @@ class Arg(object):
         for func in self.use_funcs:
             ret = func(ret)
 
-        if self.target == 'json':
-            if self.type != noop:
-                msg = ('Expected type {} for {}, got {}'
-                       .format(self.JSON_TYPES[self.type], name,
-                               # TODO: Handle types not known by JSON_TYPES
-                               self.JSON_TYPES[type(ret)]))
-                # Allow simple types (string, integer, number) to receive null
-                if ret is None and self.type in self.NON_NULLABLE_TYPES:
-                    raise ValidationError(self.error or msg)
-                if ret is not None and not isinstance(ret, self.type):
-                    # For str/unicode interchangeability
-                    if not isinstance(ret, (str, unicode)):
-                        raise ValidationError(self.error or msg)
-        else:
-            try:
-                ret = self.type(ret)
-            except ValueError as error:
-                raise ValidationError(self.error or error)
+        msg = 'Expected type {} for {}, got {}'\
+            .format(JSON_TYPES.get(self.type, self.type.__name__), name,
+                    JSON_TYPES.get(type(ret), type(ret).__name__))
+
+        if self.type != noop:
+            # Allow simple types (string, integer, number) to receive null
+            if ret is None and self.type in JSON_NON_NULLABLE_TYPES:
+                raise ValidationError(self.error or msg)
+        try:
+            ret = self.type(ret)
+        except (ValueError, TypeError):
+            raise ValidationError(self.error or msg)
 
         # Then call validation functions
         for validator in self.validators:
@@ -241,6 +239,7 @@ class Parser(object):
     :param callable error_handler: Custom error handler function.
     :param str error: Custom error message to use if validation fails.
     """
+
     DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
     #: Maps target => method name
@@ -309,7 +308,6 @@ class Parser(object):
             targets_to_check = self._validated_targets(targets or self.targets)
 
         for target in targets_to_check:
-            argobj.target = target
             value = self._get_value(name, argobj, req=req, target=target)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
