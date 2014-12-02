@@ -28,7 +28,10 @@ Example usage: ::
 import functools
 import logging
 
+from pyramid.httpexceptions import exception_response
+
 from webargs import core
+from webargs.core import text_type
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +66,15 @@ class PyramidParser(core.Parser):
     def parse_files(self, req, name, arg):
         raise NotImplementedError('Files parsing not supported by {0}'
             .format(self.__class__.__name__))
+
+    def handle_error(self, error):
+        """Handles errors during parsing. Aborts the current HTTP request and
+        responds with a 400 error.
+        """
+        logger.error(error)
+        status_code = getattr(error, 'status_code', 400)
+        data = getattr(error, 'data', {})
+        raise exception_response(status_code, detail=text_type(error), **data)
 
     def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
                  validate=None):
