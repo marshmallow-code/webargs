@@ -28,6 +28,7 @@ Example usage: ::
 import functools
 import logging
 
+from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
 from webargs import core
@@ -64,8 +65,9 @@ class PyramidParser(core.Parser):
         return core.get_value(req.headers, name, arg.multiple)
 
     def parse_files(self, req, name, arg):
-        raise NotImplementedError('Files parsing not supported by {0}'
-            .format(self.__class__.__name__))
+        """Pull a file from the request."""
+        files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
+        return core.get_value(MultiDict(files), name, arg.multiple)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
