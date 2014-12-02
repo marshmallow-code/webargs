@@ -44,6 +44,10 @@ def testapp():
         args = parser.parse(hello_args, request, targets=('headers',))
         return args
 
+    @parser.use_args({'myfile': Arg(multiple=True)}, targets=('files',))
+    def echofile(request, args):
+        return dict((i.filename, i.file.getvalue()) for i in args['myfile'])
+
     @parser.use_args({'myvalue': Arg(int)})
     def foo(request, args):
         return args
@@ -63,6 +67,7 @@ def testapp():
     config.add_route('validate', '/validate')
     config.add_route('echocookie', '/echocookie')
     config.add_route('echo2', '/echo2')
+    config.add_route('echofile', '/echofile')
     config.add_route('foo', '/foo')
     config.add_route('bar', '/bar')
 
@@ -71,6 +76,7 @@ def testapp():
     config.add_view(validate, route_name='validate', renderer='json')
     config.add_view(echocookie, route_name='echocookie', renderer='json')
     config.add_view(echo2, route_name='echo2', renderer='json')
+    config.add_view(echofile, route_name='echofile', renderer='json')
     config.add_view(foo, route_name='foo', renderer='json')
     config.add_view(Bar, route_name='bar', renderer='json')
 
@@ -108,6 +114,11 @@ def test_parsing_cookies(testapp):
 def test_parsing_headers(testapp):
     res = testapp.get('/echo2', headers={'name': 'Fred'})
     assert res.json == {'name': 'Fred'}
+
+def test_parse_files(testapp):
+    payload = [('myfile', 'baz.txt', 'bar'), ('myfile', 'moo.txt', 'zoo')]
+    res = testapp.post('/echofile', upload_files=payload)
+    assert res.json == {'baz.txt': 'bar', 'moo.txt': 'zoo'}
 
 def test_exception_on_validation_error(testapp):
     res = testapp.post('/validate', {'num': '3'}, expect_errors=True)
