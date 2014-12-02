@@ -191,7 +191,7 @@ class Arg(object):
         for func in self.use_funcs:
             ret = func(ret)
 
-        msg = 'Expected type {} for {}, got {}'\
+        msg = 'Expected type {0} for {1}, got {2}'\
             .format(JSON_TYPES.get(self.type, self.type.__name__), name,
                     JSON_TYPES.get(type(ret), type(ret).__name__))
 

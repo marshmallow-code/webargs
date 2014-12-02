@@ -233,12 +233,11 @@ def test_value_error_raised_if_invalid_target(request):
         p.parse_arg('foo', arg, request, targets=('invalidtarget', 'headers'))
     assert 'Invalid targets arguments: {0}'.format(['invalidtarget']) in str(excinfo)
 
-# TODO: This is no longer valid. Leaving commented for now
-# @mock.patch('webargs.core.Parser.parse_json')
-# def test_conversion(parse_json, request):
-#     parse_json.return_value = 42
-#     arg = Arg(str)
-#     assert Parser().parse_arg('foo', arg, request, targets=('json',)) == '42'
+@mock.patch('webargs.core.Parser.parse_json')
+def test_conversion(parse_json, request):
+    parse_json.return_value = 42
+    arg = Arg(str)
+    assert Parser().parse_arg('foo', arg, request, targets=('json',)) == '42'
 
 @mock.patch('webargs.core.Parser.handle_error')
 @mock.patch('webargs.core.Parser.parse_json')
