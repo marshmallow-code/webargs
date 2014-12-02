@@ -115,7 +115,7 @@ def test_exception_on_validation_error(testapp):
 
 def test_validation_error_with_message(testapp):
     res = testapp.post('/validate', {'num': '3'}, expect_errors=True)
-    assert "Houston, we've had a problem." in res.normal_body
+    res.mustcontain("Houston, we've had a problem.")
 
 def test_use_args_decorator(testapp):
     assert testapp.post('/foo', {'myvalue': 23}).json == {'myvalue': 23}
