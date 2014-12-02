@@ -116,7 +116,7 @@ def test_parsing_headers(testapp):
     assert res.json == {'name': 'Fred'}
 
 def test_parse_files(testapp):
-    payload = [('myfile', 'baz.txt', 'bar'), ('myfile', 'moo.txt', 'zoo')]
+    payload = [('myfile', 'baz.txt', b'bar'), ('myfile', 'moo.txt', b'zoo')]
     res = testapp.post('/echofile', upload_files=payload)
     assert res.json == {'baz.txt': 'bar', 'moo.txt': 'zoo'}
 
