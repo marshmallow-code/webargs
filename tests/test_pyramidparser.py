@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import pytest
 from webtest import TestApp
@@ -19,6 +18,10 @@ hello_multiple = {
     'name': Arg(multiple=True),
 }
 
+hello_validate = {
+    'num': Arg(int, validate=lambda n: n != 3, error="Houston, we've had a problem."),
+}
+
 @pytest.fixture
 def testapp():
     def echo(request):
@@ -27,6 +30,18 @@ def testapp():
 
     def echomulti(request):
         args = parser.parse(hello_multiple, request)
+        return args
+
+    def validate(request):
+        args = parser.parse(hello_validate, request)
+        return args
+
+    def echocookie(request):
+        args = parser.parse(hello_args, request, targets=('cookies',))
+        return args
+
+    def echo2(request):
+        args = parser.parse(hello_args, request, targets=('headers',))
         return args
 
     @parser.use_args({'myvalue': Arg(int)})
@@ -45,11 +60,17 @@ def testapp():
 
     config.add_route('echo', '/echo')
     config.add_route('echomulti', '/echomulti')
+    config.add_route('validate', '/validate')
+    config.add_route('echocookie', '/echocookie')
+    config.add_route('echo2', '/echo2')
     config.add_route('foo', '/foo')
     config.add_route('bar', '/bar')
 
     config.add_view(echo, route_name='echo', renderer='json')
     config.add_view(echomulti, route_name='echomulti', renderer='json')
+    config.add_view(validate, route_name='validate', renderer='json')
+    config.add_view(echocookie, route_name='echocookie', renderer='json')
+    config.add_view(echo2, route_name='echo2', renderer='json')
     config.add_view(foo, route_name='foo', renderer='json')
     config.add_view(Bar, route_name='bar', renderer='json')
 
@@ -79,6 +100,22 @@ def test_parse_json(testapp):
 
 def test_parse_json_default(testapp):
     assert testapp.post_json('/echo', {}).json == {'name': 'World'}
+
+def test_parsing_cookies(testapp):
+    testapp.set_cookie('name', 'Jean-Luc Picard')
+    assert testapp.get('/echocookie').json == {'name': 'Jean-Luc Picard'}
+
+def test_parsing_headers(testapp):
+    res = testapp.get('/echo2', headers={'name': 'Fred'})
+    assert res.json == {'name': 'Fred'}
+
+def test_exception_on_validation_error(testapp):
+    res = testapp.post('/validate', {'num': '3'}, expect_errors=True)
+    assert res.status_code == 400
+
+def test_validation_error_with_message(testapp):
+    res = testapp.post('/validate', {'num': '3'}, expect_errors=True)
+    assert "Houston, we've had a problem." in res.normal_body
 
 def test_use_args_decorator(testapp):
     assert testapp.post('/foo', {'myvalue': 23}).json == {'myvalue': 23}
