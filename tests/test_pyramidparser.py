@@ -46,7 +46,8 @@ def testapp():
 
     @parser.use_args({'myfile': Arg(multiple=True)}, targets=('files',))
     def echofile(request, args):
-        return dict((i.filename, text_type(i.file.getvalue())) for i in args['myfile'])
+        _value = lambda f: f.getvalue().decode('utf-8')
+        return dict((i.filename, _value(i.file)) for i in args['myfile'])
 
     @parser.use_args({'myvalue': Arg(int)})
     def foo(request, args):
