@@ -512,6 +512,7 @@ Project Info
 
    license
    changelog
+   authors
    contributing
 
 Suggested Pairings

@@ -4,6 +4,7 @@ Changelog
 0.9.0 (unreleased)
 ******************
 
+* Pyramid support thanks to @philtay.
 * Allow ``use`` argument to be a list of functions.
 * *Backwards-incompatible*: Parser will only pass ``ValidationErrors`` to its error handler function, rather than catching all generic Exceptions.
 * Add a short-lived cache to the ``Parser`` class that can be used to store processed request data for reuse.
