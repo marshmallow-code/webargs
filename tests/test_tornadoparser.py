@@ -24,7 +24,12 @@ name = 'name'
 bvalue = b'value'
 value = 'value'
 
+
 class TestQueryArgs(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_get_single_values(self):
         query = [(name, value)]
         arg = Arg(multiple=False)
@@ -63,6 +68,10 @@ class TestQueryArgs(object):
 
 
 class TestFormArgs(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_get_single_values(self):
         query = [(name, value)]
         arg = Arg(multiple=False)
@@ -101,12 +110,14 @@ class TestFormArgs(object):
 
 
 class TestJSONArgs(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_get_single_values(self):
         query = {name: value}
         arg = Arg(multiple=False)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result == value
@@ -115,8 +126,6 @@ class TestJSONArgs(object):
         query = {name: [value, value]}
         arg = Arg(multiple=True)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result == [value, value]
@@ -125,8 +134,6 @@ class TestJSONArgs(object):
         query = {}
         arg = Arg(multiple=False)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result is Missing
@@ -135,8 +142,6 @@ class TestJSONArgs(object):
         query = {}
         arg = Arg(multiple=True)
         request = make_json_request(query)
-
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
 
         assert result == []
@@ -147,21 +152,23 @@ class TestJSONArgs(object):
             body=tornado.concurrent.Future,
             headers={'Content-Type': 'application/json'},
         )
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
-        assert parser.json == {}
+        assert parser._cache['json'] == {}
         assert result is Missing
 
     def test_it_should_handle_value_error_on_parse_json(self):
         arg = Arg()
         request = make_request('this is json not')
-        parser._parse_json_body(request)
         result = parser.parse_json(request, name, arg)
-        assert parser.json == {}
+        assert parser._cache['json'] == {}
         assert result is Missing
 
 
 class TestHeadersArgs(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_get_single_values(self):
         query = {name: value}
         arg = Arg(multiple=False)
@@ -200,6 +207,10 @@ class TestHeadersArgs(object):
 
 
 class TestFilesArgs(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_get_single_values(self):
         query = [(name, value)]
         arg = Arg(multiple=False)
@@ -245,6 +256,10 @@ class TestErrorHandler(object):
 
 
 class TestParse(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_parse_query_arguments(self):
         attrs = {
             'string': Arg(),
@@ -259,6 +274,20 @@ class TestParse(object):
 
         assert parsed['integer'] == [1, 2]
         assert parsed['string'] == bvalue
+
+    def test_parsing_clears_cache(self):
+        request = make_json_request({
+            'string': 'value',
+            'integer': [1, 2]
+        })
+        string_result = parser.parse_json(request, 'string', Arg(str))
+        assert string_result == 'value'
+        assert 'json' in parser._cache
+        assert 'string' in parser._cache['json']
+        assert 'integer' in parser._cache['json']
+        attrs = {'string': Arg(str), 'integer': Arg(int, multiple=True)}
+        parser.parse(attrs, request)
+        assert parser._cache == {}
 
     def test_it_should_parse_form_arguments(self):
         attrs = {
@@ -339,6 +368,10 @@ class TestParse(object):
 
 
 class TestUseArgs(object):
+
+    def setup_method(self, method):
+        parser.clear_cache()
+
     def test_it_should_pass_parsed_as_first_argument(self):
         class Handler(object):
             request = make_json_request({'key': 'value'})

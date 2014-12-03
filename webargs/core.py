@@ -258,6 +258,8 @@ class Parser(object):
         self.targets = targets or self.DEFAULT_TARGETS
         self.error_callback = _callable_or_raise(error_handler)
         self.error = error
+        #: A short-lived cache to store results from processing request bodies.
+        self._cache = {}
 
     def _validated_targets(self, targets):
         """Ensure that the given targets argument is valid.
@@ -340,8 +342,8 @@ class Parser(object):
          :return: A dictionary of parsed arguments
         """
         validators = _ensure_list_of_callables(validate)
+        parsed = {}
         try:
-            parsed = {}
             for argname, argobj in iteritems(argmap):
                 parsed_value = self.parse_arg(argname, argobj, req,
                     targets=targets or self.targets)
@@ -361,12 +363,19 @@ class Parser(object):
                         validator.__name__, parsed
                     )
                     raise ValidationError(self.error or msg)
-            return parsed
         except ValidationError as error:
             if self.error_callback:
                 self.error_callback(error)
             else:
                 self.handle_error(error)
+        finally:
+            self.clear_cache()
+        return parsed
+
+    def clear_cache(self):
+        """Invalidate the parser's cache."""
+        self._cache = {}
+        return None
 
     def use_args(self, argmap, req=None, targets=None, as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
