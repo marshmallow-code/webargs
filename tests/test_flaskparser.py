@@ -14,7 +14,7 @@ from webargs import Arg, Missing
 from webargs.core import ValidationError
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
-from .compat import text_type, unicode
+from .compat import text_type
 
 class TestAppConfig:
     TESTING = True
@@ -387,7 +387,7 @@ def test_parse_multiple_json(testapp):
         assert args['name'] == ['steve']
 
 def test_parse_json_with_nonascii_characters(testapp):
-    args = {'text': Arg(unicode)}
+    args = {'text': Arg(text_type)}
     text = u'øˆƒ£ºº∆ƒˆ∆'
     with testapp.test_request_context('/foo', data=json.dumps({'text': text}),
             content_type='application/json', method='POST'):

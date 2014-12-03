@@ -10,14 +10,14 @@ PY2 = sys.version_info[0] == 2
 
 if not PY2:
     iteritems = lambda d: d.items()
-    unicode = str
     text_type = str
-    long = float
+    binary_type = bytes
+    long_type = float
 else:
     iteritems = lambda d: d.iteritems()
-    unicode = unicode
     text_type = unicode
-    long = long
+    binary_type = str
+    long_type = long
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class ValidationError(WebargsError):
         Store status_code and additonal data.
     """
     def __init__(self, error, status_code=400, **data):
-        self.message = unicode(error)
+        self.message = text_type(error)
         self.status_code = status_code
         self.data = data
         super(ValidationError, self).__init__(self.message)
@@ -121,11 +121,11 @@ JSON_TYPES = {
     bool: 'boolean',
     int: 'integer',
     float: 'number',
-    long: 'number',
+    long_type: 'number',
     type(None): 'null',
     dict: 'object',
-    str: 'string',
-    unicode: 'string',
+    text_type: 'string',
+    binary_type: 'string',
 }
 
 

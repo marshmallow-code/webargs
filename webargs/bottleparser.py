@@ -23,7 +23,7 @@ import logging
 from bottle import request, HTTPError
 
 from webargs import core
-from webargs.core import unicode
+from webargs.core import text_type
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +65,8 @@ class BottleParser(core.Parser):
         logger.error(error)
         status = getattr(error, 'status_code', 400)
         data = getattr(error, 'data', {})
-        raise HTTPError(status=status, body=unicode(error), headers=data.get('headers'),
-                exception=error)
+        raise HTTPError(status=status, body=text_type(error),
+                        headers=data.get('headers'), exception=error)
 
     def parse(self, argmap, req=None, *args, **kwargs):
         """Parses the request using the given arguments map.
