@@ -115,7 +115,7 @@ def noop(x):
     return x
 
 
-JSON_TYPES = {
+TYPES = {
     list: 'array',
     tuple: 'array',
     bool: 'boolean',
@@ -127,9 +127,6 @@ JSON_TYPES = {
     text_type: 'string',
     binary_type: 'string',
 }
-
-
-JSON_NON_NULLABLE_TYPES = set([list, tuple, dict, bool])
 
 
 class Arg(object):
@@ -192,13 +189,9 @@ class Arg(object):
             ret = func(ret)
 
         msg = 'Expected type {0} for {1}, got {2}'\
-            .format(JSON_TYPES.get(self.type, self.type.__name__), name,
-                    JSON_TYPES.get(type(ret), type(ret).__name__))
+            .format(TYPES.get(self.type, self.type.__name__), name,
+                    TYPES.get(type(ret), type(ret).__name__))
 
-        if self.type != noop:
-            # Allow simple types (string, integer, number) to receive null
-            if ret is None and self.type in JSON_NON_NULLABLE_TYPES:
-                raise ValidationError(self.error or msg)
         try:
             ret = self.type(ret)
         except (ValueError, TypeError):

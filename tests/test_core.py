@@ -3,7 +3,8 @@ import mock
 
 import pytest
 
-from webargs.core import Parser, Arg, ValidationError, Missing, get_value, PY2
+from webargs.core import Parser, Arg, ValidationError, Missing, get_value, PY2, \
+    text_type, long_type
 
 if not PY2:
     unicode = str
@@ -50,8 +51,29 @@ class TestArg:
     def test_validated_with_bad_type(self):
         arg = Arg(type_=int)
         assert arg.validated('foo', 42) == 42
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', 'nonint')
+        assert 'Expected type integer for foo, got string' in str(excinfo)
+
+    def test_validated_null(self):
+        arg = Arg(type_=dict)
+        assert arg.validated('foo', {}) == {}
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('foo', None)
+        assert 'Expected type object for foo, got null' in str(excinfo)
+
+    def test_validated_null_noop(self):
+        arg = Arg()
+        assert arg.validated('foo', {}) == {}
+        assert arg.validated('foo', None) is None
+
+    def test_validated_text_type(self):
+        arg = Arg(type_=text_type)
+        assert arg.validated('foo', 42) == '42'
+
+    def test_validated_long_type(self):
+        arg = Arg(type_=long_type)
+        assert arg.validated('foo', 42) == 42
 
     def test_custom_error(self):
         arg = Arg(type_=int, error='not an int!')
