@@ -60,7 +60,7 @@ class TestArg:
             arg = Arg(type_=t)
             with pytest.raises(ValidationError) as excinfo:
                 arg.validated('foo', None)
-            assert 'Expected type {} for foo, got null'.format(TYPES[t]) in str(excinfo)
+            assert 'Expected type {0} for foo, got null'.format(TYPES[t]) in str(excinfo)
 
     def test_validated_null(self):
         arg = Arg(type_=dict)
