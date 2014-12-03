@@ -4,7 +4,7 @@ import mock
 import pytest
 
 from webargs.core import Parser, Arg, ValidationError, Missing, get_value, PY2, \
-    text_type, long_type
+    text_type, long_type, NON_NULLABLE_TYPES, TYPES
 
 if not PY2:
     unicode = str
@@ -54,6 +54,13 @@ class TestArg:
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', 'nonint')
         assert 'Expected type integer for foo, got string' in str(excinfo)
+
+    def test_validated_non_nullable_types(self):
+        for t in NON_NULLABLE_TYPES:
+            arg = Arg(type_=t)
+            with pytest.raises(ValidationError) as excinfo:
+                arg.validated('foo', None)
+            assert 'Expected type {} for foo, got null'.format(TYPES[t]) in str(excinfo)
 
     def test_validated_null(self):
         arg = Arg(type_=dict)
