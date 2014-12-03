@@ -15,9 +15,9 @@ if not PY2:
     long_type = float
 else:
     iteritems = lambda d: d.iteritems()
-    text_type = unicode
+    text_type = unicode  # noqa
     binary_type = str
-    long_type = long
+    long_type = long  # noqa
 
 logger = logging.getLogger(__name__)
 
