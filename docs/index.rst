@@ -468,6 +468,29 @@ With :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>`, the pa
             }
             self.write(response)
 
+Pyramid Support
+===============
+
+Pyramid support is available via the :mod:`webargs.pyramidparser` module.
+
+Decorator Usage
+---------------
+
+When using the :meth:`use_args <webargs.pyramidparser.PyramidParser.use_args>` decorator on a view callable, the arguments dictionary will be positioned after the `request` argument.
+
+.. code-block:: python
+
+    from pyramid.response import Response
+    from webargs.pyramidparser import use_args
+
+    @use_args({'per_page': Arg(int)})
+    def user_detail(request, args):
+        return Response('The user page for user {uid}, '
+                'showing {per_page} posts.').format(uid=uid,
+                                                    per_page=args['per_page']))
+
+As with the other parser modules, :meth:`use_kwargs <webargs.pyramidparser.PyramidParser.use_kwargs>` will add keyword arguments to the view callable.
+
 
 API Reference
 =============
