@@ -244,7 +244,7 @@ class Parser(object):
     DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
     #: Maps target => method name
-    TARGET_MAP = {
+    __target_map__ = {
         'json': 'parse_json',
         'querystring': 'parse_querystring',
         'query': 'parse_querystring',
@@ -268,7 +268,7 @@ class Parser(object):
         """
         # The set difference between the given targets and the available targets
         # will be the set of invalid targets
-        valid_targets = set(self.TARGET_MAP.keys())
+        valid_targets = set(self.__target_map__.keys())
         given = set(targets)
         invalid_targets = given - valid_targets
         if len(invalid_targets):
@@ -279,7 +279,7 @@ class Parser(object):
     def _get_value(self, name, argobj, req, target):
         # Parsing function to call
         # May be a method name (str) or a function
-        func = self.TARGET_MAP.get(target)
+        func = self.__target_map__.get(target)
         if func:
             if inspect.isfunction(func):
                 function = func
@@ -450,7 +450,7 @@ class Parser(object):
         :param str name: The name of the target to register.
         """
         def decorator(func):
-            self.TARGET_MAP[name] = func
+            self.__target_map__[name] = func
             return func
         return decorator
 

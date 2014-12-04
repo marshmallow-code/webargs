@@ -271,8 +271,23 @@ def test_parse_required_multiple_arg(parse_form, web_request):
 def test_default_targets():
     assert set(Parser.DEFAULT_TARGETS) == set(['json', 'querystring', 'form'])
 
-def test_callable_default(parser, web_request):
-    web_request.json = {}
+
+def test_default(parser, request):
+    request.json = {}
+    args = {'val': Arg(default='pizza')}
+    result = parser.parse(args, request, targets=('json', ))
+    assert result['val'] == 'pizza'
+
+
+def test_default_can_be_none(parser, request):
+    request.json = {}
+    args = {'val': Arg(default=None)}
+    result = parser.parse(args, request, targets=('json', ))
+    assert result['val'] is None
+
+
+def test_callable_default(parser, request):
+    request.json = {}
     args = {'val': Arg(default=lambda: 'pizza')}
     result = parser.parse(args, web_request, targets=('json', ))
     assert result['val'] == 'pizza'
