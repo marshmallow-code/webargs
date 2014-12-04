@@ -16,7 +16,7 @@ from webargs.core import (
     TYPES
 )
 
-from collections import OrderedDict
+from uuid import UUID
 
 if not PY2:
     unicode = str
@@ -96,11 +96,12 @@ class TestArg:
         assert arg.validated('foo', 42) == 42
 
     def test_validated_unknown_type(self):
-        arg = Arg(type_=OrderedDict)
-        assert arg.validated('foo', OrderedDict([('bar', 2)])) == {'bar': 2}
+        arg = Arg(type_=UUID)
+        assert (arg.validated('foo', '12345678123456781234567812345678') ==
+                UUID('12345678-1234-5678-1234-567812345678'))
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', None)
-        assert 'Expected type OrderedDict for foo, got null' in str(excinfo)
+        assert 'Expected type UUID for foo, got null' in str(excinfo)
 
     def test_custom_error(self):
         arg = Arg(type_=int, error='not an int!')
