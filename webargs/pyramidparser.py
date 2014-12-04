@@ -80,7 +80,9 @@ class PyramidParser(core.Parser):
 
     def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
                  validate=None):
-        """Decorator that injects parsed arguments into a view function or method.
+        """Decorator that injects parsed arguments into a view callable.
+        Supports the *Class-based View* pattern where `request` is saved as an instance
+        attribute on a view class.
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param req: The request object to parse
