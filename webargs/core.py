@@ -118,6 +118,7 @@ def noop(x):
 TYPES = {
     list: 'array',
     tuple: 'array',
+    set: 'array',
     bool: 'boolean',
     int: 'integer',
     float: 'number',
@@ -128,7 +129,7 @@ TYPES = {
     binary_type: 'string',
 }
 
-NON_NULLABLE_TYPES = set([list, tuple, dict, bool])
+NON_NULLABLE_TYPES = set([list, tuple, set, dict, bool])
 
 
 class Arg(object):
@@ -190,9 +191,10 @@ class Arg(object):
         for func in self.use_funcs:
             ret = func(ret)
 
-        msg = 'Expected type {0} for {1}, got {2}'\
-            .format(TYPES.get(self.type, self.type.__name__), name,
-                    TYPES.get(type(ret), type(ret).__name__))
+        msg = 'Expected type {0} for {1}, got {2}'.format(
+            TYPES.get(self.type, self.type.__name__), name,
+            TYPES.get(type(ret), type(ret).__name__)
+        )
 
         if ret is None and self.type in NON_NULLABLE_TYPES:
             raise ValidationError(self.error or msg)
