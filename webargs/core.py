@@ -10,14 +10,17 @@ PY2 = sys.version_info[0] == 2
 
 if not PY2:
     iteritems = lambda d: d.items()
-    unicode = str
     text_type = str
+    binary_type = bytes
+    long_type = float
 else:
     iteritems = lambda d: d.iteritems()
-    unicode = unicode
-    text_type = unicode
+    text_type = unicode  # noqa
+    binary_type = str
+    long_type = long  # noqa
 
 logger = logging.getLogger(__name__)
+
 
 class WebargsError(Exception):
     """Base class for all webargs-related errors."""
@@ -37,7 +40,7 @@ class ValidationError(WebargsError):
         Store status_code and additonal data.
     """
     def __init__(self, error, status_code=400, **data):
-        self.message = unicode(error)
+        self.message = text_type(error)
         self.status_code = status_code
         self.data = data
         super(ValidationError, self).__init__(self.message)
@@ -56,6 +59,7 @@ def _callable_or_raise(obj):
         raise ValueError('{0!r} is not callable.'.format(obj))
     else:
         return obj
+
 
 def _ensure_list_of_callables(obj):
     if obj:
@@ -111,6 +115,23 @@ def noop(x):
     return x
 
 
+__type_map__ = {
+    list: 'array',
+    tuple: 'array',
+    set: 'array',
+    bool: 'boolean',
+    int: 'integer',
+    float: 'number',
+    long_type: 'number',
+    type(None): 'null',
+    dict: 'object',
+    text_type: 'string',
+    binary_type: 'string',
+}
+
+__non_nullable_types__ = set([list, tuple, set, dict, bool])
+
+
 class Arg(object):
     """A request argument.
 
@@ -163,15 +184,25 @@ class Arg(object):
         return ('<webargs.core.Arg(type_={self.type}, default={self.default!r}, '
                 'required={self.required})>').format(self=self)
 
-    def _validate(self, value):
+    def _validate(self, name, value):
         """Perform conversion and validation on ``value``."""
         ret = value
         for func in self.use_funcs:
             ret = func(ret)
+
+        msg = 'Expected type "{0}" for {1}, got "{2}"'.format(
+            __type_map__.get(self.type, self.type.__name__), name,
+            __type_map__.get(type(ret), type(ret).__name__)
+        )
+
+        if ret is None and self.type in __non_nullable_types__:
+            raise ValidationError(self.error or msg)
+
         try:
             ret = self.type(ret)
-        except ValueError as error:
-            raise ValidationError(self.error or error)
+        except (ValueError, TypeError):
+            raise ValidationError(self.error or msg)
+
         # Then call validation functions
         for validator in self.validators:
             if validator(ret) is False:
@@ -181,7 +212,7 @@ class Arg(object):
                 raise ValidationError(self.error or msg)
         return ret
 
-    def validated(self, value):
+    def validated(self, name, value):
         """Convert and validate the given value according to the ``type_``,
         ``use``, and ``validate`` attributes.
 
@@ -192,9 +223,9 @@ class Arg(object):
         if value is Missing:
             return value
         if self.multiple and isinstance(value, list):
-            return [self._validate(each) for each in value]
+            return [self._validate(name, each) for each in value]
         else:
-            return self._validate(value)
+            return self._validate(name, value)
 
 
 class Parser(object):
@@ -208,6 +239,7 @@ class Parser(object):
     :param callable error_handler: Custom error handler function.
     :param str error: Custom error message to use if validation fails.
     """
+
     DEFAULT_TARGETS = ('querystring', 'form', 'json',)
 
     #: Maps target => method name
@@ -283,7 +315,7 @@ class Parser(object):
                 continue
             # Found the value; validate and return it
             if value is not Missing:
-                return argobj.validated(value)
+                return argobj.validated(name, value)
         if value is Missing:
             if argobj.default is not None:
                 if callable(argobj.default):

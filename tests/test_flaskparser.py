@@ -14,7 +14,7 @@ from webargs import Arg, Missing
 from webargs.core import ValidationError
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
-from .compat import text_type, unicode
+from .compat import text_type
 
 class TestAppConfig:
     TESTING = True
@@ -142,7 +142,7 @@ def test_abort_called_on_type_conversion_error(mock_abort, testapp):
         parser.parse(argmap)
     mock_abort.assert_called_once
     abort_args, abort_kwargs = mock_abort.call_args
-    assert 'invalid literal' in abort_kwargs['message']
+    assert 'Expected type "integer" for value, got "string"' in abort_kwargs['message']
     assert type(abort_kwargs['exc']) == ValidationError
 
 def test_use_args_decorator(testapp):
@@ -387,7 +387,7 @@ def test_parse_multiple_json(testapp):
         assert args['name'] == ['steve']
 
 def test_parse_json_with_nonascii_characters(testapp):
-    args = {'text': Arg(unicode)}
+    args = {'text': Arg(text_type)}
     text = u'øˆƒ£ºº∆ƒˆ∆'
     with testapp.test_request_context('/foo', data=json.dumps({'text': text}),
             content_type='application/json', method='POST'):
