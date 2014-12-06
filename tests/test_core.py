@@ -12,6 +12,8 @@ from webargs.core import (
     PY2,
     text_type,
     long_type,
+    __type_map__,
+    __non_nullable_types__
 )
 
 from uuid import UUID
@@ -66,14 +68,14 @@ class TestArg:
             arg.validated('foo', 'nonint')
         assert 'Expected type "integer" for foo, got "string"' in str(excinfo)
 
-    @pytest.mark.parametrize('arg_type', Arg.__non_nullable_types__)
+    @pytest.mark.parametrize('arg_type', __non_nullable_types__)
     def test_validated_non_nullable_types(self, arg_type):
         print(arg_type)
         arg = Arg(type_=arg_type)
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', None)
         assert 'Expected type "{0}" for foo, got "null"'.format(
-            Arg.__type_map__[arg_type]
+            __type_map__[arg_type]
         ) in str(excinfo)
 
     def test_validated_null(self):

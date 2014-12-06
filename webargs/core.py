@@ -115,6 +115,23 @@ def noop(x):
     return x
 
 
+__type_map__ = {
+    list: 'array',
+    tuple: 'array',
+    set: 'array',
+    bool: 'boolean',
+    int: 'integer',
+    float: 'number',
+    long_type: 'number',
+    type(None): 'null',
+    dict: 'object',
+    text_type: 'string',
+    binary_type: 'string',
+}
+
+__non_nullable_types__ = set([list, tuple, set, dict, bool])
+
+
 class Arg(object):
     """A request argument.
 
@@ -143,22 +160,6 @@ class Arg(object):
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """
-    __type_map__ = {
-        list: 'array',
-        tuple: 'array',
-        set: 'array',
-        bool: 'boolean',
-        int: 'integer',
-        float: 'number',
-        long_type: 'number',
-        type(None): 'null',
-        dict: 'object',
-        text_type: 'string',
-        binary_type: 'string',
-    }
-
-    __non_nullable_types__ = set([list, tuple, set, dict, bool])
-
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
                  allow_missing=False, target=None, source=None, **metadata):
@@ -190,11 +191,11 @@ class Arg(object):
             ret = func(ret)
 
         msg = 'Expected type "{0}" for {1}, got "{2}"'.format(
-            self.__type_map__.get(self.type, self.type.__name__), name,
-            self.__type_map__.get(type(ret), type(ret).__name__)
+            __type_map__.get(self.type, self.type.__name__), name,
+            __type_map__.get(type(ret), type(ret).__name__)
         )
 
-        if ret is None and self.type in self.__non_nullable_types__:
+        if ret is None and self.type in __non_nullable_types__:
             raise ValidationError(self.error or msg)
 
         try:
