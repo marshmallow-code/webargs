@@ -12,8 +12,6 @@ from webargs.core import (
     PY2,
     text_type,
     long_type,
-    NON_NULLABLE_TYPES,
-    TYPES
 )
 
 from uuid import UUID
@@ -66,22 +64,24 @@ class TestArg:
         assert arg.validated('foo', 42) == 42
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', 'nonint')
-        assert 'Expected type integer for foo, got string' in str(excinfo)
+        assert 'Expected type "integer" for foo, got "string"' in str(excinfo)
 
-    @pytest.mark.parametrize('arg_type', NON_NULLABLE_TYPES)
+    @pytest.mark.parametrize('arg_type', Arg.__non_nullable_types__)
     def test_validated_non_nullable_types(self, arg_type):
         print(arg_type)
         arg = Arg(type_=arg_type)
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', None)
-        assert 'Expected type {0} for foo, got null'.format(TYPES[arg_type]) in str(excinfo)
+        assert 'Expected type "{0}" for foo, got "null"'.format(
+            Arg.__type_map__[arg_type]
+        ) in str(excinfo)
 
     def test_validated_null(self):
         arg = Arg(type_=dict)
         assert arg.validated('foo', {}) == {}
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', None)
-        assert 'Expected type object for foo, got null' in str(excinfo)
+        assert 'Expected type "object" for foo, got "null"' in str(excinfo)
 
     def test_validated_null_noop(self):
         arg = Arg()
@@ -102,7 +102,7 @@ class TestArg:
                 UUID('12345678-1234-5678-1234-567812345678'))
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', None)
-        assert 'Expected type UUID for foo, got null' in str(excinfo)
+        assert 'Expected type "UUID" for foo, got "null"' in str(excinfo)
 
     def test_custom_error(self):
         arg = Arg(type_=int, error='not an int!')

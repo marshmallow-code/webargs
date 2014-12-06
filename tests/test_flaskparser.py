@@ -142,7 +142,7 @@ def test_abort_called_on_type_conversion_error(mock_abort, testapp):
         parser.parse(argmap)
     mock_abort.assert_called_once
     abort_args, abort_kwargs = mock_abort.call_args
-    assert 'Expected type integer for value, got string' in abort_kwargs['message']
+    assert 'Expected type "integer" for value, got "string"' in abort_kwargs['message']
     assert type(abort_kwargs['exc']) == ValidationError
 
 def test_use_args_decorator(testapp):
