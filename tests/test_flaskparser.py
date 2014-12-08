@@ -80,6 +80,19 @@ def test_arg_with_target(testapp):
         assert args['age'] == 42
 
 
+def test_nested_args(testapp):
+    testargs = {
+        'name': Arg({'first': Arg(use=lambda v: v.lower()),
+                     'last': Arg(use=lambda v: v.upper())})
+    }
+    with testapp.test_request_context('/myendpoint', method='post',
+            data=json.dumps({'name': {'first': 'sTevE', 'last': 'LoRiA'}}),
+            content_type='application/json'):
+        args = parser.parse(testargs)
+        assert args['name']['first'] == 'steve'
+        assert args['name']['last'] == 'LORIA'
+
+
 def test_parsing_json_default(testapp):
     with testapp.test_request_context('/myendpoint', method='post',
                                     data=json.dumps({}),

@@ -135,8 +135,10 @@ __non_nullable_types__ = set([list, tuple, set, dict, bool])
 class Arg(object):
     """A request argument.
 
-    :param type type\_: Value type. Will try to convert the passed in value to this
-        type. If ``None``, no type conversion will be performed.
+    :param type\_: Value type or nested `Arg` dictionary. If the former,
+        the parsed value will be coerced this type. If the latter, the parsed
+        value will be validated and converted according to the nested `Arg` dict.
+        If ``None``, no type conversion will be performed.
     :param default: Default value for the argument. Used if the value is not found
         on the request. May be a callable.
     :param bool required: If ``True``, the :meth:`Parser.handle_error` method will be
@@ -163,7 +165,14 @@ class Arg(object):
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
                  allow_missing=False, target=None, source=None, **metadata):
-        self.type = type_ or noop  # default to no type conversion
+        if isinstance(type_, dict):
+            self.type = dict
+            self._nested_args = type_
+            self._has_nesting = True
+        else:
+            self.type = type_ or noop  # default to no type conversion
+            self._nested_args = None
+            self._has_nesting = False
         if multiple and default is None:
             self.default = []
         else:
@@ -194,7 +203,6 @@ class Arg(object):
             __type_map__.get(self.type, self.type.__name__), name,
             __type_map__.get(type(ret), type(ret).__name__)
         )
-
         if ret is None and self.type in __non_nullable_types__:
             raise ValidationError(self.error or msg)
 
@@ -210,6 +218,13 @@ class Arg(object):
                     validator.__name__, ret
                 )
                 raise ValidationError(self.error or msg)
+
+        if self._has_nesting:
+            # Recurse into nested argdict
+            for key, val in iteritems(ret):
+                nested_arg = self._nested_args.get(key)
+                if nested_arg:
+                    ret[key] = nested_arg.validated(key, val)
         return ret
 
     def validated(self, name, value):
