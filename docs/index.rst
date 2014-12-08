@@ -277,6 +277,20 @@ Each parser has a default error handling method. To override the error handling 
         raise CustomError(error)
 
 
+Nesting Args
+------------
+
+`Arg` dictionaries can be nested within each other.
+
+.. code-block:: python
+
+        args = {
+            'name': Arg({
+                'first': Arg(str, require=True),
+                'last': Arg(str, required=True),
+            })
+        }
+
 
 Flask Support
 =============
