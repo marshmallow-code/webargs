@@ -230,6 +230,14 @@ class TestArgNesting:
         in_data = {'foo': 'hErP', 'bar': 'dErP'}
         assert arg.validated('', in_data) == {'foo': 'HERP', 'bar': 'derp'}
 
+    def test_nested_required(self):
+        arg = Arg({
+            'foo': Arg(required=True),
+            'bar': Arg(required=False),
+        })
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('', {})
+        assert 'Required parameter "foo" not found.' in str(excinfo)
 
 # Parser tests
 
@@ -311,7 +319,7 @@ def test_parse_required_arg_raises_validation_error(parse_json, web_request):
     parse_json.return_value = Missing
     with pytest.raises(ValidationError) as excinfo:
         p.parse_arg('foo', arg, web_request)
-    assert 'Required parameter ' + repr('foo') + ' not found.' in str(excinfo)
+    assert 'Required parameter "foo" not found.' in str(excinfo)
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse_required_arg(parse_json, web_request):

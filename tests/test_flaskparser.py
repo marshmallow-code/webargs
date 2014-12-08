@@ -82,8 +82,8 @@ def test_arg_with_target(testapp):
 
 def test_nested_args(testapp):
     testargs = {
-        'name': Arg({'first': Arg(use=lambda v: v.lower()),
-                     'last': Arg(use=lambda v: v.upper())})
+        'name': Arg({'first': Arg(str, use=lambda v: v.lower()),
+                     'last': Arg(str, use=lambda v: v.upper())})
     }
     with testapp.test_request_context('/myendpoint', method='post',
             data=json.dumps({'name': {'first': 'sTevE', 'last': 'LoRiA'}}),

@@ -221,9 +221,15 @@ class Arg(object):
 
         if self._has_nesting:
             # Recurse into nested argdict
-            for key, val in iteritems(ret):
-                nested_arg = self._nested_args.get(key)
-                if nested_arg:
+            for key, nested_arg in iteritems(self._nested_args):
+                try:
+                    val = ret[key]
+                except KeyError:
+                    if nested_arg.required:
+                        raise ValidationError(
+                            'Required parameter "{0}" not found.'.format(key)
+                        )
+                else:
                     ret[key] = nested_arg.validated(key, val)
         return ret
 
@@ -338,7 +344,7 @@ class Parser(object):
                 else:
                     value = argobj.default
             if argobj.required:
-                raise ValidationError('Required parameter {0!r} not found.'.format(name))
+                raise ValidationError('Required parameter "{0}" not found.'.format(name))
         return value
 
     def parse(self, argmap, req, targets=None, validate=None, force_all=False):
