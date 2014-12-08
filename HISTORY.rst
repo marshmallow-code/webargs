@@ -7,6 +7,7 @@ Changelog
 * Pyramid support thanks to @philtay.
 * User-friendly error messages when ``Arg`` type conversion/validation fails. Thanks Andriy Yurchuk.
 * Allow ``use`` argument to be a list of functions.
+* Allow ``Args`` to be nested within each other, e.g. for nested dict validation. Thanks @saritasa for the suggestion.
 * *Backwards-incompatible*: Parser will only pass ``ValidationErrors`` to its error handler function, rather than catching all generic Exceptions.
 * *Backwards-incompatible*: Rename ``Parser.TARGET_MAP`` to ``Parser.__target_map__``.
 * Add a short-lived cache to the ``Parser`` class that can be used to store processed request data for reuse.

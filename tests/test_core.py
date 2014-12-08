@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import mock
 
 import pytest
@@ -168,6 +169,76 @@ class TestArg:
         assert 'foo' in r
         assert 'required=True' in r
 
+
+class TestArgNesting:
+
+    def test_nested_argdict_has_type_dict(self):
+        arg = Arg({
+            'foo': Arg()
+        })
+        assert arg.type == dict
+
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('myarg', 'notadict')
+
+        assert 'Expected type "object" for myarg, got "string"' in str(excinfo)
+
+    def test_has_nesting(self):
+        arg = Arg({'foo': Arg()})
+        assert arg._has_nesting is True
+
+    def test_nested_validation(self):
+        arg = Arg({
+            'foo': Arg(validate=lambda v: v <= 42)
+        })
+
+        assert arg.validated('myarg', {'foo': 42}) == {'foo': 42}
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('', {'foo': 43})
+        assert 'Validator <lambda>(43) is not True' in str(excinfo)
+
+    def test_deep_nesting_validation(self):
+        arg = Arg({
+            'foo': Arg({
+                'bar': Arg(validate=lambda v: v <= 42)
+            })
+        })
+
+        valid = {'foo': {'bar': 42}}
+        assert arg.validated('myarg', valid) == valid
+
+    def test_extra_nested_items_are_in_output(self):
+        arg = Arg({
+            'foo': Arg()
+        })
+        in_data = {'foo': 'herp', 'baz': 'derp'}
+        assert arg.validated('', in_data) == {'foo': 'herp', 'baz': 'derp'}
+
+    def test_outer_use(self):
+        arg = Arg({
+            'foo': Arg()
+        }, use=json.loads)
+
+        in_data = json.dumps({'foo': 42})
+        assert arg.validated('', in_data) == {'foo': 42}
+
+    def test_nested_use(self):
+        arg = Arg({
+            'foo': Arg(use=lambda v: v.upper()),
+            'bar': Arg(use=lambda v: v.lower())
+        })
+        in_data = {'foo': 'hErP', 'bar': 'dErP'}
+        assert arg.validated('', in_data) == {'foo': 'HERP', 'bar': 'derp'}
+
+    def test_nested_required(self):
+        arg = Arg({
+            'foo': Arg(required=True),
+            'bar': Arg(required=False),
+        })
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('', {})
+        assert 'Required parameter "foo" not found.' in str(excinfo)
+
 # Parser tests
 
 @mock.patch('webargs.core.Parser.parse_json')
@@ -248,7 +319,7 @@ def test_parse_required_arg_raises_validation_error(parse_json, web_request):
     parse_json.return_value = Missing
     with pytest.raises(ValidationError) as excinfo:
         p.parse_arg('foo', arg, web_request)
-    assert 'Required parameter ' + repr('foo') + ' not found.' in str(excinfo)
+    assert 'Required parameter "foo" not found.' in str(excinfo)
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse_required_arg(parse_json, web_request):
