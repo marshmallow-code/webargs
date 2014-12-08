@@ -280,13 +280,13 @@ Each parser has a default error handling method. To override the error handling 
 Nesting Args
 ------------
 
-`Arg` dictionaries can be nested within each other.
+`Arg` dictionaries can be nested within each other. This can be useful for validating nested data.
 
 .. code-block:: python
 
         args = {
             'name': Arg({
-                'first': Arg(str, require=True),
+                'first': Arg(str, required=True),
                 'last': Arg(str, required=True),
             })
         }

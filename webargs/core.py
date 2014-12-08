@@ -243,7 +243,7 @@ class Arg(object):
         # Prevent "missing" placeholder from getting converted
         if value is Missing:
             return value
-        if self.multiple and isinstance(value, list):
+        if self.multiple and isinstance(value, (list, tuple)):
             return [self._validate(name, each) for each in value]
         else:
             return self._validate(name, value)
