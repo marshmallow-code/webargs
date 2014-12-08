@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.9.0 (unreleased)
+0.9.0 (2014-10-08)
 ******************
 
 * Pyramid support thanks to @philtay.

@@ -53,7 +53,7 @@ setup(
     version=__version__,
     description=('A utility library for parsing HTTP request arguments, '
         'with built-in support for popular web frameworks, including '
-        'Flask and Django.'),
+        'Flask, Django, Bottle, Tornado, and Pyramid.'),
     long_description=(read("README.rst") + '\n\n' +
                         read("HISTORY.rst")),
     author='Steven Loria',
