@@ -239,6 +239,20 @@ class TestArgNesting:
             arg.validated('', {})
         assert 'Required parameter "foo" not found.' in str(excinfo)
 
+    def test_nested_multiple(self):
+        arg = Arg({
+            'foo': Arg(required=True),
+            'bar': Arg(required=True),
+        }, multiple=True)
+
+        in_data = [{'foo': 42, 'bar': 24}, {'foo': 12, 'bar': 21}]
+        assert arg.validated('', in_data) == in_data
+        bad_data = [{'foo': 42, 'bar': 24}, {'bar': 21}]
+
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('', bad_data)
+        assert 'Required' in str(excinfo)
+
 # Parser tests
 
 @mock.patch('webargs.core.Parser.parse_json')
