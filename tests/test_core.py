@@ -3,6 +3,9 @@ import json
 import mock
 
 import pytest
+from werkzeug.datastructures import MultiDict as WerkMultiDict
+from django.utils.datastructures import MultiValueDict as DjMultiDict
+from bottle import MultiDict as BotMultiDict
 
 from webargs.core import (
     Parser,
@@ -539,6 +542,27 @@ def test_full_input_validator_receives_nonascii_input(web_request):
     args = {'text': Arg(unicode)}
     with pytest.raises(ValidationError):
         parser.parse(args, web_request, targets=('json', ), validate=validate)
+
+def test_get_value_basic():
+    assert get_value({'foo': 42}, 'foo', False) == 42
+    assert get_value({'foo': 42}, 'bar', False) is Missing
+    assert get_value({'foos': ['a', 'b']}, 'foos', True) == ['a', 'b']
+
+
+def create_bottle_multi_dict():
+    d = BotMultiDict()
+    d['foos'] = 'a'
+    d['foos'] = 'b'
+    return d
+
+@pytest.mark.parametrize('input_dict',
+[
+    WerkMultiDict([('foos', 'a'), ('foos', 'b')]),
+    DjMultiDict({'foos': ['a', 'b']}),
+    create_bottle_multi_dict(),
+])
+def test_get_value_multidict(input_dict):
+    assert get_value(input_dict, 'foos', multiple=True) == ['a', 'b']
 
 def test_parse_with_source(web_request):
 

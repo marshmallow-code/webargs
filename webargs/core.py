@@ -106,6 +106,8 @@ def get_value(d, name, multiple):
             return d.getlist(name)
         elif hasattr(d, 'getall'):
             return d.getall(name)
+        elif isinstance(val, (list, tuple)):
+            return val
         else:
             return [val]
     return val
