@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.9.1 (unreleased)
+0.9.1 (2014-12-11)
 ******************
 
 - Fix behavior of ``multiple=True`` when nesting Args. Thanks Derrick Gilland for reporting.
