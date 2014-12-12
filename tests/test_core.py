@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
 import mock
+import sys
 
 import pytest
 from werkzeug.datastructures import MultiDict as WerkMultiDict
-from django.utils.datastructures import MultiValueDict as DjMultiDict
+
+PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
+if not PY26:  # django does not support python 2.6
+    from django.utils.datastructures import MultiValueDict as DjMultiDict
 from bottle import MultiDict as BotMultiDict
 
 from webargs.core import (
@@ -555,12 +559,13 @@ def create_bottle_multi_dict():
     d['foos'] = 'b'
     return d
 
-@pytest.mark.parametrize('input_dict',
-[
+multidicts = [
     WerkMultiDict([('foos', 'a'), ('foos', 'b')]),
-    DjMultiDict({'foos': ['a', 'b']}),
     create_bottle_multi_dict(),
-])
+]
+if not PY26:
+    multidicts.append(DjMultiDict({'foos': ['a', 'b']}))
+@pytest.mark.parametrize('input_dict', multidicts)
 def test_get_value_multidict(input_dict):
     assert get_value(input_dict, 'foos', multiple=True) == ['a', 'b']
 
