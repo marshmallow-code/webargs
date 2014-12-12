@@ -92,6 +92,19 @@ def test_nested_args(testapp):
         assert args['name']['first'] == 'steve'
         assert args['name']['last'] == 'LORIA'
 
+def test_nested_multiple_args(testapp):
+    testargs = {
+        'users': Arg({'id': Arg(), 'name': Arg()}, multiple=True)
+    }
+    in_data = {'users': [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]}
+    with testapp.test_request_context('/myendpoint', method='post',
+            data=json.dumps(in_data),
+            content_type='application/json'):
+        args = parser.parse(testargs)
+        users = args['users']
+        assert users[0]['id'] == 1
+        assert users[1]['id'] == 2
+
 
 def test_parsing_json_default(testapp):
     with testapp.test_request_context('/myendpoint', method='post',
