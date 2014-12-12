@@ -1,7 +1,12 @@
 Changelog
 ---------
 
-0.9.0 (2014-10-08)
+0.9.1 (unreleased)
+******************
+
+- Fix behavior of ``multiple=True`` when nesting Args. Thanks Derrick Gilland for reporting.
+
+0.9.0 (2014-12-08)
 ******************
 
 * Pyramid support thanks to @philtay.
