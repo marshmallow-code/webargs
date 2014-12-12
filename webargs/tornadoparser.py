@@ -51,7 +51,7 @@ def get_value(d, name, multiple):
     if multiple:
         return [] if value is core.Missing else value
 
-    if value and isinstance(value, list):
+    if value and isinstance(value, (list, tuple)):
         return value[0]
 
     return value
