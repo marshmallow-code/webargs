@@ -15,6 +15,7 @@ from webargs.core import (
     Parser,
     Arg,
     ValidationError,
+    RequiredArgMissingError,
     Missing,
     get_value,
     PY2,
@@ -236,7 +237,7 @@ class TestArgNesting:
             'foo': Arg(required=True),
             'bar': Arg(required=False),
         })
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(RequiredArgMissingError) as excinfo:
             arg.validated('', {})
         assert 'Required parameter "foo" not found.' in str(excinfo)
 
@@ -341,7 +342,7 @@ def test_parse_required_arg_raises_validation_error(parse_json, web_request):
     arg = Arg(required=True)
     p = Parser()
     parse_json.return_value = Missing
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(RequiredArgMissingError) as excinfo:
         p.parse_arg('foo', arg, web_request)
     assert 'Required parameter "foo" not found.' in str(excinfo)
 
@@ -358,11 +359,11 @@ def test_parse_required_multiple_arg(parse_form, web_request):
     parse_form.return_value = []
     arg = Arg(multiple=True, required=True)
     p = Parser()
-    with pytest.raises(ValidationError):
+    with pytest.raises(RequiredArgMissingError):
         p.parse_arg('foo', arg, web_request)
 
     parse_form.return_value = None
-    with pytest.raises(ValidationError):
+    with pytest.raises(RequiredArgMissingError):
         p.parse_arg('foo', arg, web_request)
 
 def test_default_targets():
@@ -644,7 +645,7 @@ def test_type_conversion_with_multiple_and_arg_missing_allowed(web_request, pars
 def test_type_conversion_with_multiple_required(web_request, parser):
     web_request.json = {}
     args = {'ids': Arg(int, multiple=True, required=True)}
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(RequiredArgMissingError) as excinfo:
         parser.parse(args, web_request)
     assert 'Required parameter "ids" not found' in str(excinfo)
 

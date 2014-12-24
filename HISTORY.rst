@@ -6,11 +6,12 @@ Changelog
 
 * When parsing a nested ``Arg``, filter out extra arguments that are not part of the ``Arg's`` nested ``dict`` (:issue:`28`). Thanks Derrick Gilland for the suggestion.
 * Fix bug in parsing ``Args`` with both type coercion and ``multiple=True`` (:issue:`30`). Thanks Steven Manuatu for reporting.
+* Raise ``RequiredArgMissingError`` when a required argument is missing on a request.
 
 0.9.1 (2014-12-11)
 ******************
 
-* Fix behavior of ``multiple=True`` when nesting Args. Thanks Derrick Gilland for reporting.
+* Fix behavior of ``multiple=True`` when nesting Args (:issues:`29`). Thanks Derrick Gilland for reporting.
 
 0.9.0 (2014-12-08)
 ******************
