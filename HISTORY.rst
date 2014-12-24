@@ -11,7 +11,7 @@ Changelog
 0.9.1 (2014-12-11)
 ******************
 
-* Fix behavior of ``multiple=True`` when nesting Args (:issues:`29`). Thanks Derrick Gilland for reporting.
+* Fix behavior of ``multiple=True`` when nesting Args (:issue:`29`). Thanks Derrick Gilland for reporting.
 
 0.9.0 (2014-12-08)
 ******************

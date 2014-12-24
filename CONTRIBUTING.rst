@@ -40,7 +40,7 @@ Setting Up for Local Development
 Git Branch Structure
 ++++++++++++++++++++
 
-Marshmallow abides by the following branching model:
+Webargs abides by the following branching model:
 
 
 ``dev``
