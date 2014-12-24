@@ -336,6 +336,22 @@ def test_multiple_arg_allowed_missing_int_conversion(testapp):
         args = parser.parse(args)
         assert 'ids' not in args or len(args['ids']) == 0
 
+def test_multiple_arg_allowed_missing_false_int_conversion(testapp):
+    args = {'ids': Arg(int, multiple=True, allow_missing=False)}
+    with testapp.test_request_context(path='/foo', method='post',
+            data=json.dumps({'fakedata': True}), content_type='application/json'):
+        args = parser.parse(args)
+        assert 'ids' in args
+
+@mock.patch('webargs.flaskparser.abort')
+def test_multiple_arg_required_int_conversion_required(mock_abort, testapp):
+    args = {'ids': Arg(int, multiple=True, required=True)}
+    with testapp.test_request_context(path='/foo', method='post',
+            data=json.dumps({}), content_type='application/json'):
+        args = parser.parse(args)
+    mock_abort.assert_called_once
+
+
 def test_parsing_headers(testapp):
     with testapp.test_request_context('/foo', headers={'Name': 'Fred'}):
         args = parser.parse(hello_args, targets=('headers',))

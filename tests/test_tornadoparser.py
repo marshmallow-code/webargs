@@ -18,12 +18,18 @@ import tornado.ioloop
 from tornado.testing import AsyncHTTPTestCase
 
 from webargs import Arg, Missing, ValidationError
-from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json
+from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json, get_value
 
 name = 'name'
 bvalue = b'value'
 value = 'value'
 
+def test_get_value_basic():
+    assert get_value({'foo': 42}, 'foo', False) == 42
+    assert get_value({'foo': 42}, 'bar', False) is Missing
+    assert get_value({'foos': ['a', 'b']}, 'foos', True) == ['a', 'b']
+    # https://github.com/sloria/webargs/pull/30
+    assert get_value({'foos': ['a', 'b']}, 'bar', True) is Missing
 
 class TestQueryArgs(object):
 
@@ -51,11 +57,14 @@ class TestQueryArgs(object):
     def test_it_should_return_missing_if_not_present(self):
         query = []
         arg = Arg(multiple=False)
+        arg2 = Arg(int, multiple=False)
         request = make_get_request(query)
 
         result = parser.parse_querystring(request, name, arg)
+        result2 = parser.parse_querystring(request, name, arg2)
 
         assert result is Missing
+        assert result2 is Missing
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []
@@ -64,7 +73,7 @@ class TestQueryArgs(object):
 
         result = parser.parse_querystring(request, name, arg)
 
-        assert result == []
+        assert result is Missing
 
 
 class TestFormArgs(object):
@@ -106,7 +115,7 @@ class TestFormArgs(object):
 
         result = parser.parse_form(request, name, arg)
 
-        assert result == []
+        assert result is Missing
 
 
 class TestJSONArgs(object):
@@ -151,7 +160,7 @@ class TestJSONArgs(object):
         request = make_json_request(query)
         result = parser.parse_json(request, name, arg)
 
-        assert result == []
+        assert result is Missing
 
     def test_it_should_handle_type_error_on_parse_json(self):
         arg = Arg()
@@ -210,7 +219,7 @@ class TestHeadersArgs(object):
 
         result = parser.parse_headers(request, name, arg)
 
-        assert result == []
+        assert result is Missing
 
 
 class TestFilesArgs(object):
@@ -252,7 +261,7 @@ class TestFilesArgs(object):
 
         result = parser.parse_files(request, name, arg)
 
-        assert result == []
+        assert result is Missing
 
 
 class TestErrorHandler(object):
@@ -372,6 +381,42 @@ class TestParse(object):
 
         assert parsed['string'] == value
         assert parsed['integer'] == [1, 2]
+
+    def test_it_should_parse_required_arguments(self):
+        args = {
+            'foo': Arg(required=True),
+        }
+
+        request = make_json_request({})
+
+        with pytest.raises(tornado.web.HTTPError) as excinfo:
+            parser.parse(args, request)
+        assert 'Required parameter "foo" not found' in str(excinfo)
+
+    def test_it_should_parse_multiple_args_with_conversion(self):
+        args = {
+            'foo': Arg(int, multiple=True)
+        }
+        request = make_json_request({})
+        result = parser.parse(args, request)
+        assert result == {'foo': []}
+
+    def test_it_should_parse_multiple_arg_allowed_missing(self):
+        args = {
+            'foo': Arg(int, multiple=True, allow_missing=True)
+        }
+        request = make_json_request({})
+        result = parser.parse(args, request)
+        assert result == {}
+
+    def test_it_should_parse_multiple_arg_required(self):
+        args = {
+            'foo': Arg(int, multiple=True, required=True)
+        }
+        request = make_json_request({})
+        with pytest.raises(tornado.web.HTTPError) as excinfo:
+            parser.parse(args, request)
+        assert 'Required parameter "foo" not found' in str(excinfo)
 
 
 class TestUseArgs(object):
