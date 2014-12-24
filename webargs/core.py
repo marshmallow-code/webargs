@@ -85,7 +85,7 @@ class _Missing(object):
     __nonzero__ = __bool__  # py2 compatibility
 
     def __repr__(self):
-        return '<webargs.core.missing>'
+        return '<webargs.core.Missing>'
 
 
 #: Singleton object that represents a value that cannot be found on a request.
