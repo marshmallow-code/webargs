@@ -214,19 +214,13 @@ class TestArgNesting:
         valid = {'foo': {'bar': 42}}
         assert arg.validated('myarg', valid) == valid
 
-    def test_extra_nested_items_are_in_output(self):
-        arg = Arg({
-            'foo': Arg()
-        })
-        in_data = {'foo': 'herp', 'baz': 'derp'}
-        assert arg.validated('', in_data) == {'foo': 'herp', 'baz': 'derp'}
-
     def test_outer_use(self):
         arg = Arg({
             'foo': Arg()
         }, use=json.loads)
 
-        in_data = json.dumps({'foo': 42})
+        # has extra args
+        in_data = json.dumps({'foo': 42, 'bar': 24})
         assert arg.validated('', in_data) == {'foo': 42}
 
     def test_nested_use(self):
@@ -259,6 +253,15 @@ class TestArgNesting:
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('', bad_data)
         assert 'Required' in str(excinfo)
+
+    def test_extra_arguments_are_excluded(self):
+        arg = Arg({
+            'foo': Arg(),
+        })
+
+        in_data = {'foo': 42, 'bar': 24}
+
+        assert arg.validated('', in_data) == {'foo': 42}
 
 # Parser tests
 

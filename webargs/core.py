@@ -222,6 +222,8 @@ class Arg(object):
                 raise ValidationError(self.error or msg)
 
         if self._has_nesting:
+            # Filter out extra args
+            ret = dict((k, v) for k, v in iteritems(ret) if k in self._nested_args)
             # Recurse into nested argdict
             for key, nested_arg in iteritems(self._nested_args):
                 try:
