@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.10.0 (unreleased)
+0.10.0 (2014-12-23)
 *******************
 
 * When parsing a nested ``Arg``, filter out extra arguments that are not part of the ``Arg's`` nested ``dict`` (:issue:`28`). Thanks Derrick Gilland for the suggestion.
