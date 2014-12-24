@@ -48,7 +48,7 @@ def get_value(d, name, multiple):
     """
     value = d.get(name, core.Missing)
 
-    if multiple:
+    if multiple and value is not core.Missing:
         return [] if value is core.Missing else value
 
     if value and isinstance(value, (list, tuple)):

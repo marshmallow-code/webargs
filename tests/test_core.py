@@ -551,6 +551,8 @@ def test_get_value_basic():
     assert get_value({'foo': 42}, 'foo', False) == 42
     assert get_value({'foo': 42}, 'bar', False) is Missing
     assert get_value({'foos': ['a', 'b']}, 'foos', True) == ['a', 'b']
+    # https://github.com/sloria/webargs/pull/30
+    assert get_value({'foos': ['a', 'b']}, 'bar', True) is Missing
 
 
 def create_bottle_multi_dict():
@@ -619,6 +621,29 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
     def viewfunc(username, password):
         return {'username': username, 'password': password}
     assert viewfunc() == {'username': 'foo', 'password': None}
+
+def test_type_conversion_with_multiple_and_arg_missing(web_request, parser):
+    # arg missing in request
+    web_request.json = {}
+    args = {'ids': Arg(int, multiple=True)}
+
+    result = parser.parse(args, web_request)
+    assert 'ids' in result
+
+def test_type_conversion_with_multiple_and_arg_missing_allowed(web_request, parser):
+    # arg missing in request
+    web_request.json = {}
+    args = {'ids': Arg(int, multiple=True, allow_missing=True)}
+
+    result = parser.parse(args, web_request)
+    assert 'ids' not in result
+
+def test_type_conversion_with_multiple_required(web_request, parser):
+    web_request.json = {}
+    args = {'ids': Arg(int, multiple=True, required=True)}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, web_request)
+    assert 'Required parameter "ids" not found' in str(excinfo)
 
 def test_use_kwargs_with_arg_allowed_missing(web_request, parser):
     user_args = {
