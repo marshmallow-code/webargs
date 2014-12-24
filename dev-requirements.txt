@@ -1,10 +1,9 @@
 pytest
 flake8
 tox>=1.5.0
-sphinx
 wheel
 invoke
-Flask==0.10.1
+Flask>=0.10.1
 mock
 webtest
 Django>=1.6.5

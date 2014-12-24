@@ -10,7 +10,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -26,10 +27,12 @@ sys.path.append(os.path.abspath("_themes"))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx_issues']
 
 primary_domain = 'py'
 default_role = 'py:obj'
+
+issues_github_path = 'sloria/webargs'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -54,8 +54,7 @@ setup(
     description=('A utility library for parsing HTTP request arguments, '
         'with built-in support for popular web frameworks, including '
         'Flask, Django, Bottle, Tornado, and Pyramid.'),
-    long_description=(read("README.rst") + '\n\n' +
-                        read("HISTORY.rst")),
+    long_description=read("README.rst"),
     author='Steven Loria',
     author_email='sloria1@gmail.com',
     url='https://github.com/sloria/webargs',
