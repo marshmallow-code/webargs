@@ -51,7 +51,7 @@ def read(fname):
 setup(
     name='webargs',
     version=__version__,
-    description=('A utility library for parsing HTTP request arguments, '
+    description=('A friendly library for parsing HTTP request arguments, '
         'with built-in support for popular web frameworks, including '
         'Flask, Django, Bottle, Tornado, and Pyramid.'),
     long_description=read("README.rst"),
