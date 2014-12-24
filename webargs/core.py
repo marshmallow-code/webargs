@@ -50,6 +50,10 @@ class ValidationError(WebargsError):
             self.message, self.status_code
         )
 
+class RequiredArgMissingError(ValidationError):
+    """Raised when a required argument is not found no a request."""
+    pass
+
 
 def _callable_or_raise(obj):
     """Makes sure an object is callable if it is not ``None``. If not
@@ -230,7 +234,7 @@ class Arg(object):
                     val = ret[key]
                 except KeyError:
                     if nested_arg.required:
-                        raise ValidationError(
+                        raise RequiredArgMissingError(
                             'Required parameter "{0}" not found.'.format(key)
                         )
                 else:
@@ -348,7 +352,9 @@ class Parser(object):
                 else:
                     value = argobj.default
             if argobj.required:
-                raise ValidationError('Required parameter "{0}" not found.'.format(name))
+                raise RequiredArgMissingError(
+                    'Required parameter "{0}" not found.'.format(name)
+                )
         return value
 
     def parse(self, argmap, req, targets=None, validate=None, force_all=False):
