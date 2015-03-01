@@ -1,12 +1,22 @@
-pytest
-flake8
-tox>=1.5.0
-wheel
+# Task running
 invoke
-Flask>=0.10.1
+
+# Testing
+pytest
+tox>=1.5.0
 mock
 webtest
+
+# Distribution
+wheel
+
+# Web frameworks
+Flask>=0.10.1
 Django>=1.6.5
 bottle>=0.12.3
 tornado>=4.0
 pyramid>=1.5.2
+
+# Syntax checking
+pep8==1.6.1
+flake8>=2.2.2
