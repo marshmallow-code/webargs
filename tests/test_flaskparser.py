@@ -44,7 +44,7 @@ def test_parsing_get_args_in_request_context(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
-def test_parsing_get_args_with_query_target_specified(testapp):
+def test_parsing_get_args_with_query_location_specified(testapp):
     with testapp.test_request_context('/myendpoint?name=Fred', method='get'):
         args = parser.parse(hello_args, locations=('query', ))
         assert args == {'name': 'Fred'}
@@ -68,10 +68,10 @@ def test_parsing_json_with_charset(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
-def test_arg_with_target(testapp):
+def test_arg_with_location(testapp):
     testargs = {
-        'name': Arg(str, target='json'),
-        'age': Arg(int, target='querystring'),
+        'name': Arg(str, location='json'),
+        'age': Arg(int, location='querystring'),
     }
     with testapp.test_request_context('/myendpoint?age=42', method='post',
             data=json.dumps({'name': 'Fred'}), content_type='application/json'):
@@ -113,14 +113,14 @@ def test_parsing_json_default(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'World'}
 
-def test_parsing_arg_with_default_and_set_target(testapp):
+def test_parsing_arg_with_default_and_set_location(testapp):
     # Regression test for issue #11
     page = {
         'p': Arg(int,
                 default=1,
                 validate=lambda p: p > 0,
                 error=u"La page demandée n'existe pas",
-                target='querystring'),
+                location='querystring'),
     }
     with testapp.test_request_context('/myendpoint', method='post',
             data=json.dumps({}), content_type='application/json'):

@@ -137,8 +137,8 @@ def test_parsing_cookies(app, testapp):
 
 def test_arg_specific_locations(app, testapp):
     testargs = {
-        'name': Arg(str, target='json'),
-        'age': Arg(int, target='querystring'),
+        'name': Arg(str, location='json'),
+        'age': Arg(int, location='querystring'),
     }
 
     @app.route('/echo', method=['POST'])

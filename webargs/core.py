@@ -474,8 +474,8 @@ class Parser(object):
         kwargs['as_kwargs'] = True
         return self.use_args(*args, **kwargs)
 
-    def target_handler(self, name):
-        """Decorator that registers a function that parses a request target.
+    def location_handler(self, name):
+        """Decorator that registers a function that parses a request location.
         The wrapped function receives a request, the name of the argument, and
         the :class:`Arg <webargs.core.Arg>` object.
 
@@ -484,11 +484,11 @@ class Parser(object):
             from webargs import core
             parser = core.Parser()
 
-            @parser.target_handler('name')
+            @parser.location_handler('name')
             def parse_data(request, name, arg):
                 return request.data.get(name)
 
-        :param str name: The name of the target to register.
+        :param str name: The name of the location to register.
         """
         def decorator(func):
             self.__location_map__[name] = func

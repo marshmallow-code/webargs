@@ -471,23 +471,23 @@ def test_custom_error_handler_decorator(parse_json, web_request):
         parser.parse({'foo': Arg()}, web_request)
 
 
-def test_custom_target_handler(web_request):
+def test_custom_location_handler(web_request):
     web_request.data = {'foo': 42}
 
     parser = Parser()
 
-    @parser.target_handler('data')
+    @parser.location_handler('data')
     def parse_data(req, name, arg):
         return req.data.get(name)
 
     result = parser.parse({'foo': Arg(int)}, web_request, locations=('data', ))
     assert result['foo'] == 42
 
-def test_custom_target_handler_with_source(web_request):
+def test_custom_location_handler_with_source(web_request):
     web_request.data = {'X-Foo': 42}
     parser = Parser()
 
-    @parser.target_handler('data')
+    @parser.location_handler('data')
     def parse_data(req, name, arg):
         # The source name is passed
         assert name == 'X-Foo'
@@ -497,11 +497,11 @@ def test_custom_target_handler_with_source(web_request):
             web_request, locations=('data', ))
     assert result['x_foo'] == 42
 
-def test_custom_target_handler_with_dest(web_request):
+def test_custom_location_handler_with_dest(web_request):
     web_request.data = {'X-Foo': 42}
     parser = Parser()
 
-    @parser.target_handler('data')
+    @parser.location_handler('data')
     def parse_data(req, name, arg):
         # The source name is passed
         assert name == 'X-Foo'
