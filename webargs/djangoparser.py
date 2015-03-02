@@ -78,7 +78,7 @@ class DjangoParser(core.Parser):
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param req: The request object to parse
-        :param tuple targets: Where on the request to search for values.
+        :param tuple locations: Where on the request to search for values.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
@@ -92,7 +92,7 @@ class DjangoParser(core.Parser):
                 except AttributeError:  # first arg is request
                     request = obj
                 parsed_args = self.parse(argmap, req=request, locations=locations,
-                                         validate=None)
+                                         validate=validate)
                 return func(obj, parsed_args, *args, **kwargs)
             return wrapper
         return decorator

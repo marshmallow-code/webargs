@@ -110,3 +110,8 @@ def test_500_response_returned_if_validation_error(testapp):
     url = '/simpleview_required/'
     res = testapp.post_json(url, {}, expect_errors=True)
     assert res.status_code == 500
+
+def test_validated_view(testapp):
+    url = '/validatedview/'
+    res = testapp.post_json(url, {'validated': 42}, expect_errors=True)
+    assert res.status_code == 500
