@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import sys
 import functools
 import inspect
 import logging
+import sys
+import warnings
 
 PY2 = sys.version_info[0] == 2
 
@@ -193,7 +194,13 @@ class Arg(object):
         self.allow_missing = allow_missing
         self.target = target
         self.dest = dest
-        self.source = source
+        if source:
+            warnings.warn(
+                "The 'source' parameter is deprecated. Use the 'dest' parameter "
+                "to specify the key to be added in the output dictionary.",
+                category=DeprecationWarning
+            )
+        self.source = source  # TODO: Remove me.
         self.metadata = metadata
 
     def __repr__(self):

@@ -595,6 +595,13 @@ def test_parse_with_source(web_request):
     parsed = parser.parse(args, web_request, targets=('json',))
     assert parsed == {'foo': 41, 'baz': 42}
 
+def test_source_param_is_deprecated(recwarn):
+    Arg(source='foo')
+
+    w = recwarn.pop(DeprecationWarning)
+    assert issubclass(w.category, DeprecationWarning)
+    assert "Use the 'dest' parameter" in str(w.message)
+
 def test_parse_with_dest(web_request):
     web_request.json = {'Content-Type': 'application/json'}
 
