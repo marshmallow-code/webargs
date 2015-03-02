@@ -162,10 +162,12 @@ class Arg(object):
     :param bool allow_missing: If the argument is not found on the request,
         don't include it in the parsed arguments dictionary.
     :param str target: Where to pull the value off the request, e.g. ``'json'``.
-    :param str source: Key at which value is located, if different from key in
-        argmap
+    :param str dest: Name of the key to be added to the parsed output dictionary.
+        If `None`, the key in the input argument dictionary is used.
     :param metadata: Extra arguments to be stored as metadata.
 
+    .. versionchanged:: 0.11.0
+        The ``source`` parameter is deprecated in favor of using ``dest``.
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """

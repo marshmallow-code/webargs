@@ -136,7 +136,7 @@ Below are examples of the various parameters that :class:`Arg <webarsg.core.Arg>
         'active': Arg(bool, target='query')
 
         # When value is keyed on a variable-unsafe name or you want to rename a key
-        'content_type': Arg(str, source='Content-Type')
+        'Content-Type': Arg(str, dest='content_type')
     }
 
 To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` method of a :class:`Parser <webargs.core.Parser>` object.

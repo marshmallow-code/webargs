@@ -5,6 +5,7 @@ Changelog
 *******************
 
 * Add ``dest`` parameter to ``Arg`` constructor which determines the key to be added to the parsed arguments dictionary (:issue:`32`).
+* *Deprecation*: The ``source`` parameter is deprecated in favor of the ``dest`` parameter.
 
 0.10.0 (2014-12-23)
 *******************
