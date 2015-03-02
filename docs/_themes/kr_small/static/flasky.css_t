@@ -289,3 +289,9 @@ tt.xref, a tt {
 a:hover tt {
     background: #EEE;
 }
+
+@media screen and (max-width: 870px) {
+    .github {
+        display: none;
+    }
+}
