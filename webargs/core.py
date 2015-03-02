@@ -161,17 +161,19 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     :param bool allow_missing: If the argument is not found on the request,
         don't include it in the parsed arguments dictionary.
-    :param str target: Where to pull the value off the request, e.g. ``'json'``.
-    :param str source: Key at which value is located, if different from key in
-        argmap
+    :param str location: Where to pull the value off the request, e.g. ``'json'``.
+    :param str dest: Name of the key to be added to the parsed output dictionary.
+        If `None`, the key in the input argument dictionary is used.
     :param metadata: Extra arguments to be stored as metadata.
 
+    .. versionchanged:: 0.11.0
+        The ``source`` parameter is deprecated in favor of using ``dest``.
     .. versionchanged:: 0.5.0
         The ``use`` callable is called before type conversion.
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, target=None, dest=None, source=None, **metadata):
+                 allow_missing=False, location=None, dest=None, source=None, **metadata):
         if isinstance(type_, dict):
             self.type = dict
             self._nested_args = type_
@@ -192,7 +194,7 @@ class Arg(object):
         if required and allow_missing:
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
-        self.target = target
+        self.location = location
         self.dest = dest
         if source:
             warnings.warn(
@@ -270,17 +272,17 @@ class Parser(object):
     a request.
 
     Descendant classes must provide lower-level implementations for parsing
-    different targets, e.g. ``parse_json``, ``parse_querystring``, etc.
+    different locations, e.g. ``parse_json``, ``parse_querystring``, etc.
 
-    :param tuple targets: Default targets to parse.
+    :param tuple locations: Default locations to parse.
     :param callable error_handler: Custom error handler function.
     :param str error: Custom error message to use if validation fails.
     """
 
-    DEFAULT_TARGETS = ('querystring', 'form', 'json',)
+    DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
 
-    #: Maps target => method name
-    __target_map__ = {
+    #: Maps location => method name
+    __location_map__ = {
         'json': 'parse_json',
         'querystring': 'parse_querystring',
         'query': 'parse_querystring',
@@ -290,32 +292,32 @@ class Parser(object):
         'files': 'parse_files',
     }
 
-    def __init__(self, targets=None, error_handler=None, error=None):
-        self.targets = targets or self.DEFAULT_TARGETS
+    def __init__(self, locations=None, error_handler=None, error=None):
+        self.locations = locations or self.DEFAULT_LOCATIONS
         self.error_callback = _callable_or_raise(error_handler)
         self.error = error
         #: A short-lived cache to store results from processing request bodies.
         self._cache = {}
 
-    def _validated_targets(self, targets):
-        """Ensure that the given targets argument is valid.
+    def _validated_locations(self, locations):
+        """Ensure that the given locations argument is valid.
 
-        :raises: ValueError if a given targets includes an invalid target.
+        :raises: ValueError if a given locations includes an invalid location.
         """
-        # The set difference between the given targets and the available targets
-        # will be the set of invalid targets
-        valid_targets = set(self.__target_map__.keys())
-        given = set(targets)
-        invalid_targets = given - valid_targets
-        if len(invalid_targets):
-            msg = "Invalid targets arguments: {0}".format(list(invalid_targets))
+        # The set difference between the given locations and the available locations
+        # will be the set of invalid locations
+        valid_locations = set(self.__location_map__.keys())
+        given = set(locations)
+        invalid_locations = given - valid_locations
+        if len(invalid_locations):
+            msg = "Invalid locations arguments: {0}".format(list(invalid_locations))
             raise ValueError(msg)
-        return targets
+        return locations
 
-    def _get_value(self, name, argobj, req, target):
+    def _get_value(self, name, argobj, req, location):
         # Parsing function to call
         # May be a method name (str) or a function
-        func = self.__target_map__.get(target)
+        func = self.__location_map__.get(location)
         if func:
             if inspect.isfunction(func):
                 function = func
@@ -326,13 +328,13 @@ class Parser(object):
             value = None
         return value
 
-    def parse_arg(self, name, argobj, req, targets=None):
+    def parse_arg(self, name, argobj, req, locations=None):
         """Parse a single argument.
 
         :param str name: The name of the value.
         :param Arg argobj: The ``Arg`` object.
         :param req: The request object to parse.
-        :param tuple targets: The targets ('json', 'querystring', etc.) where
+        :param tuple locations: The locations ('json', 'querystring', etc.) where
             to search for the value.
         :return: The argument value or `Missing` if the value cannot be found
             on the request.
@@ -341,13 +343,13 @@ class Parser(object):
             if a required argument is missing.
         """
         value = None
-        if argobj.target:
-            targets_to_check = self._validated_targets([argobj.target])
+        if argobj.location:
+            locations_to_check = self._validated_locations([argobj.location])
         else:
-            targets_to_check = self._validated_targets(targets or self.targets)
+            locations_to_check = self._validated_locations(locations or self.locations)
 
-        for target in targets_to_check:
-            value = self._get_value(name, argobj, req=req, target=target)
+        for location in locations_to_check:
+            value = self._get_value(name, argobj, req=req, location=location)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it
@@ -365,12 +367,12 @@ class Parser(object):
                 )
         return value
 
-    def parse(self, argmap, req, targets=None, validate=None, force_all=False):
+    def parse(self, argmap, req, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
         :param dict argmap: Dictionary of argname:Arg object pairs.
         :param req: The request object to parse.
-        :param tuple targets: Where on the request to search for values.
+        :param tuple locations: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
             'headers', 'cookies', 'files')``.
         :param callable validate: Validation function or list of validation functions
@@ -384,7 +386,7 @@ class Parser(object):
         try:
             for argname, argobj in iteritems(argmap):
                 parsed_value = self.parse_arg(argname, argobj, req,
-                    targets=targets or self.targets)
+                    locations=locations or self.locations)
                 # Skip missing values
                 can_skip = (not force_all and
                             parsed_value is Missing or (argobj.multiple
@@ -416,7 +418,7 @@ class Parser(object):
         self._cache = {}
         return None
 
-    def use_args(self, argmap, req=None, targets=None, as_kwargs=False, validate=None):
+    def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -427,20 +429,20 @@ class Parser(object):
                 return 'Hello ' + args['name']
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
-        :param tuple targets: Where on the request to search for values.
+        :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
         """
-        targets = targets or self.DEFAULT_TARGETS
+        locations = locations or self.DEFAULT_LOCATIONS
 
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 # if as_kwargs is passed, must include all args
                 force_all = as_kwargs
-                parsed_args = self.parse(argmap, req=req, targets=targets,
+                parsed_args = self.parse(argmap, req=req, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
@@ -472,8 +474,8 @@ class Parser(object):
         kwargs['as_kwargs'] = True
         return self.use_args(*args, **kwargs)
 
-    def target_handler(self, name):
-        """Decorator that registers a function that parses a request target.
+    def location_handler(self, name):
+        """Decorator that registers a function that parses a request location.
         The wrapped function receives a request, the name of the argument, and
         the :class:`Arg <webargs.core.Arg>` object.
 
@@ -482,14 +484,14 @@ class Parser(object):
             from webargs import core
             parser = core.Parser()
 
-            @parser.target_handler('name')
+            @parser.location_handler('name')
             def parse_data(request, name, arg):
                 return request.data.get(name)
 
-        :param str name: The name of the target to register.
+        :param str name: The name of the location to register.
         """
         def decorator(func):
-            self.__target_map__[name] = func
+            self.__location_map__[name] = func
             return func
         return decorator
 

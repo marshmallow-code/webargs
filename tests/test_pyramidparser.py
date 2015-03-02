@@ -37,14 +37,14 @@ def testapp():
         return args
 
     def echocookie(request):
-        args = parser.parse(hello_args, request, targets=('cookies',))
+        args = parser.parse(hello_args, request, locations=('cookies',))
         return args
 
     def echo2(request):
-        args = parser.parse(hello_args, request, targets=('headers',))
+        args = parser.parse(hello_args, request, locations=('headers',))
         return args
 
-    @parser.use_args({'myfile': Arg(multiple=True)}, targets=('files',))
+    @parser.use_args({'myfile': Arg(multiple=True)}, locations=('files',))
     def echofile(request, args):
         _value = lambda f: f.getvalue().decode('utf-8')
         return dict((i.filename, _value(i.file)) for i in args['myfile'])

@@ -5,7 +5,7 @@ webargs
 .. image:: https://badge.fury.io/py/webargs.png
     :target: http://badge.fury.io/py/webargs
 
-.. image:: https://travis-ci.org/sloria/webargs.png?branch=master
+.. image:: https://travis-ci.org/sloria/webargs.png?branch=pypi
     :target: https://travis-ci.org/sloria/webargs
 
 Homepage: https://webargs.readthedocs.org/

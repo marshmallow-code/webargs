@@ -34,7 +34,7 @@ def testapp():
     @app.route('/handleform', methods=['post'])
     def handleform():
         """View that just returns the jsonified args."""
-        args = parser.parse(hello_args, targets=('form', ))
+        args = parser.parse(hello_args, locations=('form', ))
         return jsonify(args)
     return app
 
@@ -44,9 +44,9 @@ def test_parsing_get_args_in_request_context(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
-def test_parsing_get_args_with_query_target_specified(testapp):
+def test_parsing_get_args_with_query_location_specified(testapp):
     with testapp.test_request_context('/myendpoint?name=Fred', method='get'):
-        args = parser.parse(hello_args, targets=('query', ))
+        args = parser.parse(hello_args, locations=('query', ))
         assert args == {'name': 'Fred'}
 
 def test_parsing_get_args_default(testapp):
@@ -68,10 +68,10 @@ def test_parsing_json_with_charset(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
-def test_arg_with_target(testapp):
+def test_arg_with_location(testapp):
     testargs = {
-        'name': Arg(str, target='json'),
-        'age': Arg(int, target='querystring'),
+        'name': Arg(str, location='json'),
+        'age': Arg(int, location='querystring'),
     }
     with testapp.test_request_context('/myendpoint?age=42', method='post',
             data=json.dumps({'name': 'Fred'}), content_type='application/json'):
@@ -113,14 +113,14 @@ def test_parsing_json_default(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'World'}
 
-def test_parsing_arg_with_default_and_set_target(testapp):
+def test_parsing_arg_with_default_and_set_location(testapp):
     # Regression test for issue #11
     page = {
         'p': Arg(int,
                 default=1,
                 validate=lambda p: p > 0,
                 error=u"La page demandée n'existe pas",
-                target='querystring'),
+                location='querystring'),
     }
     with testapp.test_request_context('/myendpoint', method='post',
             data=json.dumps({}), content_type='application/json'):
@@ -354,14 +354,14 @@ def test_multiple_arg_required_int_conversion_required(mock_abort, testapp):
 
 def test_parsing_headers(testapp):
     with testapp.test_request_context('/foo', headers={'Name': 'Fred'}):
-        args = parser.parse(hello_args, targets=('headers',))
+        args = parser.parse(hello_args, locations=('headers',))
         # Header key is lowercased
         assert args['name'] == 'Fred'
 
 def test_parsing_cookies(testapp):
     @testapp.route('/getcookiearg')
     def echo():
-        args = parser.parse(hello_args, targets=('cookies',))
+        args = parser.parse(hello_args, locations=('cookies',))
         return jsonify(args)
     testclient = testapp.test_client()
     testclient.set_cookie('localhost', key='name', value='Fred')
@@ -389,7 +389,7 @@ def test_parse_files(testapp):
     file_args = {'myfile': Arg()}
     with testapp.test_request_context('/foo', method='POST',
             data=payload):
-        args = parser.parse(file_args, targets=('files', ))
+        args = parser.parse(file_args, locations=('files', ))
         assert args['myfile'].read() == b'bar'
 
 @pytest.mark.parametrize('context', [
@@ -432,7 +432,7 @@ def test_parse_multiple_json(testapp):
     multargs = {'name': Arg(multiple=True)}
     with testapp.test_request_context('/foo', data=json.dumps({'name': 'steve'}),
             content_type='application/json', method='POST'):
-        args = parser.parse(multargs, targets=('json',))
+        args = parser.parse(multargs, locations=('json',))
         assert args['name'] == ['steve']
 
 def test_parse_json_with_nonascii_characters(testapp):
@@ -440,7 +440,7 @@ def test_parse_json_with_nonascii_characters(testapp):
     text = u'øˆƒ£ºº∆ƒˆ∆'
     with testapp.test_request_context('/foo', data=json.dumps({'text': text}),
             content_type='application/json', method='POST'):
-        result = parser.parse(args, targets=('json', ))
+        result = parser.parse(args, locations=('json', ))
     assert result['text'] == text
 
 def test_validation_error_with_status_code_and_data(testapp):
@@ -450,7 +450,7 @@ def test_validation_error_with_status_code_and_data(testapp):
     with testapp.test_request_context('/foo', data=json.dumps({'text': 'bar'}),
             content_type='application/json', method='POST'):
         with pytest.raises(HTTPException) as excinfo:
-            parser.parse(args, targets=('json', ))
+            parser.parse(args, locations=('json', ))
     exc = excinfo.value
     assert exc.code == 401
     assert exc.data['extra'] == 'some data'

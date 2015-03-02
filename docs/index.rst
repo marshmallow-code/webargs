@@ -133,10 +133,10 @@ Below are examples of the various parameters that :class:`Arg <webarsg.core.Arg>
         'nickname': Arg(str, multiple=True),
 
         # When you know where an argument should be parsed from
-        'active': Arg(bool, target='query')
+        'active': Arg(bool, location='query')
 
         # When value is keyed on a variable-unsafe name or you want to rename a key
-        'content_type': Arg(str, source='Content-Type')
+        'Content-Type': Arg(str, dest='content_type')
     }
 
 To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` method of a :class:`Parser <webargs.core.Parser>` object.
@@ -172,16 +172,16 @@ Alternatively, you can decorate your view with :meth:`use_args <webargs.core.Par
         return render_template('settings.html', username=username, nickname=nickname)
 
 
-By default, webargs will search for arguments from the URL querystring (e.g. ``"/?name=foo"``), form data, and JSON data (in that order). You can explicitly specify which targets to search, like so:
+By default, webargs will search for arguments from the URL querystring (e.g. ``"/?name=foo"``), form data, and JSON data (in that order). You can explicitly specify which locations to search, like so:
 
 .. code-block:: python
 
     @app.route('/register')
-    @use_args(user_args, targets=('json', 'form'))
+    @use_args(user_args, locations=('json', 'form'))
     def register(args):
         return 'registration page'
 
-Available targets include:
+Available locations include:
 
 - ``'querystring'`` (same as ``'query'``)
 - ``'json'``
@@ -190,23 +190,23 @@ Available targets include:
 - ``'cookies'``
 - ``'files'``
 
-Adding Custom Target Handlers
------------------------------
+Adding Custom Location Handlers
+-------------------------------
 
-To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.core.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
+To add your own custom location handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.core.Arg>` object, then decorate that function with :func:`Parser.location_handler <webargs.core.Parser.location_handler>`.
 
 
 .. code-block:: python
 
     from webargs.flaskparser import parser
 
-    @parser.target_handler('data')
+    @parser.location_handler('data')
     def parse_data(request, name, arg):
         return request.data.get(name)
 
-    # Now 'data' can be specified as a target
+    # Now 'data' can be specified as a location
 
-    @parser.use_args({'per_page': Arg(int)}, targets=('data', ))
+    @parser.use_args({'per_page': Arg(int)}, locations=('data', ))
     def posts(args):
         return 'displaying {} posts'.format(args['per_page'])
 

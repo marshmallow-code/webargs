@@ -81,7 +81,7 @@ def test_parse_headers_raises_not_implemented_error(mockrequest):
     arg = Arg()
     p = DjangoParser()
     with pytest.raises(NotImplementedError) as excinfo:
-        p.parse_arg('foo', arg, req=mockrequest, targets=('headers',))
+        p.parse_arg('foo', arg, req=mockrequest, locations=('headers',))
     assert 'Header parsing not supported by DjangoParser' in str(excinfo)
 
 def test_parse_cookies(testapp):
@@ -109,4 +109,9 @@ def test_500_response_returned_if_validation_error(testapp):
     # Endpoint requires 'name'
     url = '/simpleview_required/'
     res = testapp.post_json(url, {}, expect_errors=True)
+    assert res.status_code == 500
+
+def test_validated_view(testapp):
+    url = '/validatedview/'
+    res = testapp.post_json(url, {'validated': 42}, expect_errors=True)
     assert res.status_code == 500
