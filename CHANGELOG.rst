@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.11.0 (unreleased)
+0.11.0 (2015-03-01)
 *******************
 
 Changes:
@@ -12,7 +12,7 @@ Changes:
 
 Deprecation:
 
-* *Deprecation*: The ``source`` parameter is deprecated in favor of the ``dest`` parameter.
+* The ``source`` parameter is deprecated in favor of the ``dest`` parameter.
 
 Bug fixes:
 
