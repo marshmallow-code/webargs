@@ -4,9 +4,19 @@ Changelog
 0.11.0 (unreleased)
 *******************
 
+Changes:
+
 * Add ``dest`` parameter to ``Arg`` constructor which determines the key to be added to the parsed arguments dictionary (:issue:`32`).
 * *Backwards-incompatible*: Rename ``targets`` parameter to ``locations`` in ``Parser`` constructor, ``Parser#parse_arg``, ``Parser#parse``, ``Parser#use_args``, and ``Parser#use_kwargs``.
+* *Backwards-incompatible*: Rename ``Parser#target_handler`` to ``Parser#location_handler``.
+
+Deprecation:
+
 * *Deprecation*: The ``source`` parameter is deprecated in favor of the ``dest`` parameter.
+
+Bug fixes:
+
+* Fix ``validate`` parameter of ``DjangoParser#use_args``.
 
 0.10.0 (2014-12-23)
 *******************
