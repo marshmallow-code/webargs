@@ -170,7 +170,7 @@ class Arg(object):
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, target=None, source=None, **metadata):
+                 allow_missing=False, target=None, dest=None, source=None, **metadata):
         if isinstance(type_, dict):
             self.type = dict
             self._nested_args = type_
@@ -192,6 +192,7 @@ class Arg(object):
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
         self.target = target
+        self.dest = dest
         self.source = source
         self.metadata = metadata
 
@@ -386,7 +387,8 @@ class Parser(object):
                 else:
                     if parsed_value is Missing:
                         parsed_value = self.fallback(req, argname, argobj)
-                    parsed[argname] = parsed_value
+                    key = argobj.dest or argname
+                    parsed[key] = parsed_value
             for validator in validators:
                 if validator(parsed) is False:
                     msg = u'Validator {0}({1}) is not True'.format(

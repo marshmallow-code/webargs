@@ -493,6 +493,18 @@ def test_custom_target_handler_with_source(web_request):
     result = parser.parse({'x_foo': Arg(int, source='X-Foo')}, web_request, targets=('data', ))
     assert result['x_foo'] == 42
 
+def test_custom_target_handler_with_dest(web_request):
+    web_request.data = {'X-Foo': 42}
+    parser = Parser()
+
+    @parser.target_handler('data')
+    def parse_data(req, name, arg):
+        # The source name is passed
+        assert name == 'X-Foo'
+        return req.data.get(name)
+
+    result = parser.parse({'X-Foo': Arg(int, dest='x_foo')}, web_request, targets=('data', ))
+    assert result['x_foo'] == 42
 
 def test_missing_is_falsy():
     assert bool(Missing) is False
@@ -576,13 +588,20 @@ def test_get_value_multidict(input_dict):
     assert get_value(input_dict, 'foos', multiple=True) == ['a', 'b']
 
 def test_parse_with_source(web_request):
-
     web_request.json = {'foo': 41, 'bar': 42}
 
     parser = MockRequestParser()
     args = {'foo': Arg(int), 'baz': Arg(int, source='bar')}
     parsed = parser.parse(args, web_request, targets=('json',))
     assert parsed == {'foo': 41, 'baz': 42}
+
+def test_parse_with_dest(web_request):
+    web_request.json = {'Content-Type': 'application/json'}
+
+    parser = MockRequestParser()
+    args = {'Content-Type': Arg(dest='content_type')}
+    parsed = parser.parse(args, web_request, targets=('json',))
+    assert parsed == {'content_type': 'application/json'}
 
 def test_metadata_can_be_stored_on_args():
     # Extra params are stored as metadata
