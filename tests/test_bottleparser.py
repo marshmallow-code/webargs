@@ -117,7 +117,7 @@ def test_use_kwargs_with_url_params(app, testapp):
 def test_parsing_headers(app, testapp):
     @app.route('/echo2')
     def echo2():
-        args = parser.parse(hello_args, request, targets=('headers',))
+        args = parser.parse(hello_args, request, locations=('headers',))
         return args
     res = testapp.get('/echo2', headers={'name': 'Fred'}).json
     assert res == {'name': 'Fred'}
@@ -130,12 +130,12 @@ def test_parsing_cookies(app, testapp):
 
     @app.route('/echocookie')
     def echocookie():
-        args = parser.parse(hello_args, request, targets=('cookies',))
+        args = parser.parse(hello_args, request, locations=('cookies',))
         return args
     testapp.get('/setcookie')
     assert testapp.get('/echocookie').json == {'name': 'Fred'}
 
-def test_arg_specific_targets(app, testapp):
+def test_arg_specific_locations(app, testapp):
     testargs = {
         'name': Arg(str, target='json'),
         'age': Arg(int, target='querystring'),

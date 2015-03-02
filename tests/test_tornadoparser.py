@@ -347,7 +347,7 @@ class TestParse(object):
             'integer': ['1', '2']
         })
 
-        parsed = parser.parse(attrs, request, targets=['headers'])
+        parsed = parser.parse(attrs, request, locations=['headers'])
 
         assert parsed['string'] == value
         assert parsed['integer'] == [1, 2]
@@ -362,7 +362,7 @@ class TestParse(object):
             ('string', 'value'), ('integer', '1'), ('integer', '2')
         ])
 
-        parsed = parser.parse(attrs, request, targets=['cookies'])
+        parsed = parser.parse(attrs, request, locations=['cookies'])
 
         assert parsed['string'] == value
         assert parsed['integer'] == [2]
@@ -377,7 +377,7 @@ class TestParse(object):
             ('string', 'value'), ('integer', '1'), ('integer', '2')
         ])
 
-        parsed = parser.parse(attrs, request, targets=['files'])
+        parsed = parser.parse(attrs, request, locations=['files'])
 
         assert parsed['string'] == value
         assert parsed['integer'] == [1, 2]

@@ -78,7 +78,7 @@ class PyramidParser(core.Parser):
         data = getattr(error, 'data', {})
         raise exception_response(status_code, detail=text_type(error), **data)
 
-    def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
+    def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  validate=None):
         """Decorator that injects parsed arguments into a view callable.
         Supports the *Class-based View* pattern where `request` is saved as an instance
@@ -86,7 +86,7 @@ class PyramidParser(core.Parser):
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param req: The request object to parse
-        :param tuple targets: Where on the request to search for values.
+        :param tuple locations: Where on the request to search for values.
         :param callable validate:
             Validation function that receives the dictionary of parsed arguments.
             If the function returns ``False``, the parser will raise a
@@ -100,7 +100,7 @@ class PyramidParser(core.Parser):
                     request = obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-                parsed_args = self.parse(argmap, req=request, targets=targets,
+                parsed_args = self.parse(argmap, req=request, locations=locations,
                                          validate=None)
                 return func(obj, parsed_args, *args, **kwargs)
             return wrapper

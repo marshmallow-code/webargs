@@ -74,7 +74,7 @@ def simpleview_multi(request):
 
 def cookieview(request):
     request.COOKIES['name'] = 'Joe'
-    args = parser.parse(hello_args, request, targets=('cookies',))
+    args = parser.parse(hello_args, request, locations=('cookies',))
     return render_json_response(args)
 
 @parser.use_args(hello_args)

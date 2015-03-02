@@ -177,11 +177,11 @@ By default, webargs will search for arguments from the URL querystring (e.g. ``"
 .. code-block:: python
 
     @app.route('/register')
-    @use_args(user_args, targets=('json', 'form'))
+    @use_args(user_args, locations=('json', 'form'))
     def register(args):
         return 'registration page'
 
-Available targets include:
+Available locations include:
 
 - ``'querystring'`` (same as ``'query'``)
 - ``'json'``
@@ -190,8 +190,8 @@ Available targets include:
 - ``'cookies'``
 - ``'files'``
 
-Adding Custom Target Handlers
------------------------------
+Adding Custom Location Handlers
+-------------------------------
 
 To add your own custom target handler, write a function that receives a request, an argument name, and an :class:`Arg <webargs.core.Arg>` object, then decorate that function with :func:`Parser.target_handler <webargs.core.Parser.target_handler>`.
 

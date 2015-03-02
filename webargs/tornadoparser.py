@@ -104,13 +104,13 @@ class TornadoParser(core.Parser):
         data = getattr(error, 'data', {})
         raise tornado.web.HTTPError(status_code, error.args[0], **data)
 
-    def use_args(self, argmap, req=None, targets=core.Parser.DEFAULT_TARGETS,
+    def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         :param dict argmap: Dictionary of argument_name:Arg object pairs.
         :param req: The request object to parse
-        :param tuple targets: Where on the request to search for values.
+        :param tuple locations: Where on the request to search for values.
         :param as_kwargs: Whether to pass arguments to the handler as kwargs
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -120,7 +120,7 @@ class TornadoParser(core.Parser):
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
                 parsed_args = self.parse(
-                    argmap, req=obj.request, targets=targets, validate=validate)
+                    argmap, req=obj.request, locations=locations, validate=validate)
 
                 if as_kwargs:
                     kwargs.update(parsed_args)
