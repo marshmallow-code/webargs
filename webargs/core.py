@@ -161,7 +161,7 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     :param bool allow_missing: If the argument is not found on the request,
         don't include it in the parsed arguments dictionary.
-    :param str target: Where to pull the value off the request, e.g. ``'json'``.
+    :param str location: Where to pull the value off the request, e.g. ``'json'``.
     :param str dest: Name of the key to be added to the parsed output dictionary.
         If `None`, the key in the input argument dictionary is used.
     :param metadata: Extra arguments to be stored as metadata.
@@ -173,7 +173,7 @@ class Arg(object):
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, target=None, dest=None, source=None, **metadata):
+                 allow_missing=False, location=None, dest=None, source=None, **metadata):
         if isinstance(type_, dict):
             self.type = dict
             self._nested_args = type_
@@ -194,7 +194,7 @@ class Arg(object):
         if required and allow_missing:
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
-        self.target = target
+        self.location = location
         self.dest = dest
         if source:
             warnings.warn(
@@ -281,8 +281,8 @@ class Parser(object):
 
     DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
 
-    #: Maps target => method name
-    __target_map__ = {
+    #: Maps location => method name
+    __location_map__ = {
         'json': 'parse_json',
         'querystring': 'parse_querystring',
         'query': 'parse_querystring',
@@ -302,11 +302,11 @@ class Parser(object):
     def _validated_locations(self, locations):
         """Ensure that the given locations argument is valid.
 
-        :raises: ValueError if a given locations includes an invalid target.
+        :raises: ValueError if a given locations includes an invalid location.
         """
         # The set difference between the given locations and the available locations
         # will be the set of invalid locations
-        valid_locations = set(self.__target_map__.keys())
+        valid_locations = set(self.__location_map__.keys())
         given = set(locations)
         invalid_locations = given - valid_locations
         if len(invalid_locations):
@@ -314,10 +314,10 @@ class Parser(object):
             raise ValueError(msg)
         return locations
 
-    def _get_value(self, name, argobj, req, target):
+    def _get_value(self, name, argobj, req, location):
         # Parsing function to call
         # May be a method name (str) or a function
-        func = self.__target_map__.get(target)
+        func = self.__location_map__.get(location)
         if func:
             if inspect.isfunction(func):
                 function = func
@@ -343,13 +343,13 @@ class Parser(object):
             if a required argument is missing.
         """
         value = None
-        if argobj.target:
-            locations_to_check = self._validated_locations([argobj.target])
+        if argobj.location:
+            locations_to_check = self._validated_locations([argobj.location])
         else:
             locations_to_check = self._validated_locations(locations or self.locations)
 
-        for target in locations_to_check:
-            value = self._get_value(name, argobj, req=req, target=target)
+        for location in locations_to_check:
+            value = self._get_value(name, argobj, req=req, location=location)
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it
@@ -491,7 +491,7 @@ class Parser(object):
         :param str name: The name of the target to register.
         """
         def decorator(func):
-            self.__target_map__[name] = func
+            self.__location_map__[name] = func
             return func
         return decorator
 

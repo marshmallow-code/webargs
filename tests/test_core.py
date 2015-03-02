@@ -37,6 +37,9 @@ class MockRequestParser(Parser):
     def parse_json(self, web_request, name, arg):
         return get_value(web_request.json, name, arg.multiple)
 
+    def parse_cookies(self, web_request, name, arg):
+        return get_value(web_request.cookies, name, arg.multiple)
+
 
 @pytest.fixture
 def web_request():
@@ -295,14 +298,14 @@ def test_parse_form_called_by_parse_arg(parse_form, web_request):
     assert parse_form.called
 
 @mock.patch('webargs.core.Parser.parse_json')
-def test_parse_json_not_called_when_json_not_a_target(parse_json, web_request):
+def test_parse_json_not_called_when_json_not_a_location(parse_json, web_request):
     arg = Arg()
     p = Parser()
     p.parse_arg('foo', arg, web_request, locations=('form', 'querystring'))
     assert parse_json.call_count == 0
 
 @mock.patch('webargs.core.Parser.parse_headers')
-def test_parse_headers_called_when_headers_is_a_target(parse_headers, web_request):
+def test_parse_headers_called_when_headers_is_a_location(parse_headers, web_request):
     arg = Arg()
     p = Parser()
     p.parse_arg('foo', arg, web_request)
@@ -311,7 +314,7 @@ def test_parse_headers_called_when_headers_is_a_target(parse_headers, web_reques
     parse_headers.assert_called
 
 @mock.patch('webargs.core.Parser.parse_cookies')
-def test_parse_cookies_called_when_cookies_is_a_target(parse_cookies, web_request):
+def test_parse_cookies_called_when_cookies_is_a_location(parse_cookies, web_request):
     arg = Arg()
     p = Parser()
     p.parse_arg('foo', arg, web_request)
@@ -390,12 +393,12 @@ def test_callable_default(parser, web_request):
     result = parser.parse(args, web_request, locations=('json', ))
     assert result['val'] == 'pizza'
 
-def test_value_error_raised_if_invalid_target(web_request):
+def test_value_error_raised_if_invalid_location(web_request):
     arg = Arg()
     p = Parser()
     with pytest.raises(ValueError) as excinfo:
-        p.parse_arg('foo', arg, web_request, locations=('invalidtarget', 'headers'))
-    assert 'Invalid locations arguments: {0}'.format(['invalidtarget']) in str(excinfo)
+        p.parse_arg('foo', arg, web_request, locations=('invalidlocation', 'headers'))
+    assert 'Invalid locations arguments: {0}'.format(['invalidlocation']) in str(excinfo)
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_conversion(parse_json, web_request):
@@ -490,7 +493,8 @@ def test_custom_target_handler_with_source(web_request):
         assert name == 'X-Foo'
         return req.data.get(name)
 
-    result = parser.parse({'x_foo': Arg(int, source='X-Foo')}, web_request, locations=('data', ))
+    result = parser.parse({'x_foo': Arg(int, source='X-Foo')},
+            web_request, locations=('data', ))
     assert result['x_foo'] == 42
 
 def test_custom_target_handler_with_dest(web_request):
@@ -687,11 +691,19 @@ def test_use_kwargs_with_arg_allowed_missing(web_request, parser):
         return {'username': username, 'password': password}
     assert viewfunc() == {'username': 'foo', 'password': None}
 
+def test_arg_location_param(web_request, parser):
+    web_request.cookies = {'foo': 42}
+    args = {'foo': Arg(location='cookies')}
+
+    parsed = parser.parse(args, web_request)
+
+    assert parsed['foo'] == 42
+
 def test_validation_errors_in_validator_are_passed_to_handle_error(parser, web_request):
     def validate(value):
         raise ValidationError('Something went wrong.')
     args = {
-        'name': Arg(validate=validate, target='json')
+        'name': Arg(validate=validate, location='json')
     }
     web_request.json = {'name': 'invalid'}
     with pytest.raises(ValidationError) as excinfo:
