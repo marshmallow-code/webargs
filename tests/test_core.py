@@ -195,8 +195,8 @@ class TestArgNesting:
         assert 'Expected type "object" for myarg, got "string"' in str(excinfo)
 
     def test_nested_argdict_can_be_a_dict_subclass(self):
-        arg = Arg(DjMultiDict({'foo': Arg()}))
-        assert arg.type == DjMultiDict
+        arg = Arg(WerkMultiDict([('foo', 'bar')]))
+        assert arg.type == WerkMultiDict
 
     def test_has_nesting(self):
         arg = Arg({'foo': Arg()})
