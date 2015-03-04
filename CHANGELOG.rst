@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.11.1 (unreleased)
+*******************
+
+Changes:
+
+* Allow nesting of dict subtypes.
+
 0.11.0 (2015-03-01)
 *******************
 

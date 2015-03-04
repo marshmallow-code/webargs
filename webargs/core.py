@@ -175,7 +175,7 @@ class Arg(object):
                  validate=None, use=None, multiple=False, error=None,
                  allow_missing=False, location=None, dest=None, source=None, **metadata):
         if isinstance(type_, dict):
-            self.type = dict
+            self.type = type(type_)  # type will always be a dict
             self._nested_args = type_
             self._has_nesting = True
         else:
