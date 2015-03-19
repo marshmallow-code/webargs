@@ -43,6 +43,7 @@ class ValidationError(WebargsError):
     def __init__(self, error, status_code=400, **data):
         self.message = text_type(error)
         self.status_code = status_code
+        self.arg_name = data.pop('arg_name') if 'arg_name' in data else None
         self.data = data
         super(ValidationError, self).__init__(self.message)
 
@@ -220,12 +221,12 @@ class Arg(object):
             __type_map__.get(type(ret), type(ret).__name__)
         )
         if ret is None and self.type in __non_nullable_types__:
-            raise ValidationError(self.error or msg)
+            raise ValidationError(self.error or msg, arg_name=name)
 
         try:
             ret = self.type(ret)
         except (ValueError, TypeError):
-            raise ValidationError(self.error or msg)
+            raise ValidationError(self.error or msg, arg_name=name)
 
         # Then call validation functions
         for validator in self.validators:
@@ -233,7 +234,7 @@ class Arg(object):
                 msg = u'Validator {0}({1}) is not True'.format(
                     validator.__name__, ret
                 )
-                raise ValidationError(self.error or msg)
+                raise ValidationError(self.error or msg, arg_name=name)
 
         if self._has_nesting:
             # Filter out extra args
@@ -363,7 +364,7 @@ class Parser(object):
                     value = argobj.default
             if argobj.required:
                 raise RequiredArgMissingError(
-                    'Required parameter "{0}" not found.'.format(name)
+                    'Required parameter "{0}" not found.'.format(name), arg_name=name
                 )
         return value
 
@@ -403,7 +404,7 @@ class Parser(object):
                     msg = u'Validator {0}({1}) is not True'.format(
                         validator.__name__, parsed
                     )
-                    raise ValidationError(self.error or msg)
+                    raise ValidationError(self.error or msg, arg_name=argname)
         except ValidationError as error:
             if self.error_callback:
                 self.error_callback(error)
