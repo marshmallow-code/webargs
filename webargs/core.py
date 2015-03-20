@@ -40,10 +40,10 @@ class ValidationError(WebargsError):
 
         Store status_code and additonal data.
     """
-    def __init__(self, error, status_code=400, **data):
+    def __init__(self, error, status_code=400, arg_name=None, **data):
         self.message = text_type(error)
         self.status_code = status_code
-        self.arg_name = data.pop('arg_name') if 'arg_name' in data else None
+        self.arg_name = arg_name
         self.data = data
         super(ValidationError, self).__init__(self.message)
 
