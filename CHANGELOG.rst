@@ -1,11 +1,12 @@
 Changelog
 ---------
 
-0.11.1 (unreleased)
+0.12.0 (unreleased)
 *******************
 
-Changes:
+Features:
 
+* Store argument name on ``ValidationError`` (:issue:`32`). Thanks :user:`alexmic` for the suggestion. Thanks :user:`stas` for the patch.
 * Allow nesting of dict subtypes.
 
 0.11.0 (2015-03-01)
