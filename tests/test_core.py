@@ -62,6 +62,12 @@ class TestArg:
         with pytest.raises(ValidationError):
             arg.validated('foo', 32)
 
+    def test_validated_stores_the_arg_name(self):
+        arg = Arg(validate=lambda t: False)
+        with pytest.raises(ValidationError) as excinfo:
+            arg.validated('our_arg_name', True)
+        assert 'our_arg_name' == excinfo.value.arg_name
+
     def test_validated_with_nonascii_input(self):
         arg = Arg(validate=lambda t: False)
         text = u'øˆ∆´ƒº'
