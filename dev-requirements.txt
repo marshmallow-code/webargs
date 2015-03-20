@@ -18,5 +18,4 @@ tornado>=4.0
 pyramid>=1.5.2
 
 # Syntax checking
-pep8==1.6.1
-flake8>=2.2.2
+flake8==2.4.0
