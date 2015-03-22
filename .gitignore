@@ -45,3 +45,4 @@ docs/_build
 README.html
 
 temp/*
+.konchrc
