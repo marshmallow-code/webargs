@@ -1,2 +1,3 @@
+-r ../dev-requirements.txt
 sphinx
 sphinx-issues==0.2.0
