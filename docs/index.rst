@@ -548,6 +548,12 @@ webargs.pyramidparser
     :inherited-members:
 
 
+webargs.webapp2parser
+---------------------
+
+.. automodule:: webargs.webapp2parser
+    :inherited-members:
+
 Project Info
 ============
 
