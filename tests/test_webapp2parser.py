@@ -5,21 +5,22 @@ import json
 
 import pytest
 from webargs.core import PY2
+from .compat import text_type
+from webargs import Arg, ValidationError
 
 pytestmark = pytest.mark.skipif(not PY2, reason='webapp2 is only compatible with Python 2')
 
 import webtest
 
 if PY2:
+    # everything should be skipped via `pytestmark` here so it is OK
     import webapp2
+    from webargs import webapp2parser
+    parser = webapp2parser.Webapp2Parser()
 
-from webargs import Arg, ValidationError
-from webargs import webapp2parser
-
-parser = webapp2parser.Webapp2Parser()
 
 hello_args = {
-    'name': Arg(unicode, default='World'),
+    'name': Arg(text_type, default='World'),
 }
 
 hello_multiple = {
