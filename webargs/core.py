@@ -14,6 +14,7 @@ if not PY2:
     text_type = str
     binary_type = bytes
     long_type = float
+    basestring = (str, bytes)
 else:
     iteritems = lambda d: d.iteritems()
     text_type = unicode  # noqa
@@ -149,8 +150,9 @@ class Arg(object):
         If ``None``, no type conversion will be performed.
     :param default: Default value for the argument. Used if the value is not found
         on the request. May be a callable.
-    :param bool required: If ``True``, the :meth:`Parser.handle_error` method will be
-        invoked if this argument is missing from the request.
+    :param required: If passes truth value test, the :meth:`Parser.handle_error`
+        method will be invoked if this argument is missing from the request.
+        Set a custom error message to be used instead of the default one.
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) or list of callables. used for custom validation. A validator may return
         a boolean or raise a :exc:`ValidationError`.
@@ -245,9 +247,11 @@ class Arg(object):
                     val = ret[key]
                 except KeyError:
                     if nested_arg.required:
-                        raise RequiredArgMissingError(
-                            'Required parameter "{0}" not found.'.format(key)
-                        )
+                        if isinstance(nested_arg.required, basestring):
+                            msg = nested_arg.required
+                        else:
+                            msg = 'Required parameter "{0}" not found.'.format(key)
+                        raise RequiredArgMissingError(msg, arg_name=key)
                 else:
                     ret[key] = nested_arg.validated(key, val)
         return ret
@@ -363,9 +367,11 @@ class Parser(object):
                 else:
                     value = argobj.default
             if argobj.required:
-                raise RequiredArgMissingError(
-                    'Required parameter "{0}" not found.'.format(name), arg_name=name
-                )
+                if isinstance(argobj.required, basestring):
+                    msg = argobj.required
+                else:
+                    msg = 'Required parameter "{0}" not found.'.format(name)
+                raise RequiredArgMissingError(msg, arg_name=name)
         return value
 
     def parse(self, argmap, req, locations=None, validate=None, force_all=False):
