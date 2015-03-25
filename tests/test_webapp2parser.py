@@ -15,9 +15,7 @@ import webtest
 if PY2:
     # everything should be skipped via `pytestmark` here so it is OK
     import webapp2
-    from webargs import webapp2parser
-    parser = webapp2parser.Webapp2Parser()
-
+    from webargs.webapp2parser import parser
 
 hello_args = {
     'name': Arg(text_type, default='World'),

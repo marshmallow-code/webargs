@@ -18,7 +18,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 import webapp2
 
 from webargs import Arg
-from webargs.webapp2parser import use_args
+from webargs.webapp2parser import use_args, use_kwargs
 
 hello_args = {
     'name': Arg(str, default='World')
@@ -32,7 +32,7 @@ class MainPage(webapp2.RequestHandler):
         # args is a dict of parsed items from hello_args
         self.response.write('Hello, {name}!'.format(name=args['name']))
 
-    @use_args(hello_args, as_kwargs=True)
+    @use_kwargs(hello_args)
     def get_kwargs(self, name=None):
         self.response.write('Hello, {name}!'.format(name=name))
 
