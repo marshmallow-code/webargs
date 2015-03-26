@@ -16,6 +16,7 @@ Django>=1.6.5
 bottle>=0.12.3
 tornado>=4.0
 pyramid>=1.5.2
+webapp2>=2.5.2
 
 # Syntax checking
 flake8==2.4.0

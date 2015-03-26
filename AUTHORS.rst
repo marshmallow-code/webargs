@@ -9,3 +9,4 @@ Credits
 * @philtay <https://github.com/philtay>
 * Andriy Yurchuk <https://github.com/Ch00k>
 * Stas Sușcov <https://github.com/stas>
+* Josh Johnston <https://github.com/Trii>
