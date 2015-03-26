@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.13.0 (unreleased)
+*******************
+
+Features:
+
+* Support for webapp2 via the `webargs.webapp2parser` module. Thanks :user:`Trii`.
+
 0.12.0 (2015-03-22)
 *******************
 

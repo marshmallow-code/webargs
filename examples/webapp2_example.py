@@ -45,5 +45,4 @@ app = webapp2.WSGIApplication([
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
     httpd = make_server('', 5001, app)
-    print "Serving on port 5001..."
     httpd.serve_forever()

@@ -53,7 +53,7 @@ setup(
     version=__version__,
     description=('A friendly library for parsing HTTP request arguments, '
         'with built-in support for popular web frameworks, including '
-        'Flask, Django, Bottle, Tornado, and Pyramid.'),
+        'Flask, Django, Bottle, Tornado, Pyramid, and webapp2.'),
     long_description=read("README.rst"),
     author='Steven Loria',
     author_email='sloria1@gmail.com',
@@ -64,7 +64,7 @@ setup(
     license=read("LICENSE"),
     zip_safe=False,
     keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado',
-     'request', 'arguments', 'parameters', 'rest', 'api'),
+      'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

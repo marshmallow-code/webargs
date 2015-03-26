@@ -13,10 +13,12 @@ Example: ::
     }
 
     class MainPage(webapp2.RequestHandler):
+
         @use_args(hello_args)
         def get_args(self, args):
             self.response.write('Hello, {name}!'.format(name=args['name']))
-        @use_args(hello_args, as_kwargs=True)
+
+        @use_kwargs(hello_args)
         def get_kwargs(self, name=None):
             self.response.write('Hello, {name}!'.format(name=name))
 
