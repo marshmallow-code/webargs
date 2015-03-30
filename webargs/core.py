@@ -81,6 +81,23 @@ def _ensure_list_of_callables(obj):
     return validators
 
 
+def _raise_required(arg, arg_name):
+    """Raises an exception for a missing required argument.
+
+    If the argument required attribute carries a message, it will be used
+    as the exception message.
+
+    TODO: Get rid of it by DRY-ing up the nested args parsing.
+
+    :raises: RequiredArgMissingError
+    """
+    if isinstance(arg.required, basestring):
+        msg = arg.required
+    else:
+        msg = 'Required parameter "{0}" not found.'.format(arg_name)
+    raise RequiredArgMissingError(msg, arg_name=arg_name)
+
+
 class _Missing(object):
     """Represents a value that is missing from the set of passed in request
     arguments.
@@ -247,11 +264,7 @@ class Arg(object):
                     val = ret[key]
                 except KeyError:
                     if nested_arg.required:
-                        if isinstance(nested_arg.required, basestring):
-                            msg = nested_arg.required
-                        else:
-                            msg = 'Required parameter "{0}" not found.'.format(key)
-                        raise RequiredArgMissingError(msg, arg_name=key)
+                        _raise_required(nested_arg, key)
                 else:
                     ret[key] = nested_arg.validated(key, val)
         return ret
@@ -367,11 +380,7 @@ class Parser(object):
                 else:
                     value = argobj.default
             if argobj.required:
-                if isinstance(argobj.required, basestring):
-                    msg = argobj.required
-                else:
-                    msg = 'Required parameter "{0}" not found.'.format(name)
-                raise RequiredArgMissingError(msg, arg_name=name)
+                _raise_required(argobj, name)
         return value
 
     def parse(self, argmap, req, locations=None, validate=None, force_all=False):
