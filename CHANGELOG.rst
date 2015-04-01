@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+0.13.0 (unreleased)
+*******************
+
+Features:
+
+* Store argument name on ``RequiredArgMissingError``. Thanks :user:`stas`.
+* Allow error messages for required validation to be overriden. Thanks again :user:`stas`.
+
+
 0.12.0 (2015-03-22)
 *******************
 

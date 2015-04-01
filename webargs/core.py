@@ -81,13 +81,12 @@ def _ensure_list_of_callables(obj):
     return validators
 
 
+# TODO: Get rid of this by DRY-ing up the nested args parsing.
 def _raise_required(arg, arg_name):
     """Raises an exception for a missing required argument.
 
     If the argument required attribute carries a message, it will be used
     as the exception message.
-
-    TODO: Get rid of it by DRY-ing up the nested args parsing.
 
     :raises: RequiredArgMissingError
     """
@@ -167,9 +166,9 @@ class Arg(object):
         If ``None``, no type conversion will be performed.
     :param default: Default value for the argument. Used if the value is not found
         on the request. May be a callable.
-    :param required: If passes truth value test, the :meth:`Parser.handle_error`
+    :param required: If truthy, the :meth:`Parser.handle_error`
         method will be invoked if this argument is missing from the request.
-        Set a custom error message to be used instead of the default one.
+        If a string, the value will be used as the error message when validation fails.
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) or list of callables. used for custom validation. A validator may return
         a boolean or raise a :exc:`ValidationError`.
