@@ -88,7 +88,6 @@ class TestArg:
 
     @pytest.mark.parametrize('arg_type', __non_nullable_types__)
     def test_validated_non_nullable_types(self, arg_type):
-        print(arg_type)
         arg = Arg(type_=arg_type)
         with pytest.raises(ValidationError) as excinfo:
             arg.validated('foo', None)
@@ -253,6 +252,15 @@ class TestArgNesting:
         with pytest.raises(RequiredArgMissingError) as excinfo:
             arg.validated('', {})
         assert 'Required parameter "foo" not found.' in str(excinfo)
+
+    def test_nested_required_unicode_error_message_override(self):
+        arg = Arg({
+            'foo': Arg(required=u'We need foo')
+        })
+        with pytest.raises(RequiredArgMissingError) as excinfo:
+            arg.validated('', {})
+        assert 'We need foo' in excinfo.value.message
+        assert 'foo' in excinfo.value.arg_name
 
     def test_nested_multiple(self):
         arg = Arg({
@@ -566,6 +574,30 @@ def test_full_input_validation_with_custom_error(web_request):
         parser.parse(args, web_request, locations=('json', ),
                      validate=lambda args: False)
     assert 'cool custom message' in str(excinfo)
+
+def test_required_with_custom_error(web_request):
+    web_request.json = {}
+    parser = MockRequestParser()
+    args = {'foo': Arg(unicode, required='We need foo')}
+    with pytest.raises(RequiredArgMissingError) as excinfo:
+        # Test that `validate` receives dictionary of args
+        parser.parse(args, web_request, locations=('json', ))
+
+    assert 'We need foo' in excinfo.value.message
+    assert 'foo' in excinfo.value.arg_name
+
+def test_required_with_custom_error_and_validation_error(web_request):
+    web_request.json = {'foo': ''}
+    parser = MockRequestParser()
+    args = {'foo': Arg(
+        unicode, required='We need foo', validate=lambda s: len(s) > 1,
+        error='foo required length is 3')}
+    with pytest.raises(ValidationError) as excinfo:
+        # Test that `validate` receives dictionary of args
+        parser.parse(args, web_request, locations=('json', ))
+
+    assert 'foo required length is 3' in excinfo.value.message
+    assert 'foo' in excinfo.value.arg_name
 
 def test_full_input_validator_receives_nonascii_input(web_request):
     def validate(val):

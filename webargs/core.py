@@ -14,6 +14,7 @@ if not PY2:
     text_type = str
     binary_type = bytes
     long_type = float
+    basestring = (str, bytes)
 else:
     iteritems = lambda d: d.iteritems()
     text_type = unicode  # noqa
@@ -78,6 +79,22 @@ def _ensure_list_of_callables(obj):
     else:
         validators = []
     return validators
+
+
+# TODO: Get rid of this by DRY-ing up the nested args parsing.
+def _raise_required(arg, arg_name):
+    """Raises an exception for a missing required argument.
+
+    If the argument required attribute carries a message, it will be used
+    as the exception message.
+
+    :raises: RequiredArgMissingError
+    """
+    if isinstance(arg.required, basestring):
+        msg = arg.required
+    else:
+        msg = 'Required parameter "{0}" not found.'.format(arg_name)
+    raise RequiredArgMissingError(msg, arg_name=arg_name)
 
 
 class _Missing(object):
@@ -149,8 +166,9 @@ class Arg(object):
         If ``None``, no type conversion will be performed.
     :param default: Default value for the argument. Used if the value is not found
         on the request. May be a callable.
-    :param bool required: If ``True``, the :meth:`Parser.handle_error` method will be
-        invoked if this argument is missing from the request.
+    :param required: If truthy, the :meth:`Parser.handle_error`
+        method will be invoked if this argument is missing from the request.
+        If a string, the value will be used as the error message when validation fails.
     :param callable validate: Callable (function or object with ``__call__`` method
         defined) or list of callables. used for custom validation. A validator may return
         a boolean or raise a :exc:`ValidationError`.
@@ -245,9 +263,7 @@ class Arg(object):
                     val = ret[key]
                 except KeyError:
                     if nested_arg.required:
-                        raise RequiredArgMissingError(
-                            'Required parameter "{0}" not found.'.format(key)
-                        )
+                        _raise_required(nested_arg, key)
                 else:
                     ret[key] = nested_arg.validated(key, val)
         return ret
@@ -363,9 +379,7 @@ class Parser(object):
                 else:
                     value = argobj.default
             if argobj.required:
-                raise RequiredArgMissingError(
-                    'Required parameter "{0}" not found.'.format(name), arg_name=name
-                )
+                _raise_required(argobj, name)
         return value
 
     def parse(self, argmap, req, locations=None, validate=None, force_all=False):
