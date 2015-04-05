@@ -10,6 +10,10 @@ Features:
 * Store argument name on ``RequiredArgMissingError``. Thanks :user:`stas`.
 * Allow error messages for required validation to be overriden. Thanks again :user:`stas`.
 
+Removals:
+
+* Remove ``source`` parameter from ``Arg``.
+
 
 0.12.0 (2015-03-22)
 *******************

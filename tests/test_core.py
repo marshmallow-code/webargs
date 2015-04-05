@@ -294,13 +294,6 @@ def test_parse_json_called_by_parse_arg(parse_json, web_request):
     p.parse_arg('foo', arg, web_request)
     parse_json.assert_called_with(web_request, 'foo', arg)
 
-@mock.patch('webargs.core.Parser.parse_json')
-def test_parse_json_called_with_source(parse_json, web_request):
-    arg = Arg(source='bar')
-    p = Parser()
-    p.parse_arg('foo', arg, web_request)
-    parse_json.assert_called_with(web_request, 'bar', arg)
-
 @mock.patch('webargs.core.Parser.parse_querystring')
 def test_parse_querystring_called_by_parse_arg(parse_querystring, web_request):
     arg = Arg()
@@ -501,27 +494,12 @@ def test_custom_location_handler(web_request):
     result = parser.parse({'foo': Arg(int)}, web_request, locations=('data', ))
     assert result['foo'] == 42
 
-def test_custom_location_handler_with_source(web_request):
-    web_request.data = {'X-Foo': 42}
-    parser = Parser()
-
-    @parser.location_handler('data')
-    def parse_data(req, name, arg):
-        # The source name is passed
-        assert name == 'X-Foo'
-        return req.data.get(name)
-
-    result = parser.parse({'x_foo': Arg(int, source='X-Foo')},
-            web_request, locations=('data', ))
-    assert result['x_foo'] == 42
-
 def test_custom_location_handler_with_dest(web_request):
     web_request.data = {'X-Foo': 42}
     parser = Parser()
 
     @parser.location_handler('data')
     def parse_data(req, name, arg):
-        # The source name is passed
         assert name == 'X-Foo'
         return req.data.get(name)
 
@@ -632,18 +610,6 @@ if not PY26:
 @pytest.mark.parametrize('input_dict', multidicts)
 def test_get_value_multidict(input_dict):
     assert get_value(input_dict, 'foos', multiple=True) == ['a', 'b']
-
-def test_parse_with_source(web_request):
-    web_request.json = {'foo': 41, 'bar': 42}
-
-    parser = MockRequestParser()
-    args = {'foo': Arg(int), 'baz': Arg(int, source='bar')}
-    parsed = parser.parse(args, web_request, locations=('json',))
-    assert parsed == {'foo': 41, 'baz': 42}
-
-def test_source_param_is_deprecated(recwarn):
-    Arg(source='foo')
-    pytest.deprecated_call(lambda: Arg(source='foo'))
 
 def test_parse_with_dest(web_request):
     web_request.json = {'Content-Type': 'application/json'}

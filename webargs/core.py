@@ -192,7 +192,7 @@ class Arg(object):
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, location=None, dest=None, source=None, **metadata):
+                 allow_missing=False, location=None, dest=None, **metadata):
         if isinstance(type_, dict):
             self.type = type(type_)  # type will always be a dict
             self._nested_args = type_
@@ -215,13 +215,6 @@ class Arg(object):
         self.allow_missing = allow_missing
         self.location = location
         self.dest = dest
-        if source:
-            warnings.warn(
-                "The 'source' parameter is deprecated. Use the 'dest' parameter "
-                "to specify the key to be added in the output dictionary.",
-                category=DeprecationWarning
-            )
-        self.source = source  # TODO: Remove me.
         self.metadata = metadata
 
     def __repr__(self):
@@ -340,7 +333,7 @@ class Parser(object):
                 function = func
             else:
                 function = getattr(self, func)
-            value = function(req, argobj.source or name, argobj)
+            value = function(req, name, argobj)
         else:
             value = None
         return value
