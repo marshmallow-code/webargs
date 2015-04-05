@@ -5,7 +5,6 @@ import functools
 import inspect
 import logging
 import sys
-import warnings
 
 PY2 = sys.version_info[0] == 2
 

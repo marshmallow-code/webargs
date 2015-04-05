@@ -60,12 +60,14 @@ def test_parsing_form_default():
 
 def test_parse_json():
     expected = {'name': 'Fred'}
-    request = webapp2.Request.blank('/echo', POST=json.dumps(expected), headers={'content-type': 'application/json'})
+    request = webapp2.Request.blank('/echo', POST=json.dumps(expected),
+        headers={'content-type': 'application/json'})
     assert parser.parse(hello_args, req=request) == expected
 
 
 def test_parse_json_default():
-    request = webapp2.Request.blank('/echo', POST='', headers={'content-type': 'application/json'})
+    request = webapp2.Request.blank('/echo', POST='',
+        headers={'content-type': 'application/json'})
     assert parser.parse(hello_args, req=request) == {'name': 'World'}
 
 
@@ -86,7 +88,9 @@ def test_parsing_headers():
 
 
 def test_parse_files():
-    """Test parsing file upload using WebTest since I don't know how to mock that using a webob.Request"""
+    """Test parsing file upload using WebTest since I don't know how to mock
+    that using a webob.Request
+    """
     class Handler(webapp2.RequestHandler):
         @parser.use_args({'myfile': Arg(multiple=True)}, locations=('files',))
         def post(self, args):
@@ -115,7 +119,9 @@ def test_validation_error_with_message():
 
 
 def test_default_app_request():
-    """Test that parser.parse uses the request from webapp2.get_request() if no request is passed"""
+    """Test that parser.parse uses the request from webapp2.get_request() if no
+    request is passed
+    """
     expected = {'name': 'Joe'}
     request = webapp2.Request.blank('/echo', POST=expected)
     app = webapp2.WSGIApplication([])
