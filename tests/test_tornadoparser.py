@@ -625,14 +625,14 @@ class TestValidateApp(AsyncHTTPTestCase):
         json_body = parse_json(res.body)
         assert json_body['name'] == 'johnny'
 
-    def test_missing_required_field_throws_400(self):
+    def test_missing_required_field_throws_422(self):
         res = self.fetch(
             '/echo',
             method='POST',
             headers={'Content-Type': 'application/json'},
             body=json.dumps({'occupation': 'pizza'}),
         )
-        assert res.code == 400
+        assert res.code == 422
 
     def test_validation_error_with_status_code_and_extra_data(self):
         res = self.fetch(
