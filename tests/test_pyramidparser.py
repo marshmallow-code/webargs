@@ -123,7 +123,7 @@ def test_parse_files(testapp):
 
 def test_exception_on_validation_error(testapp):
     res = testapp.post('/validate', {'num': '3'}, expect_errors=True)
-    assert res.status_code == 400
+    assert res.status_code == 422
 
 def test_validation_error_with_message(testapp):
     res = testapp.post('/validate', {'num': '3'}, expect_errors=True)

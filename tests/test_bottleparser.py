@@ -62,7 +62,7 @@ def test_parsing_form_default(testapp):
 
 def test_abort_called_on_validation_error(testapp):
     res = testapp.post('/echo', {'name': 'b'}, expect_errors=True)
-    assert res.status_code == 400
+    assert res.status_code == 422
 
 def test_validation_error_with_status_code_and_data(app):
     def always_fail(value):
@@ -91,7 +91,7 @@ def test_use_args_with_validation(app, testapp):
     result = testapp.post('/foo/', {'myvalue': 43}, expect_errors=True)
     assert result.status_code == 200
     result = testapp.post('/foo/', {'myvalue': 41}, expect_errors=True)
-    assert result.status_code == 400
+    assert result.status_code == 422
 
 def test_use_args_with_url_params(app, testapp):
     @app.route('/foo/<name>')

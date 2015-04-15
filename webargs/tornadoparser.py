@@ -101,8 +101,12 @@ class TornadoParser(core.Parser):
         """
         logger.error(error)
         status_code = getattr(error, 'status_code', 400)
+        if status_code == 422:
+            reason = 'Unprocessable Entity'
+        else:
+            reason = None
         data = getattr(error, 'data', {})
-        raise tornado.web.HTTPError(status_code, error.args[0], **data)
+        raise tornado.web.HTTPError(status_code, error.args[0], reason=reason, **data)
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  as_kwargs=False, validate=None):

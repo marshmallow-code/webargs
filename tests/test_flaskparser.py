@@ -155,7 +155,7 @@ def test_abort_called_on_validation_error(mock_abort, testapp):
         parser.parse(argmap)
     mock_abort.assert_called
     abort_args, abort_kwargs = mock_abort.call_args
-    assert abort_args[0] == 400
+    assert abort_args[0] == 422
     expected_msg = u'Validator {0}({1}) is not True'.format(validate.__name__, 41)
     assert abort_kwargs['message'] == expected_msg
     assert type(abort_kwargs['exc']) == ValidationError
@@ -189,7 +189,7 @@ def test_use_args_with_validate_parameter(testapp):
 
     test_client = testapp.test_client()
     res = test_client.post('/foo/', data={'myvalue': 41})
-    assert res.status_code == 400
+    assert res.status_code == 422
 
 
 def test_use_args_decorator_on_a_method(testapp):
@@ -296,7 +296,7 @@ def test_abort_called_when_required_arg_not_present(mock_abort, testapp):
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({}), content_type='application/json'):
         parser.parse(args)
-        assert mock_abort.called_once_with(400)
+        assert mock_abort.called_once_with(422)
 
 def test_arg_allowed_missing(testapp):
     # 'last' argument is allowed to be missing
