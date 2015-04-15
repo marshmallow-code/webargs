@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.14.0 (unreleased)
+*******************
+
+Changes:
+
+* A 422 response is returned to the client when a ``ValidationError`` is raised by a parser (:issue:`38`).
+
 0.13.0 (2015-04-05)
 *******************
 
