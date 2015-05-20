@@ -61,6 +61,10 @@ def testapp():
         def __call__(self, args):
             return args
 
+    @parser.use_kwargs({'myvalue': Arg(int)})
+    def baz(request, myvalue):
+        return {'myvalue': myvalue}
+
     config = Configurator()
 
     config.add_route('echo', '/echo')
@@ -71,6 +75,7 @@ def testapp():
     config.add_route('echofile', '/echofile')
     config.add_route('foo', '/foo')
     config.add_route('bar', '/bar')
+    config.add_route('baz', '/baz')
 
     config.add_view(echo, route_name='echo', renderer='json')
     config.add_view(echomulti, route_name='echomulti', renderer='json')
@@ -80,6 +85,7 @@ def testapp():
     config.add_view(echofile, route_name='echofile', renderer='json')
     config.add_view(foo, route_name='foo', renderer='json')
     config.add_view(Bar, route_name='bar', renderer='json')
+    config.add_view(baz, route_name='baz', renderer='json')
 
     app = config.make_wsgi_app()
 
@@ -134,3 +140,6 @@ def test_use_args_decorator(testapp):
 
 def test_use_args_decorator_class(testapp):
     assert testapp.post('/bar', {'myvalue': 42}).json == {'myvalue': 42}
+
+def test_user_kwargs_decorator(testapp):
+    assert testapp.post('/baz', {'myvalue': 42}).json == {'myvalue': 42}
