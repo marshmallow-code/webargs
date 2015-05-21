@@ -442,7 +442,7 @@ class Parser(object):
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
         """
-        locations = locations or self.DEFAULT_LOCATIONS
+        locations = locations or self.locations
 
         def decorator(func):
             @functools.wraps(func)
