@@ -4,6 +4,11 @@ Changelog
 0.14.0 (unreleased)
 *******************
 
+Bug fixes:
+
+* Fix ``PyramidParser's`` ``use_kwargs`` method (:issue:`42`). Thanks :user:`hartror` for the catch and patch.
+* Correctly use locations passed to Parser's constructor when using ``use_args`` (:issue:`44`). Thanks :user:`jacebrowning` for the catch and patch.
+
 Changes:
 
 * A 422 response is returned to the client when a ``ValidationError`` is raised by a parser (:issue:`38`).
