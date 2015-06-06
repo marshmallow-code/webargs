@@ -39,6 +39,12 @@ logger = logging.getLogger(__name__)
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
+    __location_map__ = {
+        'matchdict': 'parse_matchdict'
+    }
+
+    __location_map__.update(core.Parser.__location_map__)
+
     def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
         return core.get_value(req.GET, name, arg.multiple)
@@ -68,6 +74,9 @@ class PyramidParser(core.Parser):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
         return core.get_value(MultiDict(files), name, arg.multiple)
+
+    def parse_matchdict(self, req, name, arg):
+        return core.get_value(req.matchdict, name, arg.multiple)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and

@@ -505,6 +505,19 @@ When using the :meth:`use_args <webargs.pyramidparser.PyramidParser.use_args>` d
 
 As with the other parser modules, :meth:`use_kwargs <webargs.pyramidparser.PyramidParser.use_kwargs>` will add keyword arguments to the view callable.
 
+URL Matches
+-----------
+
+The :mod:`webargs.pyramidparser` module adds support for parsing values from the request matchdict.
+
+.. code-block:: python
+
+    from pyramid.response import Response
+    from webargs.pyramidparser import use_args
+
+    @parser.use_args({'mymatch': Arg(int)}, locations=('matchdict',))
+    def matched(request, args):
+        return Response('The value for mymatch is {}'.format(args['mymatch'])))
 
 API Reference
 =============
