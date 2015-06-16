@@ -39,11 +39,9 @@ logger = logging.getLogger(__name__)
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
-    __location_map__ = {
-        'matchdict': 'parse_matchdict'
-    }
-
-    __location_map__.update(core.Parser.__location_map__)
+    __location_map__ = dict(
+        matchdict='parse_matchdict',
+        **core.Parser.__location_map__)
 
     def parse_querystring(self, req, name, arg):
         """Pull a querystring value from the request."""
