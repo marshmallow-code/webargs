@@ -4,6 +4,10 @@ Changelog
 0.14.0 (unreleased)
 *******************
 
+Features:
+
+* Add parsing of ``matchdict`` to ``PyramidParser``. Thanks :user:`hartror`.
+
 Bug fixes:
 
 * Fix ``PyramidParser's`` ``use_kwargs`` method (:issue:`42`). Thanks :user:`hartror` for the catch and patch.
