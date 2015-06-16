@@ -65,6 +65,10 @@ def testapp():
     def baz(request, myvalue):
         return {'myvalue': myvalue}
 
+    @parser.use_args({'mymatch': Arg(int)}, locations=('matchdict',))
+    def matched(request, args):
+        return args
+
     config = Configurator()
 
     config.add_route('echo', '/echo')
@@ -76,6 +80,7 @@ def testapp():
     config.add_route('foo', '/foo')
     config.add_route('bar', '/bar')
     config.add_route('baz', '/baz')
+    config.add_route('matched', '/matched/{mymatch:\d+}')
 
     config.add_view(echo, route_name='echo', renderer='json')
     config.add_view(echomulti, route_name='echomulti', renderer='json')
@@ -86,6 +91,7 @@ def testapp():
     config.add_view(foo, route_name='foo', renderer='json')
     config.add_view(Bar, route_name='bar', renderer='json')
     config.add_view(baz, route_name='baz', renderer='json')
+    config.add_view(matched, route_name='matched', renderer='json')
 
     app = config.make_wsgi_app()
 
@@ -143,3 +149,7 @@ def test_use_args_decorator_class(testapp):
 
 def test_user_kwargs_decorator(testapp):
     assert testapp.post('/baz', {'myvalue': 42}).json == {'myvalue': 42}
+
+def test_parse_matchdict(testapp):
+    res = testapp.get('/matched/1')
+    assert res.json == {'mymatch': 1}
