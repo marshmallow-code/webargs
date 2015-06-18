@@ -619,6 +619,24 @@ def test_parse_with_dest(web_request):
     parsed = parser.parse(args, web_request, locations=('json',))
     assert parsed == {'content_type': 'application/json'}
 
+def test_parse_nested_with_dest(web_request):
+    parser = MockRequestParser()
+
+    web_request.json = dict(nested_arg=dict(wrong='OK'))
+    args = dict(nested_arg=Arg(dict(wrong=Arg(dest='right'))))
+
+    parsed = parser.parse(args, web_request, locations=('json',))
+    assert parsed == dict(nested_arg=dict(right='OK'))
+
+def test_parse_nested_with_default(web_request):
+    parser = MockRequestParser()
+
+    web_request.json = dict(nested_arg=dict())
+    args = dict(nested_arg=Arg(dict(missing=Arg(default=False))))
+
+    parsed = parser.parse(args, web_request, locations=('json',))
+    assert parsed == dict(nested_arg=dict(missing=False))
+
 def test_metadata_can_be_stored_on_args():
     # Extra params are stored as metadata
     arg = Arg(int, description='Just a number.')

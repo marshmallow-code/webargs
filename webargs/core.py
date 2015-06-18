@@ -258,6 +258,14 @@ class Arg(object):
                         _raise_required(nested_arg, key)
                 else:
                     ret[key] = nested_arg.validated(key, val)
+
+                if ((nested_arg.default is not None) and
+                        (ret.get(key, Missing) is Missing)):
+                    ret[key] = nested_arg.default
+
+                if nested_arg.dest is not None:
+                    ret[nested_arg.dest] = ret[key]
+                    del ret[key]
         return ret
 
     def validated(self, name, value):
