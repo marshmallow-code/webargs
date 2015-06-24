@@ -12,6 +12,7 @@ Bug fixes:
 
 * Fix ``PyramidParser's`` ``use_kwargs`` method (:issue:`42`). Thanks :user:`hartror` for the catch and patch.
 * Correctly use locations passed to Parser's constructor when using ``use_args`` (:issue:`44`). Thanks :user:`jacebrowning` for the catch and patch.
+* Fix behavior of ``default`` and ``dest`` argument on nested ``Args`` (:issue:`40` and :issue:`46`). Thanks :user:`stas`.
 
 Changes:
 
