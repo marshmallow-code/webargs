@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.14.1 (unreleased)
+*******************
+
+Bug fixes:
+
+* Fix parsing nested ``Args`` when the argument is missing from the input (:issue:`52`). Thanks :user:`stas`.
+
 0.14.0 (2015-06-28)
 *******************
 
