@@ -264,8 +264,8 @@ class Arg(object):
                     ret[key] = nested_arg.default
 
                 if nested_arg.dest is not None:
-                    ret[nested_arg.dest] = ret[key]
-                    del ret[key]
+                    ret[nested_arg.dest] = ret.pop(key, None)
+
         return ret
 
     def validated(self, name, value):

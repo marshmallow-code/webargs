@@ -628,6 +628,15 @@ def test_parse_nested_with_dest(web_request):
     parsed = parser.parse(args, web_request, locations=('json',))
     assert parsed == dict(nested_arg=dict(right='OK'))
 
+def test_parse_nested_with_missing_key_and_dest(web_request):
+    parser = MockRequestParser()
+
+    web_request.json = dict(nested_arg=dict(payload='OK'))
+    args = dict(nested_arg=Arg(dict(missing=Arg(dest='found'))))
+
+    parsed = parser.parse(args, web_request, locations=('json',))
+    assert parsed == dict(nested_arg=dict(found=None))
+
 def test_parse_nested_with_default(web_request):
     parser = MockRequestParser()
 
