@@ -233,10 +233,11 @@ class Arg(object):
         if ret is None and self.type in __non_nullable_types__:
             raise ValidationError(self.error or msg, arg_name=name)
 
-        try:
-            ret = self.type(ret)
-        except (ValueError, TypeError):
-            raise ValidationError(self.error or msg, arg_name=name)
+        if ret is not None:
+            try:
+                ret = self.type(ret)
+            except (ValueError, TypeError):
+                raise ValidationError(self.error or msg, arg_name=name)
 
         # Then call validation functions
         for validator in self.validators:

@@ -120,8 +120,8 @@ class TestArg:
         assert (arg.validated('foo', '12345678123456781234567812345678') ==
                 UUID('12345678-1234-5678-1234-567812345678'))
         with pytest.raises(ValidationError) as excinfo:
-            arg.validated('foo', None)
-        assert 'Expected type "UUID" for foo, got "null"' in str(excinfo)
+            arg.validated('foo', '123xyz')   # An invalid UUID
+        assert 'Expected type "UUID" for foo, got "string"' in str(excinfo)
 
     def test_custom_error(self):
         arg = Arg(type_=int, error='not an int!')
