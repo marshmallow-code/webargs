@@ -115,6 +115,10 @@ class TestArg:
         arg = Arg(type_=long_type)
         assert arg.validated('foo', 42) == 42
 
+    def test_validated_string_conversion_null(self):
+        arg = Arg(type_=str)
+        assert arg.validated('foo', None) is None
+
     def test_validated_unknown_type(self):
         arg = Arg(type_=UUID)
         assert (arg.validated('foo', '12345678123456781234567812345678') ==
