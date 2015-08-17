@@ -179,6 +179,8 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     :param bool allow_missing: If the argument is not found on the request,
         don't include it in the parsed arguments dictionary.
+    :param bool none_as_missing: Treat a `None` value as if it were missing when parsing
+        this argument.
     :param str location: Where to pull the value off the request, e.g. ``'json'``.
     :param str dest: Name of the key to be added to the parsed output dictionary.
         If `None`, the key in the input argument dictionary is used.
