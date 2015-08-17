@@ -4,7 +4,7 @@ invoke
 # Testing
 pytest
 tox>=1.5.0
-mock
+mock==1.0.1
 webtest
 
 # Distribution
