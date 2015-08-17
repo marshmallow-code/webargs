@@ -193,7 +193,8 @@ class Arg(object):
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, location=None, dest=None, none_as_missing=False, **metadata):
+                 allow_missing=False, location=None, dest=None,
+                 none_as_missing=False, **metadata):
         if isinstance(type_, dict):
             self.type = type(type_)  # type will always be a dict
             self._nested_args = type_
