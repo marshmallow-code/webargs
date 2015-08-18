@@ -159,10 +159,27 @@ __non_nullable_types__ = set([list, tuple, set, dict, bool])
 class Arg(object):
     """A request argument.
 
+    When a value for an Arg is found in the request, it is processed by the ``validated``
+    method, which performs type conversion and any validation functions on this
+    Arg object.
+
+    The validation is performed as follows:
+
+    1. Any ``use`` functions are run to transform the value prior to type conversion.
+    2. If the value is not ``None`` then type conversion will take place, transforming the
+       value using the `type\_` parameter
+    3. Any validation functions are run. If a function returns ``False`` or raises a
+       :exc:`ValidationError` then validation for this Arg will stop and an error will
+       be raised.
+
+    In the case of a nested Arg dictionary, the validation functions are run before
+    the nested arguments are processed.
+
     :param type\_: Value type or nested `Arg` dictionary. If the former,
         the parsed value will be coerced this type. If the latter, the parsed
         value will be validated and converted according to the nested `Arg` dict.
-        If ``None``, no type conversion will be performed.
+        If the parsed value, or the `type\_` parameter is  ``None``, no type conversion
+        will be performed.
     :param default: Default value for the argument. Used if the value is not found
         on the request. May be a callable.
     :param required: If truthy, the :meth:`Parser.handle_error`
@@ -233,10 +250,11 @@ class Arg(object):
         if ret is None and self.type in __non_nullable_types__:
             raise ValidationError(self.error or msg, arg_name=name)
 
-        try:
-            ret = self.type(ret)
-        except (ValueError, TypeError):
-            raise ValidationError(self.error or msg, arg_name=name)
+        if ret is not None:
+            try:
+                ret = self.type(ret)
+            except (ValueError, TypeError):
+                raise ValidationError(self.error or msg, arg_name=name)
 
         # Then call validation functions
         for validator in self.validators:
