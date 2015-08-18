@@ -1,8 +1,12 @@
 Changelog
 ---------
 
-0.14.1 (unreleased)
+0.15.0 (unreleased)
 *******************
+
+Changes:
+
+* If a parsed argument is ``None``, the type conversion is not called :issue:`54`. Thanks :user:`marcellarius`.
 
 Bug fixes:
 

@@ -12,3 +12,4 @@ Credits
 * Josh Johnston <https://github.com/Trii>
 * Rory Hart <https://github.com/hartror>
 * Jace Browning <https://github.com/jacebrowning>
+* @marcellarius <https://github.com/marcellarius>
