@@ -196,6 +196,8 @@ class Arg(object):
     :param str error: Custom error message to use if validation fails.
     :param bool allow_missing: If the argument is not found on the request,
         don't include it in the parsed arguments dictionary.
+    :param bool none_as_missing: Treat a `None` value as if it were missing when parsing
+        this argument.
     :param str location: Where to pull the value off the request, e.g. ``'json'``.
     :param str dest: Name of the key to be added to the parsed output dictionary.
         If `None`, the key in the input argument dictionary is used.
@@ -208,7 +210,8 @@ class Arg(object):
     """
     def __init__(self, type_=None, default=None, required=False,
                  validate=None, use=None, multiple=False, error=None,
-                 allow_missing=False, location=None, dest=None, **metadata):
+                 allow_missing=False, location=None, dest=None,
+                 none_as_missing=False, **metadata):
         if isinstance(type_, dict):
             self.type = type(type_)  # type will always be a dict
             self._nested_args = type_
@@ -229,6 +232,7 @@ class Arg(object):
         if required and allow_missing:
             raise ValueError('"required" and "allow_missing" cannot both be True.')
         self.allow_missing = allow_missing
+        self.none_as_missing = none_as_missing
         self.location = location
         self.dest = dest
         self.metadata = metadata
@@ -385,6 +389,8 @@ class Parser(object):
 
         for location in locations_to_check:
             value = self._get_value(name, argobj, req=req, location=location)
+            if argobj.none_as_missing and value is None:
+                value = Missing
             if argobj.multiple and not (isinstance(value, list) and len(value)):
                 continue
             # Found the value; validate and return it

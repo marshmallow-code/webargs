@@ -415,6 +415,26 @@ def test_value_error_raised_if_invalid_location(web_request):
         p.parse_arg('foo', arg, web_request, locations=('invalidlocation', 'headers'))
     assert 'Invalid locations arguments: {0}'.format(['invalidlocation']) in str(excinfo)
 
+def test_none_as_missing_sets_default(parser, web_request):
+    web_request.json = {"name": None}
+    args = {"name": Arg(none_as_missing=True, default="Bob")}
+    result = parser.parse(args, web_request, locations=('json',))
+    assert result["name"] == "Bob"
+
+def test_none_as_missing_and_allow_missing(web_request, parser):
+    web_request.json = {"name": None}
+    args = {"name": Arg(none_as_missing=True, allow_missing=True)}
+    result = parser.parse(args, web_request, locations=("json",))
+    assert "name" not in result
+
+def test_none_as_missing_and_required(web_request, parser):
+    web_request.json = {"foo": None}
+    arg = Arg(required=True, none_as_missing=True)
+    with pytest.raises(RequiredArgMissingError) as excinfo:
+        parser.parse_arg('foo', arg, web_request)
+    assert 'Required parameter "foo" not found.' in str(excinfo)
+
+
 @mock.patch('webargs.core.Parser.parse_json')
 def test_conversion(parse_json, web_request):
     parse_json.return_value = 42
