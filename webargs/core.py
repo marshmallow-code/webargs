@@ -123,6 +123,7 @@ def get_value(d, name, multiple):
     :param bool multiple: Whether to handle multiple values.
     """
     val = d.get(name, Missing)
+    val = val if val is not None else Missing
     if multiple and val is not Missing:
         if hasattr(d, 'getlist'):
             return d.getlist(name)
