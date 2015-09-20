@@ -8,10 +8,24 @@ import os
 sys.path.insert(0, os.path.abspath('..'))
 import webargs
 sys.path.append(os.path.abspath("_themes"))
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx_issues']
+
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+    'sphinx_issues',
+]
+
 primary_domain = 'py'
 default_role = 'py:obj'
+
 issues_github_path = 'sloria/webargs'
+
+intersphinx_mapping = {
+    'python': ('http://python.readthedocs.org/en/latest/', None),
+    'marshmallow': ('http://marshmallow.readthedocs.org/en/latest/', None),
+}
+
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from webargs.core import Arg, WebargsError, ValidationError, RequiredArgMissingError, Missing
+
+from marshmallow import ValidationError
+from marshmallow.utils import missing
+from webargs.core import Nested, WebargsError
 
 __version__ = '0.15.0'
 __author__ = 'Steven Loria'
 __license__ = 'MIT'
 
 
-__all__ = ['Arg', 'WebargsError', 'ValidationError', 'RequiredArgMissingError', 'Missing']
+__all__ = ['WebargsError', 'ValidationError', 'missing', 'Nested']
