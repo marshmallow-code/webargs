@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from marshmallow import ValidationError
 from marshmallow.utils import missing
-from webargs.core import Nested, WebargsError
+from webargs.core import Nested, WebargsError, ValidationError
 
 __version__ = '0.15.0'
 __author__ = 'Steven Loria'
