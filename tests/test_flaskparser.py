@@ -10,7 +10,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
-from webargs import Arg, Missing
+from marshmallow import fields
 from webargs.core import ValidationError
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
@@ -23,7 +23,7 @@ class TestAppConfig:
 parser = FlaskParser()
 
 hello_args = {
-    'name': Arg(text_type, default='World'),
+    'name': fields.Str(missing='World'),
 }
 
 @pytest.fixture
@@ -445,8 +445,10 @@ def test_parse_json_with_nonascii_characters(testapp):
 
 def test_validation_error_with_status_code_and_data(testapp):
     def always_fail(value):
-        raise ValidationError('something went wrong', status_code=401, extra='some data')
-    args = {'text': Arg(validate=always_fail)}
+        raise ValidationError('something went wrong',
+            status_code=401, data=dict(extra='some data'))
+
+    args = {'text': fields.Field(validate=always_fail)}
     with testapp.test_request_context('/foo', data=json.dumps({'text': 'bar'}),
             content_type='application/json', method='POST'):
         with pytest.raises(HTTPException) as excinfo:
