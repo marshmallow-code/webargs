@@ -18,5 +18,3 @@ install:
 before_script: flake8 webargs
 
 script: py.test
-
-
