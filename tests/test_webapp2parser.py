@@ -4,9 +4,9 @@ import urllib
 import json
 
 import pytest
-from webargs.core import PY2
-from .compat import text_type
-from webargs import Arg, ValidationError
+from marshmallow import fields
+from marshmallow.compat import PY2
+from webargs import ValidationError
 
 pytestmark = pytest.mark.skipif(not PY2, reason='webapp2 is only compatible with Python 2')
 
@@ -18,15 +18,16 @@ if PY2:
     from webargs.webapp2parser import parser
 
 hello_args = {
-    'name': Arg(text_type, default='World'),
+    'name': fields.Str(missing='World'),
 }
 
 hello_multiple = {
-    'name': Arg(multiple=True),
+    'name': fields.List(fields.Str()),
 }
 
 hello_validate = {
-    'num': Arg(int, validate=lambda n: n != 3, error="Houston, we've had a problem."),
+    'num': fields.Int(validate=lambda n: n != 3,
+        error_messages={'validator_failed': "Houston, we've had a problem."}),
 }
 
 
@@ -92,7 +93,7 @@ def test_parse_files():
     that using a webob.Request
     """
     class Handler(webapp2.RequestHandler):
-        @parser.use_args({'myfile': Arg(multiple=True)}, locations=('files',))
+        @parser.use_args({'myfile': fields.List(fields.Field())}, locations=('files',))
         def post(self, args):
             self.response.content_type = 'application/json'
             _value = lambda f: f.getvalue().decode('utf-8')

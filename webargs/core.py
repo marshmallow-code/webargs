@@ -63,7 +63,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
     for name, field_obj in iteritems(argmap):
         attrs[field_obj.metadata.get('dest') or name] = field_obj
     attrs['Meta'] = Meta
-    cls = type('ArgSchema', (ma.Schema,), attrs)
+    cls = type(str('ArgSchema'), (ma.Schema,), attrs)
     return cls if not instance else cls(**kwargs)
 
 

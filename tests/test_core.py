@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
 import mock
 import sys
 
 import pytest
 from marshmallow import Schema, fields
-from marshmallow.compat import PY2
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -22,10 +20,6 @@ from webargs.core import (
     is_multiple,
     argmap2schema,
 )
-
-
-if not PY2:
-    unicode = str
 
 
 class MockRequestParser(Parser):
@@ -515,7 +509,7 @@ class TestValidationError:
     def test_repr(self):
         err = ValidationError('foo', status_code=403)
         assert repr(err) == ('ValidationError({0!r}, '
-                'status_code=403, headers=None)'.format(unicode('foo')))
+                'status_code=403, headers=None)'.format('foo'))
 
 def test_parse_basic(web_request, parser):
     web_request.json = {'foo': '42'}
