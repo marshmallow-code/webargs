@@ -283,7 +283,7 @@ def test_required_with_custom_error_and_validation_error(web_request):
     web_request.json = {'foo': ''}
     parser = MockRequestParser()
     args = {'foo': fields.Str(required='We need foo', validate=lambda s: len(s) > 1,
-        error='foo required length is 3')}
+        error_messages={'validator_failed': 'foo required length is 3'})}
     with pytest.raises(ValidationError) as excinfo:
         # Test that `validate` receives dictionary of args
         parser.parse(args, web_request, locations=('json', ))
@@ -300,7 +300,7 @@ def test_full_input_validator_receives_nonascii_input(web_request):
     args = {'text': fields.Str()}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request, locations=('json', ), validate=validate)
-    assert excinfo.value.args[0] == ['Invalid value.']
+    assert excinfo.value.messages == ['Invalid value.']
 
 def test_get_value_basic():
     assert get_value({'foo': 42}, 'foo', False) == 42

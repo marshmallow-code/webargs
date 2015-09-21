@@ -21,6 +21,8 @@ __all__ = [
     'get_value',
 ]
 
+DEFAULT_VALIDATION_STATUS = 422
+
 
 class WebargsError(Exception):
     """Base class for all webargs-related errors."""
@@ -31,7 +33,7 @@ class ValidationError(WebargsError, ma.exceptions.ValidationError):
     """Raised when validation fails on user input. Same as
     `marshmallow.ValidationError`.
     """
-    def __init__(self, message, status_code=422, headers=None, **kwargs):
+    def __init__(self, message, status_code=DEFAULT_VALIDATION_STATUS, headers=None, **kwargs):
         self.status_code = status_code
         self.headers = headers
         ma.exceptions.ValidationError.__init__(self, message, **kwargs)
@@ -123,6 +125,7 @@ class Parser(object):
     """
 
     DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
+    DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
 
     #: Maps location => method name
     __location_map__ = {
@@ -171,7 +174,10 @@ class Parser(object):
         return value
 
     def parse_arg(self, name, field, req, locations=None):
-        """Parse a single argument.
+        """Parse a single argument from a request.
+
+        .. note::
+            This method does not perform validation on the argument.
 
         :param str name: The name of the value.
         :param marshmallow.fields.Field field: The marshmallow `Field` for the request
@@ -182,10 +188,7 @@ class Parser(object):
         :return: The unvalidated argument value or `missing` if the value cannot be found
             on the request.
         """
-        if isinstance(field, ma.fields.Field):
-            location = field.metadata.get('location')
-        else:
-            location = None
+        location = field.metadata.get('location')
         if location:
             locations_to_check = self._validated_locations([location])
         else:
@@ -238,10 +241,13 @@ class Parser(object):
                     msg = u'Invalid value.'  # TODO: make configurable
                     raise ValidationError(msg)
         except ma.exceptions.ValidationError as error:
-            if isinstance(error, ma.exceptions.ValidationError):
+            if (isinstance(error, ma.exceptions.ValidationError) and not
+                    isinstance(error, ValidationError)):
                 # Raise a webargs error instead
                 error = ValidationError(
                     error.messages,
+                    status_code=getattr(error, 'status_code', DEFAULT_VALIDATION_STATUS),
+                    headers=getattr(error, 'headers', {}),
                     field_names=error.field_names,
                     fields=error.fields,
                     data=error.data
@@ -271,11 +277,11 @@ class Parser(object):
         Example usage with Flask: ::
 
             @app.route('/echo', methods=['get', 'post'])
-            @parser.use_args({'name': Arg(str)})
+            @parser.use_args({'name': fields.Str()})
             def greet(args):
                 return 'Hello ' + args['name']
 
-        :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param dict argmap: Dictionary of argument_name:Field object pairs.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
@@ -312,7 +318,7 @@ class Parser(object):
         Example usage with Flask: ::
 
             @app.route('/echo', methods=['get', 'post'])
-            @parser.use_kwargs({'name': Arg(str)})
+            @parser.use_kwargs({'name': fields.Str()})
             def greet(name):
                 return 'Hello ' + name
 
@@ -324,7 +330,7 @@ class Parser(object):
     def location_handler(self, name):
         """Decorator that registers a function that parses a request location.
         The wrapped function receives a request, the name of the argument, and
-        the :class:`Arg <webargs.core.Arg>` object.
+        the corresponding `Field <marshmallow.fields.Field>` object.
 
         Example: ::
 

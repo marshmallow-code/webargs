@@ -4,13 +4,13 @@
 Example: ::
 
     from flask import Flask
-    from webargs import Arg
+    from marshmallow import fields
     from webargs.flaskparser import use_args
 
     app = Flask(__name__)
 
     hello_args = {
-        'name': Arg(str, required=True)
+        'name': fields.Str(required=True)
     }
 
     @app.route('/')
@@ -63,7 +63,7 @@ class FlaskParser(core.Parser):
             return core.get_value(req.form, name, core.is_multiple(field))
         except AttributeError:
             pass
-        return core.Missing
+        return core.missing
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""
@@ -79,12 +79,11 @@ class FlaskParser(core.Parser):
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
-        responds with a 400 error.
+        responds with a 422 error.
         """
         logger.error(error)
-        status_code = getattr(error, 'status_code', 400)
-        data = getattr(error, 'data', {})
-        abort(status_code, messages=error.messages, exc=error, **data)
+        status_code = getattr(error, 'status_code', self.DEFAULT_VALIDATION_STATUS)
+        abort(status_code, messages=error.messages, exc=error)
 
     def parse(self, argmap, req=None, *args, **kwargs):
         """Parses the request using the given arguments map.

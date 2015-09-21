@@ -11,10 +11,8 @@ from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
 from marshmallow import fields
-from webargs.core import ValidationError
+from webargs.core import ValidationError, Nested, missing
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
-
-from .compat import text_type
 
 class TestAppConfig:
     TESTING = True
@@ -68,10 +66,10 @@ def test_parsing_json_with_charset(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
-def test_arg_with_location(testapp):
+def test_fields_with_location(testapp):
     testargs = {
-        'name': Arg(str, location='json'),
-        'age': Arg(int, location='querystring'),
+        'name': fields.Str(location='json'),
+        'age': fields.Int(location='querystring'),
     }
     with testapp.test_request_context('/myendpoint?age=42', method='post',
             data=json.dumps({'name': 'Fred'}), content_type='application/json'):
@@ -82,19 +80,19 @@ def test_arg_with_location(testapp):
 
 def test_nested_args(testapp):
     testargs = {
-        'name': Arg({'first': Arg(str, use=lambda v: v.lower()),
-                     'last': Arg(str, use=lambda v: v.upper())})
+        'name': Nested({'first': fields.Str(),
+                     'last': fields.Str()})
     }
     with testapp.test_request_context('/myendpoint', method='post',
-            data=json.dumps({'name': {'first': 'sTevE', 'last': 'LoRiA'}}),
+            data=json.dumps({'name': {'first': 'Steve', 'last': 'Loria'}}),
             content_type='application/json'):
         args = parser.parse(testargs)
-        assert args['name']['first'] == 'steve'
-        assert args['name']['last'] == 'LORIA'
+        assert args['name']['first'] == 'Steve'
+        assert args['name']['last'] == 'Loria'
 
 def test_nested_multiple_args(testapp):
     testargs = {
-        'users': Arg({'id': Arg(), 'name': Arg()}, multiple=True)
+        'users': Nested({'id': fields.Int(), 'name': fields.Str()}, many=True)
     }
     in_data = {'users': [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]}
     with testapp.test_request_context('/myendpoint', method='post',
@@ -104,7 +102,6 @@ def test_nested_multiple_args(testapp):
         users = args['users']
         assert users[0]['id'] == 1
         assert users[1]['id'] == 2
-
 
 def test_parsing_json_default(testapp):
     with testapp.test_request_context('/myendpoint', method='post',
@@ -116,11 +113,11 @@ def test_parsing_json_default(testapp):
 def test_parsing_arg_with_default_and_set_location(testapp):
     # Regression test for issue #11
     page = {
-        'p': Arg(int,
-                default=1,
-                validate=lambda p: p > 0,
-                error=u"La page demandée n'existe pas",
-                location='querystring'),
+        'p': fields.Int(
+            missing=1,
+            validate=lambda p: p > 0,
+            error=u"La page demandée n'existe pas",
+            location='querystring'),
     }
     with testapp.test_request_context('/myendpoint', method='post',
             data=json.dumps({}), content_type='application/json'):
@@ -149,31 +146,31 @@ def test_abort_called_on_validation_error(mock_abort, testapp):
     def validate(x):
         return x == 42
 
-    argmap = {'value': Arg(validate=validate, type_=int)}
+    argmap = {'value': fields.Field(validate=validate)}
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({'value': 41}), content_type='application/json'):
         parser.parse(argmap)
     mock_abort.assert_called
     abort_args, abort_kwargs = mock_abort.call_args
     assert abort_args[0] == 422
-    expected_msg = u'Validator {0}({1}) is not True'.format(validate.__name__, 41)
-    assert abort_kwargs['message'] == expected_msg
+    expected_msg = u'Invalid value.'
+    assert abort_kwargs['messages']['value'] == [expected_msg]
     assert type(abort_kwargs['exc']) == ValidationError
 
 @mock.patch('webargs.flaskparser.abort')
 def test_abort_called_on_type_conversion_error(mock_abort, testapp):
-    argmap = {'value': Arg(type_=int)}
+    argmap = {'value': fields.Int()}
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({'value': 'badinput'}), content_type='application/json'):
         parser.parse(argmap)
-    mock_abort.assert_called_once
+    mock_abort.assert_called_once()
     abort_args, abort_kwargs = mock_abort.call_args
-    assert 'Expected type "integer" for value, got "string"' in abort_kwargs['message']
+    assert abort_kwargs['messages']['value'] == ['Not a valid integer.']
     assert type(abort_kwargs['exc']) == ValidationError
 
 def test_use_args_decorator(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
-    @parser.use_args({'myvalue': Arg(type_=int)})
+    @parser.use_args({'myvalue': fields.Int()})
     def echo(args):
         return jsonify(args)
     test_client = testapp.test_client()
@@ -183,7 +180,7 @@ def test_use_args_decorator(testapp):
 
 def test_use_args_with_validate_parameter(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
-    @parser.use_args({'myvalue': Arg(int)}, validate=lambda args: args['myvalue'] > 42)
+    @parser.use_args({'myvalue': fields.Int()}, validate=lambda args: args['myvalue'] > 42)
     def echo(args):
         return jsonify(args)
 
@@ -194,7 +191,7 @@ def test_use_args_with_validate_parameter(testapp):
 
 def test_use_args_decorator_on_a_method(testapp):
     class MyMethodView(MethodView):
-        @parser.use_args({'myvalue': Arg(int)})
+        @parser.use_args({'myvalue': fields.Int()})
         def post(self, args):
             return jsonify(args)
     testapp.add_url_rule('/methodview/',
@@ -206,7 +203,7 @@ def test_use_args_decorator_on_a_method(testapp):
 def test_use_kwargs_decorator_on_a_method(testapp):
 
     class MyMethodView(MethodView):
-        @parser.use_kwargs({'myvalue': Arg(int)})
+        @parser.use_kwargs({'myvalue': fields.Int()})
         def post(self, myvalue):
             return jsonify({'myvalue': myvalue})
 
@@ -219,7 +216,7 @@ def test_use_kwargs_decorator_on_a_method(testapp):
 
 def test_use_args_decorator_with_url_parameters(testapp):
     @testapp.route('/foo/<int:id>', methods=['post', 'get'])
-    @parser.use_args({'myvalue': Arg(type_=int)})
+    @parser.use_args({'myvalue': fields.Int()})
     def echo(args, id):
         assert id == 42
         return jsonify(args)
@@ -229,7 +226,7 @@ def test_use_args_decorator_with_url_parameters(testapp):
 
 def test_use_args_singleton(testapp):
     @testapp.route('/foo/')
-    @use_args({'myvalue': Arg(int)})
+    @use_args({'myvalue': fields.Int()})
     def echo(args):
         return jsonify(args)
     test_client = testapp.test_client()
@@ -238,7 +235,7 @@ def test_use_args_singleton(testapp):
 
 def test_use_args_doesnt_change_docstring(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
-    @parser.use_args({'myvalue': Arg(type_=int)})
+    @parser.use_args({'myvalue': fields.Int()})
     def echo(args, id):
         """Echo docstring."""
         return jsonify(args)
@@ -246,7 +243,7 @@ def test_use_args_doesnt_change_docstring(testapp):
 
 def test_use_kwargs_decorator(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
-    @parser.use_kwargs({'myvalue': Arg(type_=int)})
+    @parser.use_kwargs({'myvalue': fields.Int()})
     def echo(myvalue):
         return jsonify(myvalue=myvalue)
     test_client = testapp.test_client()
@@ -255,17 +252,18 @@ def test_use_kwargs_decorator(testapp):
 
 def test_use_kwargs_with_missing_data(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
-    @parser.use_kwargs({'username': Arg(str), 'password': Arg(str)})
+    @parser.use_kwargs({'username': fields.Str(), 'password': fields.Str()})
     def echo(username, password):
-        return jsonify(username=username, password=password)
+        assert password is missing
+        return jsonify(username=username)
     test_client = testapp.test_client()
     res = test_client.post('/foo/', data={'username': 'foo'})
-    expected = {'username': 'foo', 'password': None}
+    expected = {'username': 'foo'}
     assert json.loads(res.data.decode('utf-8')) == expected
 
 def test_use_kwargs_decorator_with_url_parameters(testapp):
     @testapp.route('/foo/<int:id>', methods=['post', 'get'])
-    @parser.use_kwargs({'myvalue': Arg(type_=int)})
+    @parser.use_kwargs({'myvalue': fields.Int()})
     def echo(myvalue, id):
         assert id == 42
         return jsonify(myvalue=myvalue)
@@ -275,7 +273,7 @@ def test_use_kwargs_decorator_with_url_parameters(testapp):
 
 def test_use_kwargs_singleton(testapp):
     @testapp.route('/foo/')
-    @use_kwargs({'myvalue': Arg(int)})
+    @use_kwargs({'myvalue': fields.Int()})
     def echo(myvalue):
         return jsonify(myvalue=myvalue)
     test_client = testapp.test_client()
@@ -284,7 +282,7 @@ def test_use_kwargs_singleton(testapp):
 
 def test_use_kwargs_doesnt_change_docstring(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
-    @parser.use_kwargs({'myvalue': Arg(type_=int)})
+    @parser.use_kwargs({'myvalue': fields.Int()})
     def echo(args, id):
         """Echo docstring."""
         return jsonify(args)
@@ -292,7 +290,7 @@ def test_use_kwargs_doesnt_change_docstring(testapp):
 
 @mock.patch('webargs.flaskparser.abort')
 def test_abort_called_when_required_arg_not_present(mock_abort, testapp):
-    args = {'required': Arg(required=True)}
+    args = {'required': fields.Field(required=True)}
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({}), content_type='application/json'):
         parser.parse(args)
@@ -300,56 +298,42 @@ def test_abort_called_when_required_arg_not_present(mock_abort, testapp):
 
 def test_arg_allowed_missing(testapp):
     # 'last' argument is allowed to be missing
-    args = {'first': Arg(str), 'last': Arg(str, allow_missing=True)}
+    args = {'first': fields.Str(), 'last': fields.Str()}
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({'first': 'Fred'}), content_type='application/json'):
         args = parser.parse(args)
         assert 'first' in args
         assert 'last' not in args
 
-def test_arg_allowed_missing_when_none_is_passed(testapp):
+def test_arg_allowed_none_when_none_is_passed(testapp):
     # 'last' argument is allowed to be missing
-    args = {'first': Arg(str), 'last': Arg(allow_missing=True)}
+    args = {'first': fields.Str(), 'last': fields.Str(allow_none=True)}
     with testapp.test_request_context('/foo', method='post',
             data=json.dumps({'first': 'Fred', 'last': None}), content_type='application/json'):
         args = parser.parse(args)
         assert 'first' in args
         assert args['last'] is None
 
-def test_arg_allow_missing_false(testapp):
-    args = {'first': Arg(str), 'last': Arg(str, allow_missing=False)}
-    with testapp.test_request_context('/foo', method='post',
-            data=json.dumps({'first': 'Fred'}), content_type='application/json'):
-        args = parser.parse(args)
-        assert args['last'] is None
-
-def test_multiple_arg_allowed_missing(testapp):
-    args = {'name': Arg(str, multiple=True, allow_missing=True)}
+def test_list_allowed_missing(testapp):
+    args = {'name': fields.List(fields.Str())}
     with testapp.test_request_context(path='/foo', method='post'):
         args = parser.parse(args)
         assert 'name' not in args
 
-def test_multiple_arg_allowed_missing_int_conversion(testapp):
-    args = {'ids': Arg(int, multiple=True, allow_missing=True)}
+def test_int_list_allowed_missing(testapp):
+    args = {'ids': fields.List(fields.Int())}
     with testapp.test_request_context(path='/foo', method='post',
             data=json.dumps({'fakedata': True}), content_type='application/json'):
         args = parser.parse(args)
         assert 'ids' not in args or len(args['ids']) == 0
 
-def test_multiple_arg_allowed_missing_false_int_conversion(testapp):
-    args = {'ids': Arg(int, multiple=True, allow_missing=False)}
-    with testapp.test_request_context(path='/foo', method='post',
-            data=json.dumps({'fakedata': True}), content_type='application/json'):
-        args = parser.parse(args)
-        assert 'ids' in args
-
 @mock.patch('webargs.flaskparser.abort')
 def test_multiple_arg_required_int_conversion_required(mock_abort, testapp):
-    args = {'ids': Arg(int, multiple=True, required=True)}
+    args = {'ids': fields.List(fields.Int(), required=True)}
     with testapp.test_request_context(path='/foo', method='post',
             data=json.dumps({}), content_type='application/json'):
         args = parser.parse(args)
-    mock_abort.assert_called_once
+    mock_abort.assert_called_once()
 
 
 def test_parsing_headers(testapp):
@@ -371,7 +355,7 @@ def test_parsing_cookies(testapp):
 def test_parse_form_returns_missing_if_no_form():
     req = mock.Mock()
     req.form.get.side_effect = AttributeError('no form')
-    assert parser.parse_form(req, 'foo', Arg()) is Missing
+    assert parser.parse_form(req, 'foo', fields.Field()) is missing
 
 def test_unicode_arg(testapp):
     with testapp.test_request_context('/foo?name=Früd'):
@@ -386,7 +370,7 @@ def test_abort_with_message():
 
 def test_parse_files(testapp):
     payload = {'myfile': (io.BytesIO(b'bar'), 'baz.txt')}
-    file_args = {'myfile': Arg()}
+    file_args = {'myfile': fields.Field()}
     with testapp.test_request_context('/foo', method='POST',
             data=payload):
         args = parser.parse(file_args, locations=('files', ))
@@ -401,52 +385,43 @@ def test_parse_files(testapp):
          ('nums', 4), ('nums', 2)])},
 ])
 def test_parse_multiple(context, testapp):
-    multargs = {'name': Arg(multiple=True), 'nums': Arg(int, multiple=True)}
+    multargs = {'name': fields.List(fields.Field()), 'nums': fields.List(fields.Int())}
     with testapp.test_request_context(**context):
         args = parser.parse(multargs)
         assert args['name'] == ['steve', 'Loria']
         assert args['nums'] == [4, 2]
 
-
-def test_parse_multiple_arg_defaults_to_empty_list(testapp):
-    multargs = {'name': Arg(multiple=True)}
-    with testapp.test_request_context('/foo'):
-        args = parser.parse(multargs)
-        assert args['name'] == []
-
 @mock.patch('webargs.flaskparser.abort')
 def test_multiple_required_arg(mock_abort, testapp):
-    multargs = {'name': Arg(required=True, multiple=True)}
+    multargs = {'name': fields.List(fields.Field(), required=True)}
     with testapp.test_request_context('/foo'):
         parser.parse(multargs)
-    assert mock_abort.called_once
+    assert mock_abort.called_once()
 
-def test_multiple_allow_missing(testapp):
-    multargs = {'name': Arg(allow_missing=True, multiple=True)}
+def test_list_allows_missing(testapp):
+    multargs = {'name': fields.List(fields.Field())}
     with testapp.test_request_context('/foo'):
         args = parser.parse(multargs)
         assert 'name' not in args
 
-
-def test_parse_multiple_json(testapp):
-    multargs = {'name': Arg(multiple=True)}
+def test_parse_json_list(testapp):
+    multargs = {'name': fields.List(fields.Field())}
     with testapp.test_request_context('/foo', data=json.dumps({'name': 'steve'}),
             content_type='application/json', method='POST'):
         args = parser.parse(multargs, locations=('json',))
         assert args['name'] == ['steve']
 
 def test_parse_json_with_nonascii_characters(testapp):
-    args = {'text': Arg(text_type)}
+    args = {'text': fields.Str()}
     text = u'øˆƒ£ºº∆ƒˆ∆'
     with testapp.test_request_context('/foo', data=json.dumps({'text': text}),
             content_type='application/json', method='POST'):
         result = parser.parse(args, locations=('json', ))
     assert result['text'] == text
 
-def test_validation_error_with_status_code_and_data(testapp):
+def test_field_validation_error(testapp):
     def always_fail(value):
-        raise ValidationError('something went wrong',
-            status_code=401, data=dict(extra='some data'))
+        raise ValidationError('something went wrong')
 
     args = {'text': fields.Field(validate=always_fail)}
     with testapp.test_request_context('/foo', data=json.dumps({'text': 'bar'}),
@@ -454,5 +429,4 @@ def test_validation_error_with_status_code_and_data(testapp):
         with pytest.raises(HTTPException) as excinfo:
             parser.parse(args, locations=('json', ))
     exc = excinfo.value
-    assert exc.code == 401
-    assert exc.data['extra'] == 'some data'
+    assert exc.code == 422
