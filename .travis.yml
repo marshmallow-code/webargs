@@ -12,8 +12,8 @@ python:
     - "pypy"
 
 install:
-    - pip install -U -r dev-requirements.txt
     - pip install -U .
+    - pip install -U -r dev-requirements.txt
 
 before_script: flake8 webargs
 

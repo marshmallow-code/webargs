@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 # Requirements
-REQUIREMENTS = []
+REQUIREMENTS = ['marshmallow>=2.0.0rc2']
 TEST_REQUIREMENTS = [
     'pytest', 'mock', 'flask',
     'django', 'webtest', 'bottle',
