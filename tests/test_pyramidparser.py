@@ -4,22 +4,22 @@ import pytest
 from webtest import TestApp
 from pyramid.config import Configurator
 
-from webargs import Arg
+from marshmallow import fields
 from webargs.pyramidparser import PyramidParser
-from .compat import text_type
 
 parser = PyramidParser()
 
 hello_args = {
-    'name': Arg(text_type, default='World'),
+    'name': fields.Str(missing='World'),
 }
 
 hello_multiple = {
-    'name': Arg(multiple=True),
+    'name': fields.List(fields.Field()),
 }
 
 hello_validate = {
-    'num': Arg(int, validate=lambda n: n != 3, error="Houston, we've had a problem."),
+    'num': fields.Int(validate=lambda n: n != 3,
+        error_messages={'validator_failed': "Houston, we've had a problem."}),
 }
 
 @pytest.fixture
@@ -44,12 +44,12 @@ def testapp():
         args = parser.parse(hello_args, request, locations=('headers',))
         return args
 
-    @parser.use_args({'myfile': Arg(multiple=True)}, locations=('files',))
+    @parser.use_args({'myfile': fields.List(fields.Field())}, locations=('files',))
     def echofile(request, args):
         _value = lambda f: f.getvalue().decode('utf-8')
         return dict((i.filename, _value(i.file)) for i in args['myfile'])
 
-    @parser.use_args({'myvalue': Arg(int)})
+    @parser.use_args({'myvalue': fields.Int()})
     def foo(request, args):
         return args
 
@@ -57,15 +57,15 @@ def testapp():
         def __init__(self, request):
             self.request = request
 
-        @parser.use_args({'myvalue': Arg(int)})
+        @parser.use_args({'myvalue': fields.Int()})
         def __call__(self, args):
             return args
 
-    @parser.use_kwargs({'myvalue': Arg(int)})
+    @parser.use_kwargs({'myvalue': fields.Int()})
     def baz(request, myvalue):
         return {'myvalue': myvalue}
 
-    @parser.use_args({'mymatch': Arg(int)}, locations=('matchdict',))
+    @parser.use_args({'mymatch': fields.Int()}, locations=('matchdict',))
     def matched(request, args):
         return args
 
