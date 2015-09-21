@@ -2,15 +2,15 @@ import json
 from django.http import HttpResponse
 from django.views.generic import View
 
-from webargs import Arg
+from marshmallow import fields
 from webargs.djangoparser import DjangoParser
 
 parser = DjangoParser()
 hello_args = {
-    'name': Arg(str, default='World')
+    'name': fields.Str(missing='World')
 }
 hello_multi = {
-    'name': Arg(multiple=True)
+    'name': fields.List(fields.Str(), multiple=True)
 }
 
 def render_json_response(data):
@@ -62,7 +62,7 @@ def simpleview(request):
     return render_json_response(args)
 
 required_args = {
-    'name': Arg(str, required=True)
+    'name': fields.Str(required=True)
 }
 def simpleview_with_required_arg(request):
     args = parser.parse(required_args, request)
@@ -85,6 +85,6 @@ def simpleview_with_param(request, args, pid):
 def decoratedview(request, args):
     return render_json_response(args)
 
-@parser.use_args({'validated': Arg(validate=lambda n: False)})
+@parser.use_args({'validated': fields.Field(validate=lambda n: False)})
 def validatedview(request, args):
     return render_json_response(args)

@@ -5,11 +5,11 @@ Example usage: ::
 
     from django.views.generic import View
     from django.http import HttpResponse
-    from webargs import Arg
+    from marshmallow import fields
     from webargs.djangoparser import use_args
 
     hello_args = {
-        'name': Arg(str, default='World')
+        'name': fields.Str(missing='World')
     }
 
     class MyView(View):
@@ -37,34 +37,34 @@ class DjangoParser(core.Parser):
         the parser and returning the appropriate `HTTPResponse`.
     """
 
-    def parse_querystring(self, req, name, arg):
+    def parse_querystring(self, req, name, field):
         """Pull the querystring value from the request."""
-        return core.get_value(req.GET, name, arg.multiple)
+        return core.get_value(req.GET, name, core.is_multiple(field))
 
-    def parse_form(self, req, name, arg):
+    def parse_form(self, req, name, field):
         """Pull the form value from the request."""
-        return core.get_value(req.POST, name, arg.multiple)
+        return core.get_value(req.POST, name, core.is_multiple(field))
 
-    def parse_json(self, req, name, arg):
+    def parse_json(self, req, name, field):
         """Pull a json value from the request body."""
         try:
             reqdata = json.loads(req.body.decode('utf-8'))
-            return core.get_value(reqdata, name, arg.multiple)
+            return core.get_value(reqdata, name, core.is_multiple(field))
         except (AttributeError, ValueError):
             pass
-        return core.Missing
+        return core.missing
 
-    def parse_cookies(self, req, name, arg):
+    def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.COOKIES, name, arg.multiple)
+        return core.get_value(req.COOKIES, name, core.is_multiple(field))
 
-    def parse_headers(self, req, name, arg):
+    def parse_headers(self, req, name, field):
         raise NotImplementedError('Header parsing not supported by {0}'
             .format(self.__class__.__name__))
 
-    def parse_files(self, req, name, arg):
+    def parse_files(self, req, name, field):
         """Pull a file from the request."""
-        return core.get_value(req.FILES, name, arg.multiple)
+        return core.get_value(req.FILES, name, core.is_multiple(field))
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  validate=None):
@@ -76,7 +76,7 @@ class DjangoParser(core.Parser):
             def myview(request, args):
                 return HttpResponse('Hello ' + args['name'])
 
-        :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param dict argmap: Dictionary of argument_name:Field object pairs.
         :param req: The request object to parse
         :param tuple locations: Where on the request to search for values.
         :param callable validate: Validation function that receives the dictionary
