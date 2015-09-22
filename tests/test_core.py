@@ -138,6 +138,7 @@ def test_default_can_be_none(parser, web_request):
     result = parser.parse(args, web_request, locations=('json', ))
     assert result['val'] is None
 
+
 def test_value_error_raised_if_invalid_location(web_request):
     field = fields.Field()
     p = Parser()
@@ -410,6 +411,70 @@ def test_use_args(web_request, parser):
     def viewfunc(args):
         return args
     assert viewfunc() == {'username': 'foo', 'password': 'bar'}
+
+
+class TestPassingSchema:
+    class UserSchema(Schema):
+        id = fields.Int(dump_only=True)
+        email = fields.Email()
+        password = fields.Str(load_only=True)
+
+    def test_passing_schema_to_parse(self, parser, web_request):
+        web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
+
+        result = parser.parse(self.UserSchema(), web_request)
+
+        assert result == {'email': 'foo@bar.com', 'password': 'bar'}
+
+    def test_use_args_can_be_passed_a_schema(self, web_request, parser):
+
+        web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
+
+        @parser.use_args(self.UserSchema(strict=True), web_request)
+        def viewfunc(args):
+            return args
+        assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
+
+    def test_use_kwargs_can_be_passed_a_schema(self, web_request, parser):
+
+        web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
+
+        @parser.use_kwargs(self.UserSchema(strict=True), web_request)
+        def viewfunc(email, password):
+            return {'email': email, 'password': password}
+        assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
+
+    def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
+            web_request, parser):
+
+        class UserSchema(Schema):
+            email = fields.Email()
+
+        web_request.json = {'email': 'invalid'}
+
+        class CustomError(Exception):
+            pass
+
+        @parser.error_handler
+        def handle_error(error):
+            raise CustomError(error.messages)
+
+        @parser.use_args(UserSchema(strict=True), web_request)
+        def viewfunc(args):
+            return args
+
+        @parser.use_args(UserSchema(), web_request)
+        def viewfunc2(args):
+            return args
+
+        with pytest.raises(CustomError) as excinfo:
+            viewfunc()
+        assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
+
+        with pytest.raises(CustomError) as excinfo:
+            viewfunc()
+        assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
+
 
 def test_use_args_with_custom_locations_in_parser(web_request, parser):
     custom_args = {

@@ -126,6 +126,7 @@ class Parser(object):
 
     DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
     DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
+    DEFAULT_VALIDATION_MESSAGE = 'Invalid value.'
 
     #: Maps location => method name
     __location_map__ = {
@@ -205,21 +206,27 @@ class Parser(object):
         return missing
 
     def _parse_request(self, argmap, req, locations, force_all):
+        argdict = argmap.fields if isinstance(argmap, ma.Schema) else argmap
         parsed = {}
-        for argname, field_obj in iteritems(argmap):
+        for argname, field_obj in iteritems(argdict):
             parsed_value = self.parse_arg(argname, field_obj, req,
                 locations=locations or self.locations)
             parsed[argname] = parsed_value
         return parsed
 
     def load(self, data, argmap):
-        schema = argmap2schema(argmap)()
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+            # TODO: Check if strict=True
+        else:
+            schema = argmap2schema(argmap)()
         return schema.load(data)
 
     def parse(self, argmap, req, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
-        :param dict argmap: Dictionary of argname -> `marshmallow.fields.Field` pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse.
         :param tuple locations: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
@@ -238,8 +245,8 @@ class Parser(object):
             for validator in validators:
                 # TODO: Is this necessary? User could just defined schema validators
                 if validator(result.data) is False:
-                    msg = u'Invalid value.'  # TODO: make configurable
-                    raise ValidationError(msg)
+                    msg = self.DEFAULT_VALIDATION_MESSAGE
+                    raise ValidationError(msg, data=result.data)
         except ma.exceptions.ValidationError as error:
             if (isinstance(error, ma.exceptions.ValidationError) and not
                     isinstance(error, ValidationError)):
@@ -261,7 +268,12 @@ class Parser(object):
         finally:
             self.clear_cache()
         if force_all:
-            missing_args = set(argmap.keys()) - set(ret.keys())
+            if isinstance(argmap, ma.Schema):
+                all_field_names = set([fname for fname, fobj in iteritems(argmap.fields)
+                    if not fobj.dump_only])
+            else:
+                all_field_names = set(argmap.keys())
+            missing_args = all_field_names - set(ret.keys())
             for key in missing_args:
                 ret[key] = missing
         return ret
