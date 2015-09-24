@@ -4,7 +4,7 @@ import pytest
 from webtest import TestApp
 from pyramid.config import Configurator
 
-from marshmallow import fields
+from webargs import fields
 from webargs.pyramidparser import PyramidParser
 
 parser = PyramidParser()

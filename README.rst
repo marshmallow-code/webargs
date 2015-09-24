@@ -15,7 +15,7 @@ webargs is a Python library for parsing HTTP request arguments, with built-in su
 .. code-block:: python
 
     from flask import Flask
-    from marshmallow import fields
+    from webargs import fields
     from webargs.flaskparser import use_args
 
     app = Flask(__name__)

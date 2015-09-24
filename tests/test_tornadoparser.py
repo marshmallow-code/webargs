@@ -17,8 +17,7 @@ import tornado.concurrent
 import tornado.ioloop
 from tornado.testing import AsyncHTTPTestCase
 
-from marshmallow import fields
-from webargs import missing, ValidationError, Nested
+from webargs import fields, missing, ValidationError
 from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json, get_value
 
 name = 'name'
@@ -142,7 +141,7 @@ class TestJSONArgs(object):
 
     def test_it_should_get_multiple_nested_values(self):
         query = {name: [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]}
-        field = fields.List(Nested({'id': fields.Field(), 'name': fields.Field()}))
+        field = fields.List(fields.Nested({'id': fields.Field(), 'name': fields.Field()}))
         request = make_json_request(query)
         result = parser.parse_json(request, name, field)
         assert result == [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]

@@ -4,8 +4,7 @@ import pytest
 from bottle import Bottle, debug, request, response
 from webtest import TestApp
 
-from marshmallow import fields
-from webargs import ValidationError
+from webargs import ValidationError, fields
 from webargs.bottleparser import BottleParser
 
 hello_args = {

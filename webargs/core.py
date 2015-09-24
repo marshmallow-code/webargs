@@ -66,18 +66,6 @@ def argmap2schema(argmap, instance=False, **kwargs):
     cls = type(str('ArgSchema'), (ma.Schema,), attrs)
     return cls if not instance else cls(**kwargs)
 
-
-class Nested(ma.fields.Nested):
-    """Same as `marshmallow.fields.Nested`, except can be passed a dictionary as
-    the first argument, which will be converted to a `marshmallow.Schema`.
-    """
-
-    def __init__(self, nested, *args, **kwargs):
-        if isinstance(nested, dict):
-            nested = argmap2schema(nested)
-        super(Nested, self).__init__(nested, *args, **kwargs)
-
-
 def is_multiple(field):
     return isinstance(field, ma.fields.List)
 

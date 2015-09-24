@@ -3,7 +3,7 @@ import mock
 import sys
 
 import pytest
-from marshmallow import Schema, fields
+from marshmallow import Schema
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -11,12 +11,14 @@ if not PY26:  # django does not support python 2.6
     from django.utils.datastructures import MultiValueDict as DjMultiDict
 from bottle import MultiDict as BotMultiDict
 
+from webargs import (
+    fields,
+    missing,
+    ValidationError,
+)
 from webargs.core import (
     Parser,
-    Nested,
-    ValidationError,
     get_value,
-    missing,
     is_multiple,
     argmap2schema,
 )
@@ -335,7 +337,7 @@ def test_parse_nested_with_load_from(web_request):
         'nested_arg': {'wrong': 'OK'}
     }
     args = {
-        'nested_arg': Nested({'right': fields.Field(load_from='wrong')})
+        'nested_arg': fields.Nested({'right': fields.Field(load_from='wrong')})
     }
 
     parsed = parser.parse(args, web_request, locations=('json',))
@@ -352,7 +354,7 @@ def test_parse_nested_with_missing_key_and_load_from(web_request):
         }
     }
     args = {
-        'nested_arg': Nested({
+        'nested_arg': fields.Nested({
             'found': fields.Field(missing=None, allow_none=True, load_from='miss')
         })
     }
@@ -369,7 +371,7 @@ def test_parse_nested_with_default(web_request):
 
     web_request.json = {'nested_arg': {}}
     args = {
-        'nested_arg': Nested({
+        'nested_arg': fields.Nested({
             'miss': fields.Field(missing='<foo>')
         })
     }
@@ -387,7 +389,7 @@ def test_nested_many(web_request, parser):
         ]
     }
     args = {
-        'pets': Nested({'name': fields.Str()}, required=True, many=True)
+        'pets': fields.Nested({'name': fields.Str()}, required=True, many=True)
     }
     parsed = parser.parse(args, web_request)
     assert parsed == {
@@ -615,7 +617,7 @@ def test_argmap2schema():
 
 def test_argmap2schema_with_nesting():
     argmap = {
-        'nest': Nested({
+        'nest': fields.Nested({
             'foo': fields.Field()
         })
     }
@@ -623,5 +625,5 @@ def test_argmap2schema_with_nesting():
     assert issubclass(schema_cls, Schema)
     schema = schema_cls()
     assert 'nest' in schema.fields
-    assert type(schema.fields['nest']) is Nested
+    assert type(schema.fields['nest']) is fields.Nested
     assert 'foo' in schema.fields['nest'].schema.fields

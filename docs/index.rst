@@ -22,22 +22,25 @@ Hello Webargs
 .. code-block:: python
 
     from flask import Flask
-    from webargs import Arg
+    from webargs import fields
     from webargs.flaskparser import use_args
 
     app = Flask(__name__)
 
     hello_args = {
-        'name': Arg(str, default='World')
+        'name': fields.Str(required=True)
     }
 
-    @app.route('/', methods=['get', 'post'])
+    @app.route('/')
     @use_args(hello_args)
     def index(args):
         return 'Hello ' + args['name']
 
     if __name__ == '__main__':
         app.run()
+
+    # curl http://localhost:5000/\?name\='World'
+    # Hello World
 
 Webargs will automatically parse:
 

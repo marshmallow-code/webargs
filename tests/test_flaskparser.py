@@ -10,8 +10,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.datastructures import ImmutableMultiDict
 import pytest
 
-from marshmallow import fields
-from webargs.core import ValidationError, Nested, missing
+from webargs import fields, ValidationError, missing
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
 
 class TestAppConfig:
@@ -80,7 +79,7 @@ def test_fields_with_location(testapp):
 
 def test_nested_args(testapp):
     testargs = {
-        'name': Nested({'first': fields.Str(),
+        'name': fields.Nested({'first': fields.Str(),
                      'last': fields.Str()})
     }
     with testapp.test_request_context('/myendpoint', method='post',
@@ -92,7 +91,7 @@ def test_nested_args(testapp):
 
 def test_nested_multiple_args(testapp):
     testargs = {
-        'users': Nested({'id': fields.Int(), 'name': fields.Str()}, many=True)
+        'users': fields.Nested({'id': fields.Int(), 'name': fields.Str()}, many=True)
     }
     in_data = {'users': [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]}
     with testapp.test_request_context('/myendpoint', method='post',
