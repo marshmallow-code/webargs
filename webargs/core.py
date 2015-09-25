@@ -289,13 +289,17 @@ class Parser(object):
             will raise a :exc:`ValidationError`.
         """
         locations = locations or self.locations
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        else:
+            schema = argmap2schema(argmap)()
 
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 # if as_kwargs is passed, must include all args
                 force_all = as_kwargs
-                parsed_args = self.parse(argmap, req=req, locations=locations,
+                parsed_args = self.parse(schema, req=req, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
