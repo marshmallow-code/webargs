@@ -39,12 +39,29 @@ def browse_docs():
     webbrowser.open_new_tab(path)
 
 @task
-def docs(clean=False, browse=False):
+def docs(clean=False, browse=False, watch=False):
+    """Build the docs."""
     if clean:
         clean_docs()
-    run("sphinx-build %s %s" % (docs_dir, build_dir), pty=True)
+    run("sphinx-build %s %s" % (docs_dir, build_dir), echo=True)
     if browse:
         browse_docs()
+    if watch:
+        watch_docs()
+
+@task
+def watch_docs():
+    """Run build the docs when a file changes."""
+    try:
+        import sphinx_autobuild  # noqa
+    except ImportError:
+        print('ERROR: watch task requires the sphinx_autobuild package.')
+        print('Install it with:')
+        print('    pip install sphinx-autobuild')
+        sys.exit(1)
+    docs()
+    run('sphinx-autobuild {0} {1} --watch {2}'.format(
+        docs_dir, build_dir, 'webargs'), echo=True, pty=True)
 
 @task
 def publish(test=False):
