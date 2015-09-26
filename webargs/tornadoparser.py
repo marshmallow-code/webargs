@@ -105,13 +105,17 @@ class TornadoParser(core.Parser):
             reason = 'Unprocessable Entity'
         else:
             reason = None
-        raise tornado.web.HTTPError(status_code, str(error.args[0]), reason=reason)
+        # HTTPError must take a string for it's log_message argument,
+        # so we json-encode the errors dictionary
+        errors = json.dumps(error.messages)
+        raise tornado.web.HTTPError(status_code, errors, reason=reason)
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
-        :param dict argmap: Dictionary of argument_name:Field object pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse
         :param tuple locations: Where on the request to search for values.
         :param as_kwargs: Whether to pass arguments to the handler as kwargs

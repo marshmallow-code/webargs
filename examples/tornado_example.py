@@ -12,12 +12,12 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=1973-04-10 addend=63
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
+import json
 import datetime as dt
 
-from dateutil import parser
 import tornado.ioloop
 from tornado.web import RequestHandler
-from webargs import Arg, ValidationError
+from webargs import fields, ValidationError
 from webargs.tornadoparser import use_args, use_kwargs
 
 
@@ -29,14 +29,18 @@ class BaseRequestHandler(RequestHandler):
         if 'exc_info' in kwargs:
             etype, value, traceback = kwargs['exc_info']
             msg = value.log_message or str(value)
-            self.write({'message': msg})
+            try:
+                error_messages = json.loads(msg)
+            except json.JSONDecodeError:
+                error_messages = msg
+            self.write({'errors': error_messages})
         self.finish()
 
 class HelloHandler(BaseRequestHandler):
     """A welcome page."""
 
     hello_args = {
-        'name': Arg(str, default='Friend')
+        'name': fields.Str(missing='Friend')
     }
 
     @use_args(hello_args)
@@ -49,17 +53,14 @@ class AdderHandler(BaseRequestHandler):
     """An addition endpoint."""
 
     add_args = {
-        'x': Arg(float, required=True),
-        'y': Arg(float, required=True),
+        'x': fields.Float(required=True),
+        'y': fields.Float(required=True),
     }
 
     @use_kwargs(add_args)
     def post(self, x, y):
         self.write({'result': x + y})
 
-
-def string_to_datetime(val):
-    return parser.parse(val)
 
 def validate_unit(val):
     if val not in ['minutes', 'days']:
@@ -69,9 +70,9 @@ class DateAddHandler(BaseRequestHandler):
     """A datetime adder endpoint."""
 
     dateadd_args = {
-        'value': Arg(default=dt.datetime.utcnow, use=string_to_datetime),
-        'addend': Arg(int, required=True, validate=lambda val: val >= 0),
-        'unit': Arg(str, validate=validate_unit)
+        'value': fields.DateTime(missing=dt.datetime.utcnow),
+        'addend': fields.Int(required=True, validate=lambda val: val >= 0),
+        'unit': fields.Str(validate=validate_unit)
     }
 
     @use_kwargs(dateadd_args)
