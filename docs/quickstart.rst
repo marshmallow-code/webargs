@@ -233,10 +233,16 @@ When you need more flexibility in defining input schemas, you can pass a marshma
         last_name = fields.Str(missing='')
         date_registered = fields.DateTime(dump_only=True)
 
+        class Meta:
+            strict = True
 
-    @use_args(UserSchema)
+
+    @use_args(UserSchema())
     def profile_view(args):
         # ...
+
+.. note::
+    You should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
 
 Next Steps
 ----------

@@ -210,7 +210,7 @@ class Parser(object):
             schema = argmap2schema(argmap)()
         if not schema.strict:
             warnings.warn("It is highly recommended that you set strict=True on your schema "
-                    "so that the parser's error handler will get invoked.", UserWarning)
+                "so that the parser's error handler will be invoked when expected.", UserWarning)
 
         return schema.load(data)
 

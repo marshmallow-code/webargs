@@ -444,7 +444,7 @@ class TestPassingSchema:
     def test_passing_schema_to_parse(self, parser, web_request):
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        result = parser.parse(self.UserSchema(), web_request)
+        result = parser.parse(self.UserSchema(strict=True), web_request)
 
         assert result == {'email': 'foo@bar.com', 'password': 'bar'}
 
@@ -466,9 +466,11 @@ class TestPassingSchema:
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
 
-    def test_warning_raised_if_schema_is_not_in_strict_mode(self, web_request, parser):
-        with pytest.warns(UserWarning):
-            parser.parse(self.UserSchema(strict=False), web_request)
+    def test_warning_raised_if_schema_is_not_in_strict_mode(
+            self, web_request, parser, recwarn):
+        parser.parse(self.UserSchema(strict=False), web_request)
+        warning = recwarn.pop(UserWarning)
+        assert 'strict=True' in str(warning.message)
 
     def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
             web_request, parser):
