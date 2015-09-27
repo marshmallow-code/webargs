@@ -25,6 +25,14 @@ from webargs import core
 
 logger = logging.getLogger(__name__)
 
+
+class HTTPError(tornado.web.HTTPError):
+    """`tornado.web.HTTPError` that stores validation errors."""
+
+    def __init__(self, *args, **kwargs):
+        self.messages = kwargs.pop('messages', {})
+        super(HTTPError, self).__init__(*args, **kwargs)
+
 def parse_json(s):
     if isinstance(s, bytes):
         s = s.decode('utf-8')
@@ -105,10 +113,10 @@ class TornadoParser(core.Parser):
             reason = 'Unprocessable Entity'
         else:
             reason = None
-        # HTTPError must take a string for it's log_message argument,
+        # HTTPError must take a string for its log_message argument,
         # so we json-encode the errors dictionary
-        errors = json.dumps(error.messages)
-        raise tornado.web.HTTPError(status_code, errors, reason=reason)
+        raise HTTPError(status_code, str(error.messages),
+                reason=reason, messages=error.messages)
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  as_kwargs=False, validate=None):
