@@ -601,7 +601,7 @@ def test_argmap2schema():
         'id': fields.Int(required=True),
         'title': fields.Str(),
         'description': fields.Str(),
-        'Content-Type': fields.Str(dest='content_type')
+        'content_type': fields.Str(load_from='content-type')
     }
 
     schema_cls = argmap2schema(argmap)

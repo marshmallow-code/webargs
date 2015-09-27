@@ -1,0 +1,17 @@
+{% import 'locale-'+language+'_t' as t -%}
+Documentation.addTranslations({
+    "locale": "es",
+    "plural_expr": "(n != 1)",
+    "messages": {
+        "permalink_header": "{{ t.permalink_header }}",
+        "permalink_definition": "{{ t.permalink_definition }}",
+        "hide_search_matches": "{{ t.hide_search_matches }}",
+        "searching": "{{ t.searching }}",
+        "preparing_search": "{{ t.preparing_search }}",
+        "search_results found %s": "{{ t.search_results_x_found }}",
+        "search_result_in": "{{ t.search_result_in }}",
+        "search_results": "{{ t.t_search_results_title }}",
+        "search_results_no_results": "{{ t.search_results_no_results }}",
+        "": ""
+    }
+});

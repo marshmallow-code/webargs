@@ -1,0 +1,28 @@
+<header>
+  <div class="wrapper clearfix">
+    <h1 class="logo"><a href="{{ pathto('index') }}" title="{{ t.return_to_home_page }}">
+      {%- if logo -%}
+        {%- if logo.startswith -%}
+          <img src="{{ pathto(logo, 1) }}" alt="{{ project }}">
+        {%- else -%}
+          <img srcset="{{ logo|join(', ') }}" alt="{{ project }}" >
+        {%- endif -%}
+      {%- endif %} {{ project }}
+    </a></h1>
+    <ul class="nav">
+      <li>
+        {% include "search-form.html" %}
+      </li>
+      <li class="hidden-xs">
+        <a class="nav-item" href="{{ pathto('index') }}">{{ t.nav_home }}</a>
+      </li>
+      <li class="hidden-xs">
+        <a class="nav-item" href="{{ github }}" title="{{ github }}"><i class="fa fa-github"></i> Github</a>
+      </li>
+      <li class="toc toc-large">
+        <a data-toggle="dropdown" href="#toc" class="nav-item">
+          <span class="visible-xs"><i class="fa fa-bars"></i></span>
+        </a>
+      </li>
+    </ul>
+</header>

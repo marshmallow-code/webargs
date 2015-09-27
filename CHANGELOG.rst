@@ -1,6 +1,63 @@
 Changelog
 ---------
 
+0.16.0 (unreleased)
+*******************
+
+The major change in this release is that webargs now depends on `marshmallow <https://marshmallow.readthedocs.org/en/latest/>`_ for defining arguments and for validation.
+
+Your code will need to be updated to use ``Fields`` rather than ``Args``.
+
+.. code-block:: python
+
+    # Old API
+    from webargs import Arg
+
+    args = {
+        'name': Arg(str, required=True)
+        'password': Arg(str, validate=lambda p: len(p) >= 6),
+        'display_per_page': Arg(int, default=10),
+        'nickname': Arg(multiple=True),
+        'Content-Type': Arg(dest='content_type', location='headers'),
+        'location': Arg({
+            'city': Arg(str),
+            'state': Arg(str)
+        })
+    }
+
+    # New API
+    from webargs import fields
+
+    args = {
+        'name': fields.Str(required=True)
+        'password': fields.Str(validate=lambda p: len(p) >= 6),
+        'display_per_page': fields.Int(missing=10),
+        'nickname': fields.List(fields.Str()),
+        'content_type': fields.Str(load_from='Content-Type'),
+        'location': fields.Nested({
+            'city': fields.Str(),
+            'state': fields.Str()
+        })
+    }
+
+Features:
+
+* Error messages for all arguments are "bundled" (:issue:`58`).
+
+Changes:
+
+* *Backwards-incompatible*: Replace ``Args`` with marshmallow fields (:issue:`61`).
+* *Backwards-incompatible*: When using ``use_kwargs``, missing arguments will have the special value ``missing`` rather than ``None``.
+* ``TornadoParser`` raises a custom ``HTTPError`` with a ``messages`` attribute when validation fails.
+
+Bug fixes:
+
+* Fix required validation of nested arguments (:issue:`39`, :issue:`51`). These are fixed by virtue of using marshmallow's ``Nested`` field. Thanks :user:`ewang` and :user:`chavz` for reporting.
+
+Support:
+
+* Updated docs.
+
 0.15.0 (2015-08-22)
 *******************
 

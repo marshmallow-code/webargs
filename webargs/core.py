@@ -31,7 +31,8 @@ class WebargsError(Exception):
 
 class ValidationError(WebargsError, ma.exceptions.ValidationError):
     """Raised when validation fails on user input. Same as
-    `marshmallow.ValidationError`.
+    `marshmallow.ValidationError`, with the addition of the ``status_code`` and
+    ``headers`` arguments.
     """
     def __init__(self, message, status_code=DEFAULT_VALIDATION_STATUS, headers=None, **kwargs):
         self.status_code = status_code
@@ -54,15 +55,11 @@ def _callable_or_raise(obj):
 
 def argmap2schema(argmap, instance=False, **kwargs):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
-    names to `marshmallow.fields.Field` objects.
+    names to `Fields <marshmallow.fields.Field>`.
     """
     class Meta(object):
         strict = True
-
-    attrs = {}
-    for name, field_obj in iteritems(argmap):
-        attrs[field_obj.metadata.get('dest') or name] = field_obj
-    attrs['Meta'] = Meta
+    attrs = dict(argmap, Meta=Meta)
     cls = type(str('ArgSchema'), (ma.Schema,), attrs)
     return cls if not instance else cls(**kwargs)
 
@@ -281,7 +278,8 @@ class Parser(object):
             def greet(args):
                 return 'Hello ' + args['name']
 
-        :param dict argmap: Dictionary of argument_name:Field object pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
@@ -332,7 +330,7 @@ class Parser(object):
         return self.use_args(*args, **kwargs)
 
     def location_handler(self, name):
-        """Decorator that registers a function that parses a request location.
+        """Decorator that registers a function for parsing a request location.
         The wrapped function receives a request, the name of the argument, and
         the corresponding `Field <marshmallow.fields.Field>` object.
 
@@ -342,7 +340,7 @@ class Parser(object):
             parser = core.Parser()
 
             @parser.location_handler('name')
-            def parse_data(request, name, arg):
+            def parse_data(request, name, field):
                 return request.data.get(name)
 
         :param str name: The name of the location to register.

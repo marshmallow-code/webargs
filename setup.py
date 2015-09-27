@@ -64,7 +64,7 @@ setup(
     license=read("LICENSE"),
     zip_safe=False,
     keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado',
-      'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api'),
+      'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api', 'marshmallow'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

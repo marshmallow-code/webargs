@@ -12,7 +12,6 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=1973-04-10 addend=63
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
-import json
 import datetime as dt
 
 import tornado.ioloop
@@ -27,14 +26,10 @@ class BaseRequestHandler(RequestHandler):
         """Write errors as JSON."""
         self.set_header('Content-Type', 'application/json')
         if 'exc_info' in kwargs:
-            etype, value, traceback = kwargs['exc_info']
-            msg = value.log_message or str(value)
-            try:
-                error_messages = json.loads(msg)
-            except json.JSONDecodeError:
-                error_messages = msg
-            self.write({'errors': error_messages})
-        self.finish()
+            etype, exc, traceback = kwargs['exc_info']
+            if hasattr(exc, 'messages'):
+                self.write({'errors': exc.messages})
+                self.finish()
 
 class HelloHandler(BaseRequestHandler):
     """A welcome page."""

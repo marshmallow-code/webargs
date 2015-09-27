@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import sys
 import os
 
@@ -7,7 +8,7 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 import webargs
-sys.path.append(os.path.abspath("_themes"))
+# sys.path.append(os.path.abspath("_themes"))
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -26,13 +27,33 @@ intersphinx_mapping = {
     'marshmallow': ('http://marshmallow.readthedocs.org/en/latest/', None),
 }
 
+# The master toctree document.
+master_doc = 'index'
+
+language = 'en'
+
+html_domain_indices = False
 templates_path = ['_templates']
 source_suffix = '.rst'
-master_doc = 'index'
 project = u'webargs'
 copyright = u'2014-2015'
 version = release = webargs.__version__
 exclude_patterns = ['_build']
-pygments_style = 'flask_theme_support.FlaskyStyle'
-html_theme = 'kr_small'
-html_theme_path = ['_themes']
+
+# THEME
+
+# Add any paths that contain custom themes here, relative to this directory.
+html_theme_path = ['./_themes']
+html_theme = 'lucuma'
+html_static_path = ['_static']
+templates_path = ['_templates']
+html_show_sourcelink = False
+
+html_context = {
+    'project': project,
+    'author': 'Steven Loria',
+    'author_url': 'http://stevenloria.com',
+    'github': 'https://github.com/sloria/webargs',
+    'seo_description': 'A friendly library for parsing HTTP request arguments.',
+    'license': 'MIT Licensed',
+}

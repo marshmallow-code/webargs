@@ -15,11 +15,10 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 """
 import datetime as dt
 
-from dateutil import parser as dateparser
 from flask import Flask
 from flask.ext import restful
 
-from webargs import Arg, ValidationError
+from webargs import fields, ValidationError
 from webargs.flaskparser import use_args, use_kwargs, parser
 
 app = Flask(__name__)
@@ -30,7 +29,7 @@ class IndexResource(restful.Resource):
     """A welcome page."""
 
     hello_args = {
-        'name': Arg(str, default='Friend')
+        'name': fields.Str(missing='Friend')
     }
 
     @use_args(hello_args)
@@ -42,18 +41,14 @@ class AddResource(restful.Resource):
     """An addition endpoint."""
 
     add_args = {
-        'x': Arg(float, required=True),
-        'y': Arg(float, required=True),
+        'x': fields.Float(required=True),
+        'y': fields.Float(required=True),
     }
 
     @use_kwargs(add_args)
     def post(self, x, y):
         """An addition endpoint."""
         return {'result': x + y}
-
-
-def string_to_datetime(val):
-    return dateparser.parse(val)
 
 def validate_unit(val):
     if val not in ['minutes', 'days']:
@@ -62,9 +57,9 @@ def validate_unit(val):
 class DateAddResource(restful.Resource):
 
     dateadd_args = {
-        'value': Arg(default=dt.datetime.utcnow, use=string_to_datetime),
-        'addend': Arg(int, required=True, validate=lambda val: val >= 0),
-        'unit': Arg(str, validate=validate_unit)
+        'value': fields.DateTime(missing=dt.datetime.utcnow),
+        'addend': fields.Int(required=True, validate=lambda val: val >= 0),
+        'unit': fields.Str(validate=validate_unit)
     }
 
     @use_kwargs(dateadd_args)
@@ -83,8 +78,7 @@ def handle_request_parsing_error(err):
     """webargs error handler that uses Flask-RESTful's abort function to return
     a JSON error response to the client.
     """
-    code, msg = getattr(err, 'status_code', 400), getattr(err, 'message', 'Invalid Request')
-    restful.abort(code, message=msg)
+    restful.abort(422, errors=err.messages)
 
 if __name__ == '__main__':
     api.add_resource(IndexResource, '/')

@@ -74,7 +74,7 @@ class PyramidParser(core.Parser):
         return core.get_value(MultiDict(files), name, core.is_multiple(field))
 
     def parse_matchdict(self, req, name, field):
-
+        """Pull a value from the request's `matchdict`."""
         return core.get_value(req.matchdict, name, core.is_multiple(field))
 
     def handle_error(self, error):
@@ -91,7 +91,8 @@ class PyramidParser(core.Parser):
         Supports the *Class-based View* pattern where `request` is saved as an instance
         attribute on a view class.
 
-        :param dict argmap: Dictionary of argument_name:Field object pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse
         :param tuple locations: Where on the request to search for values.
         :param callable validate:

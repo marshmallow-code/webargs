@@ -6,7 +6,6 @@ Example: ::
     import webapp2
 
     from marshmallow import fields
-    from webargs import Arg
     from webargs.webobparser import use_args
 
     hello_args = {
@@ -29,7 +28,6 @@ Example: ::
     ], debug=True)
 """
 import logging
-
 
 from webargs import core
 import webapp2

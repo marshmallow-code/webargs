@@ -1,0 +1,22 @@
+<footer>
+  {#<nav>
+    <div class="wrapper clearfix">
+      <p class="pull-left">
+        {{ t.site_in_other_languages }}: <a href="/">English</a>, <a href="/es/">Español</a>.
+      </p>
+    </div>
+  </nav>#}
+  <div class="credits">
+    <div class="wrapper align-center clearfix">
+      <p>
+        {{ t.created_by }} <a href="{{ author_url }}">{{ author }}</a>
+        <span class="hidden-xs">·</span><br class="hidden-sm hidden-md hidden-lg">
+        {{ license }}
+      </p>
+      <p class="project">
+        <a href="{{ github }}">GitHub Project</a> ·
+        <a href="{{ github }}/issues">Issues</a> ·
+      </p>
+    </div>
+  </div>
+</footer>
