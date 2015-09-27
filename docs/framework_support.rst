@@ -1,3 +1,5 @@
+.. _frameworks:
+
 Framework Support
 =================
 
