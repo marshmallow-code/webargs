@@ -9,12 +9,14 @@ docs_dir = 'docs'
 build_dir = os.path.join(docs_dir, '_build')
 
 @task
-def test(coverage=False):
+def test(coverage=False, browse=False):
     import pytest
     args = []
     if coverage:
         args.extend(['--cov=webargs', '--cov-report=term', '--cov-report=html'])
     retcode = pytest.main(args)
+    if coverage and browse:
+        webbrowser.open_new_tab(os.path.join('htmlcov', 'index.html'))
     sys.exit(retcode)
 
 @task

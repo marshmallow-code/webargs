@@ -141,7 +141,7 @@ def test_default_can_be_none(parser, web_request):
     assert result['val'] is None
 
 
-def test_value_error_raised_if_invalid_location(web_request):
+def test_value_error_raised_if_parse_arg_called_with_invalid_location(web_request):
     field = fields.Field()
     p = Parser()
     with pytest.raises(ValueError) as excinfo:
@@ -303,6 +303,11 @@ def test_full_input_validator_receives_nonascii_input(web_request):
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request, locations=('json', ), validate=validate)
     assert excinfo.value.messages == ['Invalid value.']
+
+def test_invalid_argument_for_validate(web_request, parser):
+    with pytest.raises(ValueError) as excinfo:
+        parser.parse({}, web_request, validate='notcallable')
+    assert 'not a callable or list of callables.' in excinfo.value.args[0]
 
 def test_get_value_basic():
     assert get_value({'foo': 42}, 'foo', False) == 42

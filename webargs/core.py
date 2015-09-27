@@ -65,6 +65,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
     return cls if not instance else cls(**kwargs)
 
 def is_multiple(field):
+    """Return whether or not `field` handles repeated/multi-value arguments."""
     return isinstance(field, ma.fields.List)
 
 def get_value(d, name, multiple):
@@ -157,7 +158,7 @@ class Parser(object):
                 function = getattr(self, func)
             value = function(req, name, argobj)
         else:
-            value = None
+            raise ValueError('Invalid location: "{0}"'.format(location))
         return value
 
     def parse_arg(self, name, field, req, locations=None):

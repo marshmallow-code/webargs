@@ -10,7 +10,7 @@ hello_args = {
     'name': fields.Str(missing='World')
 }
 hello_multi = {
-    'name': fields.List(fields.Str(), multiple=True)
+    'name': fields.List(fields.Str())
 }
 
 def render_json_response(data):
