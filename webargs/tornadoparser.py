@@ -14,11 +14,11 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-
 import json
 import functools
 import logging
 
+import marshmallow as ma
 import tornado.web
 
 from webargs import core
@@ -113,9 +113,7 @@ class TornadoParser(core.Parser):
             reason = 'Unprocessable Entity'
         else:
             reason = None
-        # HTTPError must take a string for its log_message argument,
-        # so we json-encode the errors dictionary
-        raise HTTPError(status_code, str(error.messages),
+        raise HTTPError(status_code, log_message=str(error.messages),
                 reason=reason, messages=error.messages)
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
@@ -131,11 +129,18 @@ class TornadoParser(core.Parser):
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
         """
+        locations = locations or self.locations
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        else:
+            schema = core.argmap2schema(argmap)()
+
         def decorator(func):
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
                 parsed_args = self.parse(
-                    argmap, req=obj.request, locations=locations, validate=validate)
+                    schema, req=obj.request, locations=locations, validate=validate,
+                    force_all=as_kwargs)
 
                 if as_kwargs:
                     kwargs.update(parsed_args)

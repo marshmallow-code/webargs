@@ -576,6 +576,11 @@ class ValidateHandler(tornado.web.RequestHandler):
     def post(self, args):
         self.write(args)
 
+    @use_kwargs(ARGS)
+    def get(self, name):
+        self.write({'status': 'success'})
+
+
 def always_fail(val):
     raise ValidationError('something went wrong')
 
@@ -587,6 +592,7 @@ class AlwaysFailHandler(tornado.web.RequestHandler):
     @use_args(ARGS)
     def post(self, args):
         self.write(args)
+
 
 validate_app = tornado.web.Application([
     (r'/echo', ValidateHandler),
@@ -616,6 +622,14 @@ class TestValidateApp(AsyncHTTPTestCase):
             body=json.dumps({'occupation': 'pizza'}),
         )
         assert res.code == 422
+
+    def test_use_kwargs_with_error(self):
+        res = self.fetch(
+            '/echo',
+            method='GET',
+        )
+        assert res.code == 422
+
 
 if __name__ == '__main__':
     echo_app.listen(8888)

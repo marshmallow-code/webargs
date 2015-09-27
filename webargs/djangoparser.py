@@ -22,6 +22,8 @@ import json
 import functools
 import logging
 
+import marshmallow as ma
+
 from webargs import core
 
 logger = logging.getLogger(__name__)
@@ -31,7 +33,7 @@ class DjangoParser(core.Parser):
 
     .. note::
 
-        The :class:`DjangoParser` does not override
+        :class:`DjangoParser` does not override
         :meth:`handle_error <webargs.core.Parser.handle_error>`, so your Django
         views are responsible for catching any :exc:`ValidationErrors` raised by
         the parser and returning the appropriate `HTTPResponse`.
@@ -67,7 +69,7 @@ class DjangoParser(core.Parser):
         return core.get_value(req.FILES, name, core.is_multiple(field))
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
-                 validate=None):
+                 as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example: ::
@@ -76,13 +78,20 @@ class DjangoParser(core.Parser):
             def myview(request, args):
                 return HttpResponse('Hello ' + args['name'])
 
-        :param dict argmap: Dictionary of argument_name:Field object pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse
         :param tuple locations: Where on the request to search for values.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
         """
+        locations = locations or self.locations
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        else:
+            schema = core.argmap2schema(argmap)()
+
         def decorator(func):
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
@@ -91,8 +100,8 @@ class DjangoParser(core.Parser):
                     request = obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-                parsed_args = self.parse(argmap, req=request, locations=locations,
-                                         validate=validate)
+                parsed_args = self.parse(schema, req=request, locations=locations,
+                                         validate=validate, force_all=as_kwargs)
                 return func(obj, parsed_args, *args, **kwargs)
             return wrapper
         return decorator
