@@ -53,7 +53,7 @@ Full documentation is available at https://webargs.readthedocs.org/.
 Project Links
 -------------
 
-- Docs: http://webargs.rtfd.org/
+- Docs: http://webargs.readthedocs.org/
 - Changelog: http://webargs.readthedocs.org/en/latest/changelog.html
 - PyPI: https://pypi.python.org/pypi/webargs
 - Issues: https://github.com/sloria/webargs/issues

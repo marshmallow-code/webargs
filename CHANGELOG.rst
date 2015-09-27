@@ -1,10 +1,10 @@
 Changelog
 ---------
 
-0.16.0 (unreleased)
+0.16.0 (2015-09-27)
 *******************
 
-The major change in this release is that webargs now depends on `marshmallow <https://marshmallow.readthedocs.org/en/latest/>`_ for defining arguments and for validation.
+The major change in this release is that webargs now depends on `marshmallow <https://marshmallow.readthedocs.org/en/latest/>`_ for defining arguments and validation.
 
 Your code will need to be updated to use ``Fields`` rather than ``Args``.
 
@@ -57,6 +57,8 @@ Bug fixes:
 Support:
 
 * Updated docs.
+* Add ``examples/schema_example.py``.
+* Tested against Python 3.5.
 
 0.15.0 (2015-08-22)
 *******************
