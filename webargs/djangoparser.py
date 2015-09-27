@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class DjangoParser(core.Parser):
     """Django request argument parser.
 
-    .. note::
+    .. warning::
 
         :class:`DjangoParser` does not override
         :meth:`handle_error <webargs.core.Parser.handle_error>`, so your Django

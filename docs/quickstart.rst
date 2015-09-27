@@ -55,7 +55,11 @@ To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` me
         return register_user(args['username'], args['password'],
             fullname=args['fullname'], per_page=args['display_per_page'])
 
-Alternatively, you can decorate your view with :meth:`use_args <webargs.core.Parser.use_args>` or :meth:`use_kwargs <webargs.core.Parser.use_kwargs>`. The parsed arguments dictionary will be injected as a parameter of your view function or as keyword arguments, respectively.
+
+Decorator API
+-------------
+
+As an alternative to `Parser.parse`, you can decorate your view with :meth:`use_args <webargs.core.Parser.use_args>` or :meth:`use_kwargs <webargs.core.Parser.use_kwargs>`. The parsed arguments dictionary will be injected as a parameter of your view function or as keyword arguments, respectively.
 
 .. code-block:: python
 
@@ -71,6 +75,20 @@ Alternatively, you can decorate your view with :meth:`use_args <webargs.core.Par
     @use_kwargs(user_args)  # Injects keyword arguments
     def user_settings(username, password, fullname, display_per_page, nickname):
         return render_template('settings.html', username=username, nickname=nickname)
+
+
+.. note::
+
+    When using `use_kwargs`, any missing values for non-required fields will take the special value `missing <marshmallow.missing>`.
+
+    .. code-block:: python
+
+        from webargs import fields, missing
+
+        @use_kwargs({'name': fields.Str(), 'nickname': fields.Str(required=False)})
+        def myview(name, nickname):
+            if nickname is missing:
+                # ...
 
 Request "Locations"
 -------------------
@@ -143,8 +161,8 @@ The full arguments dictionary can also be validated by passing ``validate`` to :
                           validate=lambda args: args['years_employed'] < args['age'])
 
 
-Handling Errors
----------------
+Custom Error Handlers
+---------------------
 
 Each parser has a default error handling method. To override the error handling callback, write a function that receives an error and handles it, then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
 
@@ -160,8 +178,8 @@ Each parser has a default error handling method. To override the error handling 
     def handle_error(error):
         raise CustomError(error.messages)
 
-Adding Custom Location Handlers
--------------------------------
+Custom Location Handlers
+------------------------
 
 To add your own custom location handler, write a function that receives a request, an argument name, and a :class:`Field <marshmallow.fields.Field>`, then decorate that function with :func:`Parser.location_handler <webargs.core.Parser.location_handler>`.
 

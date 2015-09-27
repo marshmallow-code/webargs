@@ -66,7 +66,6 @@ def watch_docs():
         print('Install it with:')
         print('    pip install sphinx-autobuild')
         sys.exit(1)
-    docs()
     run('sphinx-autobuild {0} {1} --watch {2}'.format(
         docs_dir, build_dir, 'webargs'), echo=True, pty=True)
 
