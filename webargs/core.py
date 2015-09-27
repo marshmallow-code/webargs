@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import collections
 import functools
 import inspect
 import logging
@@ -183,7 +184,8 @@ class Parser(object):
         key = field.load_from or name
         for location in locations_to_check:
             value = self._get_value(key, field, req=req, location=location)
-            if is_multiple(field) and not (isinstance(value, list) and len(value)):
+            if (is_multiple(field) and not
+                    (isinstance(value, collections.Iterable) and len(value))):
                 continue
             # Found the value; validate and return it
             if value is not missing:
