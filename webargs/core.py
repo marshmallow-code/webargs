@@ -5,6 +5,7 @@ import collections
 import functools
 import inspect
 import logging
+import warnings
 
 import marshmallow as ma
 from marshmallow.compat import iteritems
@@ -205,9 +206,12 @@ class Parser(object):
     def load(self, data, argmap):
         if isinstance(argmap, ma.Schema):
             schema = argmap
-            # TODO: Check if strict=True
         else:
             schema = argmap2schema(argmap)()
+        if not schema.strict:
+            warnings.warn("It is highly recommended that you set strict=True on your schema "
+                    "so that the parser's error handler will get invoked.", UserWarning)
+
         return schema.load(data)
 
     def parse(self, argmap, req, locations=None, validate=None, force_all=False):

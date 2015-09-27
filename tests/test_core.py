@@ -466,6 +466,10 @@ class TestPassingSchema:
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
 
+    def test_warning_raised_if_schema_is_not_in_strict_mode(self, web_request, parser):
+        with pytest.warns(UserWarning):
+            parser.parse(self.UserSchema(strict=False), web_request)
+
     def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
             web_request, parser):
 
