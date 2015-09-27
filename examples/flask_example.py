@@ -61,7 +61,7 @@ def dateadd(value, addend, unit):
     return jsonify({'result': result.isoformat()})
 
 # Return validation errors as JSON
-@app.errorhandler(400)
+@app.errorhandler(422)
 def handle_validation_error(err):
     exc = err.data['exc']
     return jsonify({'errors': exc.messages}), 400
