@@ -148,6 +148,11 @@ def test_value_error_raised_if_invalid_location(web_request):
         p.parse_arg('foo', field, web_request, locations=('invalidlocation', 'headers'))
     assert 'Invalid locations arguments: {0}'.format(['invalidlocation']) in str(excinfo)
 
+def test_value_error_raised_if_invalid_location_on_field(web_request, parser):
+    with pytest.raises(ValueError) as excinfo:
+        parser.parse({'foo': fields.Field(location='invalidlocation')}, web_request)
+    assert 'Invalid locations arguments: {0}'.format(['invalidlocation']) in str(excinfo)
+
 @mock.patch('webargs.core.Parser.handle_error')
 @mock.patch('webargs.core.Parser.parse_json')
 def test_handle_error_called_when_parsing_raises_error(parse_json, handle_error, web_request):
@@ -330,6 +335,16 @@ def test_parse_with_load_from(web_request):
     args = {'content_type': fields.Field(load_from='Content-Type')}
     parsed = parser.parse(args, web_request, locations=('json',))
     assert parsed == {'content_type': 'application/json'}
+
+
+def test_parse_with_force_all(web_request, parser):
+    web_request.json = {'foo': 42}
+
+    args = {'foo': fields.Int(), 'bar': fields.Int(required=False)}
+
+    parsed = parser.parse(args, web_request, force_all=True)
+    assert parsed['foo'] == 42
+    assert parsed['bar'] is missing
 
 def test_parse_nested_with_load_from(web_request):
     parser = MockRequestParser()

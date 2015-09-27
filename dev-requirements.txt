@@ -9,6 +9,7 @@ webtest
 
 # Distribution
 wheel
+twine
 
 # Web frameworks
 Flask>=0.10.1
@@ -19,9 +20,4 @@ pyramid>=1.5.2
 webapp2>=2.5.2
 
 # Syntax checking
-flake8==2.4.0
-
-# TODO: Remove me
-# webargs will eventually depend on 2.0 final
-# Depend on dev branch until it's released
-git+https://github.com/marshmallow-code/marshmallow.git@dev
+flake8==2.4.1

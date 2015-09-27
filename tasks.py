@@ -10,10 +10,17 @@ build_dir = os.path.join(docs_dir, '_build')
 
 @task
 def test(coverage=False):
-    cmd = 'py.test'
+    import pytest
+    args = []
     if coverage:
-        cmd += ' --cov=webargs --cov-report=term --cov-report=html'
-    run(cmd, pty=True)
+        args.extend(['--cov=webargs', '--cov-report=term', '--cov-report=html'])
+    retcode = pytest.main(args)
+    sys.exit(retcode)
+
+@task
+def flake():
+    """Run flake8 on codebase."""
+    run('flake8 .', echo=True)
 
 @task
 def clean():
@@ -66,12 +73,10 @@ def watch_docs():
 @task
 def publish(test=False):
     """Publish to the cheeseshop."""
-    try:
-        __import__('wheel')
-    except ImportError:
-        print("wheel required. Run `pip install wheel`.")
-        sys.exit(1)
+    clean()
     if test:
-        run('python setup.py register -r test sdist bdist_wheel upload -r test')
+        run('python setup.py register -r test sdist bdist_wheel', echo=True)
+        run('twine upload dist/* -r test', echo=True)
     else:
-        run("python setup.py register sdist bdist_wheel upload")
+        run('python setup.py register sdist bdist_wheel', echo=True)
+        run('twine upload dist/*', echo=True)

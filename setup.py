@@ -1,28 +1,9 @@
 # -*- coding: utf-8 -*-
 import re
-import sys
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
 
 # Requirements
-REQUIREMENTS = ['marshmallow>=2.0.0rc2']
-TEST_REQUIREMENTS = [
-    'pytest', 'mock', 'flask',
-    'django', 'webtest', 'bottle',
-    'tornado', 'pyramid',
-]
-
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errcode = pytest.main(self.test_args)
-        sys.exit(errcode)
-
+REQUIREMENTS = ['marshmallow>=2.0.0']
 
 def find_version(fname):
     '''Attempts to find the version number in the file names fname.
@@ -82,6 +63,4 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
     test_suite='tests',
-    tests_require=TEST_REQUIREMENTS,
-    cmdclass={'test': PyTest}
 )
