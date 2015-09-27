@@ -1,0 +1,417 @@
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    outline: none;
+}
+
+html,
+body {
+    height: 100%;
+    min-width: 312px;
+    background-color: #ffffff;
+}
+
+.wrapper {
+    margin: 0 auto;
+    max-width: 900px;
+    padding: 0 14px;
+    position: relative;
+}
+
+.wrapper .section p {
+    overflow-x: hidden;
+}
+
+a img {
+    border: none;
+}
+
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.clearfix:before,
+.clearfix:after,
+.nav:before,
+.nav:after,
+.pager:before,
+.pager:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after,
+.nav:after,
+.pager:after {
+    clear: both;
+}
+
+.pull-right {
+    float: right !important;
+}
+
+.pull-left {
+    float: left !important;
+}
+
+.hide {
+    display: none !important;
+}
+
+.show {
+    display: block !important;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+label {
+    font-weight: bold;
+}
+
+fieldset {
+    padding: 20px;
+    margin: 0 0 20px 0;
+    border: 1px solid #ccc;
+}
+
+legend {
+    font-weight: bold;
+    font-size: 17px;
+}
+
+input.text,
+input.title,
+textarea,
+select {
+    margin: 7px 0;
+    border: 1px solid #bbb;
+}
+
+table {
+    margin: 0 0 20px;
+    border: 2px solid #CCC;
+    background: #FFF;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 4px 14px;
+    border: 1px solid #CCC;
+    border-collapse: collapse;
+}
+
+table th {
+    border-bottom: 2px solid #CCC;
+    background: #EEE;
+    font-weight: bold;
+    padding: 7px 14px;
+}
+
+img {
+    max-width: 100%;
+}
+
+header {
+    padding: 20px 0 10px;
+    /*border-bottom: 1px solid #ddd;*/
+    margin-bottom: 10px;
+}
+
+header h1 {
+    float: left;
+    /*background: url(../images/authocode-logo.png) no-repeat;*/
+    /*text-indent: -9999em;*/
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+    color: black;
+}
+
+header h1 a,
+header h1 a:hover,
+header h1 a:visited {
+    color: #aaa;
+    display: block;
+    font-size: 18px;
+    line-height: 40px;
+    padding: 10px 0;
+    text-align: left;
+    text-decoration: none;
+    font-family: ProximaNovaLight;
+}
+header h1 a:hover {
+    color: #222;
+}
+
+header h1 a small {
+    font-size: smaller;
+    display: block;
+    font-size: 20px;
+}
+
+header .nav {
+    float: right;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+header .nav li {
+    display: inline-block;
+    position: relative;
+}
+
+header .nav .nav-item {
+    color: #444;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+}
+
+header .nav .nav-item .fa {
+    font-size: 18px;
+}
+
+header .nav .search-form {
+    display: inline-block;
+    padding: 10px;
+}
+
+header .nav .search-form input {
+    color: #444;
+    border-radius: 4px;
+    border: 1px solid #aaa;
+    width: 220px;
+    padding: 2px 40px 2px 2px;
+    -moz-transition: width 0.5s;
+    -webkit-transition: width 0.5s;
+    transition: width 0.5s;
+}
+
+@media (min-width: 580px) {
+    header .nav .search-form input:focus {
+        width: 340px;
+    }
+}
+
+header .nav .search-form button {
+    color: #444;
+    background-position: center center;
+    background-repeat: no-repeat;
+    width: 40px;
+    background-color: transparent;
+    border: none;
+    margin-left: -44px;
+}
+
+header h1.logo a,
+header h1.logo a:hover,
+header h1.logo a:visited {
+    background-color: transparent;
+    color: #444;
+    font-family: Arial, sans-serif;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 40px;
+    padding-left: 0;
+    text-align: left;
+    text-decoration: none;
+}
+header h1.logo a:hover {
+    color: #111;
+}
+header h1.logo a img {
+    max-height: 32px;
+    vertical-align: middle;
+}
+}
+
+#main {
+    padding-top: 20px;
+}
+
+#toc {
+    float: right;
+    width: 270px;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    background-color: white;
+    margin: 0 0 40px 40px;
+    font-size: 13px;
+    clear: right;
+}
+
+#toc h3 {
+    font-size: 15px;
+    margin: 5px 0 15px;
+    padding: 0;
+}
+
+#toc ul {
+    margin: 5px 0 16px 8px;
+    padding: 0;
+}
+
+#toc > ul {
+    margin-left: 0
+}
+
+#toc ul li {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    font-size: 13px;
+    font-weight: normal;
+}
+
+#toc ul li ul {
+    margin: 5px 0 5px 8px;
+}
+
+#toc ul li ul li {
+    list-style-type: square;
+    list-style-position: outside;
+    margin-left: 10px;
+}
+
+#toc ul li a {
+    padding: 7px 0 4px 0;
+    display: inline-block;
+    text-decoration: none;
+}
+
+#toc ul li.current {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 14px 20px;
+    margin: 10px -20px;
+    background: #f0f0f0;
+    box-shadow: #aaa 1px 1px 8px;
+}
+
+@media (max-width: 767px) {
+    #toc {
+        display: none;
+        float: none;
+        width: 100%;
+        margin: -30px 0 0;
+    }
+}
+
+@media (min-width: 768px) {
+    #toc {
+        display: block !important;
+    }
+}
+
+@media (min-width: 1080px) {
+    #toc {
+        margin-right: -90px;
+        width: 280px;
+    }
+}
+
+footer {
+    color: #666;
+    font-size: 12px;
+    padding: 0;
+    margin: 40px 0 0 0;
+}
+
+footer nav {
+    padding: 15px 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+footer nav p {
+    margin: 10px 0;
+}
+
+footer .credits {
+    padding: 15px 0;
+}
+
+footer .credits p {
+    margin: 5px 0;
+}
+
+footer a,
+footer a:visited,
+footer a:link {
+    padding: 1px;
+    color: #333;
+}
+
+footer a:hover {
+    color: #000;
+}
+
+#sponsored_by {
+    text-align: center;
+    margin: 20px 0px;
+}
+
+#sponsored_by img {
+    vertical-align: -7px;
+    margin: 0 7px;
+}
+
+.figure {
+    margin: 20px 0 30px;
+    border: none;
+}
+
+.figure a.image-reference {
+    text-decoration: none;
+    border: none;
+}
+
+.caption {
+    font-style: italic;
+    font-size: small;
+    color: #444;
+    padding: 10px;
+    margin: 5px;
+}
+
+body.search #searchbox {
+    display: none !important;
+}
+
+#searchbox-body input {
+    padding: 8px 4px;
+    border-radius: 4px;
+    font-size: 15px;
+    width: 80%;
+}
+
+.highlight-link {
+    position: absolute;
+    top: 44px;
+    left: 10px;
+    font-size: 13px;
+}
+
+#search-progress {
+    font-size: 12px;
+    display: block;
+    color: #999;
+    padding: 7px 2px!important;
+}

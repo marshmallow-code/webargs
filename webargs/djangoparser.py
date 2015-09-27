@@ -5,11 +5,11 @@ Example usage: ::
 
     from django.views.generic import View
     from django.http import HttpResponse
-    from webargs import Arg
+    from marshmallow import fields
     from webargs.djangoparser import use_args
 
     hello_args = {
-        'name': Arg(str, default='World')
+        'name': fields.Str(missing='World')
     }
 
     class MyView(View):
@@ -22,6 +22,8 @@ import json
 import functools
 import logging
 
+import marshmallow as ma
+
 from webargs import core
 
 logger = logging.getLogger(__name__)
@@ -31,43 +33,43 @@ class DjangoParser(core.Parser):
 
     .. note::
 
-        The :class:`DjangoParser` does not override
+        :class:`DjangoParser` does not override
         :meth:`handle_error <webargs.core.Parser.handle_error>`, so your Django
         views are responsible for catching any :exc:`ValidationErrors` raised by
         the parser and returning the appropriate `HTTPResponse`.
     """
 
-    def parse_querystring(self, req, name, arg):
+    def parse_querystring(self, req, name, field):
         """Pull the querystring value from the request."""
-        return core.get_value(req.GET, name, arg.multiple)
+        return core.get_value(req.GET, name, core.is_multiple(field))
 
-    def parse_form(self, req, name, arg):
+    def parse_form(self, req, name, field):
         """Pull the form value from the request."""
-        return core.get_value(req.POST, name, arg.multiple)
+        return core.get_value(req.POST, name, core.is_multiple(field))
 
-    def parse_json(self, req, name, arg):
+    def parse_json(self, req, name, field):
         """Pull a json value from the request body."""
         try:
             reqdata = json.loads(req.body.decode('utf-8'))
-            return core.get_value(reqdata, name, arg.multiple)
+            return core.get_value(reqdata, name, core.is_multiple(field))
         except (AttributeError, ValueError):
             pass
-        return core.Missing
+        return core.missing
 
-    def parse_cookies(self, req, name, arg):
+    def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.COOKIES, name, arg.multiple)
+        return core.get_value(req.COOKIES, name, core.is_multiple(field))
 
-    def parse_headers(self, req, name, arg):
+    def parse_headers(self, req, name, field):
         raise NotImplementedError('Header parsing not supported by {0}'
             .format(self.__class__.__name__))
 
-    def parse_files(self, req, name, arg):
+    def parse_files(self, req, name, field):
         """Pull a file from the request."""
-        return core.get_value(req.FILES, name, arg.multiple)
+        return core.get_value(req.FILES, name, core.is_multiple(field))
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
-                 validate=None):
+                 as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example: ::
@@ -76,13 +78,20 @@ class DjangoParser(core.Parser):
             def myview(request, args):
                 return HttpResponse('Hello ' + args['name'])
 
-        :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse
         :param tuple locations: Where on the request to search for values.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
         """
+        locations = locations or self.locations
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        else:
+            schema = core.argmap2schema(argmap)()
+
         def decorator(func):
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
@@ -91,8 +100,8 @@ class DjangoParser(core.Parser):
                     request = obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-                parsed_args = self.parse(argmap, req=request, locations=locations,
-                                         validate=validate)
+                parsed_args = self.parse(schema, req=request, locations=locations,
+                                         validate=validate, force_all=as_kwargs)
                 return func(obj, parsed_args, *args, **kwargs)
             return wrapper
         return decorator

@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 # Requirements
-REQUIREMENTS = []
+REQUIREMENTS = ['marshmallow>=2.0.0rc2']
 TEST_REQUIREMENTS = [
     'pytest', 'mock', 'flask',
     'django', 'webtest', 'bottle',
@@ -64,7 +64,7 @@ setup(
     license=read("LICENSE"),
     zip_safe=False,
     keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado',
-      'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api'),
+      'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api', 'marshmallow'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

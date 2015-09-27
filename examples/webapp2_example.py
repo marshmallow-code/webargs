@@ -17,13 +17,12 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 
 import webapp2
 
-from webargs import Arg
+from webargs import fields
 from webargs.webapp2parser import use_args, use_kwargs
 
 hello_args = {
-    'name': Arg(str, default='World')
+    'name': fields.Str(missing='World')
 }
-
 
 class MainPage(webapp2.RequestHandler):
 

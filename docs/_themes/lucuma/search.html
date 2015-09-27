@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% set title = t_search_page %}
+
+{% block bodyclass %}search{% endblock %}
+
+{% block content %}
+<div>
+  <div class="wrapper">
+    {% include "searchresults.html" %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ pathto('_static/scripts/searchtools.js', 1) }}"></script>
+<script>$(document).ready(function(){
+  Search.loadIndex("{{ pathto('searchindex.js', 1) }}");
+});</script>
+<script id="searchindexloader"></script>
+{% endblock %}

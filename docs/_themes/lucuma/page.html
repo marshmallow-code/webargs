@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div id="main">
+  <div class="wrapper">
+  {% if pagename != 'index' %}
+    {% include "toc.html" %}
+  {% endif %}
+  {{ body }}
+  </div>
+</div>
+{% endblock %}

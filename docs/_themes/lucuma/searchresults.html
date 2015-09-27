@@ -1,0 +1,32 @@
+{% import 'locale-'+language+'_t' as t -%}
+<h1 id="search-documentation">{{ t.search_page }}</h1>
+<noscript>
+  <div id="fallback" class="admonition warning">
+    <p>{{ t.activate_js_to_search }}.</p>
+  </div>
+</noscript>
+
+<form action="" method="get" id="searchbox-body" novalidate>
+  <input type="text" name="q" value="{{ q }}">
+  <button type="submit" class="button">{{ t.action_search }}</button>
+  <span id="search-progress" style="padding-left: 10px"></span>
+</form>
+{% if search_performed %}
+  <h2>{{ t.search_results_title }}</h2>
+  {% if not search_results %}
+    <p>{{ t.search_results_no_results }} :(</p>
+  {% endif %}
+{% endif %}
+
+<div id="search-results">
+{% if search_results -%}
+  <ul>
+  {%- for href, caption, context in search_results %}
+    <li>
+      <a href="{{ pathto(item.href) }}">{{ caption }}</a>
+      <div class="context">{{ context|e }}</div>
+    </li>
+  {%- endfor %}
+  </ul>
+{%- endif %}
+</div>

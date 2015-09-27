@@ -1,0 +1,19 @@
+{% set nav_index = 'Index' -%}
+{% set nav_home = 'Home' -%}
+{% set return_to_home_page = 'Return to home page' -%}
+{% set site_in_other_languages = 'This site in other languages' -%}
+{% set created_by = 'Created by' -%}
+{% set sponsored_by = 'Sponsored by' -%}
+{% set search_page = 'Search' -%}
+{% set activate_js_to_search = 'The search needs JavaScript to works. Please activate it.' -%}
+{% set action_search = 'Search' -%}
+{% set search_results_title = 'Results' -%}
+{% set search_results_no_results = 'No results' -%}
+
+{% set permalink_header = "Permalink to this headline" %}
+{% set permalink_definition = "Permalink to this definition" %}
+{% set hide_search_matches = "Hide Search Matches" %}
+{% set searching = "Searching ..." %}
+{% set preparing_search = "Preparing search..." %}
+{% set search_results_x_found = "Found %s result(s)" %}
+{% set search_result_in = "in" %}

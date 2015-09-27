@@ -6,11 +6,11 @@ Example usage: ::
     from wsgiref.simple_server import make_server
     from pyramid.config import Configurator
     from pyramid.response import Response
-    from webargs import Arg
+    from marshmallow import fields
     from webargs.pyramidparser import use_args
 
     hello_args = {
-        'name': Arg(str, default='World')
+        'name': fields.Str(missing='World')
     }
 
     @use_args(hello_args)
@@ -31,8 +31,8 @@ import logging
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
+from marshmallow.compat import text_type
 from webargs import core
-from webargs.core import text_type
 
 logger = logging.getLogger(__name__)
 
@@ -43,38 +43,39 @@ class PyramidParser(core.Parser):
         matchdict='parse_matchdict',
         **core.Parser.__location_map__)
 
-    def parse_querystring(self, req, name, arg):
+    def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, arg.multiple)
+        return core.get_value(req.GET, name, core.is_multiple(field))
 
-    def parse_form(self, req, name, arg):
+    def parse_form(self, req, name, field):
         """Pull a form value from the request."""
-        return core.get_value(req.POST, name, arg.multiple)
+        return core.get_value(req.POST, name, core.is_multiple(field))
 
-    def parse_json(self, req, name, arg):
+    def parse_json(self, req, name, field):
         """Pull a json value from the request."""
         try:
             json_data = req.json_body
         except ValueError:
-            return core.Missing
+            return core.missing
 
-        return core.get_value(json_data, name, arg.multiple)
+        return core.get_value(json_data, name, core.is_multiple(field))
 
-    def parse_cookies(self, req, name, arg):
+    def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, arg.multiple)
+        return core.get_value(req.cookies, name, core.is_multiple(field))
 
-    def parse_headers(self, req, name, arg):
+    def parse_headers(self, req, name, field):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, arg.multiple)
+        return core.get_value(req.headers, name, core.is_multiple(field))
 
-    def parse_files(self, req, name, arg):
+    def parse_files(self, req, name, field):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
-        return core.get_value(MultiDict(files), name, arg.multiple)
+        return core.get_value(MultiDict(files), name, core.is_multiple(field))
 
-    def parse_matchdict(self, req, name, arg):
-        return core.get_value(req.matchdict, name, arg.multiple)
+    def parse_matchdict(self, req, name, field):
+        """Pull a value from the request's `matchdict`."""
+        return core.get_value(req.matchdict, name, core.is_multiple(field))
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
@@ -82,8 +83,7 @@ class PyramidParser(core.Parser):
         """
         logger.error(error)
         status_code = getattr(error, 'status_code', 400)
-        data = getattr(error, 'data', {})
-        raise exception_response(status_code, detail=text_type(error), **data)
+        raise exception_response(status_code, detail=text_type(error))
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
                  as_kwargs=False, validate=None):
@@ -91,7 +91,8 @@ class PyramidParser(core.Parser):
         Supports the *Class-based View* pattern where `request` is saved as an instance
         attribute on a view class.
 
-        :param dict argmap: Dictionary of argument_name:Arg object pairs.
+        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
+            of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse
         :param tuple locations: Where on the request to search for values.
         :param callable validate:

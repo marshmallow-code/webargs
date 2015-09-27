@@ -15,14 +15,13 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 import datetime as dt
 import json
 
-from dateutil import parser
 from bottle import route, run, error, response
-from webargs import Arg, ValidationError
+from webargs import fields, ValidationError
 from webargs.bottleparser import use_args, use_kwargs
 
 
 hello_args = {
-    'name': Arg(str, default='Friend')
+    'name': fields.Str(missing='Friend')
 }
 @route('/', method='GET')
 @use_args(hello_args)
@@ -32,8 +31,8 @@ def index(args):
     return {'message': 'Welcome, {}!'.format(args['name'])}
 
 add_args = {
-    'x': Arg(float, required=True),
-    'y': Arg(float, required=True),
+    'x': fields.Float(required=True),
+    'y': fields.Float(required=True),
 }
 @route('/add', method='POST')
 @use_kwargs(add_args)
@@ -41,18 +40,14 @@ def add(x, y):
     """An addition endpoint."""
     return {'result': x + y}
 
-
-def string_to_datetime(val):
-    return parser.parse(val)
-
 def validate_unit(val):
     if val not in ['minutes', 'days']:
         raise ValidationError("Unit must be either 'minutes' or 'days'.")
 
 dateadd_args = {
-    'value': Arg(default=dt.datetime.utcnow, use=string_to_datetime),
-    'addend': Arg(int, required=True, validate=lambda val: val >= 0),
-    'unit': Arg(str, validate=validate_unit)
+    'value': fields.DateTime(missing=dt.datetime.utcnow),
+    'addend': fields.Int(required=True, validate=lambda val: val >= 0),
+    'unit': fields.Str(validate=validate_unit)
 }
 @route('/dateadd', method='POST')
 @use_kwargs(dateadd_args)
@@ -66,7 +61,7 @@ def dateadd(value, addend, unit):
     return {'result': result.isoformat()}
 
 # Return validation errors as JSON
-@error(400)
+@error(422)
 def error400(err):
     response.content_type = 'application/json'
     return json.dumps({'message': str(err.body)})

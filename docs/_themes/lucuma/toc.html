@@ -1,0 +1,6 @@
+{% import 'locale-'+language+'_t' as t -%}
+<div id="toc">
+  <h3>{{ t.nav_index }}</h3>
+  <a class="nav-item" href="{{ pathto('index') }}">{{ t.nav_home }}</a>
+  {{ toctree(maxdepth=3) }}
+</div>

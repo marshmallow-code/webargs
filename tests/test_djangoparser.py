@@ -4,8 +4,9 @@ import sys
 
 import pytest
 import mock
+from marshmallow import fields
+
 from webtest import TestApp
-from webargs import Arg
 from webargs.djangoparser import DjangoParser
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -78,10 +79,10 @@ def test_decorated_with_url_param(route, testapp):
     assert res.json == {'name': 'Fred'}
 
 def test_parse_headers_raises_not_implemented_error(mockrequest):
-    arg = Arg()
+    field = fields.Field()
     p = DjangoParser()
     with pytest.raises(NotImplementedError) as excinfo:
-        p.parse_arg('foo', arg, req=mockrequest, locations=('headers',))
+        p.parse_arg('foo', field, req=mockrequest, locations=('headers',))
     assert 'Header parsing not supported by DjangoParser' in str(excinfo)
 
 def test_parse_cookies(testapp):

@@ -20,3 +20,8 @@ webapp2>=2.5.2
 
 # Syntax checking
 flake8==2.4.0
+
+# TODO: Remove me
+# webargs will eventually depend on 2.0 final
+# Depend on dev branch until it's released
+git+https://github.com/marshmallow-code/marshmallow.git@dev

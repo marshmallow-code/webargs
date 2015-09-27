@@ -14,15 +14,14 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 """
 import datetime as dt
 
-from dateutil import parser
 from flask import Flask, jsonify
-from webargs import Arg, ValidationError
+from webargs import fields, ValidationError
 from webargs.flaskparser import use_args, use_kwargs
 
 app = Flask(__name__)
 
 hello_args = {
-    'name': Arg(str, default='Friend')
+    'name': fields.Str(missing='Friend')
 }
 @app.route('/', methods=['GET'])
 @use_args(hello_args)
@@ -32,8 +31,8 @@ def index(args):
     return jsonify({'message': 'Welcome, {}!'.format(args['name'])})
 
 add_args = {
-    'x': Arg(float, required=True),
-    'y': Arg(float, required=True),
+    'x': fields.Float(required=True),
+    'y': fields.Float(required=True),
 }
 @app.route('/add', methods=['POST'])
 @use_kwargs(add_args)
@@ -41,18 +40,14 @@ def add(x, y):
     """An addition endpoint."""
     return jsonify({'result': x + y})
 
-
-def string_to_datetime(val):
-    return parser.parse(val)
-
 def validate_unit(val):
     if val not in ['minutes', 'days']:
         raise ValidationError("Unit must be either 'minutes' or 'days'.")
 
 dateadd_args = {
-    'value': Arg(default=dt.datetime.utcnow, use=string_to_datetime),
-    'addend': Arg(int, required=True, validate=lambda val: val >= 0),
-    'unit': Arg(str, validate=validate_unit)
+    'value': fields.DateTime(default=dt.datetime.utcnow),
+    'addend': fields.Int(required=True, validate=lambda val: val >= 0),
+    'unit': fields.Str(validate=validate_unit)
 }
 @app.route('/dateadd', methods=['POST'])
 @use_kwargs(dateadd_args)
@@ -69,7 +64,7 @@ def dateadd(value, addend, unit):
 @app.errorhandler(400)
 def handle_validation_error(err):
     exc = err.data['exc']
-    return jsonify({'message': str(exc)}), 400
+    return jsonify({'errors': exc.messages}), 400
 
 
 if __name__ == '__main__':
