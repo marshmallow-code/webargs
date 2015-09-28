@@ -55,9 +55,9 @@ db = {'users': {}}
 ##### use_schema #####
 
 def use_schema(schema, list_view=False, locations=None):
-    """Decorator for using a marshmallow schema for
-        (1) parsing a request's input and
-        (2) serializing its output to a JSON response.
+    """View decorator for using a marshmallow schema to
+        (1) parse a request's input and
+        (2) serializing the view's output to a JSON response.
     """
     def decorator(func):
         @functools.wraps(func)

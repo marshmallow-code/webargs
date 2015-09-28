@@ -45,7 +45,7 @@ def validate_unit(val):
         raise ValidationError("Unit must be either 'minutes' or 'days'.")
 
 dateadd_args = {
-    'value': fields.DateTime(missing=dt.datetime.utcnow),
+    'value': fields.DateTime(required=False),
     'addend': fields.Int(required=True, validate=lambda val: val >= 0),
     'unit': fields.Str(validate=validate_unit)
 }
@@ -53,6 +53,7 @@ dateadd_args = {
 @use_kwargs(dateadd_args)
 def dateadd(value, addend, unit):
     """A datetime adder endpoint."""
+    value = value or dt.datetime.utcnow()
     if unit == 'minutes':
         delta = dt.timedelta(minutes=addend)
     else:
@@ -62,7 +63,7 @@ def dateadd(value, addend, unit):
 
 # Return validation errors as JSON
 @error(422)
-def error400(err):
+def error422(err):
     response.content_type = 'application/json'
     return json.dumps({'message': str(err.body)})
 

@@ -57,7 +57,7 @@ def validate_unit(val):
 class DateAddResource(restful.Resource):
 
     dateadd_args = {
-        'value': fields.DateTime(missing=dt.datetime.utcnow),
+        'value': fields.DateTime(required=False),
         'addend': fields.Int(required=True, validate=lambda val: val >= 0),
         'unit': fields.Str(validate=validate_unit)
     }
@@ -65,6 +65,7 @@ class DateAddResource(restful.Resource):
     @use_kwargs(dateadd_args)
     def post(self, value, addend, unit):
         """A datetime adder endpoint."""
+        value = value or dt.datetime.utcnow()
         if unit == 'minutes':
             delta = dt.timedelta(minutes=addend)
         else:
