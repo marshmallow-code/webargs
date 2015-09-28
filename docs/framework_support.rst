@@ -43,7 +43,7 @@ Here is an example error handler that returns validation messages to the client 
         # webargs attaches additional metadata to the `data` attribute
         data = getattr(err, 'data')
         if data:
-            err_message = data['message']
+            err_message = data['messages']
         else:
             err_message = 'Invalid request'
         return jsonify({
