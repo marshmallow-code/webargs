@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+0.17.0 (unreleased)
+*******************
+
+Features:
+
+* `TornadoParser` returns unicode strings rather than bytestrings (:issue:`41`). Thanks :user:`thomasboyt` for the suggestion.
+
+Support:
+
+* Add ``examples/annotations_example.py`` (demonstrates using Python 3 function annotations to define request arguments).
+* Fix examples.
+
 0.16.0 (2015-09-27)
 *******************
 
