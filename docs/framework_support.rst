@@ -38,17 +38,18 @@ Here is an example error handler that returns validation messages to the client 
 
     from flask import jsonify
 
-    @app.errorhandler(400)
+    @app.errorhandler(422)
     def handle_bad_request(err):
         # webargs attaches additional metadata to the `data` attribute
         data = getattr(err, 'data')
         if data:
-            err_message = data['messages']
+            # Get validations from the ValidationError object
+            messages = data['exc'].messages
         else:
-            err_message = 'Invalid request'
+            messages = ['Invalid request']
         return jsonify({
-            'message': err_message,
-        }), 400
+            'messages': messages,
+        }), 422
 
 
 Django
@@ -122,7 +123,7 @@ The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Pa
         try:
             args = parser.parse(required_args, request)
         except ValidationError as err:
-            return JsonResponse({'error': str(err)}, status=400)
+            return JsonResponse({'messages': err.messages}, status=422)
         return JsonResponse({'message': 'Hello {name}'.format(name=name)})
 
 Tornado
