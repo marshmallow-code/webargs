@@ -20,7 +20,7 @@ Example: ::
 """
 import logging
 
-from flask import request, abort as flask_abort
+import flask
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
@@ -34,7 +34,7 @@ def abort(http_status_code, **kwargs):
     From Flask-Restful. See NOTICE file for license information.
     """
     try:
-        flask_abort(http_status_code)
+        flask.abort(http_status_code)
     except HTTPException as err:
         if len(kwargs):
             err.data = kwargs
@@ -85,12 +85,9 @@ class FlaskParser(core.Parser):
         status_code = getattr(error, 'status_code', self.DEFAULT_VALIDATION_STATUS)
         abort(status_code, messages=error.messages, exc=error)
 
-    def parse(self, argmap, req=None, *args, **kwargs):
-        """Parses the request using the given arguments map.
-        Uses Flask's context-local request object if req=None.
-        """
-        req_obj = req or request  # Default to context-local request
-        return super(FlaskParser, self).parse(argmap, req_obj, *args, **kwargs)
+    def get_default_request(self):
+        """Override to use Flask's thread-local request objec by default"""
+        return flask.request
 
 parser = FlaskParser()
 use_args = parser.use_args

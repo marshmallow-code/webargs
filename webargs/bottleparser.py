@@ -20,7 +20,7 @@ Example: ::
 """
 import logging
 
-from bottle import request, HTTPError
+import bottle
 
 from webargs import core
 
@@ -64,15 +64,12 @@ class BottleParser(core.Parser):
         logger.error(error)
         status_code = getattr(error, 'status_code', self.DEFAULT_VALIDATION_STATUS)
         headers = getattr(error, 'headers', {})
-        raise HTTPError(status=status_code, body=error.messages,
+        raise bottle.HTTPError(status=status_code, body=error.messages,
                         headers=headers, exception=error)
 
-    def parse(self, argmap, req=None, *args, **kwargs):
-        """Parses the request using the given arguments map.
-        Uses Bottle's context-local request object if req=None.
-        """
-        req_obj = req or request  # Default to context-local request
-        return super(BottleParser, self).parse(argmap, req_obj, *args, **kwargs)
+    def get_default_request(self):
+        """Override to use bottle's thread-local request object by default."""
+        return bottle.request
 
 parser = BottleParser()
 use_args = parser.use_args

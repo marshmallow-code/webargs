@@ -69,10 +69,8 @@ class Webapp2Parser(core.Parser):
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
         return core.get_value(webob.multidict.MultiDict(files), name, field)
 
-    def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
-        """Wrap :meth:`core.Parser.parse` to inject the active :class:`webapp2.Request` in"""
-        req = req or webapp2.get_request()
-        return super(Webapp2Parser, self).parse(argmap, req, locations, validate, force_all)
+    def get_default_request(self):
+        return webapp2.get_request()
 
 parser = Webapp2Parser()
 use_args = parser.use_args

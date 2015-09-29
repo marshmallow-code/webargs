@@ -10,6 +10,7 @@ build_dir = os.path.join(docs_dir, '_build')
 
 @task
 def test(coverage=False, browse=False):
+    flake()
     import pytest
     args = []
     if coverage:

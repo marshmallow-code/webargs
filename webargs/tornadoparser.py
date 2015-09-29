@@ -15,10 +15,8 @@ Example: ::
             self.write(response)
 """
 import json
-import functools
 import logging
 
-import marshmallow as ma
 from marshmallow.compat import basestring
 import tornado.web
 from tornado.escape import _unicode
@@ -132,41 +130,8 @@ class TornadoParser(core.Parser):
         raise HTTPError(status_code, log_message=str(error.messages),
                 reason=reason, messages=error.messages)
 
-    def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
-                 as_kwargs=False, validate=None):
-        """Decorator that injects parsed arguments into a view function or method.
-
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
-        :param req: The request object to parse
-        :param tuple locations: Where on the request to search for values.
-        :param as_kwargs: Whether to pass arguments to the handler as kwargs
-        :param callable validate: Validation function that receives the dictionary
-            of parsed arguments. If the function returns ``False``, the parser
-            will raise a :exc:`ValidationError`.
-        """
-        locations = locations or self.locations
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        else:
-            schema = core.argmap2schema(argmap)()
-
-        def decorator(func):
-            @functools.wraps(func)
-            def wrapper(obj, *args, **kwargs):
-                parsed_args = self.parse(
-                    schema, req=obj.request, locations=locations, validate=validate,
-                    force_all=as_kwargs)
-
-                if as_kwargs:
-                    kwargs.update(parsed_args)
-                else:
-                    args = (parsed_args,) + args
-
-                return func(obj, *args, **kwargs)
-            return wrapper
-        return decorator
-
+    def get_request_from_view_args(self, args, kwargs):
+        return args[0].request
 
 parser = TornadoParser()
 use_args = parser.use_args

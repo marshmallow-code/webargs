@@ -215,7 +215,7 @@ class Parser(object):
 
         return schema.load(data)
 
-    def parse(self, argmap, req, locations=None, validate=None, force_all=False):
+    def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
         :param dict argmap: Either a `marshmallow.Schema` or a `dict`
@@ -230,6 +230,8 @@ class Parser(object):
 
          :return: A dictionary of parsed arguments
         """
+        req = req or self.get_default_request()
+        assert req is not None, 'Must pass req object'
         ret = None
         validators = _ensure_list_of_callables(validate)
         try:
@@ -276,6 +278,21 @@ class Parser(object):
         self._cache = {}
         return None
 
+    def get_default_request(self):
+        """Optional override. Provides a hook for frameworks that use thread-local
+        request objects.
+        """
+        return None
+
+    def get_request_from_view_args(self, args, kwargs):
+        """Optional override. Returns the request object to be parsed, given a view
+        function's args and kwargs.
+
+        Used by the `use_args` and `use_kwargs` to get a request object from a
+        view's arguments.
+        """
+        return None
+
     def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -299,13 +316,21 @@ class Parser(object):
             schema = argmap
         else:
             schema = argmap2schema(argmap)()
+        request_obj = req
 
         def decorator(func):
+            req_ = request_obj
+
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
+                req_obj = req_
+
                 # if as_kwargs is passed, must include all args
                 force_all = as_kwargs
-                parsed_args = self.parse(schema, req=req, locations=locations,
+
+                if not req_obj:
+                    req_obj = self.get_request_from_view_args(args, kwargs)
+                parsed_args = self.parse(schema, req=req_obj, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
@@ -314,7 +339,8 @@ class Parser(object):
                     # Wrapped function is a method, so inject parsed_args
                     # after 'self'
                     if args and args[0]:
-                        return func(args[0], parsed_args, *args[1:], **kwargs)
+                        rest_args = (parsed_args, ) + tuple(args[1:])
+                        return func(args[0], *rest_args, **kwargs)
                     return func(parsed_args, *args, **kwargs)
             return wrapper
         return decorator
