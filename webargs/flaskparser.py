@@ -49,33 +49,33 @@ class FlaskParser(core.Parser):
         # Fail silently so that the webargs parser can handle the error
         json_data = req.get_json(silent=True)
         if json_data:
-            return core.get_value(json_data, name, core.is_multiple(field))
+            return core.get_value(json_data, name, field)
         else:
             return core.missing
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
-        return core.get_value(req.args, name, core.is_multiple(field))
+        return core.get_value(req.args, name, field)
 
     def parse_form(self, req, name, field):
         """Pull a form value from the request."""
         try:
-            return core.get_value(req.form, name, core.is_multiple(field))
+            return core.get_value(req.form, name, field)
         except AttributeError:
             pass
         return core.missing
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, core.is_multiple(field))
+        return core.get_value(req.headers, name, field)
 
     def parse_cookies(self, req, name, field):
         """Pull a value from the cookiejar."""
-        return core.get_value(req.cookies, name, core.is_multiple(field))
+        return core.get_value(req.cookies, name, field)
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
-        return core.get_value(req.files, name, core.is_multiple(field))
+        return core.get_value(req.files, name, field)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and

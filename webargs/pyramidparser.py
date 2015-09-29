@@ -31,6 +31,7 @@ import logging
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
+import marshmallow as ma
 from marshmallow.compat import text_type
 from webargs import core
 
@@ -45,11 +46,11 @@ class PyramidParser(core.Parser):
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, core.is_multiple(field))
+        return core.get_value(req.GET, name, field)
 
     def parse_form(self, req, name, field):
         """Pull a form value from the request."""
-        return core.get_value(req.POST, name, core.is_multiple(field))
+        return core.get_value(req.POST, name, field)
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
@@ -58,24 +59,24 @@ class PyramidParser(core.Parser):
         except ValueError:
             return core.missing
 
-        return core.get_value(json_data, name, core.is_multiple(field))
+        return core.get_value(json_data, name, field)
 
     def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, core.is_multiple(field))
+        return core.get_value(req.cookies, name, field)
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, core.is_multiple(field))
+        return core.get_value(req.headers, name, field)
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
-        return core.get_value(MultiDict(files), name, core.is_multiple(field))
+        return core.get_value(MultiDict(files), name, field)
 
     def parse_matchdict(self, req, name, field):
         """Pull a value from the request's `matchdict`."""
-        return core.get_value(req.matchdict, name, core.is_multiple(field))
+        return core.get_value(req.matchdict, name, field)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
@@ -93,23 +94,29 @@ class PyramidParser(core.Parser):
 
         :param dict argmap: Either a `marshmallow.Schema` or a `dict`
             of argname -> `marshmallow.fields.Field` pairs.
-        :param req: The request object to parse
+        :param req: The request object to parse. Pulled off of the view by default.
         :param tuple locations: Where on the request to search for values.
-        :param callable validate:
-            Validation function that receives the dictionary of parsed arguments.
-            If the function returns ``False``, the parser will raise a
-            :exc:`ValidationError`.
+        :param bool as_kwargs: Whether to insert arguments as keyword arguments.
+        :param callable validate: Validation function that receives the dictionary
+            of parsed arguments. If the function returns ``False``, the parser
+            will raise a :exc:`ValidationError`.
         """
+        locations = locations or self.locations
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        else:
+            schema = core.argmap2schema(argmap)()
+
         def decorator(func):
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
                 # The first argument is either `self` or `request`
                 try:  # get self.request
-                    request = obj.request
+                    request = req or obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-                parsed_args = self.parse(argmap, req=request, locations=locations,
-                                         validate=None)
+                parsed_args = self.parse(schema, req=request, locations=locations,
+                                         validate=validate, force_all=as_kwargs)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(obj, *args, **kwargs)

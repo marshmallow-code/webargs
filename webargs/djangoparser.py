@@ -41,24 +41,24 @@ class DjangoParser(core.Parser):
 
     def parse_querystring(self, req, name, field):
         """Pull the querystring value from the request."""
-        return core.get_value(req.GET, name, core.is_multiple(field))
+        return core.get_value(req.GET, name, field)
 
     def parse_form(self, req, name, field):
         """Pull the form value from the request."""
-        return core.get_value(req.POST, name, core.is_multiple(field))
+        return core.get_value(req.POST, name, field)
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request body."""
         try:
             reqdata = json.loads(req.body.decode('utf-8'))
-            return core.get_value(reqdata, name, core.is_multiple(field))
+            return core.get_value(reqdata, name, field)
         except (AttributeError, ValueError):
             pass
         return core.missing
 
     def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.COOKIES, name, core.is_multiple(field))
+        return core.get_value(req.COOKIES, name, field)
 
     def parse_headers(self, req, name, field):
         raise NotImplementedError('Header parsing not supported by {0}'

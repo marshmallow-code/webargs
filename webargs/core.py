@@ -69,7 +69,7 @@ def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
     return isinstance(field, ma.fields.List)
 
-def get_value(d, name, multiple):
+def get_value(d, name, field):
     """Get a value from a dictionary. Handles ``MultiDict`` types when
     ``multiple=True``. If the value is not found, return `missing`.
 
@@ -77,6 +77,7 @@ def get_value(d, name, multiple):
     :param str name: Name of the key.
     :param bool multiple: Whether to handle multiple values.
     """
+    multiple = is_multiple(field)
     val = d.get(name, missing)
     if multiple and val is not missing:
         if hasattr(d, 'getlist'):

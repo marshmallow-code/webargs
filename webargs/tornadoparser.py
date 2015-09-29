@@ -60,11 +60,12 @@ def decode_argument(value, name=None):
         raise HTTPError(400, "Invalid unicode in %s: %r" %
                         (name or "url", value[:40]))
 
-def get_value(d, name, multiple):
+def get_value(d, name, field):
     """Handle gets from 'multidicts' made of lists
 
     It handles cases: ``{"key": [value]}`` and ``{"key": value}``
     """
+    multiple = core.is_multiple(field)
     value = d.get(name, core.missing)
     if value is core.missing:
         return core.missing
@@ -91,19 +92,19 @@ class TornadoParser(core.Parser):
         json_body = self._cache.get('json')
         if json_body is None:
             self._cache['json'] = parse_json_body(req)
-        return get_value(self._cache['json'], name, core.is_multiple(field))
+        return get_value(self._cache['json'], name, field)
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
-        return get_value(req.query_arguments, name, core.is_multiple(field))
+        return get_value(req.query_arguments, name, field)
 
     def parse_form(self, req, name, field):
         """Pull a form value from the request."""
-        return get_value(req.body_arguments, name, core.is_multiple(field))
+        return get_value(req.body_arguments, name, field)
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""
-        return get_value(req.headers, name, core.is_multiple(field))
+        return get_value(req.headers, name, field)
 
     def parse_cookies(self, req, name, field):
         """Pull a value from the header data."""
@@ -116,7 +117,7 @@ class TornadoParser(core.Parser):
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
-        return get_value(req.files, name, core.is_multiple(field))
+        return get_value(req.files, name, field)
 
     def handle_error(self, error):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`

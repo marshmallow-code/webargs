@@ -24,11 +24,12 @@ name = 'name'
 value = 'value'
 
 def test_get_value_basic():
-    assert get_value({'foo': 42}, 'foo', False) == 42
-    assert get_value({'foo': 42}, 'bar', False) is missing
-    assert get_value({'foos': ['a', 'b']}, 'foos', True) == ['a', 'b']
+    field, multifield = fields.Field(), fields.List(fields.Str())
+    assert get_value({'foo': 42}, 'foo', field) == 42
+    assert get_value({'foo': 42}, 'bar', field) is missing
+    assert get_value({'foos': ['a', 'b']}, 'foos', multifield) == ['a', 'b']
     # https://github.com/sloria/webargs/pull/30
-    assert get_value({'foos': ['a', 'b']}, 'bar', True) is missing
+    assert get_value({'foos': ['a', 'b']}, 'bar', multifield) is missing
 
 class TestQueryArgs(object):
 

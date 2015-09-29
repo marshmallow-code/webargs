@@ -331,7 +331,8 @@ if not PY26:
     multidicts.append(DjMultiDict({'foos': ['a', 'b']}))
 @pytest.mark.parametrize('input_dict', multidicts)
 def test_get_value_multidict(input_dict):
-    assert get_value(input_dict, 'foos', multiple=True) == ['a', 'b']
+    field = fields.List(fields.Str())
+    assert get_value(input_dict, 'foos', field) == ['a', 'b']
 
 def test_parse_with_load_from(web_request):
     web_request.json = {'Content-Type': 'application/json'}

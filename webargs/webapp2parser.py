@@ -44,30 +44,30 @@ class Webapp2Parser(core.Parser):
         """Pull a json value from the request."""
         try:
             json_data = webapp2_extras.json.decode(req.body)
-            return core.get_value(json_data, name, core.is_multiple(field))
+            return core.get_value(json_data, name, field)
         except ValueError:
             return core.missing
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, core.is_multiple(field))
+        return core.get_value(req.GET, name, field)
 
     def parse_form(self, req, name, field):
         """Pull a form value from the request."""
-        return core.get_value(req.POST, name, core.is_multiple(field))
+        return core.get_value(req.POST, name, field)
 
     def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, core.is_multiple(field))
+        return core.get_value(req.cookies, name, field)
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, core.is_multiple(field))
+        return core.get_value(req.headers, name, field)
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
-        return core.get_value(webob.multidict.MultiDict(files), name, core.is_multiple(field))
+        return core.get_value(webob.multidict.MultiDict(files), name, field)
 
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Wrap :meth:`core.Parser.parse` to inject the active :class:`webapp2.Request` in"""

@@ -7,11 +7,17 @@ Changelog
 Features:
 
 * `TornadoParser` returns unicode strings rather than bytestrings (:issue:`41`). Thanks :user:`thomasboyt` for the suggestion.
+* *Backwards-compatible*: ``webargs.core.get_value`` takes a ``Field`` as its last argument. Note: this is technically a breaking change, but this won't affect most users since ``get_value`` is only used internally by ``Parser`` classes.
 
 Support:
 
 * Add ``examples/annotations_example.py`` (demonstrates using Python 3 function annotations to define request arguments).
-* Fix examples.
+* Fix examples. Thanks :user:`hyunchel` for catching an error in the Flask error handling docs.
+
+
+Bug fixes:
+
+* Correctly pass ``validate`` and ``force_all`` params to ``PyramidParser.use_args``.
 
 0.16.0 (2015-09-27)
 *******************
