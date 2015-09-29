@@ -19,7 +19,9 @@ import functools
 import logging
 
 import marshmallow as ma
+from marshmallow.compat import basestring
 import tornado.web
+from tornado.escape import _unicode
 
 from webargs import core
 
@@ -48,6 +50,15 @@ def parse_json_body(req):
             pass
     return {}
 
+# From tornado.web.RequestHandler.decode_argument
+def decode_argument(value, name=None):
+    """Decodes an argument from the request.
+    """
+    try:
+        return _unicode(value)
+    except UnicodeDecodeError:
+        raise HTTPError(400, "Invalid unicode in %s: %r" %
+                        (name or "url", value[:40]))
 
 def get_value(d, name, multiple):
     """Handle gets from 'multidicts' made of lists
@@ -55,14 +66,18 @@ def get_value(d, name, multiple):
     It handles cases: ``{"key": [value]}`` and ``{"key": value}``
     """
     value = d.get(name, core.missing)
-
+    if value is core.missing:
+        return core.missing
     if multiple and value is not core.missing:
-        return [] if value is core.missing else value
-
+        return [decode_argument(v, name) if isinstance(v, basestring) else v
+                for v in value]
+    ret = value
     if value and isinstance(value, (list, tuple)):
-        return value[0]
-
-    return value
+        ret = value[0]
+    if isinstance(ret, basestring):
+        return decode_argument(ret, name)
+    else:
+        return ret
 
 class TornadoParser(core.Parser):
     """Tornado request argument parser."""

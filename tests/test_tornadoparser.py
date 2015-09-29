@@ -21,7 +21,6 @@ from webargs import fields, missing, ValidationError
 from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json, get_value
 
 name = 'name'
-bvalue = b'value'
 value = 'value'
 
 def test_get_value_basic():
@@ -43,7 +42,7 @@ class TestQueryArgs(object):
 
         result = parser.parse_querystring(request, name, field)
 
-        assert result == bvalue
+        assert result == value
 
     def test_it_should_get_multiple_values(self):
         query = [(name, value), (name, value)]
@@ -52,7 +51,7 @@ class TestQueryArgs(object):
 
         result = parser.parse_querystring(request, name, field)
 
-        assert result == [bvalue, bvalue]
+        assert result == [value, value]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
@@ -76,7 +75,7 @@ class TestQueryArgs(object):
         assert result is missing
 
 
-class TestFormArgs(object):
+class TestFormArgs:
 
     def setup_method(self, method):
         parser.clear_cache()
@@ -88,7 +87,7 @@ class TestFormArgs(object):
 
         result = parser.parse_form(request, name, field)
 
-        assert result == bvalue
+        assert result == value
 
     def test_it_should_get_multiple_values(self):
         query = [(name, value), (name, value)]
@@ -97,7 +96,7 @@ class TestFormArgs(object):
 
         result = parser.parse_form(request, name, field)
 
-        assert result == [bvalue, bvalue]
+        assert result == [value, value]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
@@ -288,7 +287,7 @@ class TestParse(object):
         parsed = parser.parse(attrs, request)
 
         assert parsed['integer'] == [1, 2]
-        assert parsed['string'] == bvalue
+        assert parsed['string'] == value
 
     def test_parsing_clears_cache(self):
         request = make_json_request({
@@ -317,7 +316,7 @@ class TestParse(object):
         parsed = parser.parse(attrs, request)
 
         assert parsed['integer'] == [1, 2]
-        assert parsed['string'] == bvalue
+        assert parsed['string'] == value
 
     def test_it_should_parse_json_arguments(self):
         attrs = {
