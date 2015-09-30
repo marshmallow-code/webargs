@@ -390,6 +390,12 @@ def test_parse_multiple(context, testapp):
         assert args['name'] == ['steve', 'Loria']
         assert args['nums'] == [4, 2]
 
+def test_parse_multiple_delimited(testapp):
+    args = {'values': fields.DelimitedList(fields.Int())}
+    with testapp.test_request_context('/?values=1,2,3'):
+        res = parser.parse(args)
+        assert res['values'] == [1, 2, 3]
+
 @mock.patch('webargs.flaskparser.abort')
 def test_multiple_required_arg(mock_abort, testapp):
     multargs = {'name': fields.List(fields.Field(), required=True)}
