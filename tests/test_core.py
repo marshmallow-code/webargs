@@ -28,10 +28,10 @@ class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
     def parse_json(self, web_request, name, arg):
-        return get_value(web_request.json, name, is_multiple(arg))
+        return get_value(web_request.json, name, arg)
 
     def parse_cookies(self, web_request, name, arg):
-        return get_value(web_request.cookies, name, is_multiple(arg))
+        return get_value(web_request.cookies, name, arg)
 
 
 @pytest.fixture
