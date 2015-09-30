@@ -546,6 +546,20 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
         return {'username': username, 'password': password}
     assert viewfunc() == {'username': 'foo', 'password': missing}
 
+def test_delimited_list_default_delimiter(web_request, parser):
+    web_request.json = {'ids': '1,2,3'}
+    args = {'ids': fields.DelimitedList(fields.Int())}
+
+    result = parser.parse(args, web_request)
+    assert result['ids'] == [1, 2, 3]
+
+def test_delimited_list_custom_delimiter(web_request, parser):
+    web_request.json = {'ids': '1|2|3'}
+    args = {'ids': fields.DelimitedList(fields.Int(), delimiter='|')}
+
+    result = parser.parse(args, web_request)
+    assert result['ids'] == [1, 2, 3]
+
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
     # arg missing in request
     web_request.json = {}

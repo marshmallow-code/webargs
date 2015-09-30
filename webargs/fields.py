@@ -36,3 +36,19 @@ class Nested(ma.fields.Nested):
         if isinstance(nested, dict):
             nested = argmap2schema(nested)
         super(Nested, self).__init__(nested, *args, **kwargs)
+
+class DelimitedList(ma.fields.List):
+
+    delimiter = ','
+
+    def __init__(self, cls_or_instance, delimiter=None, **kwargs):
+        self.delimiter = delimiter or self.delimiter
+        super(DelimitedList, self).__init__(cls_or_instance, **kwargs)
+
+    def _serialize(self, value, attr, obj):
+        ret = super(DelimitedList, self)._serialize(value, attr, obj)
+        return self.delimiter.join(ret)
+
+    def _deserialize(self, value, attr, data):
+        ret = value.split(self.delimiter)
+        return super(DelimitedList, self)._deserialize(ret, attr, data)
