@@ -241,6 +241,16 @@ When you need more flexibility in defining input schemas, you can pass a marshma
     def profile_view(args):
         # ...
 
+    @use_kwargs(UserSchema())
+    def profile_update(username, password, first_name, last_name):
+        # ...
+
+    # You can add additional paramters
+    @use_kwargs({'posts_per_page': fields.Int(missing=10, location='query')})
+    @use_args(UserSchema())
+    def profile_posts(args, posts_per_page):
+        # ...
+
 .. note::
     You should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
 

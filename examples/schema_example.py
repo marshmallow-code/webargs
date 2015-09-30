@@ -11,13 +11,14 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http GET :5001/users/42
     $ http POST :5001/users/ usename=brian first_name=Brian last_name=May
     $ http PATCH :5001/users/42 username=freddie
+    $ http GET :5001/users/ limit==1
 """
 import functools
 from flask import Flask, request, jsonify
 import random
 
 from marshmallow import Schema, fields, post_dump
-from webargs.flaskparser import parser
+from webargs.flaskparser import parser, use_kwargs
 
 app = Flask(__name__)
 
@@ -90,12 +91,13 @@ class UserSchema(Schema):
 ##### Routes #####
 
 @app.route('/users/', methods=['GET', 'POST'])
+@use_kwargs({'limit': fields.Int(missing=10, location='query')})
 @use_schema(UserSchema(), list_view=True)
-def user_list(reqargs):
+def user_list(reqargs, limit):
     users = db['users'].values()
     if request.method == 'POST':
         User.insert(db=db, **reqargs)
-    return users
+    return list(users)[:limit]
 
 
 @app.route('/users/<int:user_id>', methods=['GET', 'PATCH'])

@@ -238,7 +238,6 @@ class Parser(object):
             parsed = self._parse_request(argmap, req, locations, force_all=force_all)
             result = self.load(parsed, argmap)
             for validator in validators:
-                # TODO: Is this necessary? User could just defined schema validators
                 if validator(result.data) is False:
                     msg = self.DEFAULT_VALIDATION_MESSAGE
                     raise ValidationError(msg, data=result.data)

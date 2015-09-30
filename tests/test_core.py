@@ -473,6 +473,18 @@ class TestPassingSchema:
         warning = recwarn.pop(UserWarning)
         assert 'strict=True' in str(warning.message)
 
+    def test_use_kwargs_stacked(self, web_request, parser):
+        web_request.json = {
+            'id': 12, 'email': 'foo@bar.com', 'password': 'bar',
+            'page': 42,
+        }
+
+        @parser.use_kwargs({'page': fields.Int()}, web_request)
+        @parser.use_kwargs(self.UserSchema(strict=True), web_request)
+        def viewfunc(email, password, page):
+            return {'email': email, 'password': password, 'page': page}
+        assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar', 'page': 42}
+
     def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
             web_request, parser):
 
