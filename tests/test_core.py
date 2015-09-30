@@ -16,12 +16,7 @@ from webargs import (
     missing,
     ValidationError,
 )
-from webargs.core import (
-    Parser,
-    get_value,
-    is_multiple,
-    argmap2schema,
-)
+from webargs.core import Parser, get_value, argmap2schema
 
 
 class MockRequestParser(Parser):
