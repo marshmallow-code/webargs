@@ -41,14 +41,21 @@ class DelimitedList(ma.fields.List):
 
     delimiter = ','
 
-    def __init__(self, cls_or_instance, delimiter=None, **kwargs):
+    def __init__(self, cls_or_instance, delimiter=None, dump_string=False, **kwargs):
         self.delimiter = delimiter or self.delimiter
+        self.dump_string = dump_string
         super(DelimitedList, self).__init__(cls_or_instance, **kwargs)
 
     def _serialize(self, value, attr, obj):
         ret = super(DelimitedList, self)._serialize(value, attr, obj)
-        return self.delimiter.join(ret)
+        if self.dump_string:
+            return self.delimiter.join(format(each) for each in value)
+        return ret
 
     def _deserialize(self, value, attr, data):
-        ret = value.split(self.delimiter)
+        ret = (
+            value
+            if ma.utils.is_iterable_but_not_string(value)
+            else value.split(self.delimiter)
+        )
         return super(DelimitedList, self)._deserialize(ret, attr, data)

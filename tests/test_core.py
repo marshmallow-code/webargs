@@ -543,17 +543,41 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
 
 def test_delimited_list_default_delimiter(web_request, parser):
     web_request.json = {'ids': '1,2,3'}
-    args = {'ids': fields.DelimitedList(fields.Int())}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int())})
+    schema = schema_cls()
 
-    result = parser.parse(args, web_request)
-    assert result['ids'] == [1, 2, 3]
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
+
+    dumped = schema.dump(parsed).data
+    assert dumped['ids'] == [1, 2, 3]
+
+def test_delimited_list_dump_string(web_request, parser):
+    web_request.json = {'ids': '1,2,3'}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int(), dump_string=True)})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
+
+    dumped = schema.dump(parsed).data
+    assert dumped['ids'] == '1,2,3'
 
 def test_delimited_list_custom_delimiter(web_request, parser):
     web_request.json = {'ids': '1|2|3'}
-    args = {'ids': fields.DelimitedList(fields.Int(), delimiter='|')}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int(), delimiter='|')})
+    schema = schema_cls()
 
-    result = parser.parse(args, web_request)
-    assert result['ids'] == [1, 2, 3]
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
+
+def test_delimited_list_load_list(web_request, parser):
+    web_request.json = {'ids': [1, 2, 3]}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int())})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
     # arg missing in request
