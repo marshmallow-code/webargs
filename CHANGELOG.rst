@@ -42,6 +42,7 @@ Your code will need to be updated to use ``Fields`` rather than ``Args``.
             'city': Arg(str),
             'state': Arg(str)
         })
+        'meta': Arg(dict),
     }
 
     # New API
@@ -56,7 +57,8 @@ Your code will need to be updated to use ``Fields`` rather than ``Args``.
         'location': fields.Nested({
             'city': fields.Str(),
             'state': fields.Str()
-        })
+        }),
+        'meta': fields.Dict(),
     }
 
 Features:
