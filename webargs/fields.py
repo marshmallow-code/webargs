@@ -18,10 +18,12 @@ import marshmallow as ma
 
 from webargs.core import argmap2schema
 
+__all__ = [
+    'Nested',
+]
 # Expose all fields from marshmallow.fields.
 # We do this instead of 'from marshmallow.fields import *' because webargs
 # has its own subclass of Nested
-__all__ = []
 for each in (field_name for field_name in ma.fields.__all__ if field_name != 'Nested'):
     __all__.append(each)
     globals()[each] = getattr(ma.fields, each)
