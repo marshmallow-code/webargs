@@ -38,6 +38,13 @@ class Nested(ma.fields.Nested):
         super(Nested, self).__init__(nested, *args, **kwargs)
 
 class DelimitedList(ma.fields.List):
+    """Same as `marshmallow.fields.List`, except can load from either a list or
+    a delimited string (e.g. "foo,bar,baz").
+
+    :param Field cls_or_instance: A field class or instance.
+    :param str delimiter: Delimiter between values.
+    :param bool dump_string: Dump values to string.
+    """
 
     delimiter = ','
 
