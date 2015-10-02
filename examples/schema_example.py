@@ -90,16 +90,6 @@ class UserSchema(Schema):
 
 ##### Routes #####
 
-@app.route('/users/', methods=['GET', 'POST'])
-@use_kwargs({'limit': fields.Int(missing=10, location='query')})
-@use_schema(UserSchema(), list_view=True)
-def user_list(reqargs, limit):
-    users = db['users'].values()
-    if request.method == 'POST':
-        User.insert(db=db, **reqargs)
-    return list(users)[:limit]
-
-
 @app.route('/users/<int:user_id>', methods=['GET', 'PATCH'])
 @use_schema(UserSchema())
 def user_detail(reqargs, user_id):
@@ -109,6 +99,16 @@ def user_detail(reqargs, user_id):
     if request.method == 'PATCH' and reqargs:
         user.update(**reqargs)
     return user
+
+# You can add additional arguments with use_kwargs
+@app.route('/users/', methods=['GET', 'POST'])
+@use_kwargs({'limit': fields.Int(missing=10, location='query')})
+@use_schema(UserSchema(), list_view=True)
+def user_list(reqargs, limit):
+    users = db['users'].values()
+    if request.method == 'POST':
+        User.insert(db=db, **reqargs)
+    return list(users)[:limit]
 
 # Return validation errors as JSON
 @app.errorhandler(422)

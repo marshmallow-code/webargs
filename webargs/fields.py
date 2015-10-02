@@ -20,6 +20,7 @@ from webargs.core import argmap2schema
 
 __all__ = [
     'Nested',
+    'DelimitedList',
 ]
 # Expose all fields from marshmallow.fields.
 # We do this instead of 'from marshmallow.fields import *' because webargs

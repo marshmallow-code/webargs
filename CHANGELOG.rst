@@ -1,12 +1,19 @@
 Changelog
 ---------
 
+0.18.0 (unreleased)
+*******************
+
+Features:
+
+* Add ``fields.DelimitedList`` (:issue:`66`). Thanks :user:`jmcarp`.
+
 0.17.0 (2015-09-29)
 *******************
 
 Features:
 
-* `TornadoParser` returns unicode strings rather than bytestrings (:issue:`41`). Thanks :user:`thomasboyt` for the suggestion.
+* ``TornadoParser`` returns unicode strings rather than bytestrings (:issue:`41`). Thanks :user:`thomasboyt` for the suggestion.
 * Add ``Parser.get_default_request`` and ``Parser.get_request_from_view_args`` hooks to simplify ``Parser`` implementations.
 * *Backwards-compatible*: ``webargs.core.get_value`` takes a ``Field`` as its last argument. Note: this is technically a breaking change, but this won't affect most users since ``get_value`` is only used internally by ``Parser`` classes.
 
