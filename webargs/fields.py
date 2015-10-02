@@ -43,19 +43,19 @@ class DelimitedList(ma.fields.List):
 
     :param Field cls_or_instance: A field class or instance.
     :param str delimiter: Delimiter between values.
-    :param bool dump_string: Dump values to string.
+    :param bool as_string: Dump values to string.
     """
 
     delimiter = ','
 
-    def __init__(self, cls_or_instance, delimiter=None, dump_string=False, **kwargs):
+    def __init__(self, cls_or_instance, delimiter=None, as_string=False, **kwargs):
         self.delimiter = delimiter or self.delimiter
-        self.dump_string = dump_string
+        self.as_string = as_string
         super(DelimitedList, self).__init__(cls_or_instance, **kwargs)
 
     def _serialize(self, value, attr, obj):
         ret = super(DelimitedList, self)._serialize(value, attr, obj)
-        if self.dump_string:
+        if self.as_string:
             return self.delimiter.join(format(each) for each in value)
         return ret
 

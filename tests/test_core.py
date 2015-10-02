@@ -552,9 +552,9 @@ def test_delimited_list_default_delimiter(web_request, parser):
     dumped = schema.dump(parsed).data
     assert dumped['ids'] == [1, 2, 3]
 
-def test_delimited_list_dump_string(web_request, parser):
+def test_delimited_list_as_string(web_request, parser):
     web_request.json = {'ids': '1,2,3'}
-    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int(), dump_string=True)})
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int(), as_string=True)})
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
