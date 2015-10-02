@@ -16,22 +16,17 @@ from webargs import (
     missing,
     ValidationError,
 )
-from webargs.core import (
-    Parser,
-    get_value,
-    is_multiple,
-    argmap2schema,
-)
+from webargs.core import Parser, get_value, argmap2schema
 
 
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
     def parse_json(self, web_request, name, arg):
-        return get_value(web_request.json, name, is_multiple(arg))
+        return get_value(web_request.json, name, arg)
 
     def parse_cookies(self, web_request, name, arg):
-        return get_value(web_request.cookies, name, is_multiple(arg))
+        return get_value(web_request.cookies, name, arg)
 
 
 @pytest.fixture
@@ -557,6 +552,44 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
     def viewfunc(username, password):
         return {'username': username, 'password': password}
     assert viewfunc() == {'username': 'foo', 'password': missing}
+
+def test_delimited_list_default_delimiter(web_request, parser):
+    web_request.json = {'ids': '1,2,3'}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int())})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
+
+    dumped = schema.dump(parsed).data
+    assert dumped['ids'] == [1, 2, 3]
+
+def test_delimited_list_as_string(web_request, parser):
+    web_request.json = {'ids': '1,2,3'}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int(), as_string=True)})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
+
+    dumped = schema.dump(parsed).data
+    assert dumped['ids'] == '1,2,3'
+
+def test_delimited_list_custom_delimiter(web_request, parser):
+    web_request.json = {'ids': '1|2|3'}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int(), delimiter='|')})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
+
+def test_delimited_list_load_list(web_request, parser):
+    web_request.json = {'ids': [1, 2, 3]}
+    schema_cls = argmap2schema({'ids': fields.DelimitedList(fields.Int())})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['ids'] == [1, 2, 3]
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
     # arg missing in request

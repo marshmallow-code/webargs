@@ -67,7 +67,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
 
 def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
-    return isinstance(field, ma.fields.List)
+    return isinstance(field, ma.fields.List) and not hasattr(field, 'delimiter')
 
 def get_value(d, name, field):
     """Get a value from a dictionary. Handles ``MultiDict`` types when
