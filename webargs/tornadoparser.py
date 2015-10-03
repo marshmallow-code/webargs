@@ -14,7 +14,6 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-import json
 import logging
 
 from marshmallow.compat import basestring
@@ -33,17 +32,12 @@ class HTTPError(tornado.web.HTTPError):
         self.messages = kwargs.pop('messages', {})
         super(HTTPError, self).__init__(*args, **kwargs)
 
-def parse_json(s):
-    if isinstance(s, bytes):
-        s = s.decode('utf-8')
-    return json.loads(s)
-
 def parse_json_body(req):
     """Return the decoded JSON body from the request."""
     content_type = req.headers.get('Content-Type')
     if content_type and 'application/json' in req.headers.get('Content-Type'):
         try:
-            return parse_json(req.body)
+            return core.parse_json(req.body)
         except (TypeError, ValueError):
             pass
     return {}

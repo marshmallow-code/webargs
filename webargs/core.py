@@ -6,6 +6,10 @@ import functools
 import inspect
 import logging
 import warnings
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 import marshmallow as ma
 from marshmallow.compat import iteritems
@@ -22,6 +26,7 @@ __all__ = [
     'Parser',
     'get_value',
     'missing',
+    'parse_json',
 ]
 
 DEFAULT_VALIDATION_STATUS = 422
@@ -90,6 +95,12 @@ def get_value(d, name, field):
         else:
             return [val]
     return val
+
+
+def parse_json(s):
+    if isinstance(s, bytes):
+        s = s.decode('utf-8')
+    return json.loads(s)
 
 def _ensure_list_of_callables(obj):
     if obj:

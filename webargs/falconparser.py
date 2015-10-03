@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
-import json
 import logging
 
 import falcon
@@ -12,12 +11,6 @@ logger = logging.getLogger(__name__)
 
 HTTP_422 = '422 Unprocessable entity'
 
-# TODO: Move to core?
-def parse_json(s):
-    if isinstance(s, bytes):
-        s = s.decode('utf-8')
-    return json.loads(s)
-
 def parse_json_body(req):
     if req.content_length in (None, 0):
         # Nothing to do
@@ -26,9 +19,11 @@ def parse_json_body(req):
     if content_type and 'application/json' in content_type:
         body = req.stream.read()
         if body:
-            return parse_json(body)
+            try:
+                return core.parse_json(body)
+            except (TypeError, ValueError):
+                pass
     return {}
-
 
 class HTTPError(falcon.HTTPError):
     """HTTPError that stores a dictionary of validation error messages.
