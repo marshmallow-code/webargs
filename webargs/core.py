@@ -21,6 +21,7 @@ __all__ = [
     'is_multiple',
     'Parser',
     'get_value',
+    'missing',
 ]
 
 DEFAULT_VALIDATION_STATUS = 422
