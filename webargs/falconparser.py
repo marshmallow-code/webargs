@@ -85,6 +85,7 @@ class FalconParser(core.Parser):
 
     def handle_error(self, error):
         """Handles errors during parsing."""
+        logger.error(error)
         raise HTTPError(HTTP_422, errors=error.messages)
 
 parser = FalconParser()

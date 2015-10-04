@@ -248,3 +248,59 @@ The `PyramidParser` supports parsing values from a request's matchdict.
     @parser.use_args({'mymatch': fields.Int()}, locations=('matchdict',))
     def matched(request, args):
         return Response('The value for mymatch is {}'.format(args['mymatch'])))
+
+Falcon
+------
+
+Falcon support is available via the :mod:`webargs.falconparser` module.
+
+Decorator Usage
++++++++++++++++
+
+When using the :meth:`use_args <webargs.falconparser.FalconParser.use_args>` decorator on a resource method, the arguments dictionary will be positioned as the first argument after ``self``.
+
+.. code-block:: python
+
+    import falcon
+    from webargs import fields
+    from webargs.falconparser import use_args
+
+    class BlogResource:
+        request_args = {
+            'title': fields.Str(required=True)
+        }
+
+        @use_args(request_args)
+        def on_post(self, args, req, resp, post_id):
+            content = args['title']
+            # ...
+
+    api = application = falcon.API()
+    api.add_route('/blogs/{post_id}')
+
+As with the other parser modules, :meth:`use_kwargs <webargs.falconparser.FalconParser.use_kwargs>` will add keyword arguments to your resource methods.
+
+Hook Usage
+++++++++++
+
+You can easily implement hooks by using `parser.parse <webargs.falconparser.FalconParser.parse>` directly.
+
+.. code-block:: python
+
+    import falcon
+    from webargs import fields
+    from webargs.falconparser import parser
+
+    def add_args(argmap, **kwargs):
+        def hook(req, resp, params):
+            parsed_args = parser.parse(argmap, req=req, **kwargs)
+            req.context['args'] = parsed_args
+        return hook
+
+    @falcon.before(add_args({'page': fields.Int(location='query')}))
+    class AuthorResource:
+
+        def on_get(self, req, resp):
+            args = req.context['args']
+            author_name = args.get('page')
+            # ...

@@ -16,7 +16,7 @@ import datetime as dt
 
 import tornado.ioloop
 from tornado.web import RequestHandler
-from webargs import fields, ValidationError
+from webargs import fields, validate
 from webargs.tornadoparser import use_args, use_kwargs
 
 
@@ -57,17 +57,13 @@ class AdderHandler(BaseRequestHandler):
         self.write({'result': x + y})
 
 
-def validate_unit(val):
-    if val not in ['minutes', 'days']:
-        raise ValidationError("Unit must be either 'minutes' or 'days'.")
-
 class DateAddHandler(BaseRequestHandler):
     """A datetime adder endpoint."""
 
     dateadd_args = {
         'value': fields.DateTime(required=False),
-        'addend': fields.Int(required=True, validate=lambda val: val >= 0),
-        'unit': fields.Str(validate=validate_unit)
+        'addend': fields.Int(required=True, validate=validate.Range(min=1)),
+        'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
     }
 
     @use_kwargs(dateadd_args)

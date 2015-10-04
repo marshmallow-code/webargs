@@ -8,6 +8,11 @@ import webtest
 from webargs import fields
 from webargs.falconparser import parser, use_args, use_kwargs
 
+def use_args_hook(args, context_key='args', **kwargs):
+    def hook(req, resp, params):
+        parsed_args = parser.parse(args, req=req, **kwargs)
+        req.context[context_key] = parsed_args
+    return hook
 
 @pytest.fixture()
 def api():
@@ -56,10 +61,17 @@ def api():
         def on_get(self, req, resp):
             parser.parse(self.args, req=req)
 
+    @falcon.before(use_args_hook(hello_args))
+    class HookResource(object):
+
+        def on_get(self, req, resp):
+            resp.body(req.context['args'])
+
     api_.add_route('/parse', ParseResource())
     api_.add_route('/use_args', UseArgsResource())
     api_.add_route('/use_args_with_param/{_id}', UseArgsWithParamResource())
     api_.add_route('/use_kwargs', UseKwargsResource())
+    api_.add_route('/hook', UseKwargsResource())
     api_.add_route('/error', AlwaysErrorResource())
 
     return api_
@@ -117,6 +129,12 @@ class TestUseArgsWithParamResource:
 
 class TestUseKwargsResource:
     url = '/use_kwargs'
+
+    def test_parse_querystring(self, testapp):
+        assert testapp.get(self.url + '?name=Fred').json == {'name': 'Fred'}
+
+class TestHookResource:
+    url = '/hook'
 
     def test_parse_querystring(self, testapp):
         assert testapp.get(self.url + '?name=Fred').json == {'name': 'Fred'}
