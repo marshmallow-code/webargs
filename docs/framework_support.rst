@@ -302,5 +302,5 @@ You can easily implement hooks by using `parser.parse <webargs.falconparser.Falc
 
         def on_get(self, req, resp):
             args = req.context['args']
-            author_name = args.get('page')
+            page = args.get('page')
             # ...
