@@ -1,5 +1,3 @@
-
-
 API
 ===
 
@@ -16,42 +14,48 @@ webargs.fields
 --------------
 
 .. automodule:: webargs.fields
-    :members: Nested
+    :members: Nested, DelimitedList
 
 webargs.flaskparser
 -------------------
 
 .. automodule:: webargs.flaskparser
-    :inherited-members:
+    :members:
 
 webargs.djangoparser
 --------------------
 
 .. automodule:: webargs.djangoparser
-    :inherited-members:
+    :members:
 
 webargs.bottleparser
 --------------------
 
 .. automodule:: webargs.bottleparser
-    :inherited-members:
+    :members:
 
 webargs.tornadoparser
 ---------------------
 
 .. automodule:: webargs.tornadoparser
-    :inherited-members:
+    :members:
 
 webargs.pyramidparser
 ---------------------
 
 .. automodule:: webargs.pyramidparser
-    :inherited-members:
+    :members:
 
 
 webargs.webapp2parser
 ---------------------
 
 .. automodule:: webargs.webapp2parser
-    :inherited-members:
+    :members:
 
+
+webargs.falconparser
+---------------------
+
+.. automodule:: webargs.falconparser
+    :members:

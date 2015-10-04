@@ -18,7 +18,7 @@ import datetime as dt
 from flask import Flask
 from flask.ext import restful
 
-from webargs import fields, ValidationError
+from webargs import fields, validate
 from webargs.flaskparser import use_args, use_kwargs, parser
 
 app = Flask(__name__)
@@ -50,16 +50,12 @@ class AddResource(restful.Resource):
         """An addition endpoint."""
         return {'result': x + y}
 
-def validate_unit(val):
-    if val not in ['minutes', 'days']:
-        raise ValidationError("Unit must be either 'minutes' or 'days'.")
-
 class DateAddResource(restful.Resource):
 
     dateadd_args = {
         'value': fields.DateTime(required=False),
-        'addend': fields.Int(required=True, validate=lambda val: val >= 0),
-        'unit': fields.Str(validate=validate_unit)
+        'addend': fields.Int(required=True, validate=validate.Range(min=1)),
+        'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
     }
 
     @use_kwargs(dateadd_args)

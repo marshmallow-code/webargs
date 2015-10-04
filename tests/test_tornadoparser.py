@@ -18,7 +18,8 @@ import tornado.ioloop
 from tornado.testing import AsyncHTTPTestCase
 
 from webargs import fields, missing, ValidationError
-from webargs.tornadoparser import parser, use_args, use_kwargs, parse_json, get_value
+from webargs.tornadoparser import parser, use_args, use_kwargs, get_value
+from webargs.core import parse_json
 
 name = 'name'
 value = 'value'

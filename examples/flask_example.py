@@ -15,7 +15,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 import datetime as dt
 
 from flask import Flask, jsonify
-from webargs import fields, ValidationError
+from webargs import fields, validate
 from webargs.flaskparser import use_args, use_kwargs
 
 app = Flask(__name__)
@@ -40,14 +40,10 @@ def add(x, y):
     """An addition endpoint."""
     return jsonify({'result': x + y})
 
-def validate_unit(val):
-    if val not in ['minutes', 'days']:
-        raise ValidationError("Unit must be either 'minutes' or 'days'.")
-
 dateadd_args = {
     'value': fields.DateTime(required=False),
-    'addend': fields.Int(required=True, validate=lambda val: val >= 0),
-    'unit': fields.Str(validate=validate_unit)
+    'addend': fields.Int(required=True, validate=validate.Range(min=1)),
+    'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
 }
 @app.route('/dateadd', methods=['POST'])
 @use_kwargs(dateadd_args)

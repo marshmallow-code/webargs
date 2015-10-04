@@ -16,7 +16,7 @@ import datetime as dt
 import json
 
 from bottle import route, run, error, response
-from webargs import fields, ValidationError
+from webargs import fields, validate
 from webargs.bottleparser import use_args, use_kwargs
 
 
@@ -40,14 +40,10 @@ def add(x, y):
     """An addition endpoint."""
     return {'result': x + y}
 
-def validate_unit(val):
-    if val not in ['minutes', 'days']:
-        raise ValidationError("Unit must be either 'minutes' or 'days'.")
-
 dateadd_args = {
     'value': fields.DateTime(required=False),
-    'addend': fields.Int(required=True, validate=lambda val: val >= 0),
-    'unit': fields.Str(validate=validate_unit)
+    'addend': fields.Int(required=True, validate=validate.Range(min=1)),
+    'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
 }
 @route('/dateadd', method='POST')
 @use_kwargs(dateadd_args)
