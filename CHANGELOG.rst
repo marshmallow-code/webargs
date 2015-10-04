@@ -9,6 +9,7 @@ Features:
 * Add ``FalconParser`` (:issue:`63`).
 * Add ``fields.DelimitedList`` (:issue:`66`). Thanks :user:`jmcarp`.
 * ``TornadoParser`` will parse json with ``simplejson`` if it is installed.
+* ``BottleParser`` caches parsed json per-request for improved performance.
 
 0.17.0 (2015-09-29)
 *******************
