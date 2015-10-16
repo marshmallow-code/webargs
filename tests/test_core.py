@@ -118,6 +118,16 @@ def test_parse_required_list(parser, web_request):
         parser.parse(args, web_request)
     assert excinfo.value.messages['foo'][0] == 'Missing data for required field.'
 
+def test_parse_empty_list(parser, web_request):
+    web_request.json = {'things': []}
+    args = {'things': fields.List(fields.Field())}
+    assert parser.parse(args, web_request) == {'things': []}
+
+def test_parse_missing_list(parser, web_request):
+    web_request.json = {}
+    args = {'things': fields.List(fields.Field())}
+    assert parser.parse(args, web_request) == {}
+
 def test_default_locations():
     assert set(Parser.DEFAULT_LOCATIONS) == set(['json', 'querystring', 'form'])
 

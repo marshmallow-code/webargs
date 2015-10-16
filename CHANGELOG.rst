@@ -4,6 +4,10 @@ Changelog
 1.0.0 (unreleased)
 ******************
 
+Bug fixes:
+
+* If an empty list is passed to a List argument, it will be parsed as an empty list rather than being excluded from the parsed arguments dict (:issue:`70`). Thanks :user:`mTatcher` for catching this.
+
 0.18.0 (2015-10-04)
 *******************
 
