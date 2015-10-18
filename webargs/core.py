@@ -238,7 +238,7 @@ class Parser(object):
 
          :return: A dictionary of parsed arguments
         """
-        req = req or self.get_default_request()
+        req = req if req is not None else self.get_default_request()
         assert req is not None, 'Must pass req object'
         ret = None
         validators = _ensure_list_of_callables(validate)
