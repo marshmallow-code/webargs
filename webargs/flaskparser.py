@@ -4,7 +4,8 @@
 Example: ::
 
     from flask import Flask
-    from marshmallow import fields
+
+    from webargs import fields
     from webargs.flaskparser import use_args
 
     app = Flask(__name__)

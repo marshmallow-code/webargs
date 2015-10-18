@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Asynchronous request parser. Compatible with Python>=3.4."""
 import asyncio
 import inspect
 import functools
@@ -9,7 +10,8 @@ import marshmallow as ma
 from webargs import core
 
 class AsyncParser(core.Parser):
-    """Asynchronous variant of `webargs.core.Parser`, where parsing methods may be coroutines.
+    """Asynchronous variant of `webargs.core.Parser`, where parsing methods may be
+    either coroutines or regular methods.
     """
 
     @asyncio.coroutine
@@ -71,13 +73,12 @@ class AsyncParser(core.Parser):
     def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
-        :param tuple locations: Where on the request to search for values.
-        :param bool as_kwargs: Whether to insert arguments as keyword arguments.
-        :param callable validate: Validation function that receives the dictionary
-            of parsed arguments. If the function returns ``False``, the parser
-            will raise a :exc:`ValidationError`.
+        .. warning::
+            This will not work with `async def` coroutines. Either use a generator-based
+            coroutine decorated with `asyncio.coroutine` or use the
+            `parse <webargs.async.AsyncParser.parse>` method.
+
+        Receives the same arguments as `webargs.core.Parser.use_args`.
         """
         locations = locations or self.locations
         if isinstance(argmap, ma.Schema):
@@ -109,6 +110,19 @@ class AsyncParser(core.Parser):
                     return func(*new_args, **kwargs)
             return wrapper
         return decorator
+
+    def use_kwargs(self, *args, **kwargs):
+        """Decorator that injects parsed arguments into a view function or method.
+
+        .. warning::
+            This will not work with `async def` coroutines. Either use a generator-based
+            coroutine decorated with `asyncio.coroutine` or use the
+            `parse <webargs.async.AsyncParser.parse>` method.
+
+        Receives the same arguments as `webargs.core.Parser.use_kwargs`.
+
+        """
+        super().use_kwargs(*args, **kwargs)
 
     @asyncio.coroutine
     def parse_arg(self, name, field, req, locations=None):

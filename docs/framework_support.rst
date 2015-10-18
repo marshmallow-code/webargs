@@ -304,3 +304,73 @@ You can easily implement hooks by using `parser.parse <webargs.falconparser.Falc
             args = req.context['args']
             page = args.get('page')
             # ...
+
+aiohttp
+-------
+
+aiohttp support is available via the :mod:`webargs.aiohttpparser` module.
+
+Decorator Usage
++++++++++++++++
+
+When using the :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` decorator on a handler, the parsed arguments dictionary will be the last positional argument.
+
+.. code-block:: python
+
+    import asyncio
+
+    from aiohttp import web
+    from webargs import fields
+    from webargs.aiohttpparser import use_args
+
+    @asyncio.coroutine
+    @use_args({'content': fields.Str(required=True)})
+    def create_comment(request, args):
+        content = args['content']
+        # ...
+
+    app = web.Application()
+    app.router.add_route('POST', '/comments/', create_comment)
+
+As with the other parser modules, :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` will add keyword arguments to your resource methods.
+
+
+Usage with coroutines
++++++++++++++++++++++
+
+The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` decorators will not work with `async def` coroutines. You must either use a generator-based coroutine decorated with `asyncio.coroutine` or use `parser.parse`.
+
+.. code-block:: python
+
+    from aiohttp import web
+
+    from webargs import fields
+
+    hello_args = {
+        'name': fields.Str(missing='World')
+    }
+
+    # YES
+    from webargs.aiohttpparser import parser
+
+    async def hello(request):
+        args = await parser.parse(hello_args, request)
+        return web.Response(b'Hello, {}'.format(args['name']))
+
+    # YES
+    import asyncio
+    from webargs.aiohttpparser import use_kwargs
+
+    @asyncio.coroutine
+    @use_kwargs(hello_args)
+    def hello(request, name):
+        return web.Response(
+            body='Hello, {}'.format(name).encode('utf-8')
+        )
+
+    # NO: use_args and use_kwargs are incompatible with async def
+    @use_kwargs(hello_args)
+    async def hello(request, name):
+        return web.Response(
+            body='Hello, {}'.format(name).encode('utf-8')
+        )

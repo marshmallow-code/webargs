@@ -1,5 +1,27 @@
 # -*- coding: utf-8 -*-
 """aiohttp request argument parsing module.
+
+Example: ::
+
+    import asyncio
+    from aiohttp import web
+
+    from webargs import fields
+    from webargs.aiohttpparser import use_args
+
+
+    hello_args = {
+        'name': fields.Str(required=True)
+    }
+    @asyncio.coroutine
+    @use_args(hello_args)
+    def index(args):
+        return web.Response(
+            body='Hello {}'.format(args['name']).encode('utf-8')
+        )
+
+    app = web.Application()
+    app.router.add_route('GET', '/', index)
 """
 import asyncio
 import json

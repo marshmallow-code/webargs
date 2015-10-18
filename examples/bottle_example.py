@@ -13,7 +13,6 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
 import datetime as dt
-import json
 
 from bottle import route, run, error, response
 from webargs import fields, validate
@@ -61,7 +60,7 @@ def dateadd(value, addend, unit):
 @error(422)
 def error422(err):
     response.content_type = 'application/json'
-    return json.dumps({'message': str(err.body)})
+    return err.body
 
 if __name__ == '__main__':
     run(port=5001, reloader=True, debug=True)
