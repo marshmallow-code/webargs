@@ -39,13 +39,13 @@ def api():
     class UseArgsResource(object):
 
         @use_args(hello_args)
-        def on_get(self, args, req, resp):
+        def on_get(self, req, resp, args):
             resp.body = json.dumps(args)
 
     class UseArgsWithParamResource(object):
 
         @use_args(hello_args)
-        def on_get(self, args, req, resp, _id):
+        def on_get(self, req, resp, args, _id):
             args['_id'] = int(_id)
             resp.body = json.dumps(args)
 

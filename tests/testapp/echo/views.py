@@ -23,7 +23,7 @@ def render_json_response(data):
 class SimpleCBVWithParam(View):
 
     @parser.use_args(hello_args)
-    def get(self, args, request, pid):
+    def get(self, request, args, pid):
         return render_json_response(args)
 
 class SimpleCBV(View):
@@ -49,11 +49,11 @@ class SimpleCBVMulti(View):
 class SimpleDecoratedCBV(View):
 
     @parser.use_args(hello_args)
-    def get(self, args, request):
+    def get(self, request, args):
         return render_json_response(args)
 
     @parser.use_args(hello_args)
-    def post(self, args, request):
+    def post(self, request, args):
         return render_json_response(args)
 
 

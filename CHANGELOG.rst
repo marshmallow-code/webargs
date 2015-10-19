@@ -4,9 +4,19 @@ Changelog
 1.0.0 (unreleased)
 ******************
 
+Features:
+
+* Add ``AIOHTTPParser`` (:issue:`71`).
+* Add ``webargs.async`` module with ``AsyncParser``.
+
 Bug fixes:
 
 * If an empty list is passed to a List argument, it will be parsed as an empty list rather than being excluded from the parsed arguments dict (:issue:`70`). Thanks :user:`mTatcher` for catching this.
+
+Other changes:
+
+* *Backwards-incompatible*: When decorating resource methods with ``FalconParser.use_args``, the parsed arguments dictionary will be positioned after the request and response arguments.
+* *Backwards-incompatible*: When decorating views with ``DjangoParser.use_args``, the parsed arguments dictionary will be positioned after the request argument.
 
 0.18.0 (2015-10-04)
 *******************

@@ -352,12 +352,9 @@ class Parser(object):
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)
                 else:
-                    # Wrapped function is a method, so inject parsed_args
-                    # after 'self'
-                    if args and args[0]:
-                        rest_args = (parsed_args, ) + tuple(args[1:])
-                        return func(args[0], *rest_args, **kwargs)
-                    return func(parsed_args, *args, **kwargs)
+                    # Add parsed_args after other positional arguments
+                    new_args = args + (parsed_args, )
+                    return func(*new_args, **kwargs)
             return wrapper
         return decorator
 

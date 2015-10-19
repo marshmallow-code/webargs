@@ -50,7 +50,7 @@ class HelloResource(object):
     }
 
     @use_args(hello_args)
-    def on_get(self, args, req, resp):
+    def on_get(self, req, resp, args):
         req.context['result'] = {'message': 'Welcome, {}!'.format(args['name'])}
 
 class AdderResource(object):

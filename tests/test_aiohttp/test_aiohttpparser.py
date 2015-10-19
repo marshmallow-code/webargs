@@ -160,7 +160,6 @@ def test_use_kwargs(create_app_and_client):
     json_data = yield from res.json()
     assert json_data == {'name': 'Joe'}
 
-
 @pytest.mark.run_loop
 def test_handling_error(create_app_and_client):
     app, client = yield from create_app_and_client()
@@ -177,3 +176,23 @@ def test_handling_error(create_app_and_client):
     json_data = yield from res.json()
     assert 'name' in json_data
     assert json_data['name'] == ['Missing data for required field.']
+
+@pytest.mark.run_loop
+def test_use_args_with_variable_routes(create_app_and_client):
+    app, client = yield from create_app_and_client()
+
+    @asyncio.coroutine
+    @use_args({'letters2': fields.Str()})
+    def handler(request, args):
+        return jsonify({
+            'letters1': request.match_info['letters1'],
+            'letters2': args['letters2'],
+        })
+
+    app.router.add_route('GET', '/{letters1}/', handler)
+
+    res = yield from client.get('/abc/?letters2=def')
+    assert res.status == 200
+    json_data = yield from res.json()
+    assert json_data['letters1'] == 'abc'
+    assert json_data['letters2'] == 'def'

@@ -62,7 +62,7 @@ Webargs can parse Django request arguments in both function-based and class-base
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` decorator, the arguments dictionary will always be the second parameter (after ``self`` or ``request``).
+When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` decorator, the arguments dictionary will positioned after the ``request`` argument.
 
 **Function-based Views**
 
@@ -98,8 +98,9 @@ When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` dec
     }
 
     class BlogPostView(View):
+
         @use_args(blog_args)
-        def get(self, args, request):
+        def get(self, request, args):
           blog_post = Post.objects.get(title__iexact=args['title'],
                                        author=args['author'])
           return render_to_response('post_template.html',
@@ -257,7 +258,8 @@ Falcon support is available via the :mod:`webargs.falconparser` module.
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.falconparser.FalconParser.use_args>` decorator on a resource method, the arguments dictionary will be positioned as the first argument after ``self``.
+When using the :meth:`use_args <webargs.falconparser.FalconParser.use_args>` decorator on a resource method, the arguments dictionary will be positioned directly after the request and response arguments.
+
 
 .. code-block:: python
 
@@ -271,7 +273,7 @@ When using the :meth:`use_args <webargs.falconparser.FalconParser.use_args>` dec
         }
 
         @use_args(request_args)
-        def on_post(self, args, req, resp, post_id):
+        def on_post(self, req, resp, args, post_id):
             content = args['title']
             # ...
 
