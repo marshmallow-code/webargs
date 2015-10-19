@@ -80,7 +80,7 @@ class AsyncParser(core.Parser):
                 force_all = as_kwargs
 
                 if not req_obj:
-                    req_obj = self.get_request_from_view_args(args, kwargs)
+                    req_obj = self.get_request_from_view_args(func, args, kwargs)
                 parsed_args = yield from self.parse(schema, req=req_obj, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:

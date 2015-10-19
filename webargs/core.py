@@ -300,12 +300,17 @@ class Parser(object):
         """
         return None
 
-    def get_request_from_view_args(self, args, kwargs):
+    def get_request_from_view_args(self, view, args, kwargs):
         """Optional override. Returns the request object to be parsed, given a view
         function's args and kwargs.
 
         Used by the `use_args` and `use_kwargs` to get a request object from a
         view's arguments.
+
+        :param callable view: The view function or method being decorated by
+            `use_args` or `use_kwargs`
+        :param tuple args: Positional arguments passed to ``view``.
+        :param dict kwargs: Keyword arguments passed to ``view``.
         """
         return None
 
@@ -345,7 +350,7 @@ class Parser(object):
                 force_all = as_kwargs
 
                 if not req_obj:
-                    req_obj = self.get_request_from_view_args(args, kwargs)
+                    req_obj = self.get_request_from_view_args(func, args, kwargs)
                 parsed_args = self.parse(schema, req=req_obj, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:

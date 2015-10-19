@@ -71,7 +71,7 @@ class FalconParser(core.Parser):
             self._cache['cookies'] = cookies = req.cookies
         return core.get_value(cookies, name, field)
 
-    def get_request_from_view_args(self, args, kwargs):
+    def get_request_from_view_args(self, view, args, kwargs):
         """Get request from a resource method's arguments. Assumes that
         request is the second argument.
         """

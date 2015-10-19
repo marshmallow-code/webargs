@@ -17,6 +17,7 @@ Other changes:
 
 * *Backwards-incompatible*: When decorating resource methods with ``FalconParser.use_args``, the parsed arguments dictionary will be positioned after the request and response arguments.
 * *Backwards-incompatible*: When decorating views with ``DjangoParser.use_args``, the parsed arguments dictionary will be positioned after the request argument.
+* *Backwards-incompatible*: ``Parser.get_request_from_view_args`` gets passed a view function as its first argument.
 
 0.18.0 (2015-10-04)
 *******************

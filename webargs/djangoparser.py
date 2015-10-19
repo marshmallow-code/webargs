@@ -65,7 +65,7 @@ class DjangoParser(core.Parser):
         """Pull a file from the request."""
         return core.get_value(req.FILES, name, field)
 
-    def get_request_from_view_args(self, args, kwargs):
+    def get_request_from_view_args(self, view, args, kwargs):
         # The first argument is either `self` or `request`
         try:  # self.request
             return args[0].request

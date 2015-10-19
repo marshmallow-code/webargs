@@ -124,7 +124,7 @@ class TornadoParser(core.Parser):
         raise HTTPError(status_code, log_message=str(error.messages),
                 reason=reason, messages=error.messages)
 
-    def get_request_from_view_args(self, args, kwargs):
+    def get_request_from_view_args(self, view, args, kwargs):
         return args[0].request
 
 parser = TornadoParser()

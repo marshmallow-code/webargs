@@ -80,7 +80,7 @@ class AioHTTPParser(AsyncParser):
             'parsing upload data.'
         )
 
-    def get_request_from_view_args(self, args, kwargs):
+    def get_request_from_view_args(self, view, args, kwargs):
         """Get request object from a handler function or method. Used internally by
         ``use_args`` and ``use_kwargs``.
         """
