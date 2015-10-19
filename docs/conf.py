@@ -46,7 +46,6 @@ html_theme_path = ['./_themes']
 html_theme = 'lucuma'
 html_static_path = ['_static']
 templates_path = ['_templates']
-html_show_sourcelink = False
 
 html_context = {
     'project': project,
