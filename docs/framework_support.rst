@@ -312,6 +312,29 @@ aiohttp
 
 aiohttp support is available via the :mod:`webargs.aiohttpparser` module.
 
+
+The `parse <webargs.aiohttpparser.AIOHTTPParser.parse>` method of `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser` is a `coroutine`.
+
+
+.. code-block:: python
+
+    import asyncio
+
+    from aiohttp import web
+    from webargs import fields
+    from webargs.aiohttpparser import parser
+
+    handler_args = {
+        'name': fields.Str(missing='World')
+    }
+    @asyncio.coroutine
+    def handler(request):
+        args = yield from parser.parse(handler_args, request)
+        return web.Response(
+            body='Hello, {}'.format(args['name']).encode('utf-8')
+        )
+
+
 Decorator Usage
 +++++++++++++++
 
