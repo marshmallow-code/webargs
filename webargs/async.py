@@ -24,6 +24,7 @@ class AsyncParser(core.Parser):
             parsed[argname] = parsed_value
         return parsed
 
+    # TODO: Lots of duplication from core.Parser here. Rethink.
     @asyncio.coroutine
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Coroutine variant of `webargs.core.Parser`.
@@ -122,7 +123,7 @@ class AsyncParser(core.Parser):
         Receives the same arguments as `webargs.core.Parser.use_kwargs`.
 
         """
-        super().use_kwargs(*args, **kwargs)
+        return super().use_kwargs(*args, **kwargs)
 
     @asyncio.coroutine
     def parse_arg(self, name, field, req, locations=None):
