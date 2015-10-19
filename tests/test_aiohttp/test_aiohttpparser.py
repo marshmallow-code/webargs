@@ -79,6 +79,23 @@ def test_parsing_headers(create_app_and_client):
 
 
 @pytest.mark.run_loop
+def test_parsing_match_info(create_app_and_client):
+    app, client = yield from create_app_and_client()
+
+    @asyncio.coroutine
+    def echo_match_info(request):
+        parsed = yield from parser.parse({'mymatch': fields.Field(location='match_info')}, request)
+        return jsonify(parsed)
+
+    app.router.add_route('GET', '/{mymatch}', echo_match_info)
+
+    res = yield from client.get('/foo')
+    assert res.status == 200
+    json_data = yield from res.json()
+    assert json_data == {'mymatch': 'foo'}
+
+
+@pytest.mark.run_loop
 def test_parsing_cookies(create_app_and_client):
     app, client = yield from create_app_and_client(client_params={'cookies': {'mycookie': 'foo'}})
 

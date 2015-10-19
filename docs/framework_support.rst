@@ -315,7 +315,7 @@ aiohttp support is available via the :mod:`webargs.aiohttpparser` module.
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` decorator on a handler, the parsed arguments dictionary will be the last positional argument.
+When using the :meth:`use_args <webargs.aiohttpparser.AioHTTPParser.use_args>` decorator on a handler, the parsed arguments dictionary will be the last positional argument.
 
 .. code-block:: python
 
@@ -340,7 +340,7 @@ As with the other parser modules, :meth:`use_kwargs <webargs.aiohttpparser.AIOHT
 Usage with coroutines
 +++++++++++++++++++++
 
-The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` decorators will not work with `async def` coroutines. You must either use a generator-based coroutine decorated with `asyncio.coroutine` or use `parser.parse`.
+The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` decorators will not work with `async def` coroutines. You must either use a generator-based coroutine decorated with `asyncio.coroutine` or use `parser.parse <webargs.aiohttpparser.AIOHTTPParser.parse>`.
 
 .. code-block:: python
 
@@ -357,7 +357,9 @@ The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`u
 
     async def hello(request):
         args = await parser.parse(hello_args, request)
-        return web.Response(b'Hello, {}'.format(args['name']))
+        return web.Response(
+            body='Hello, {}'.format(name).encode('utf-8')
+        )
 
     # YES
     import asyncio
@@ -376,3 +378,22 @@ The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`u
         return web.Response(
             body='Hello, {}'.format(name).encode('utf-8')
         )
+
+URL Matches
++++++++++++
+
+The `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser>` supports parsing values from a request's ``match_info``.
+
+.. code-block:: python
+
+    from aiohttp import web
+    from webargs.aiohttpparser import use_args
+
+    @parser.use_args({'slug': fields.Str(location='match_info')})
+    def article_detail(request, args):
+        return web.Response(
+            body='Slug: {}'.format(args['slug']).encode('utf-8')
+        )
+
+    app = web.Application()
+    app.router.add_route('GET', '/articles/{slug}', article_detail)

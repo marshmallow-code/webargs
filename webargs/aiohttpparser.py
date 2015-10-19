@@ -15,7 +15,7 @@ Example: ::
     }
     @asyncio.coroutine
     @use_args(hello_args)
-    def index(args):
+    def index(request, args):
         return web.Response(
             body='Hello {}'.format(args['name']).encode('utf-8')
         )
@@ -41,6 +41,11 @@ class HTTPUnprocessableEntity(web.HTTPClientError):
 
 class AioHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
+
+    __location_map__ = dict(
+        match_info='parse_match_info',
+        **core.Parser.__location_map__
+    )
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
@@ -79,6 +84,10 @@ class AioHTTPParser(AsyncParser):
             'parse_files is not implemented. You may be able to use parse_form for '
             'parsing upload data.'
         )
+
+    def parse_match_info(self, req, name, field):
+        """Pull a value from the request's ``match_info``."""
+        return core.get_value(req.match_info, name, field)
 
     def get_request_from_view_args(self, view, args, kwargs):
         """Get request object from a handler function or method. Used internally by
