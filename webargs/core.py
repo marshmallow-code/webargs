@@ -68,6 +68,15 @@ def get_field_names_for_argmap(argmap):
         all_field_names = set(argmap.keys())
     return all_field_names
 
+
+def fill_in_missing_args(ret, argmap):
+    # WARNING: We modify ret in-place
+    all_field_names = get_field_names_for_argmap(argmap)
+    missing_args = all_field_names - set(ret.keys())
+    for key in missing_args:
+        ret[key] = missing
+    return ret
+
 def argmap2schema(argmap, instance=False, **kwargs):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
@@ -211,7 +220,7 @@ class Parser(object):
                 return value
         return missing
 
-    def _parse_request(self, argmap, req, locations, force_all):
+    def _parse_request(self, argmap, req, locations):
         argdict = argmap.fields if isinstance(argmap, ma.Schema) else argmap
         parsed = {}
         for argname, field_obj in iteritems(argdict):
@@ -273,7 +282,7 @@ class Parser(object):
         ret = None
         validators = _ensure_list_of_callables(validate)
         try:
-            parsed = self._parse_request(argmap, req, locations, force_all=force_all)
+            parsed = self._parse_request(argmap, req, locations)
             result = self.load(parsed, argmap)
             self._validate_arguments(result.data, validators)
         except ma.exceptions.ValidationError as error:
@@ -283,10 +292,7 @@ class Parser(object):
         finally:
             self.clear_cache()
         if force_all:
-            all_field_names = get_field_names_for_argmap(argmap)
-            missing_args = all_field_names - set(ret.keys())
-            for key in missing_args:
-                ret[key] = missing
+            fill_in_missing_args(ret, argmap)
         return ret
 
     def clear_cache(self):
