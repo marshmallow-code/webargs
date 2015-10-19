@@ -28,6 +28,8 @@ class AsyncParser(core.Parser):
     @asyncio.coroutine
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Coroutine variant of `webargs.core.Parser`.
+
+        Receives the same arguments as `webargs.core.Parser.parse`.
         """
         req = req if req is not None else self.get_default_request()
         assert req is not None, 'Must pass req object'
@@ -36,36 +38,15 @@ class AsyncParser(core.Parser):
         try:
             parsed = yield from self._parse_request(argmap, req, locations, force_all=force_all)
             result = self.load(parsed, argmap)
-            for validator in validators:
-                if validator(result.data) is False:
-                    msg = self.DEFAULT_VALIDATION_MESSAGE
-                    raise core.ValidationError(msg, data=result.data)
+            self._validate_arguments(result.data, validators)
         except ma.exceptions.ValidationError as error:
-            if (isinstance(error, ma.exceptions.ValidationError) and not
-                    isinstance(error, core.ValidationError)):
-                # Raise a webargs error instead
-                error = core.ValidationError(
-                    error.messages,
-                    status_code=getattr(error, 'status_code', core.DEFAULT_VALIDATION_STATUS),
-                    headers=getattr(error, 'headers', {}),
-                    field_names=error.field_names,
-                    fields=error.fields,
-                    data=error.data
-                )
-            if self.error_callback:
-                self.error_callback(error)
-            else:
-                self.handle_error(error)
+            self._on_validation_error(error)
         else:
             ret = result.data
         finally:
             self.clear_cache()
         if force_all:
-            if isinstance(argmap, ma.Schema):
-                all_field_names = set([fname for fname, fobj in iteritems(argmap.fields)
-                    if not fobj.dump_only])
-            else:
-                all_field_names = set(argmap.keys())
+            all_field_names = core.get_field_names_for_argmap(argmap)
             missing_args = all_field_names - set(ret.keys())
             for key in missing_args:
                 ret[key] = core.missing
