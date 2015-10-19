@@ -315,7 +315,7 @@ aiohttp support is available via the :mod:`webargs.aiohttpparser` module.
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.aiohttpparser.AioHTTPParser.use_args>` decorator on a handler, the parsed arguments dictionary will be the last positional argument.
+When using the :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` decorator on a handler, the parsed arguments dictionary will be the last positional argument.
 
 .. code-block:: python
 

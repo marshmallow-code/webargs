@@ -39,7 +39,7 @@ class HTTPUnprocessableEntity(web.HTTPClientError):
     status_code = 422
 
 
-class AioHTTPParser(AsyncParser):
+class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
     __location_map__ = dict(
@@ -109,6 +109,6 @@ class AioHTTPParser(AsyncParser):
         )
 
 
-parser = AioHTTPParser()
+parser = AIOHTTPParser()
 use_args = parser.use_args
 use_kwargs = parser.use_kwargs
