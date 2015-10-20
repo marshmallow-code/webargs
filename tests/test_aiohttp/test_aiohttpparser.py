@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
-import pytest
-
 from webargs import fields
 
 import asyncio
@@ -20,50 +17,35 @@ def configure_app(app):
     app.router.add_route('GET', '/', echo)
     app.router.add_route('POST', '/', echo)
 
-
-@pytest.mark.run_loop
-def test_parsing_querystring(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_parsing_querystring(app, client):
     configure_app(app)
 
-    res = yield from client.get('/')
-    assert res.status == 200
-    text = yield from res.text()
-    assert json.loads(text) == {'name': 'Steve'}
+    res = client.get('/')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Steve'}
 
-    res = yield from client.get('/?name=Joe')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Joe'}
+    res = client.get('/?name=Joe')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Joe'}
 
-
-@pytest.mark.run_loop
-def test_parsing_form(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_parsing_form(app, client):
     configure_app(app)
 
-    res = yield from client.post('/', data={'name': 'Joe'})
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Joe'}
+    res = client.post('/', {'name': 'Joe'})
+    assert res.status_code == 200
+    assert res.json == {'name': 'Joe'}
 
-@pytest.mark.run_loop
-def test_parsing_json(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_parsing_json(app, client):
     configure_app(app)
 
-    res = yield from client.post(
+    res = client.post_json(
         '/',
-        data=json.dumps({'name': 'Joe'}),
-        headers={'Content-Type': 'application/json'}
+        {'name': 'Joe'},
     )
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Joe'}
+    assert res.status_code == 200
+    assert res.json == {'name': 'Joe'}
 
-@pytest.mark.run_loop
-def test_parsing_headers(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_parsing_headers(app, client):
 
     @asyncio.coroutine
     def echo_header(request):
@@ -72,15 +54,11 @@ def test_parsing_headers(create_app_and_client):
 
     app.router.add_route('GET', '/echoheader', echo_header)
 
-    res = yield from client.get('/echoheader', headers={'myheader': 'foo'})
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'myheader': 'foo'}
+    res = client.get('/echoheader', headers={'myheader': 'foo'})
+    assert res.status_code == 200
+    assert res.json == {'myheader': 'foo'}
 
-
-@pytest.mark.run_loop
-def test_parsing_match_info(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_parsing_match_info(app, client):
 
     @asyncio.coroutine
     def echo_match_info(request):
@@ -89,15 +67,11 @@ def test_parsing_match_info(create_app_and_client):
 
     app.router.add_route('GET', '/{mymatch}', echo_match_info)
 
-    res = yield from client.get('/foo')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'mymatch': 'foo'}
+    res = client.get('/foo')
+    assert res.status_code == 200
+    assert res.json == {'mymatch': 'foo'}
 
-
-@pytest.mark.run_loop
-def test_parsing_cookies(create_app_and_client):
-    app, client = yield from create_app_and_client(client_params={'cookies': {'mycookie': 'foo'}})
+def test_parsing_cookies(app, client):
 
     @asyncio.coroutine
     def echo_cookie(request):
@@ -106,15 +80,13 @@ def test_parsing_cookies(create_app_and_client):
 
     app.router.add_route('GET', '/echocookie', echo_cookie)
 
-    res = yield from client.get('/echocookie')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'mycookie': 'foo'}
+    client.set_cookie('mycookie', 'foo')
+    res = client.get('/echocookie')
+    assert res.status_code == 200
+    assert res.json == {'mycookie': 'foo'}
 
 
-@pytest.mark.run_loop
-def test_use_args(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_use_args(app, client):
 
     @asyncio.coroutine
     @use_args({'name': fields.Field(missing='Steve')})
@@ -123,20 +95,16 @@ def test_use_args(create_app_and_client):
 
     app.router.add_route('GET', '/', echo_use_args)
 
-    res = yield from client.get('/')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Steve'}
+    res = client.get('/')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Steve'}
 
-    res = yield from client.get('/?name=Joe')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Joe'}
+    res = client.get('/?name=Joe')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Joe'}
 
-@pytest.mark.run_loop
-def test_use_kwargs_on_method(create_app_and_client):
-    app, client = yield from create_app_and_client()
 
+def test_use_kwargs_on_method(app, client):
     class Handler:
 
         @asyncio.coroutine
@@ -147,19 +115,16 @@ def test_use_kwargs_on_method(create_app_and_client):
     handler = Handler()
     app.router.add_route('GET', '/', handler.get)
 
-    res = yield from client.get('/')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Steve'}
+    res = client.get('/')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Steve'}
 
-    res = yield from client.get('/?name=Joe')
-    assert res.status == 200
-    json_data = yield from res.json()
+    res = client.get('/?name=Joe')
+    assert res.status_code == 200
+    json_data = res.json
     assert json_data == {'name': 'Joe'}
 
-@pytest.mark.run_loop
-def test_use_kwargs(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_use_kwargs(app, client):
 
     @use_kwargs({'name': fields.Field(missing='Steve')})
     def echo_use_kwargs(request, name):
@@ -167,19 +132,15 @@ def test_use_kwargs(create_app_and_client):
 
     app.router.add_route('GET', '/', echo_use_kwargs)
 
-    res = yield from client.get('/')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Steve'}
+    res = client.get('/')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Steve'}
 
-    res = yield from client.get('/?name=Joe')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data == {'name': 'Joe'}
+    res = client.get('/?name=Joe')
+    assert res.status_code == 200
+    assert res.json == {'name': 'Joe'}
 
-@pytest.mark.run_loop
-def test_handling_error(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_handling_error(app, client):
 
     @asyncio.coroutine
     def validated(request):
@@ -188,15 +149,12 @@ def test_handling_error(create_app_and_client):
 
     app.router.add_route('GET', '/', validated)
 
-    res = yield from client.get('/')
-    assert res.status == 422
-    json_data = yield from res.json()
-    assert 'name' in json_data
-    assert json_data['name'] == ['Missing data for required field.']
+    res = client.get('/', expect_errors=True)
+    assert res.status_code == 422
+    assert 'name' in res.json
+    assert res.json['name'] == ['Missing data for required field.']
 
-@pytest.mark.run_loop
-def test_use_args_with_variable_routes(create_app_and_client):
-    app, client = yield from create_app_and_client()
+def test_use_args_with_variable_routes(app, client):
 
     @asyncio.coroutine
     @use_args({'letters2': fields.Str()})
@@ -208,8 +166,7 @@ def test_use_args_with_variable_routes(create_app_and_client):
 
     app.router.add_route('GET', '/{letters1}/', handler)
 
-    res = yield from client.get('/abc/?letters2=def')
-    assert res.status == 200
-    json_data = yield from res.json()
-    assert json_data['letters1'] == 'abc'
-    assert json_data['letters2'] == 'def'
+    res = client.get('/abc/?letters2=def')
+    assert res.status_code == 200
+    assert res.json['letters1'] == 'abc'
+    assert res.json['letters2'] == 'def'
