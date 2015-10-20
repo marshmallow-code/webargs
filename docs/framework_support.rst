@@ -313,7 +313,7 @@ aiohttp
 aiohttp support is available via the :mod:`webargs.aiohttpparser` module.
 
 
-The `parse <webargs.aiohttpparser.AIOHTTPParser.parse>` method of `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser` is a `coroutine`.
+The `parse <webargs.aiohttpparser.AIOHTTPParser.parse>` method of `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser>` is a `coroutine <asyncio.coroutine>`.
 
 
 .. code-block:: python
