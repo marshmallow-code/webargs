@@ -19,11 +19,9 @@ Example usage: ::
             return HttpResponse('Hello ' + args['name'])
 """
 import json
-import logging
 
 from webargs import core
 
-logger = logging.getLogger(__name__)
 
 class DjangoParser(core.Parser):
     """Django request argument parser.

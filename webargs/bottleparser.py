@@ -18,13 +18,10 @@ Example: ::
     if __name__ == '__main__':
         run(debug=True)
 """
-import logging
-
 import bottle
 
 from webargs import core
 
-logger = logging.getLogger(__name__)
 
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
@@ -66,7 +63,6 @@ class BottleParser(core.Parser):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """
-        logger.error(error)
         status_code = getattr(error, 'status_code', self.DEFAULT_VALIDATION_STATUS)
         headers = getattr(error, 'headers', {})
         raise bottle.HTTPError(status=status_code, body=error.messages,

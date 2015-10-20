@@ -26,7 +26,6 @@ Example usage: ::
         server.serve_forever()
 """
 import functools
-import logging
 
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
@@ -35,7 +34,6 @@ import marshmallow as ma
 from marshmallow.compat import text_type
 from webargs import core
 
-logger = logging.getLogger(__name__)
 
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
@@ -82,7 +80,6 @@ class PyramidParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        logger.error(error)
         status_code = getattr(error, 'status_code', 400)
         raise exception_response(status_code, detail=text_type(error))
 

@@ -27,14 +27,10 @@ Example: ::
         webapp2.Route(r'/hello_dict', MainPage, handler_method='get_kwargs'),
     ], debug=True)
 """
-import logging
-
 from webargs import core
 import webapp2
 import webapp2_extras.json
 import webob.multidict
-
-logger = logging.getLogger(__name__)
 
 
 class Webapp2Parser(core.Parser):

@@ -14,15 +14,11 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-import logging
-
 from marshmallow.compat import basestring
 import tornado.web
 from tornado.escape import _unicode
 
 from webargs import core
-
-logger = logging.getLogger(__name__)
 
 
 class HTTPError(tornado.web.HTTPError):
@@ -115,7 +111,6 @@ class TornadoParser(core.Parser):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
-        logger.error(error)
         status_code = getattr(error, 'status_code', core.DEFAULT_VALIDATION_STATUS)
         if status_code == 422:
             reason = 'Unprocessable Entity'

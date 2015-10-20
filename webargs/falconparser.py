@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
-import logging
-
 import falcon
 
 from webargs import core
-
-logger = logging.getLogger(__name__)
 
 HTTP_422 = '422 Unprocessable entity'
 
@@ -85,7 +81,6 @@ class FalconParser(core.Parser):
 
     def handle_error(self, error):
         """Handles errors during parsing."""
-        logger.error(error)
         raise HTTPError(HTTP_422, errors=error.messages)
 
 parser = FalconParser()

@@ -25,14 +25,11 @@ Example: ::
 """
 import asyncio
 import json
-import logging
 
 from aiohttp import web
 
 from webargs import core
 from webargs.async import AsyncParser
-
-logger = logging.getLogger(__name__)
 
 
 class HTTPUnprocessableEntity(web.HTTPClientError):
@@ -102,7 +99,6 @@ class AIOHTTPParser(AsyncParser):
 
     def handle_error(self, error):
         """Handle ValidationErrors and return a JSON response of error messages to the client."""
-        logger.error(error)
         raise HTTPUnprocessableEntity(
             body=json.dumps(error.messages).encode('utf-8'),
             content_type='application/json'
