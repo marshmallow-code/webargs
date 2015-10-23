@@ -210,7 +210,7 @@ Nesting Fields
         args = {
             'name': fields.Nested({
                 'first': fields.Str(required=True),
-                'last': feilds.Str(required=True),
+                'last': fields.Str(required=True),
             })
         }
 
