@@ -226,7 +226,7 @@ class Parser(object):
         for argname, field_obj in iteritems(argdict):
             parsed_value = self.parse_arg(argname, field_obj, req,
                 locations=locations or self.locations)
-            parsed[argname] = parsed_value
+            parsed[field_obj.load_from or argname] = parsed_value
         return parsed
 
     def load(self, data, argmap):
