@@ -49,7 +49,8 @@ class AsyncParser(core.Parser):
             core.fill_in_missing_args(ret, argmap)
         return ret
 
-    def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
+    def use_args(self, argmap, req=None, locations=None, as_kwargs=False,
+                 validate=None, factory=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         .. warning::
@@ -63,7 +64,12 @@ class AsyncParser(core.Parser):
         if isinstance(argmap, ma.Schema):
             schema = argmap
         else:
-            schema = core.argmap2schema(argmap)()
+            if isinstance(argmap, dict):
+                schema = core.argmap2schema(argmap)
+            else:
+                schema = argmap
+            factory = factory or (lambda s, r: s())
+
         request_obj = req
 
         def decorator(func):
@@ -78,7 +84,10 @@ class AsyncParser(core.Parser):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = yield from self.parse(schema, req=req_obj, locations=locations,
+
+                constructed = factory(schema, request) if factory else schema
+
+                parsed_args = yield from self.parse(constructed, req=req_obj, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)

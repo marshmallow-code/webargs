@@ -84,25 +84,31 @@ class PyramidParser(core.Parser):
         raise exception_response(status_code, detail=text_type(error))
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
-                 as_kwargs=False, validate=None):
+                 as_kwargs=False, validate=None, factory=None):
         """Decorator that injects parsed arguments into a view callable.
         Supports the *Class-based View* pattern where `request` is saved as an instance
         attribute on a view class.
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param dict argmap: Either a `marshmallow.Schema` class or instance, or a
+            `dict` of argname -> `marshmallow.fields.Field` pairs.
         :param req: The request object to parse. Pulled off of the view by default.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
+        :param callable factory: Function that receives the schema class and the
+            request and returns a schema instance.
         """
         locations = locations or self.locations
         if isinstance(argmap, ma.Schema):
             schema = argmap
         else:
-            schema = core.argmap2schema(argmap)()
+            if isinstance(argmap, dict):
+                schema = core.argmap2schema(argmap)
+            else:
+                schema = argmap
+            factory = factory or (lambda s, r: s())
 
         def decorator(func):
             @functools.wraps(func)
@@ -112,7 +118,10 @@ class PyramidParser(core.Parser):
                     request = req or obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-                parsed_args = self.parse(schema, req=request, locations=locations,
+
+                constructed = factory(schema, request) if factory else schema
+
+                parsed_args = self.parse(constructed, req=request, locations=locations,
                                          validate=validate, force_all=as_kwargs)
                 if as_kwargs:
                     kwargs.update(parsed_args)

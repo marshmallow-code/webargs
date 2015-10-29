@@ -320,7 +320,8 @@ class Parser(object):
         """
         return None
 
-    def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
+    def use_args(self, argmap, req=None, locations=None, as_kwargs=False,
+                 validate=None, factory=None):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -330,19 +331,25 @@ class Parser(object):
             def greet(args):
                 return 'Hello ' + args['name']
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param dict argmap: Either a `marshmallow.Schema` class or instance,
+            or a `dict` of argname -> `marshmallow.fields.Field` pairs.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
+        :param callable factory: Function that receives the schema class and the
+            request and returns a schema instance.
         """
         locations = locations or self.locations
         if isinstance(argmap, ma.Schema):
             schema = argmap
         else:
-            schema = argmap2schema(argmap)()
+            if isinstance(argmap, dict):
+                schema = argmap2schema(argmap)
+            else:
+                schema = argmap
+            factory = factory or (lambda s, r: s())
         request_obj = req
 
         def decorator(func):
@@ -357,7 +364,10 @@ class Parser(object):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = self.parse(schema, req=req_obj, locations=locations,
+
+                constructed = factory(schema, req_obj) if factory else schema
+
+                parsed_args = self.parse(constructed, req=req_obj, locations=locations,
                                          validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)

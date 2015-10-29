@@ -2,6 +2,7 @@
 
 import pytest
 from webtest import TestApp
+from marshmallow import Schema
 from pyramid.config import Configurator
 
 from webargs import fields
@@ -21,6 +22,18 @@ hello_validate = {
     'num': fields.Int(validate=lambda n: n != 3,
         error_messages={'validator_failed': "Houston, we've had a problem."}),
 }
+
+
+def greet(request, value):
+    return 'Greetings ' + value
+
+
+class FactorySchema(Schema):
+    greetings = fields.Method(None, deserialize='greet', load_from='name')
+
+    def greet(self, value):
+        return self.context['request'].greet(value)
+
 
 @pytest.fixture
 def testapp():
@@ -69,6 +82,13 @@ def testapp():
     def matched(request, args):
         return args
 
+    @parser.use_args(
+        FactorySchema,
+        factory=lambda s, r: s(context={'request': r})
+    )
+    def factory(request, args):
+        return args
+
     config = Configurator()
 
     config.add_route('echo', '/echo')
@@ -81,6 +101,7 @@ def testapp():
     config.add_route('bar', '/bar')
     config.add_route('baz', '/baz')
     config.add_route('matched', '/matched/{mymatch:\d+}')
+    config.add_route('factory', '/factory')
 
     config.add_view(echo, route_name='echo', renderer='json')
     config.add_view(echomulti, route_name='echomulti', renderer='json')
@@ -92,6 +113,8 @@ def testapp():
     config.add_view(Bar, route_name='bar', renderer='json')
     config.add_view(baz, route_name='baz', renderer='json')
     config.add_view(matched, route_name='matched', renderer='json')
+    config.add_view(factory, route_name='factory', renderer='json')
+    config.add_request_method(greet)
 
     app = config.make_wsgi_app()
 
@@ -153,3 +176,7 @@ def test_user_kwargs_decorator(testapp):
 def test_parse_matchdict(testapp):
     res = testapp.get('/matched/1')
     assert res.json == {'mymatch': 1}
+
+def test_use_args_factory(testapp):
+    res = testapp.post('/factory', {'name': 'Jean-Luc Picard'})
+    assert res.json == {'greetings':  'Greetings Jean-Luc Picard'}
