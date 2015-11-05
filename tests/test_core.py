@@ -278,7 +278,10 @@ def test_full_input_validation_with_multiple_validators(web_request, parser):
 def test_required_with_custom_error(web_request):
     web_request.json = {}
     parser = MockRequestParser()
-    args = {'foo': fields.Str(required='We need foo')}
+    args = {'foo': fields.Str(
+        required=True,
+        error_messages={'required': 'We need foo'})
+    }
     with pytest.raises(ValidationError) as excinfo:
         # Test that `validate` receives dictionary of args
         parser.parse(args, web_request, locations=('json', ))
