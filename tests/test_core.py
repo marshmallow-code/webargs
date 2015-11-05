@@ -3,7 +3,7 @@ import mock
 import sys
 
 import pytest
-from marshmallow import Schema
+from marshmallow import Schema, post_load
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -439,6 +439,30 @@ def test_use_args(web_request, parser):
     def viewfunc(args):
         return args
     assert viewfunc() == {'username': 'foo', 'password': 'bar'}
+
+
+def test_use_args_callable(web_request, parser):
+    class HelloSchema(Schema):
+        name = fields.Str()
+
+        class Meta(object):
+            strict = True
+
+        @post_load
+        def request_data(self, item):
+            item['data'] = self.context['request'].data
+            return item
+
+    web_request.json = {'name': 'foo'}
+    web_request.data = 'request-data'
+
+    @parser.use_args(
+        lambda r: HelloSchema(context={'request': web_request}),
+        web_request,
+    )
+    def viewfunc(args):
+        return args
+    assert viewfunc() == {'name': 'foo', 'data': 'request-data'}
 
 
 class TestPassingSchema:

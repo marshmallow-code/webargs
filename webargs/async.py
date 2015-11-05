@@ -62,6 +62,8 @@ class AsyncParser(core.Parser):
         locations = locations or self.locations
         if isinstance(argmap, ma.Schema):
             schema = argmap
+        elif callable(argmap):
+            schema = None
         else:
             schema = core.argmap2schema(argmap)()
         request_obj = req
@@ -78,8 +80,10 @@ class AsyncParser(core.Parser):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = yield from self.parse(schema, req=req_obj, locations=locations,
-                                         validate=validate, force_all=force_all)
+                schema = constructor(req_obj)
+                parsed_args = yield from self.parse(schema or argmap(request),
+                                                    req=req_obj, locations=locations,
+                                                    validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)

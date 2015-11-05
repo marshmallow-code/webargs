@@ -330,8 +330,9 @@ class Parser(object):
             def greet(args):
                 return 'Hello ' + args['name']
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param dict argmap: Either a `marshmallow.Schema`, a `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable
+            which accepts a request and returns a `marshmallow.Schema`.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
@@ -341,6 +342,8 @@ class Parser(object):
         locations = locations or self.locations
         if isinstance(argmap, ma.Schema):
             schema = argmap
+        elif callable(argmap):
+            schema = None
         else:
             schema = argmap2schema(argmap)()
         request_obj = req
@@ -357,8 +360,9 @@ class Parser(object):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = self.parse(schema, req=req_obj, locations=locations,
-                                         validate=validate, force_all=force_all)
+                parsed_args = self.parse(schema or argmap(req_obj), req=req_obj,
+                                         locations=locations, validate=validate,
+                                         force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)

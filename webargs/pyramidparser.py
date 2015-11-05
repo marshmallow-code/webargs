@@ -89,8 +89,9 @@ class PyramidParser(core.Parser):
         Supports the *Class-based View* pattern where `request` is saved as an instance
         attribute on a view class.
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param dict argmap: Either a `marshmallow.Schema`, a `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable
+            which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse. Pulled off of the view by default.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
@@ -101,6 +102,8 @@ class PyramidParser(core.Parser):
         locations = locations or self.locations
         if isinstance(argmap, ma.Schema):
             schema = argmap
+        elif callable(argmap):
+            schema = None
         else:
             schema = core.argmap2schema(argmap)()
 
@@ -112,8 +115,10 @@ class PyramidParser(core.Parser):
                     request = req or obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-                parsed_args = self.parse(schema, req=request, locations=locations,
-                                         validate=validate, force_all=as_kwargs)
+
+                parsed_args = self.parse(schema or argmap(request), req=request,
+                                         locations=locations, validate=validate,
+                                         force_all=as_kwargs)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(obj, *args, **kwargs)
