@@ -201,18 +201,22 @@ To add your own custom location handler, write a function that receives a reques
 Nesting Fields
 --------------
 
-`Fields <marshmallow.fields.Field>` dictionaries can be nested within each other. This can be useful for validating nested data.
+`Field <marshmallow.fields.Field>` dictionaries can be nested within each other. This can be useful for validating nested data.
+
+.. note::
+
+    Only the ``'json'`` request location supports nested fields.
 
 .. code-block:: python
 
-        from webargs import fields
+    from webargs import fields
 
-        args = {
-            'name': fields.Nested({
-                'first': fields.Str(required=True),
-                'last': fields.Str(required=True),
-            })
-        }
+    args = {
+        'name': fields.Nested({
+            'first': fields.Str(required=True),
+            'last': fields.Str(required=True),
+        })
+    }
 
 Marshmallow Integration
 -----------------------
