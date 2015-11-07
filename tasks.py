@@ -33,6 +33,7 @@ def flake():
             os.path.join('webargs', 'async.py'),
             os.path.join('webargs', 'aiohttpparser.py'),
             os.path.join('examples', 'annotations_example.py'),
+            'build',
         ]
         cmd += ' --exclude={0}'.format(','.join(excludes))
     run(cmd, echo=True)

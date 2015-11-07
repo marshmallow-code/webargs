@@ -519,10 +519,17 @@ class TestPassingSchema:
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
 
+    # Must skip on older versions of python due to
+    # https://github.com/pytest-dev/pytest/issues/840
+    @pytest.mark.skipif(sys.version_info < (3, 4),
+                        reason="Skipping due to a bug in pytest's warning recording")
     def test_warning_raised_if_schema_is_not_in_strict_mode(
-            self, web_request, parser, recwarn):
-        parser.parse(self.UserSchema(strict=False), web_request)
-        warning = recwarn.pop(UserWarning)
+        self, web_request, parser
+    ):
+
+        with pytest.warns(UserWarning) as record:
+            parser.parse(self.UserSchema(strict=False), web_request)
+        warning = record[0]
         assert 'strict=True' in str(warning.message)
 
     def test_use_kwargs_stacked(self, web_request, parser):
