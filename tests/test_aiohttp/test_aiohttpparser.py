@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from webargs import fields
+from marshmallow import Schema
 
 import asyncio
 
@@ -84,6 +85,25 @@ def test_parsing_cookies(app, client):
     res = client.get('/echocookie')
     assert res.status_code == 200
     assert res.json == {'mycookie': 'foo'}
+
+def test_parse_with_callable(app, client):
+
+    class MySchema(Schema):
+        foo = fields.Field(missing=42)
+
+    def make_schema(req):
+        return MySchema(context={'request': req})
+
+    @asyncio.coroutine
+    def echo_parse(request):
+        args = yield from parser.parse(make_schema, request)
+        return jsonify(args)
+
+    app.router.add_route('GET', '/factory', echo_parse)
+
+    res = client.get('/factory')
+    assert res.status_code == 200
+    assert res.json == {'foo': 42}
 
 
 def test_use_args(app, client):

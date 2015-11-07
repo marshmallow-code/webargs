@@ -220,8 +220,9 @@ class Parser(object):
                 return value
         return missing
 
-    def _parse_request(self, argmap, req, locations):
-        argdict = argmap.fields if isinstance(argmap, ma.Schema) else argmap
+    def _parse_request(self, schema, req, locations):
+        """Return a parsed arguments dictionary for the current request."""
+        argdict = schema.fields
         parsed = {}
         for argname, field_obj in iteritems(argdict):
             parsed_value = self.parse_arg(argname, field_obj, req,
@@ -262,6 +263,22 @@ class Parser(object):
                 msg = self.DEFAULT_VALIDATION_MESSAGE
                 raise ValidationError(msg, data=data)
 
+    def _get_schema(self, argmap, req):
+        """Return a `marshmallow.Schema` for the given argmap and request.
+
+        :param argmap: Either a `marshmallow.Schema`, `dict`, or callable that returns
+            a `marshmallow.Schema` instance.
+        :param req: The request object being parsed.
+        :rtype: marshmallow.Schema
+        """
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        elif callable(argmap):
+            schema = argmap(req)
+        else:
+            schema = argmap2schema(argmap)()
+        return schema
+
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
@@ -281,9 +298,10 @@ class Parser(object):
         assert req is not None, 'Must pass req object'
         ret = None
         validators = _ensure_list_of_callables(validate)
+        schema = self._get_schema(argmap, req)
         try:
-            parsed = self._parse_request(argmap, req, locations)
-            result = self.load(parsed, argmap)
+            parsed = self._parse_request(schema=schema, req=req, locations=locations)
+            result = self.load(parsed, schema)
             self._validate_arguments(result.data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
@@ -340,12 +358,6 @@ class Parser(object):
             will raise a :exc:`ValidationError`.
         """
         locations = locations or self.locations
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        elif callable(argmap):
-            schema = None
-        else:
-            schema = argmap2schema(argmap)()
         request_obj = req
 
         def decorator(func):
@@ -360,7 +372,8 @@ class Parser(object):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = self.parse(schema or argmap(req_obj), req=req_obj,
+                # NOTE: At this point, argmap may be a Schema, callable, or dict
+                parsed_args = self.parse(argmap, req=req_obj,
                                          locations=locations, validate=validate,
                                          force_all=force_all)
                 if as_kwargs:

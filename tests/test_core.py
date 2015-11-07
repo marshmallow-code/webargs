@@ -444,6 +444,22 @@ def test_use_args(web_request, parser):
     assert viewfunc() == {'username': 'foo', 'password': 'bar'}
 
 
+def test_parse_with_callable(web_request, parser):
+
+    web_request.json = {'foo': 42}
+
+    class MySchema(Schema):
+        foo = fields.Field()
+
+    def make_schema(req):
+        assert req is web_request
+        return MySchema(context={'request': req})
+
+    result = parser.parse(make_schema, web_request)
+
+    assert result == {'foo': 42}
+
+
 def test_use_args_callable(web_request, parser):
     class HelloSchema(Schema):
         name = fields.Str()
@@ -459,8 +475,12 @@ def test_use_args_callable(web_request, parser):
     web_request.json = {'name': 'foo'}
     web_request.data = 'request-data'
 
+    def make_schema(req):
+        assert req is web_request
+        return HelloSchema(context={'request': req})
+
     @parser.use_args(
-        lambda r: HelloSchema(context={'request': web_request}),
+        make_schema,
         web_request,
     )
     def viewfunc(args):
