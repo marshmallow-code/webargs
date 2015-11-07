@@ -124,6 +124,26 @@ def test_use_args(app, client):
     assert res.json == {'name': 'Joe'}
 
 
+def test_use_args_with_callable(app, client):
+
+    class MySchema(Schema):
+        foo = fields.Field(missing=42)
+
+    def make_schema(req):
+        return MySchema(context={'request': req})
+
+    @asyncio.coroutine
+    @use_args(make_schema)
+    def echo_use_args(request, args):
+        return jsonify(args)
+
+    app.router.add_route('GET', '/use_args', echo_use_args)
+
+    res = client.get('/use_args')
+    assert res.status_code == 200
+    assert res.json == {'foo': 42}
+
+
 def test_use_kwargs_on_method(app, client):
     class Handler:
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Asynchronous request parser. Compatible with Python>=3.4."""
 import asyncio
+import collections
 import inspect
 import functools
 
@@ -62,6 +63,10 @@ class AsyncParser(core.Parser):
         """
         locations = locations or self.locations
         request_obj = req
+        # Optimization: If argmap is passed as a dictionary, we only need
+        # to generate a Schema once
+        if isinstance(argmap, collections.Mapping):
+            argmap = core.argmap2schema(argmap)()
 
         def decorator(func):
             req_ = request_obj

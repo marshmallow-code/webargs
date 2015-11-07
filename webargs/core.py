@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import collections
 import functools
 import inspect
 import logging
@@ -282,8 +283,9 @@ class Parser(object):
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param argmap: Either a `marshmallow.Schema`, `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable that returns
+            a `marshmallow.Schema` instance.
         :param req: The request object to parse.
         :param tuple locations: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
@@ -359,6 +361,10 @@ class Parser(object):
         """
         locations = locations or self.locations
         request_obj = req
+        # Optimization: If argmap is passed as a dictionary, we only need
+        # to generate a Schema once
+        if isinstance(argmap, collections.Mapping):
+            argmap = argmap2schema(argmap)()
 
         def decorator(func):
             req_ = request_obj
