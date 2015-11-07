@@ -267,7 +267,8 @@ class Parser(object):
     def _get_schema(self, argmap, req):
         """Return a `marshmallow.Schema` for the given argmap and request.
 
-        :param argmap: Either a `marshmallow.Schema`, `dict`, or callable that returns
+        :param argmap: Either a `marshmallow.Schema`, `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable that returns
             a `marshmallow.Schema` instance.
         :param req: The request object being parsed.
         :rtype: marshmallow.Schema
@@ -283,9 +284,9 @@ class Parser(object):
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
-        :param argmap: Either a `marshmallow.Schema`, `dict`
-            of argname -> `marshmallow.fields.Field` pairs, or a callable that returns
-            a `marshmallow.Schema` instance.
+        :param argmap: Either a `marshmallow.Schema`, a `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable
+            which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse.
         :param tuple locations: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
@@ -350,7 +351,7 @@ class Parser(object):
             def greet(args):
                 return 'Hello ' + args['name']
 
-        :param dict argmap: Either a `marshmallow.Schema`, a `dict`
+        :param argmap: Either a `marshmallow.Schema`, a `dict`
             of argname -> `marshmallow.fields.Field` pairs, or a callable
             which accepts a request and returns a `marshmallow.Schema`.
         :param tuple locations: Where on the request to search for values.
