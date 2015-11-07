@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Asynchronous request parser. Compatible with Python>=3.4."""
 import asyncio
+import collections
 import inspect
 import functools
 
@@ -15,8 +16,8 @@ class AsyncParser(core.Parser):
     """
 
     @asyncio.coroutine
-    def _parse_request(self, argmap, req, locations):
-        argdict = argmap.fields if isinstance(argmap, ma.Schema) else argmap
+    def _parse_request(self, schema, req, locations):
+        argdict = schema.fields
         parsed = {}
         for argname, field_obj in iteritems(argdict):
             parsed_value = yield from self.parse_arg(argname, field_obj, req,
@@ -35,9 +36,10 @@ class AsyncParser(core.Parser):
         assert req is not None, 'Must pass req object'
         ret = None
         validators = core._ensure_list_of_callables(validate)
+        schema = self._get_schema(argmap, req)
         try:
-            parsed = yield from self._parse_request(argmap, req, locations)
-            result = self.load(parsed, argmap)
+            parsed = yield from self._parse_request(schema=schema, req=req, locations=locations)
+            result = self.load(parsed, schema)
             self._validate_arguments(result.data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
@@ -60,11 +62,11 @@ class AsyncParser(core.Parser):
         Receives the same arguments as `webargs.core.Parser.use_args`.
         """
         locations = locations or self.locations
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        else:
-            schema = core.argmap2schema(argmap)()
         request_obj = req
+        # Optimization: If argmap is passed as a dictionary, we only need
+        # to generate a Schema once
+        if isinstance(argmap, collections.Mapping):
+            argmap = core.argmap2schema(argmap)()
 
         def decorator(func):
             req_ = request_obj
@@ -78,8 +80,10 @@ class AsyncParser(core.Parser):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = yield from self.parse(schema, req=req_obj, locations=locations,
-                                         validate=validate, force_all=force_all)
+                # NOTE: At this point, argmap may be a Schema, callable, or dict
+                parsed_args = yield from self.parse(argmap,
+                                                    req=req_obj, locations=locations,
+                                                    validate=validate, force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)
