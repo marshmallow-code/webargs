@@ -2,6 +2,7 @@
 
 import pytest
 from webtest import TestApp
+from marshmallow import Schema, post_load
 from pyramid.config import Configurator
 
 from webargs import fields
@@ -21,6 +22,19 @@ hello_validate = {
     'num': fields.Int(validate=lambda n: n != 3,
         error_messages={'validator_failed': "Houston, we've had a problem."}),
 }
+
+
+class HelloSchema(Schema):
+    name = fields.String()
+
+    @post_load
+    def greet(self, item):
+        item['url'] = self.context['request'].url
+        return item
+
+    class Meta(object):
+        strict = True
+
 
 @pytest.fixture
 def testapp():
@@ -69,6 +83,10 @@ def testapp():
     def matched(request, args):
         return args
 
+    @parser.use_args(lambda req: HelloSchema(context={'request': req}))
+    def constructor(request, args):
+        return args
+
     config = Configurator()
 
     config.add_route('echo', '/echo')
@@ -81,6 +99,7 @@ def testapp():
     config.add_route('bar', '/bar')
     config.add_route('baz', '/baz')
     config.add_route('matched', '/matched/{mymatch:\d+}')
+    config.add_route('constructor', '/constructor')
 
     config.add_view(echo, route_name='echo', renderer='json')
     config.add_view(echomulti, route_name='echomulti', renderer='json')
@@ -92,6 +111,7 @@ def testapp():
     config.add_view(Bar, route_name='bar', renderer='json')
     config.add_view(baz, route_name='baz', renderer='json')
     config.add_view(matched, route_name='matched', renderer='json')
+    config.add_view(constructor, route_name='constructor', renderer='json')
 
     app = config.make_wsgi_app()
 
@@ -153,3 +173,8 @@ def test_user_kwargs_decorator(testapp):
 def test_parse_matchdict(testapp):
     res = testapp.get('/matched/1')
     assert res.json == {'mymatch': 1}
+
+
+def test_use_args_callable(testapp):
+    res = testapp.post('/constructor', {'name': 'Jean-Luc Picard'})
+    assert res.json == {'name': 'Jean-Luc Picard', 'url': 'http://localhost/constructor'}

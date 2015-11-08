@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import collections
 import functools
 import inspect
 import logging
@@ -220,8 +221,9 @@ class Parser(object):
                 return value
         return missing
 
-    def _parse_request(self, argmap, req, locations):
-        argdict = argmap.fields if isinstance(argmap, ma.Schema) else argmap
+    def _parse_request(self, schema, req, locations):
+        """Return a parsed arguments dictionary for the current request."""
+        argdict = schema.fields
         parsed = {}
         for argname, field_obj in iteritems(argdict):
             parsed_value = self.parse_arg(argname, field_obj, req,
@@ -262,11 +264,29 @@ class Parser(object):
                 msg = self.DEFAULT_VALIDATION_MESSAGE
                 raise ValidationError(msg, data=data)
 
+    def _get_schema(self, argmap, req):
+        """Return a `marshmallow.Schema` for the given argmap and request.
+
+        :param argmap: Either a `marshmallow.Schema`, `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable that returns
+            a `marshmallow.Schema` instance.
+        :param req: The request object being parsed.
+        :rtype: marshmallow.Schema
+        """
+        if isinstance(argmap, ma.Schema):
+            schema = argmap
+        elif callable(argmap):
+            schema = argmap(req)
+        else:
+            schema = argmap2schema(argmap)()
+        return schema
+
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
         """Main request parsing method.
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param argmap: Either a `marshmallow.Schema`, a `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable
+            which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse.
         :param tuple locations: Where on the request to search for values.
             Can include one or more of ``('json', 'querystring', 'form',
@@ -281,9 +301,10 @@ class Parser(object):
         assert req is not None, 'Must pass req object'
         ret = None
         validators = _ensure_list_of_callables(validate)
+        schema = self._get_schema(argmap, req)
         try:
-            parsed = self._parse_request(argmap, req, locations)
-            result = self.load(parsed, argmap)
+            parsed = self._parse_request(schema=schema, req=req, locations=locations)
+            result = self.load(parsed, schema)
             self._validate_arguments(result.data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
@@ -330,8 +351,9 @@ class Parser(object):
             def greet(args):
                 return 'Hello ' + args['name']
 
-        :param dict argmap: Either a `marshmallow.Schema` or a `dict`
-            of argname -> `marshmallow.fields.Field` pairs.
+        :param argmap: Either a `marshmallow.Schema`, a `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable
+            which accepts a request and returns a `marshmallow.Schema`.
         :param tuple locations: Where on the request to search for values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
@@ -339,11 +361,11 @@ class Parser(object):
             will raise a :exc:`ValidationError`.
         """
         locations = locations or self.locations
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        else:
-            schema = argmap2schema(argmap)()
         request_obj = req
+        # Optimization: If argmap is passed as a dictionary, we only need
+        # to generate a Schema once
+        if isinstance(argmap, collections.Mapping):
+            argmap = argmap2schema(argmap)()
 
         def decorator(func):
             req_ = request_obj
@@ -357,8 +379,10 @@ class Parser(object):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
-                parsed_args = self.parse(schema, req=req_obj, locations=locations,
-                                         validate=validate, force_all=force_all)
+                # NOTE: At this point, argmap may be a Schema, callable, or dict
+                parsed_args = self.parse(argmap, req=req_obj,
+                                         locations=locations, validate=validate,
+                                         force_all=force_all)
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)

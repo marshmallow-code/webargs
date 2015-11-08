@@ -3,7 +3,7 @@ import mock
 import sys
 
 import pytest
-from marshmallow import Schema
+from marshmallow import Schema, post_load
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -278,7 +278,10 @@ def test_full_input_validation_with_multiple_validators(web_request, parser):
 def test_required_with_custom_error(web_request):
     web_request.json = {}
     parser = MockRequestParser()
-    args = {'foo': fields.Str(required='We need foo')}
+    args = {'foo': fields.Str(
+        required=True,
+        error_messages={'required': 'We need foo'})
+    }
     with pytest.raises(ValidationError) as excinfo:
         # Test that `validate` receives dictionary of args
         parser.parse(args, web_request, locations=('json', ))
@@ -441,6 +444,50 @@ def test_use_args(web_request, parser):
     assert viewfunc() == {'username': 'foo', 'password': 'bar'}
 
 
+def test_parse_with_callable(web_request, parser):
+
+    web_request.json = {'foo': 42}
+
+    class MySchema(Schema):
+        foo = fields.Field()
+
+    def make_schema(req):
+        assert req is web_request
+        return MySchema(context={'request': req})
+
+    result = parser.parse(make_schema, web_request)
+
+    assert result == {'foo': 42}
+
+
+def test_use_args_callable(web_request, parser):
+    class HelloSchema(Schema):
+        name = fields.Str()
+
+        class Meta(object):
+            strict = True
+
+        @post_load
+        def request_data(self, item):
+            item['data'] = self.context['request'].data
+            return item
+
+    web_request.json = {'name': 'foo'}
+    web_request.data = 'request-data'
+
+    def make_schema(req):
+        assert req is web_request
+        return HelloSchema(context={'request': req})
+
+    @parser.use_args(
+        make_schema,
+        web_request,
+    )
+    def viewfunc(args):
+        return args
+    assert viewfunc() == {'name': 'foo', 'data': 'request-data'}
+
+
 class TestPassingSchema:
     class UserSchema(Schema):
         id = fields.Int(dump_only=True)
@@ -472,10 +519,17 @@ class TestPassingSchema:
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
 
+    # Must skip on older versions of python due to
+    # https://github.com/pytest-dev/pytest/issues/840
+    @pytest.mark.skipif(sys.version_info < (3, 4),
+                        reason="Skipping due to a bug in pytest's warning recording")
     def test_warning_raised_if_schema_is_not_in_strict_mode(
-            self, web_request, parser, recwarn):
-        parser.parse(self.UserSchema(strict=False), web_request)
-        warning = recwarn.pop(UserWarning)
+        self, web_request, parser
+    ):
+
+        with pytest.warns(UserWarning) as record:
+            parser.parse(self.UserSchema(strict=False), web_request)
+        warning = record[0]
         assert 'strict=True' in str(warning.message)
 
     def test_use_kwargs_stacked(self, web_request, parser):

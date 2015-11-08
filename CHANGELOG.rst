@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.1.0 (unreleased)
+******************
+
+Features:
+
+* ``Parser.parse``, ``Parser.use_args`` and ``Parser.use_kwargs`` can take a Schema factory as the first argument (:issue:`73`). Thanks :user:`DamianHeard` for the suggestion and the PR.
+
 1.0.0 (2015-10-19)
 ******************
 

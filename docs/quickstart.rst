@@ -251,8 +251,8 @@ Nesting Fields
 
     By default, webargs only parses nested fields using the ``json`` request location. You can, however, :ref:`implement your own parser <quickstart-custom-parsers>` to add nested field functionality to the other locations.
 
-Marshmallow Integration
------------------------
+Advanced: Marshmallow Integration
+---------------------------------
 
 When you need more flexibility in defining input schemas, you can pass a marshmallow `Schema <marshmallow.Schema>` instead of a dictionary to `Parser.parse <webargs.core.Parser.parse>`, `Parser.use_args <webargs.core.Parser.use_args>`, and `Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
 
@@ -290,6 +290,81 @@ When you need more flexibility in defining input schemas, you can pass a marshma
 
 .. note::
     You should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
+
+
+Advanced: Schema Factories
+--------------------------
+
+If you need to parametrize a schema based on a given request, you can use a "Schema factory": a callable that receives the current `request` and returns a `marshmallow.Schema` instance.
+
+Consider the following use cases:
+
+- Handle partial updates for PATCH requests using marshmallow's `partial loading <https://marshmallow.readthedocs.org/en/latest/quickstart.html#partial-loading>`_ API.
+- Filtering via a query parameter by passing ``only`` to the Schema.
+
+.. code-block:: python
+
+    from marshmallow import Schema, fields
+    from webargs.flaskparser import use_args
+
+    class UserSchema(Schema):
+        id = fields.Int(dump_only=True)
+        username = fields.Str(required=True)
+        password = fields.Str(load_only=True)
+        first_name = fields.Str(missing='')
+        last_name = fields.Str(missing='')
+        date_registered = fields.DateTime(dump_only=True)
+
+        class Meta:
+            strict = True
+
+    def make_user_schema(request):
+        # Filter based on 'fields' query parameter
+        only = request.args.get('fields', None)
+        # Respect partial updates for PATCH requests
+        partial = request.method == 'PUT'
+        # Add current request to the schema's context
+        return UserSchema(only=only, partial=partial, context={'request': request})
+
+    # Pass the factory to .parse, .use_args, or .use_kwargs
+    @use_args(make_user_schema):
+    def profile_view(args):
+        # ...
+
+
+Reducing Boilerplate
+++++++++++++++++++++
+
+We can reduce boilerplate and improve [re]usability with a simple helper function:
+
+.. code-block:: python
+
+    from webargs.flaskparser import use_args
+
+    def use_args_with(schema_cls, schema_kwargs=None, **kwargs):
+        schema_kwargs = schema_kwargs or {}
+        def factory(request):
+            # Filter based on 'fields' query parameter
+            only = request.args.get('fields', None)
+            # Respect partial updates for PATCH requests
+            partial = request.method == 'PUT'
+            # Add current request to the schema's context
+            # and ensure we're always using strict mode
+            return schema_cls(
+                only=only, partial=partial, strict=True,
+                context={'request': request}, **schema_kwargs
+            )
+        return use_args(factory, **kwargs)
+
+
+Now we can attach input schemas to our view functions like so:
+
+.. code-block:: python
+
+    @use_args_with(UserSchema)
+    def profile_view(args):
+        # ...
+
 
 Next Steps
 ----------
