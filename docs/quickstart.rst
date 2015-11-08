@@ -198,39 +198,6 @@ To add your own custom location handler, write a function that receives a reques
     def posts(args):
         return 'displaying {} posts'.format(args['per_page'])
 
-.. _quickstart-custom-parsers:
-
-Custom Parsers
---------------
-
-To add your own parser, extend :class:`Parser <webargs.core.Parser>` and implement the `parse_*` method(s) you need to override. For example, here is a custom Flask parser that handles nested query string arguments.
-
-
-.. code-block:: python
-
-    import re
-
-    from webargs import core
-    from webargs.flaskparser import FlaskParser
-
-    class NestedQueryFlaskParser(FlaskParser):
-        def parse_querystring(self, req, name, field):
-            return core.get_value(_structure_dict(req.args), name, field)
-
-    def _structure_dict(dict_):
-        def structure_dict_pair(r, key, value):
-            m = re.match(r'(\w+)\.(.*)', key)
-            if m:
-                if r.get(m.group(1)) is None:
-                    r[m.group(1)] = {}
-                structure_dict_pair(r[m.group(1)], m.group(2), value)
-            else:
-                r[key] = value
-        r = {}
-        for k, v in dict_.items():
-            structure_dict_pair(r, k, v)
-        return r
-
 Nesting Fields
 --------------
 
@@ -364,6 +331,58 @@ Now we can attach input schemas to our view functions like so:
     @use_args_with(UserSchema)
     def profile_view(args):
         # ...
+
+
+.. _quickstart-custom-parsers:
+
+Advanced: Custom Parsers
+------------------------
+
+To add your own parser, extend :class:`Parser <webargs.core.Parser>` and implement the `parse_*` method(s) you need to override. For example, here is a custom Flask parser that handles nested query string arguments.
+
+
+.. code-block:: python
+
+    import re
+
+    from webargs import core
+    from webargs.flaskparser import FlaskParser
+
+    class NestedQueryFlaskParser(FlaskParser):
+        """Parses nested query args
+
+        This parser handles nested query args. It expects nested levels
+        delimited by a period and then deserializes the query args into a
+        nested dict.
+
+        For example, the URL query params `?name.first=John&name.last=Boone`
+        will yield the following dict:
+
+            {
+                'name': {
+                    'first': 'John',
+                    'last': 'Boone',
+                }
+            }
+        """
+
+        def parse_querystring(self, req, name, field):
+            return core.get_value(_structure_dict(req.args), name, field)
+
+
+    def _structure_dict(dict_):
+        def structure_dict_pair(r, key, value):
+            m = re.match(r'(\w+)\.(.*)', key)
+            if m:
+                if r.get(m.group(1)) is None:
+                    r[m.group(1)] = {}
+                structure_dict_pair(r[m.group(1)], m.group(2), value)
+            else:
+                r[key] = value
+        r = {}
+        for k, v in dict_.items():
+            structure_dict_pair(r, k, v)
+        return r
 
 
 Next Steps
