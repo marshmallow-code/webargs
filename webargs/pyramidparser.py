@@ -25,12 +25,12 @@ Example usage: ::
         server = make_server('0.0.0.0', 6543, app)
         server.serve_forever()
 """
+import collections
 import functools
 
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
-import marshmallow as ma
 from marshmallow.compat import text_type
 from webargs import core
 
@@ -100,12 +100,10 @@ class PyramidParser(core.Parser):
             will raise a :exc:`ValidationError`.
         """
         locations = locations or self.locations
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        elif callable(argmap):
-            schema = None
-        else:
-            schema = core.argmap2schema(argmap)()
+        # Optimization: If argmap is passed as a dictionary, we only need
+        # to generate a Schema once
+        if isinstance(argmap, collections.Mapping):
+            argmap = core.argmap2schema(argmap)()
 
         def decorator(func):
             @functools.wraps(func)
@@ -115,8 +113,8 @@ class PyramidParser(core.Parser):
                     request = req or obj.request
                 except AttributeError:  # first arg is request
                     request = obj
-
-                parsed_args = self.parse(schema or argmap(request), req=request,
+                # NOTE: At this point, argmap may be a Schema, callable, or dict
+                parsed_args = self.parse(argmap, req=request,
                                          locations=locations, validate=validate,
                                          force_all=as_kwargs)
                 if as_kwargs:
