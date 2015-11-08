@@ -8,6 +8,10 @@ Features:
 
 * ``Parser.parse``, ``Parser.use_args`` and ``Parser.use_kwargs`` can take a Schema factory as the first argument (:issue:`73`). Thanks :user:`DamianHeard` for the suggestion and the PR.
 
+Support:
+
+* Docs: Add "Custom Parsers" section with example of parsing nested querystring arguments (:issue:`74`). Thanks :user:`dwieeb`.
+
 1.0.0 (2015-10-19)
 ******************
 

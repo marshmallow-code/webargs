@@ -91,6 +91,7 @@ User Guide
 
     install
     quickstart
+    advanced
     framework_support
 
 API Reference
