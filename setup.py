@@ -44,10 +44,10 @@ setup(
     install_requires=REQUIREMENTS,
     license=read("LICENSE"),
     zip_safe=False,
-    keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado',
+    keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado', 'aiohttp',
       'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api', 'marshmallow'),
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
