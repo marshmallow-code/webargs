@@ -5,6 +5,27 @@ Advanced Usage
 
 This section includes guides for advanced usage patterns.
 
+Custom Location Handlers
+------------------------
+
+To add your own custom location handler, write a function that receives a request, an argument name, and a :class:`Field <marshmallow.fields.Field>`, then decorate that function with :func:`Parser.location_handler <webargs.core.Parser.location_handler>`.
+
+
+.. code-block:: python
+
+    from webargs import fields
+    from webargs.flaskparser import parser
+
+    @parser.location_handler('data')
+    def parse_data(request, name, field):
+        return request.data.get(name)
+
+    # Now 'data' can be specified as a location
+    @parser.use_args({'per_page': fields.Int()}, locations=('data', ))
+    def posts(args):
+        return 'displaying {} posts'.format(args['per_page'])
+
+
 Marshmallow Integration
 -----------------------
 

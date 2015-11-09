@@ -161,8 +161,8 @@ The full arguments dictionary can also be validated by passing ``validate`` to :
                           validate=lambda args: args['years_employed'] < args['age'])
 
 
-Custom Error Handlers
----------------------
+Error Handling
+--------------
 
 Each parser has a default error handling method. To override the error handling callback, write a function that receives an error and handles it, then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
 
@@ -177,26 +177,6 @@ Each parser has a default error handling method. To override the error handling 
     @parser.error_handler
     def handle_error(error):
         raise CustomError(error.messages)
-
-Custom Location Handlers
-------------------------
-
-To add your own custom location handler, write a function that receives a request, an argument name, and a :class:`Field <marshmallow.fields.Field>`, then decorate that function with :func:`Parser.location_handler <webargs.core.Parser.location_handler>`.
-
-
-.. code-block:: python
-
-    from webargs import fields
-    from webargs.flaskparser import parser
-
-    @parser.location_handler('data')
-    def parse_data(request, name, field):
-        return request.data.get(name)
-
-    # Now 'data' can be specified as a location
-    @parser.use_args({'per_page': fields.Int()}, locations=('data', ))
-    def posts(args):
-        return 'displaying {} posts'.format(args['per_page'])
 
 Nesting Fields
 --------------
@@ -221,6 +201,6 @@ Nesting Fields
 Next Steps
 ----------
 
-- Go on to :ref:`Advanced Usage <advanced>`.
+- Go on to :ref:`Advanced Usage <advanced>` to learn how to add custom location handlers, use marshmallow Schemas, and more.
 - See the :ref:`Framework Support <frameworks>` page for framework-specific guides.
 - For example applications, check out the `examples <https://github.com/sloria/webargs/tree/dev/examples>`_ directory.

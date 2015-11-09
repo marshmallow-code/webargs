@@ -11,6 +11,7 @@ Features:
 Support:
 
 * Docs: Add "Custom Parsers" section with example of parsing nested querystring arguments (:issue:`74`). Thanks :user:`dwieeb`.
+* Docs: Add "Advanced Usage" page.
 
 1.0.0 (2015-10-19)
 ******************
