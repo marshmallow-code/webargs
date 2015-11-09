@@ -21,3 +21,4 @@ Contributors (chronological)
 * Jace Browning <https://github.com/jacebrowning>
 * @marcellarius <https://github.com/marcellarius>
 * Damian Heard <https://github.com/DamianHeard>
+* Daniel Imhoff <https://github.com/dwieeb>
