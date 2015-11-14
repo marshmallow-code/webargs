@@ -92,6 +92,26 @@ def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
     return isinstance(field, ma.fields.List) and not hasattr(field, 'delimiter')
 
+
+def get_mimetype(content_type):
+    return content_type.split(';')[0].strip() if content_type else None
+
+# Adapted from werkzeug: https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
+def is_json(mimetype):
+    """Indicates if this mimetype is JSON or not.  By default a request
+    is considered to include JSON data if the mimetype is
+    ``application/json`` or ``application/*+json``.
+    """
+    if not mimetype:
+        return False
+    if ';' in mimetype:  # Allow Content-Type header to be passed
+        mimetype = get_mimetype(mimetype)
+    if mimetype == 'application/json':
+        return True
+    if mimetype.startswith('application/') and mimetype.endswith('+json'):
+        return True
+    return False
+
 def get_value(d, name, field):
     """Get a value from a dictionary. Handles ``MultiDict`` types when
     ``multiple=True``. If the value is not found, return `missing`.

@@ -16,7 +16,7 @@ from webargs import (
     missing,
     ValidationError,
 )
-from webargs.core import Parser, get_value, argmap2schema
+from webargs.core import Parser, get_value, argmap2schema, is_json, get_mimetype
 
 
 class MockRequestParser(Parser):
@@ -763,3 +763,15 @@ def test_argmap2schema_with_nesting():
     assert 'nest' in schema.fields
     assert type(schema.fields['nest']) is fields.Nested
     assert 'foo' in schema.fields['nest'].schema.fields
+
+
+def test_is_json():
+    assert is_json(None) is False
+    assert is_json('application/json') is True
+    assert is_json('application/xml') is False
+    assert is_json('application/vnd.api+json') is True
+
+def test_get_mimetype():
+    assert get_mimetype('application/json') == 'application/json'
+    assert get_mimetype('application/json;charset=utf8') == 'application/json'
+    assert get_mimetype(None) is None

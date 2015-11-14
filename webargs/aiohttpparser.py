@@ -32,6 +32,11 @@ from webargs import core
 from webargs.async import AsyncParser
 
 
+def is_json_request(req):
+    content_type = req.content_type
+    return core.is_json(content_type)
+
+
 class HTTPUnprocessableEntity(web.HTTPClientError):
     status_code = 422
 
@@ -60,7 +65,7 @@ class AIOHTTPParser(AsyncParser):
     @asyncio.coroutine
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        if req.has_body:
+        if req.has_body and is_json_request(req):
             json_data = self._cache.get('json')
             if json_data is None:
                 self._cache['json'] = yield from req.json()

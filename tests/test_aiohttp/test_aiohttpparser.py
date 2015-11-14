@@ -29,6 +29,19 @@ def test_parsing_querystring(app, client):
     assert res.status_code == 200
     assert res.json == {'name': 'Joe'}
 
+# regression test for https://github.com/sloria/webargs/issues/80
+def test_parse_missing_required_arg_with_extra_data(app, client):
+    @asyncio.coroutine
+    def parse_required(request):
+        parsed = yield from parser.parse({'name': fields.Field(required=True)}, request)
+        return jsonify(parsed)
+
+    app.router.add_route('POST', '/', parse_required)
+
+    res = client.post('/', {'abc': 123}, expect_errors=True)
+    assert res.status_code == 422
+    assert res.json == {'name': ['Missing data for required field.']}
+
 def test_parsing_form(app, client):
     configure_app(app)
 
