@@ -96,6 +96,14 @@ class TestParseResource:
         res = testapp.put_json(self.url, {'name': 'Fred'})
         assert res.json == {'name': 'Fred'}
 
+    def test_parse_json_with_vendor_media_type(self, testapp):
+        res = testapp.put(
+            self.url,
+            json.dumps({'name': 'Fred'}),
+            content_type='application/vnd.api+json;charset=utf8'
+        )
+        assert res.json == {'name': 'Fred'}
+
     def test_parse_headers(self, testapp):
         res = testapp.get(self.url, headers={'name': 'Fred'})
         assert res.json == {'name': 'Fred'}

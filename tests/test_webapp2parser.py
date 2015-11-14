@@ -65,6 +65,12 @@ def test_parse_json():
         headers={'content-type': 'application/json'})
     assert parser.parse(hello_args, req=request) == expected
 
+def test_parse_json_with_vendor_media_type():
+    expected = {'name': 'Fred'}
+    request = webapp2.Request.blank('/echo', POST=json.dumps(expected),
+        headers={'content-type': 'application/vnd.api+json'})
+    assert parser.parse(hello_args, req=request) == expected
+
 
 def test_parse_json_default():
     request = webapp2.Request.blank('/echo', POST='',

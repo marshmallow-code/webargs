@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import sys
+import json
 
 import pytest
 import mock
@@ -61,6 +62,15 @@ def test_parse_json_data(route, testapp):
     res = testapp.post_json(route, {'name': 'Fred'})
     assert res.json == {'name': 'Fred'}
 
+
+@pytest.mark.parametrize("route", [
+    '/simpleview/',
+    '/simplecbvview/'
+])
+def test_parse_json_data_with_vendor_media_type(route, testapp):
+    res = testapp.post(route, json.dumps({'name': 'Fred'}), content_type='application/vnd.api+json')
+    assert res.request.content_type == 'application/vnd.api+json'  # sanity check
+    assert res.json == {'name': 'Fred'}
 
 @pytest.mark.parametrize("route", [
     '/decoratedview/?name=Fred',

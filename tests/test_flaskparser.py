@@ -65,6 +65,13 @@ def test_parsing_json_with_charset(testapp):
         args = parser.parse(hello_args)
         assert args == {'name': 'Fred'}
 
+def test_parsing_json_with_vendor_media_type(testapp):
+    with testapp.test_request_context('/myendpoint', method='post',
+                                      data=json.dumps({'name': 'Fred'}),
+                                      content_type='application/vnd.api+json;charset=UTF-8'):
+        args = parser.parse(hello_args)
+        assert args == {'name': 'Fred'}
+
 def test_fields_with_location(testapp):
     testargs = {
         'name': fields.Str(location='json'),

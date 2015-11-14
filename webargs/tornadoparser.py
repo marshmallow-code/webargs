@@ -31,7 +31,7 @@ class HTTPError(tornado.web.HTTPError):
 def parse_json_body(req):
     """Return the decoded JSON body from the request."""
     content_type = req.headers.get('Content-Type')
-    if content_type and 'application/json' in req.headers.get('Content-Type'):
+    if content_type and core.is_json(content_type):
         try:
             return core.parse_json(req.body)
         except (TypeError, ValueError):

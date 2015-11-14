@@ -39,13 +39,20 @@ def abort(http_status_code, **kwargs):
         raise err
 
 
+def is_json_request(req):
+    return core.is_json(req.mimetype)
+
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
+        # Pass force in order to handle vendor media types,
+        # e.g. applications/vnd.json+api
+        # this should be unnecessary in Flask 1.0
+        force = is_json_request(req)
         # Fail silently so that the webargs parser can handle the error
-        json_data = req.get_json(silent=True)
+        json_data = req.get_json(force=force, silent=True)
         if json_data:
             return core.get_value(json_data, name, field)
         else:

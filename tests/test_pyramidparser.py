@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 
 import pytest
 from webtest import TestApp
@@ -136,6 +137,15 @@ def test_parsing_form_default(testapp):
 
 def test_parse_json(testapp):
     assert testapp.post_json('/echo', {'name': 'Fred'}).json == {'name': 'Fred'}
+
+def test_parse_json_with_vendor_media_type(testapp):
+    res = testapp.post(
+        '/echo',
+        json.dumps({'name': 'Fred'}),
+        content_type='application/vnd.api+json;charset=utf8'
+    )
+    assert res.request.content_type == 'application/vnd.api+json'  # sanity check
+    assert res.json == {'name': 'Fred'}
 
 def test_parse_json_default(testapp):
     assert testapp.post_json('/echo', {}).json == {'name': 'World'}

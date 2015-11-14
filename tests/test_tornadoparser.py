@@ -132,6 +132,14 @@ class TestJSONArgs(object):
 
         assert result == value
 
+    def test_parsing_request_with_vendor_content_type(self):
+        query = {name: value}
+        field = fields.Field()
+        request = make_json_request(query, content_type='application/vnd.api+json; charset=UTF-8')
+        result = parser.parse_json(request, name, field)
+
+        assert result == value
+
     def test_it_should_get_multiple_values(self):
         query = {name: [value, value]}
         field = fields.List(fields.Field())
@@ -476,11 +484,11 @@ def make_form_request(args):
     )
 
 
-def make_json_request(args):
+def make_json_request(args, content_type='application/json; charset=UTF-8'):
     return make_request(
         body=make_json_body(args),
         headers={
-            'Content-Type': 'application/json; charset=UTF-8'
+            'Content-Type': content_type,
         }
     )
 

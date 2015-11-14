@@ -7,12 +7,15 @@ from webargs import core
 
 HTTP_422 = '422 Unprocessable entity'
 
+def is_json_request(req):
+    content_type = req.get_header('Content-Type')
+    return content_type and core.is_json(content_type)
+
 def parse_json_body(req):
     if req.content_length in (None, 0):
         # Nothing to do
         return {}
-    content_type = req.get_header('Content-Type')
-    if content_type and 'application/json' in content_type:
+    if is_json_request(req):
         body = req.stream.read()
         if body:
             try:
