@@ -1,12 +1,12 @@
 Changelog
 ---------
 
-1.1.1 (unreleased)
+1.1.1 (2015-11-14)
 ******************
 
 Bug fixes:
 
-* aiohttp: Fix bug that raised a ``JSONDecodeError`` raised when parsing non-JSON requests using default ``locations`` (:issue:`80`). Thanks :user:`leonidumanskiy` for reporting.
+* aiohttpparser: Fix bug that raised a ``JSONDecodeError`` raised when parsing non-JSON requests using default ``locations`` (:issue:`80`). Thanks :user:`leonidumanskiy` for reporting.
 * Fix parsing JSON requests that have a vendor media type, e.g. ``application/vnd.api+json``.
 
 1.1.0 (2015-11-08)
