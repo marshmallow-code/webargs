@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.2.0 (unreleased)
+******************
+
+Features:
+
+* Add ``view_args`` request location to ``FlaskParser`` (:issue:`82`). Thanks :user:`oreza` for the suggestion.
+
 1.1.1 (2015-11-14)
 ******************
 

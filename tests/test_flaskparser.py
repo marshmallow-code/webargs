@@ -58,6 +58,27 @@ def test_parsing_json_in_request_context(testapp):
         args = parser.parse(hello_args)
         assert args['name'] == 'Fred'
 
+def test_parsing_view_args(testapp):
+    @testapp.route('/view_args/<view_arg>/')
+    def echo_view_args(**kwargs):
+        return ''
+
+    with testapp.test_request_context('/view_args/42/', method='get'):
+        args = parser.parse({'view_arg': fields.Int()}, locations=('view_args', ))
+        assert args['view_arg'] == 42
+
+@mock.patch('webargs.flaskparser.abort')
+def test_parsing_view_invalid_view_args(mock_abort, testapp):
+    @testapp.route('/view_args/<view_arg>/')
+    def echo_view_args(**kwargs):
+        return ''
+    with testapp.test_request_context('/view_args/foo/', method='get'):
+        parser.parse({'view_arg': fields.Int()}, locations=('view_args', ))
+
+    mock_abort.assert_called_once()
+    abort_args, abort_kwargs = mock_abort.call_args
+    assert abort_kwargs['messages']['view_arg'] == ['Not a valid integer.']
+
 def test_parsing_json_with_charset(testapp):
     with testapp.test_request_context('/myendpoint', method='post',
                                       data=json.dumps({'name': 'Fred'}),
@@ -183,6 +204,14 @@ def test_use_args_decorator(testapp):
     res = test_client.post('/foo/', data={'myvalue': 23})
     assert json.loads(res.data.decode('utf-8')) == {'myvalue': 23}
 
+def test_use_args_decorator_with_view_args_parsing(testapp):
+    @testapp.route('/view_args/<value>/', methods=['post', 'get'])
+    @parser.use_args({'value': fields.Int(location='view_args')})
+    def echo(args, **kwargs):
+        return jsonify(args)
+    test_client = testapp.test_client()
+    res = test_client.post('/view_args/42/')
+    assert json.loads(res.data.decode('utf-8')) == {'value': 42}
 
 def test_use_args_with_validate_parameter(testapp):
     @testapp.route('/foo/', methods=['post', 'get'])
