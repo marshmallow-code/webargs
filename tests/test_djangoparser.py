@@ -11,10 +11,12 @@ from webtest import TestApp
 from webargs.djangoparser import DjangoParser
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
-if not PY26:
+PY33 = sys.version_info[0] == 3 and int(sys.version_info[1]) < 4
+if not PY26 and not PY33:
     from tests.testapp.testapp.wsgi import application
 
-pytestmark = pytest.mark.skipif(PY26, reason='Django is not compatible with python 2.6')
+pytestmark = pytest.mark.skipif(PY26 or PY33,
+                                reason='Django is not compatible with python 2.6 or 3.3')
 
 @pytest.fixture
 def testapp():
