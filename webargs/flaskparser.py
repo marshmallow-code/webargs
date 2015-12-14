@@ -45,6 +45,15 @@ def is_json_request(req):
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
+    __location_map__ = dict(
+        view_args='parse_view_args',
+        **core.Parser.__location_map__
+    )
+
+    def parse_view_args(self, req, name, field):
+        """Pull a value from the request's ``view_args``."""
+        return core.get_value(req.view_args, name, field)
+
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
         # Pass force in order to handle vendor media types,

@@ -51,6 +51,20 @@ Here is an example error handler that returns validation messages to the client 
             'messages': messages,
         }), 422
 
+URL Matches
++++++++++++
+
+The `FlaskParser` supports parsing values from a request's ``view_args``.
+
+.. code-block:: python
+
+    from webargs.flaskparser import use_args
+
+    @app.route('/greeting/<name>/')
+    @use_args({'name': fields.Str(location='view_args')})
+    def greeting(args, **kwargs):
+        return 'Hello {}'.format(args['name'])
+
 
 Django
 ------
