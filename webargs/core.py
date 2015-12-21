@@ -233,9 +233,8 @@ class Parser(object):
         else:
             locations_to_check = self._validated_locations(locations or self.locations)
 
-        key = field.load_from or name
         for location in locations_to_check:
-            value = self._get_value(key, field, req=req, location=location)
+            value = self._get_value(name, field, req=req, location=location)
             # Found the value; validate and return it
             if value is not missing:
                 return value
@@ -246,6 +245,7 @@ class Parser(object):
         argdict = schema.fields
         parsed = {}
         for argname, field_obj in iteritems(argdict):
+            argname = field_obj.load_from or argname
             parsed_value = self.parse_arg(argname, field_obj, req,
                 locations=locations or self.locations)
             parsed[argname] = parsed_value

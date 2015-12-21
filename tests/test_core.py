@@ -351,6 +351,17 @@ def test_parse_with_load_from(web_request):
     assert parsed == {'content_type': 'application/json'}
 
 
+def test_parse_with_load_from_retains_field_name_in_error(web_request):
+    web_request.json = {'Content-Type': 12345}
+
+    parser = MockRequestParser()
+    args = {'content_type': fields.Str(load_from='Content-Type')}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, web_request, locations=('json',))
+    assert 'Content-Type' in excinfo.value.messages
+    assert excinfo.value.messages['Content-Type'] == ['Not a valid string.']
+
+
 def test_parse_with_force_all(web_request, parser):
     web_request.json = {'foo': 42}
 
