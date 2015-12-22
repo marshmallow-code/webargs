@@ -8,6 +8,10 @@ Features:
 
 * Add ``view_args`` request location to ``FlaskParser`` (:issue:`82`). Thanks :user:`oreza` for the suggestion.
 
+Bug fixes:
+
+* Use the value of ``load_from`` as the key for error messages when it is provided (:issue:`83`). Thanks :user:`immerrr` for the catch and patch.
+
 1.1.1 (2015-11-14)
 ******************
 
