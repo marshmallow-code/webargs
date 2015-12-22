@@ -22,3 +22,4 @@ Contributors (chronological)
 * @marcellarius <https://github.com/marcellarius>
 * Damian Heard <https://github.com/DamianHeard>
 * Daniel Imhoff <https://github.com/dwieeb>
+* immerrr <https://github.com/immerrr>
