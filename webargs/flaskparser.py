@@ -62,10 +62,9 @@ class FlaskParser(core.Parser):
         force = is_json_request(req)
         # Fail silently so that the webargs parser can handle the error
         json_data = req.get_json(force=force, silent=True)
-        if json_data:
-            return core.get_value(json_data, name, field)
-        else:
+        if json_data is None:
             return core.missing
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""

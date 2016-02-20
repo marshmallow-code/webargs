@@ -56,8 +56,7 @@ class PyramidParser(core.Parser):
             json_data = req.json_body
         except ValueError:
             return core.missing
-
-        return core.get_value(json_data, name, field)
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""

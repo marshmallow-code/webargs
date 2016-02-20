@@ -14,10 +14,10 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-from marshmallow.compat import basestring
 import tornado.web
 from tornado.escape import _unicode
 
+from marshmallow.compat import basestring
 from webargs import core
 
 
@@ -77,10 +77,12 @@ class TornadoParser(core.Parser):
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        json_body = self._cache.get('json')
-        if json_body is None:
-            self._cache['json'] = parse_json_body(req)
-        return get_value(self._cache['json'], name, field)
+        json_data = self._cache.get('json')
+        if json_data is None:
+            self._cache['json'] = json_data = parse_json_body(req)
+            if json_data is None:
+                return core.missing
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""

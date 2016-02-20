@@ -65,13 +65,12 @@ class AIOHTTPParser(AsyncParser):
     @asyncio.coroutine
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        if req.has_body and is_json_request(req):
-            json_data = self._cache.get('json')
-            if json_data is None:
-                self._cache['json'] = yield from req.json()
-            return core.get_value(self._cache['json'], name, field)
-        else:
+        if not (req.has_body and is_json_request(req)):
             return core.missing
+        json_data = self._cache.get('json')
+        if json_data is None:
+            self._cache['json'] = json_data = yield from req.json()
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""

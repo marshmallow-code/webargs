@@ -45,11 +45,10 @@ class DjangoParser(core.Parser):
     def parse_json(self, req, name, field):
         """Pull a json value from the request body."""
         try:
-            reqdata = json.loads(req.body.decode('utf-8'))
-            return core.get_value(reqdata, name, field)
+            json_data = json.loads(req.body.decode('utf-8'))
         except (AttributeError, ValueError):
-            pass
-        return core.missing
+            return core.missing
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_cookies(self, req, name, field):
         """Pull the value from the cookiejar."""
