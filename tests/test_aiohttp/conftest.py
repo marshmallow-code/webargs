@@ -17,7 +17,4 @@ def app(loop):
 
 @pytest.fixture()
 def client(app, monkeypatch):
-    client_ = TestApp(app)
-    monkeypatch.setattr(aiohttp.parsers.StreamWriter, 'set_tcp_cork', lambda s, v: True)
-    monkeypatch.setattr(aiohttp.parsers.StreamWriter, 'set_tcp_nodelay', lambda s, v: True)
-    return client_
+    return TestApp(app)

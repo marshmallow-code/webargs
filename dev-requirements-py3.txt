@@ -1,3 +1,3 @@
 -r dev-requirements.txt
-aiohttp>=0.17.4
-webtest-aiohttp
+aiohttp>=0.21.0
+webtest-aiohttp>=1.1.0
