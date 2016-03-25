@@ -23,3 +23,4 @@ Contributors (chronological)
 * Damian Heard <https://github.com/DamianHeard>
 * Daniel Imhoff <https://github.com/dwieeb>
 * immerrr <https://github.com/immerrr>
+* Brett Higgins <https://github.com/brettdh>

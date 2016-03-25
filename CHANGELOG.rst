@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.2.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix JSON parsing in Flask<=0.9.0. Thanks :user:`brettdh` for the PR.
+
 1.2.0 (2016-01-04)
 ******************
 
