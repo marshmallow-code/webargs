@@ -42,6 +42,7 @@ def abort(http_status_code, **kwargs):
 def is_json_request(req):
     return core.is_json(req.mimetype)
 
+
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
@@ -61,7 +62,13 @@ class FlaskParser(core.Parser):
         # this should be unnecessary in Flask 1.0
         force = is_json_request(req)
         # Fail silently so that the webargs parser can handle the error
-        json_data = req.get_json(force=force, silent=True)
+        if hasattr(req, 'get_json'):
+            # Flask >= 0.10.x
+            json_data = req.get_json(force=force, silent=True)
+        else:
+            # Flask <= 0.9.x
+            json_data = req.json
+
         if json_data:
             return core.get_value(json_data, name, field)
         else:
