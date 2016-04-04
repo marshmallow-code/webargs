@@ -1,8 +1,12 @@
 Changelog
 ---------
 
-1.2.1 (unreleased)
+1.3.0 (unreleased)
 ******************
+
+Features:
+
+* Add bulk-type arguments support for JSON parsing by passing ``many=True`` to a ``Schema`` (:issue:`81`). Thanks :user:`frol`.
 
 Bug fixes:
 

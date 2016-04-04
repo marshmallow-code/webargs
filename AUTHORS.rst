@@ -24,3 +24,4 @@ Contributors (chronological)
 * Daniel Imhoff <https://github.com/dwieeb>
 * immerrr <https://github.com/immerrr>
 * Brett Higgins <https://github.com/brettdh>
+* Vlad Frolov <https://github.com/frol>
