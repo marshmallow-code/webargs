@@ -40,9 +40,9 @@ class Webapp2Parser(core.Parser):
         """Pull a json value from the request."""
         try:
             json_data = webapp2_extras.json.decode(req.body)
-            return core.get_value(json_data, name, field)
         except ValueError:
             return core.missing
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""

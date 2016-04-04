@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from bottle import Bottle, debug, request, response
+import json
+from bottle import Bottle, HTTPResponse, debug, request, response
 from webtest import TestApp
 
+import marshmallow as ma
 from webargs import ValidationError, fields
 from webargs.bottleparser import BottleParser
 
@@ -13,6 +15,11 @@ hello_args = {
 hello_multiple = {
     'name': fields.List(fields.Str())
 }
+
+class HelloSchema(ma.Schema):
+    name = fields.Str(missing='World', validate=lambda n: len(n) >= 3)
+
+hello_many_nested = HelloSchema(strict=True, many=True)
 
 parser = BottleParser()
 
@@ -28,6 +35,12 @@ def app():
     @app.route('/echomulti/', method=['GET', 'POST'])
     def multi():
         return parser.parse(hello_multiple, request)
+
+    @app.route('/echomanynested/', method=['GET', 'POST'])
+    def many_nested():
+        arguments = parser.parse(hello_many_nested, request, locations=('json', ))
+        return HTTPResponse(body=json.dumps(arguments), content_type='application/json')
+
     debug(True)
     return app
 
@@ -54,6 +67,28 @@ def test_parse_json(testapp):
 
 def test_parse_json_default(testapp):
     assert testapp.post_json('/echo', {}).json == {'name': 'World'}
+
+def test_parse_json_ignore_extra_data(testapp):
+    assert testapp.post_json('/echo', {'extra': 'data'}).json == {'name': 'World'}
+
+def test_parse_json_blank(testapp):
+    assert testapp.post_json('/echo', None).json == {'name': 'World'}
+
+def test_parse_json_ignore_unexpected_int(testapp):
+    assert testapp.post_json('/echo', 1).json == {'name': 'World'}
+
+def test_parse_json_ignore_unexpected_list(testapp):
+    assert testapp.post_json('/echo', [{'extra': 'data'}]).json == {'name': 'World'}
+
+def test_parse_json_many_nested_invalid_input(testapp):
+    res = testapp.post_json('/echomanynested/', [{'name': 'a'}], expect_errors=True)
+    assert res.status_code == 422
+
+def test_parse_json_many_nested(testapp):
+    assert testapp.post_json('/echomanynested/', [{'extra': 'data'}]).json == [{'name': 'World'}]
+
+def test_parse_json_many_nested_ignore_malformed_data(testapp):
+    assert testapp.post_json('/echomanynested/', {'extra': 'data'}).json == []
 
 def test_parsing_form_default(testapp):
     assert testapp.post('/echo', {}).json == {'name': 'World'}

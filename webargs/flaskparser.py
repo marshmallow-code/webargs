@@ -68,11 +68,9 @@ class FlaskParser(core.Parser):
         else:
             # Flask <= 0.9.x
             json_data = req.json
-
-        if json_data:
-            return core.get_value(json_data, name, field)
-        else:
+        if json_data is None:
             return core.missing
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""

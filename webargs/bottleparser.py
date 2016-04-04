@@ -36,16 +36,15 @@ class BottleParser(core.Parser):
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        json_body = self._cache.get('json')
-        if json_body is None:
+        json_data = self._cache.get('json')
+        if json_data is None:
             try:
-                self._cache['json'] = json_body = req.json
+                self._cache['json'] = json_data = req.json
             except (AttributeError, ValueError):
                 return core.missing
-        if json_body is not None:
-            return core.get_value(req.json, name, field)
-        else:
-            return core.missing
+            if json_data is None:
+                return core.missing
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
         """Pull a value from the header data."""

@@ -53,10 +53,10 @@ class FalconParser(core.Parser):
 
     def parse_json(self, req, name, field):
         """Pull a JSON body value from the request."""
-        json_body = self._cache.get('json')
-        if json_body is None:
-            self._cache['json'] = json_body = parse_json_body(req)
-        return core.get_value(json_body, name, field)
+        json_data = self._cache.get('json_data')
+        if json_data is None:
+            self._cache['json_data'] = json_data = parse_json_body(req)
+        return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
         """Pull a header value from the request."""
