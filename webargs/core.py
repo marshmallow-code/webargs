@@ -45,7 +45,9 @@ class ValidationError(WebargsError, ma.exceptions.ValidationError):
     def __init__(self, message, status_code=DEFAULT_VALIDATION_STATUS, headers=None, **kwargs):
         self.status_code = status_code
         self.headers = headers
-        ma.exceptions.ValidationError.__init__(self, message, **kwargs)
+        ma.exceptions.ValidationError.__init__(
+            self, message, status_code=status_code, headers=headers, **kwargs
+        )
 
     def __repr__(self):
         return 'ValidationError({0!r}, status_code={1}, headers={2})'.format(
@@ -290,11 +292,10 @@ class Parser(object):
             # Raise a webargs error instead
             error = ValidationError(
                 error.messages,
-                status_code=getattr(error, 'status_code', self.DEFAULT_VALIDATION_STATUS),
-                headers=getattr(error, 'headers', {}),
                 field_names=error.field_names,
                 fields=error.fields,
-                data=error.data
+                data=error.data,
+                **getattr(error, 'kwargs', {})
             )
         if self.error_callback:
             self.error_callback(error)

@@ -8,10 +8,13 @@ from flask import Flask, jsonify
 from flask.views import MethodView
 from werkzeug.exceptions import HTTPException
 from werkzeug.datastructures import ImmutableMultiDict
+import marshmallow
 import pytest
 
 from webargs import fields, ValidationError, missing
 from webargs.flaskparser import FlaskParser, use_args, use_kwargs, abort
+
+MARSHMALLOW_VERSION_INFO = marshmallow.__version__.split('.')
 
 class TestAppConfig:
     TESTING = True
@@ -471,3 +474,17 @@ def test_field_validation_error(testapp):
             parser.parse(args, locations=('json', ))
     exc = excinfo.value
     assert exc.code == 422
+
+# Regression test for https://github.com/sloria/webargs/issues/85
+@pytest.mark.skipif(int(MARSHMALLOW_VERSION_INFO[1]) < 7,
+                    reason='status_code only works in marshmallow>=2.7')
+def test_field_validation_error_with_custom_status_code(testapp):
+    def always_fail(value):
+        raise ValidationError('something went wrong', status_code=400)
+    args = {'text': fields.Field(validate=always_fail)}
+    with testapp.test_request_context('/foo', data=json.dumps({'text': 'bar'}),
+            content_type='application/json', method='POST'):
+        with pytest.raises(HTTPException) as excinfo:
+            parser.parse(args, locations=('json', ))
+    exc = excinfo.value
+    assert exc.code == 400
