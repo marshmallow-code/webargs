@@ -97,7 +97,7 @@ Consider the following use cases:
         # Filter based on 'fields' query parameter
         only = request.args.get('fields', None)
         # Respect partial updates for PATCH requests
-        partial = request.method == 'PUT'
+        partial = request.method == 'PATCH'
         # Add current request to the schema's context
         return UserSchema(only=only, partial=partial, context={'request': request})
 
@@ -122,7 +122,7 @@ We can reduce boilerplate and improve [re]usability with a simple helper functio
             # Filter based on 'fields' query parameter
             only = request.args.get('fields', None)
             # Respect partial updates for PATCH requests
-            partial = request.method == 'PUT'
+            partial = request.method == 'PATCH'
             # Add current request to the schema's context
             # and ensure we're always using strict mode
             return schema_cls(
@@ -211,6 +211,46 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
         for k, v in dict_.items():
             structure_dict_pair(r, k, v)
         return r
+
+Bulk-type Arguments
+-------------------
+
+In order to parse a JSON array of objects, pass ``many=True`` to your input ``Schema`` .
+
+For example, you might implement JSON PATCH according to `RFC 6902 <https://tools.ietf.org/html/rfc6902>`_ like so:
+
+
+.. code-block:: python
+
+    from webargs import fields
+    from webargs.flaskparser import use_args
+    from marshmallow import Schema, validate
+
+    class PatchSchema(Schema):
+        op = fields.Str(
+            required=True,
+            validate=validate.OneOf(['add', 'remove', 'replace', 'move', 'copy'])
+        )
+        path = fields.Str(required=True)
+        value = fields.Str(required=True)
+
+        class Meta:
+            strict = True
+
+
+    @app.route('/profile/', methods=['patch'])
+    @use_args(PatchSchema(many=True), locations=('json', ))
+    def patch_blog(args):
+        """Implements JSON Patch for the user profile
+
+        Example JSON body:
+
+        [
+            {"op": "replace", "path": "/email", "value": "mynewemail@test.org"}
+        ]
+        """
+        # ...
+
 
 Next Steps
 ----------

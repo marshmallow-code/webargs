@@ -12,6 +12,11 @@ Bug fixes:
 
 * Fix JSON parsing in Flask<=0.9.0. Thanks :user:`brettdh` for the PR.
 
+
+Support:
+
+* Docs: Add "Custom Fields" section with example of using a ``Function`` field (:issue:`94`). Thanks :user:`brettdh` for the suggestion.
+
 1.2.0 (2016-01-04)
 ******************
 
