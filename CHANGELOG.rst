@@ -11,6 +11,7 @@ Features:
 Bug fixes:
 
 * Fix JSON parsing in Flask<=0.9.0. Thanks :user:`brettdh` for the PR.
+* Fix behavior of ``status_code`` argument to ``ValidationError`` (:issue:`85`). This requires **marshmallow>=2.7.0**. Thanks :user:`ParthGandhi` for reporting.
 
 
 Support:

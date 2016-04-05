@@ -109,6 +109,18 @@ def test_validator_that_raises_validation_error(app):
     res = vtestapp.post_json('/validated', {'text': 'bar'}, expect_errors=True)
     assert res.status_code == 422
 
+def test_validator_that_raises_validation_error_with_status_code(app):
+    def always_fail(value):
+        raise ValidationError('something went wrong', status_code=400)
+    args = {'text': fields.Str(validate=always_fail)}
+
+    @app.route('/validated', method=['POST'])
+    def validated_route():
+        parser.parse(args)
+    vtestapp = TestApp(app)
+    res = vtestapp.post_json('/validated', {'text': 'bar'}, expect_errors=True)
+    assert res.status_code == 400
+
 def test_use_args_decorator(app, testapp):
     @app.route('/foo/', method=['GET', 'POST'])
     @parser.use_args({'myvalue': fields.Int()})

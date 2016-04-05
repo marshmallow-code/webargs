@@ -79,7 +79,7 @@ class PyramidParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        status_code = getattr(error, 'status_code', 400)
+        status_code = getattr(error, 'status_code', 422)
         raise exception_response(status_code, detail=text_type(error))
 
     def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,

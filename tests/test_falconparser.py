@@ -5,7 +5,7 @@ import pytest
 import falcon
 import webtest
 
-from webargs import fields
+from webargs import fields, ValidationError
 from webargs.falconparser import parser, use_args, use_kwargs
 
 def use_args_hook(args, context_key='args', **kwargs):
@@ -61,6 +61,15 @@ def api():
         def on_get(self, req, resp):
             parser.parse(self.args, req=req)
 
+    def fail_with_400(value):
+        raise ValidationError('something went wrong', status_code=400)
+
+    class AlwaysErrorWith400Resource(object):
+        args = {'bad': fields.Field(validate=fail_with_400)}
+
+        def on_get(self, req, resp):
+            parser.parse(self.args, req=req)
+
     @falcon.before(use_args_hook(hello_args))
     class HookResource(object):
 
@@ -72,6 +81,7 @@ def api():
     api_.add_route('/use_args_with_param/{_id}', UseArgsWithParamResource())
     api_.add_route('/use_kwargs', UseKwargsResource())
     api_.add_route('/hook', UseKwargsResource())
+    api_.add_route('/error400', AlwaysErrorWith400Resource())
     api_.add_route('/error', AlwaysErrorResource())
 
     return api_
@@ -122,6 +132,13 @@ class TestErrorHandler:
         assert 'errors' in res.json
         assert 'bad' in res.json['errors']
         assert res.json['errors']['bad'] == ['Invalid value.']
+
+class TestErrorHandlerWithStatusCode:
+    url = '/error400'
+
+    def test_error_handler_returns_400_response(self, testapp):
+        res = testapp.get(self.url + '?bad=42', expect_errors=True)
+        assert res.status_code == 400
 
 class TestUseArgsResource:
     url = '/use_args'

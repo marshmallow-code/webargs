@@ -6,7 +6,7 @@ from webtest import TestApp
 from marshmallow import Schema, post_load
 from pyramid.config import Configurator
 
-from webargs import fields
+from webargs import fields, ValidationError
 from webargs.pyramidparser import PyramidParser
 
 parser = PyramidParser()
@@ -59,6 +59,18 @@ def testapp():
         args = parser.parse(hello_args, request, locations=('headers',))
         return args
 
+    def error(request):
+        def always_fail(val):
+            raise ValidationError('something went wrong')
+        args = parser.parse({'text': fields.Field(validate=always_fail)}, request)
+        return args
+
+    def error400(request):
+        def always_fail(val):
+            raise ValidationError('something went wrong', status_code=400)
+        args = parser.parse({'text': fields.Field(validate=always_fail)}, request)
+        return args
+
     @parser.use_args({'myfile': fields.List(fields.Field())}, locations=('files',))
     def echofile(request, args):
         _value = lambda f: f.getvalue().decode('utf-8')
@@ -101,6 +113,8 @@ def testapp():
     config.add_route('baz', '/baz')
     config.add_route('matched', '/matched/{mymatch:\d+}')
     config.add_route('constructor', '/constructor')
+    config.add_route('error', '/error')
+    config.add_route('error400', '/error400')
 
     config.add_view(echo, route_name='echo', renderer='json')
     config.add_view(echomulti, route_name='echomulti', renderer='json')
@@ -113,6 +127,8 @@ def testapp():
     config.add_view(baz, route_name='baz', renderer='json')
     config.add_view(matched, route_name='matched', renderer='json')
     config.add_view(constructor, route_name='constructor', renderer='json')
+    config.add_view(error, route_name='error', renderer='json')
+    config.add_view(error400, route_name='error400', renderer='json')
 
     app = config.make_wsgi_app()
 
@@ -184,7 +200,14 @@ def test_parse_matchdict(testapp):
     res = testapp.get('/matched/1')
     assert res.json == {'mymatch': 1}
 
-
 def test_use_args_callable(testapp):
     res = testapp.post('/constructor', {'name': 'Jean-Luc Picard'})
     assert res.json == {'name': 'Jean-Luc Picard', 'url': 'http://localhost/constructor'}
+
+def test_error_handler_returns_422_default(testapp):
+    res = testapp.get('/error?text=foo', expect_errors=True)
+    assert res.status_code == 422
+
+def test_error_handler_respects_custom_status_code(testapp):
+    res = testapp.get('/error400?text=foo', expect_errors=True)
+    assert res.status_code == 400

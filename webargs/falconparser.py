@@ -5,7 +5,20 @@ import falcon
 
 from webargs import core
 
-HTTP_422 = '422 Unprocessable entity'
+HTTP_422 = '422 Unprocessable Entity'
+
+# Mapping of int status codes to string status
+status_map = {
+    422: HTTP_422,
+}
+# Collect all exceptions from falcon.status_codes
+def _find_exceptions():
+    for name in filter(lambda n: n.startswith('HTTP'), dir(falcon.status_codes)):
+        status = getattr(falcon.status_codes, name)
+        status_code = int(status.split(' ')[0])
+        status_map[status_code] = status
+_find_exceptions()
+del _find_exceptions
 
 def is_json_request(req):
     content_type = req.get_header('Content-Type')
@@ -84,7 +97,10 @@ class FalconParser(core.Parser):
 
     def handle_error(self, error):
         """Handles errors during parsing."""
-        raise HTTPError(HTTP_422, errors=error.messages)
+        status = status_map.get(error.status_code)
+        if status is None:
+            raise LookupError('Status code {0} not supported'.format(error.status_code))
+        raise HTTPError(status, errors=error.messages)
 
 parser = FalconParser()
 use_args = parser.use_args

@@ -4,6 +4,7 @@ from marshmallow import Schema
 
 import asyncio
 
+from webargs import ValidationError
 from webargs.aiohttpparser import parser, use_args, use_kwargs
 from tests.test_aiohttp.utils import jsonify
 
@@ -206,6 +207,22 @@ def test_handling_error(app, client):
     assert res.status_code == 422
     assert 'name' in res.json
     assert res.json['name'] == ['Missing data for required field.']
+
+def test_handling_user_validation_error_with_status_code(app, client):
+    def always_fail(value):
+        raise ValidationError('something went wrong', status_code=400)
+    args = {'text': fields.Str(validate=always_fail)}
+
+    @asyncio.coroutine
+    def validated(request):
+        parsed = yield from parser.parse(args, request)
+        return jsonify(parsed)
+
+    app.router.add_route('GET', '/', validated)
+
+    res = client.get('/?text=foo', expect_errors=True)
+    assert res.json == {'text': ['something went wrong']}
+    assert res.status_code == 400
 
 def test_use_args_with_variable_routes(app, client):
 
