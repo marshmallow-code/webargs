@@ -103,6 +103,18 @@ def test_parse_required_arg_raises_validation_error(parser, web_request):
         parser.parse(args, web_request)
     assert 'Missing data for required field.' in str(excinfo)
 
+def test_arg_not_required_excluded_in_parsed_output(parser, web_request):
+    web_request.json = {'first': 'Steve'}
+    args = {'first': fields.Str(), 'last': fields.Str()}
+    result = parser.parse(args, web_request)
+    assert result == {'first': 'Steve'}
+
+def test_arg_allow_none(parser, web_request):
+    web_request.json = {'first': 'Steve', 'last': None}
+    args = {'first': fields.Str(), 'last': fields.Str(allow_none=True)}
+    result = parser.parse(args, web_request)
+    assert result == {'first': 'Steve', 'last': None}
+
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse_required_arg(parse_json, web_request):
     arg = fields.Field(required=True)
@@ -145,6 +157,17 @@ def test_default_can_be_none(parser, web_request):
     result = parser.parse(args, web_request, locations=('json', ))
     assert result['val'] is None
 
+# Regression test for issue #11
+def test_arg_with_default_and_location(parser, web_request):
+    web_request.json = {}
+    args = {
+        'p': fields.Int(
+            missing=1,
+            validate=lambda p: p > 0,
+            error=u"La page demandée n'existe pas",
+            location='querystring'),
+    }
+    assert parser.parse(args, web_request) == {'p': 1}
 
 def test_value_error_raised_if_parse_arg_called_with_invalid_location(web_request):
     field = fields.Field()
@@ -455,6 +478,39 @@ def test_use_args(web_request, parser):
     assert viewfunc() == {'username': 'foo', 'password': 'bar'}
 
 
+def test_use_args_doesnt_change_docstring(parser):
+    @parser.use_args({'val': fields.Int()})
+    def viewfunc(args):
+        """View docstring"""
+        pass
+    assert viewfunc.__doc__ == 'View docstring'
+
+def test_use_kwargs_doesnt_change_docstring(parser):
+    @parser.use_kwargs({'val': fields.Int()})
+    def viewfunc(val):
+        """View docstring"""
+        pass
+    assert viewfunc.__doc__ == 'View docstring'
+
+def test_list_allowed_missing(web_request, parser):
+    args = {'name': fields.List(fields.Str())}
+    web_request.json = {'fakedata': True}
+    result = parser.parse(args, web_request)
+    assert result == {}
+
+def test_int_list_allowed_missing(web_request, parser):
+    args = {'name': fields.List(fields.Int())}
+    web_request.json = {'fakedata': True}
+    result = parser.parse(args, web_request)
+    assert result == {}
+
+def test_multiple_arg_required_with_int_conversion(web_request, parser):
+    args = {'ids': fields.List(fields.Int(), required=True)}
+    web_request.json = {'fakedata': True}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, web_request)
+    assert excinfo.value.messages == {'ids': ['Missing data for required field.']}
+
 def test_parse_with_callable(web_request, parser):
 
     web_request.json = {'foo': 42}
@@ -519,6 +575,30 @@ class TestPassingSchema:
         @parser.use_args(self.UserSchema(strict=True), web_request)
         def viewfunc(args):
             return args
+        assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
+
+    def test_passing_schema_factory_to_parse(self, parser, web_request):
+        web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
+
+        def factory(req):
+            assert req is web_request
+            return self.UserSchema(context={'request': req}, strict=True)
+
+        result = parser.parse(factory, web_request)
+
+        assert result == {'email': 'foo@bar.com', 'password': 'bar'}
+
+    def test_use_args_can_be_passed_a_schema_factory(self, web_request, parser):
+        web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
+
+        def factory(req):
+            assert req is web_request
+            return self.UserSchema(context={'request': req}, strict=True)
+
+        @parser.use_args(factory, web_request)
+        def viewfunc(args):
+            return args
+
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
 
     def test_use_kwargs_can_be_passed_a_schema(self, web_request, parser):
