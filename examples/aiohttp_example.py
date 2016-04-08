@@ -14,18 +14,11 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 """
 import asyncio
 import datetime as dt
-import json
 
 from aiohttp import web
+from aiohttp.web import json_response
 from webargs import fields, validate
 from webargs.aiohttpparser import use_args, use_kwargs
-
-def jsonify(data, **kwargs):
-    kwargs.setdefault('content_type', 'application/json')
-    return web.Response(
-        body=json.dumps(data).encode('utf-8'),
-        **kwargs
-    )
 
 hello_args = {
     'name': fields.Str(missing='Friend')
@@ -35,7 +28,7 @@ hello_args = {
 def index(request, args):
     """A welcome page.
     """
-    return jsonify({'message': 'Welcome, {}!'.format(args['name'])})
+    return json_response({'message': 'Welcome, {}!'.format(args['name'])})
 
 add_args = {
     'x': fields.Float(required=True),
@@ -45,7 +38,7 @@ add_args = {
 @use_kwargs(add_args)
 def add(request, x, y):
     """An addition endpoint."""
-    return jsonify({'result': x + y})
+    return json_response({'result': x + y})
 
 dateadd_args = {
     'value': fields.DateTime(required=False),
@@ -62,7 +55,7 @@ def dateadd(request, value, addend, unit):
     else:
         delta = dt.timedelta(days=addend)
     result = value + delta
-    return jsonify({'result': result.isoformat()})
+    return json_response({'result': result.isoformat()})
 
 
 def create_app():
