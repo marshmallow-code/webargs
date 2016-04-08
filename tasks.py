@@ -16,7 +16,7 @@ def test(coverage=False, browse=False):
     if coverage:
         args.extend(['--cov=webargs', '--cov-report=term', '--cov-report=html'])
 
-    if sys.version_info < (3, 4, 1):
+    if sys.version_info[0] < 3:
         args.append('--ignore={0}'.format(os.path.join('tests', 'test_aiohttpparser.py')))
     retcode = pytest.main(args)
     if coverage and browse:
@@ -27,7 +27,7 @@ def test(coverage=False, browse=False):
 def flake():
     """Run flake8 on codebase."""
     cmd = 'flake8 .'
-    if sys.version_info < (3, 4, 1):
+    if sys.version_info[0] < 3:
         excludes = [
             os.path.join('tests', 'apps', 'aiohttp_app.py'),
             os.path.join('tests', 'test_aiohttparser.py'),

@@ -83,6 +83,14 @@ def error400(request):
     return json_response(parsed)
 
 @asyncio.coroutine
+def error_invalid(request):
+    def always_fail(value):
+        raise ValidationError('something went wrong', status_code=12345)
+    args = {'text': fields.Str(validate=always_fail)}
+    parsed = yield from parser.parse(args, request)
+    return json_response(parsed)
+
+@asyncio.coroutine
 def echo_headers(request):
     parsed = yield from parser.parse(hello_args, request, locations=('headers', ))
     return json_response(parsed)
@@ -145,6 +153,7 @@ def create_app():
               echo_use_kwargs_with_path_param)
     add_route(app, ['GET', 'POST'], '/error', always_error)
     add_route(app, ['GET', 'POST'], '/error400', error400)
+    add_route(app, ['GET'], '/error_invalid', error_invalid)
     add_route(app, ['GET'], '/echo_headers', echo_headers)
     add_route(app, ['GET'], '/echo_cookie', echo_cookie)
     add_route(app, ['POST'], '/echo_nested', echo_nested)
