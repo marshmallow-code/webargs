@@ -22,16 +22,22 @@ from webargs.core import Parser, get_value, argmap2schema, is_json, get_mimetype
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
-    def parse_json(self, web_request, name, arg):
-        return get_value(web_request.json, name, arg)
+    def parse_querystring(self, req, name, field):
+        return get_value(req.query, name, field)
 
-    def parse_cookies(self, web_request, name, arg):
-        return get_value(web_request.cookies, name, arg)
+    def parse_json(self, req, name, field):
+        return get_value(req.json, name, field)
+
+    def parse_cookies(self, req, name, field):
+        return get_value(req.cookies, name, field)
 
 
-@pytest.fixture
+@pytest.yield_fixture(scope='function')
 def web_request():
-    return mock.Mock()
+    req = mock.Mock()
+    req.query = {}
+    yield req
+    req.query = {}
 
 @pytest.fixture
 def parser():
@@ -476,6 +482,51 @@ def test_use_args(web_request, parser):
     def viewfunc(args):
         return args
     assert viewfunc() == {'username': 'foo', 'password': 'bar'}
+
+
+def test_use_args_stacked(web_request, parser):
+    query_args = {
+        'page': fields.Int()
+    }
+    json_args = {
+        'username': fields.Str(),
+    }
+    web_request.json = {'username': 'foo'}
+    web_request.query = {'page': 42}
+
+    @parser.use_args(query_args, web_request, locations=('query', ))
+    @parser.use_args(json_args, web_request, locations=('json', ))
+    def viewfunc(query_parsed, json_parsed):
+        return {
+            'json': json_parsed,
+            'query': query_parsed
+        }
+    assert viewfunc() == {
+        'json': {'username': 'foo'},
+        'query': {'page': 42}
+    }
+
+def test_use_kwargs_stacked(web_request, parser):
+    query_args = {
+        'page': fields.Int(error_messages={'invalid': '{input} not a valid integer'})
+    }
+    json_args = {
+        'username': fields.Str(),
+    }
+    web_request.json = {'username': 'foo'}
+    web_request.query = {'page': 42}
+
+    @parser.use_kwargs(query_args, web_request, locations=('query', ))
+    @parser.use_kwargs(json_args, web_request, locations=('json', ))
+    def viewfunc(page, username):
+        return {
+            'json': {'username': username},
+            'query': {'page': page}
+        }
+    assert viewfunc() == {
+        'json': {'username': 'foo'},
+        'query': {'page': 42}
+    }
 
 
 def test_use_args_doesnt_change_docstring(parser):
