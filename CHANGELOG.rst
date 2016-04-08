@@ -11,6 +11,7 @@ Bug fixes:
 Support:
 
 * Massive refactor of tests (:issue:`98`).
+* Docs: Fix incorrect use_args example in Tornado section (:issue:`100`). Thanks :user:`frankslaughter` for reporting.
 
 1.3.0 (2016-04-05)
 ******************

@@ -181,7 +181,7 @@ The :class:`webargs.tornadoparser.TornadoParser` parses arguments from a :class:
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` decorator, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self``.
+When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` decorator, the decorated method will have the dictionary of parsed arguments passed as a positional argument after ``self`` and any regex match groups from the URL spec.
 
 
 .. code-block:: python
@@ -192,7 +192,7 @@ When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` d
     class HelloHandler(tornado.web.RequestHandler):
 
         @use_args({'name': fields.Str()})
-        def post(self, reqargs, id):
+        def post(self, id, reqargs):
             response = {
                 'message': 'Hello {}'.format(reqargs['name'])
             }
