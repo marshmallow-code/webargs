@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+1.3.1 (unreleased)
+******************
+
+Bug fixes:
+
+* aiohttpparser: Fix bug in handling bulk-type arguments.
+
+Support:
+
+* Massive refactor of tests (:issue:`98`).
+
 1.3.0 (2016-04-05)
 ******************
 

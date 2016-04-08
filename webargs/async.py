@@ -17,12 +17,24 @@ class AsyncParser(core.Parser):
 
     @asyncio.coroutine
     def _parse_request(self, schema, req, locations):
-        argdict = schema.fields
-        parsed = {}
-        for argname, field_obj in iteritems(argdict):
-            parsed_value = yield from self.parse_arg(argname, field_obj, req,
-                locations=locations or self.locations)
-            parsed[argname] = parsed_value
+        if schema.many:
+            assert 'json' in locations, "schema.many=True is only supported for JSON location"
+            # The ad hoc Nested field is more like a workaround or a helper, and it servers its
+            # purpose fine. However, if somebody has a desire to re-design the support of
+            # bulk-type arguments, go ahead.
+            parsed = yield from self.parse_arg(
+                name='json',
+                field=ma.fields.Nested(schema, many=True),
+                req=req,
+                locations=locations
+            )
+        else:
+            argdict = schema.fields
+            parsed = {}
+            for argname, field_obj in iteritems(argdict):
+                argname = field_obj.load_from or argname
+                parsed_value = yield from self.parse_arg(argname, field_obj, req, locations)
+                parsed[argname] = parsed_value
         return parsed
 
     # TODO: Lots of duplication from core.Parser here. Rethink.
