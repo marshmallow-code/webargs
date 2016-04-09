@@ -131,14 +131,14 @@ The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Pa
 
     from webargs import fields, ValidationError
 
-    args = {
+    argmap = {
         'name': fields.Str(required=True)
     }
     def index(request):
         try:
-            args = parser.parse(required_args, request)
+            args = parser.parse(argmap, request)
         except ValidationError as err:
-            return JsonResponse({'messages': err.messages}, status=422)
+            return JsonResponse(err.messages, status=err.status_code)
         return JsonResponse({'message': 'Hello {name}'.format(name=name)})
 
 Tornado

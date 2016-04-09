@@ -29,6 +29,9 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
         # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
         'nickname': fields.List(fields.Str()),
 
+        # Delimited list, e.g. "/?languages=python,javascript"
+        'languages': fields.DelimitedList(fields.Str())
+
         # When you know where an argument should be parsed from
         'active': fields.Bool(location='query')
 
@@ -135,13 +138,28 @@ The validator may return either a `boolean` or raise a :exc:`ValidationError <we
             # Optionally pass a status_code
             raise ValidationError('User does not exist')
 
-    args = {
+    argmap = {
         'id': fields.Int(validate=must_exist_in_db)
     }
 
 .. note::
 
     You may also pass a list of validators to the ``validate`` parameter.
+
+.. note::
+
+    You may pass an HTTP status code to `ValidationError <webargs.core.ValidationError>`.
+
+    .. code-block:: python
+    
+        def must_exist_in_db(val):
+            if not User.query.get(val):
+                # Optionally pass a status_code
+                raise ValidationError('User does not exist', status_code=404)
+
+        argmap = {
+            'id': fields.Int(validate=must_exist_in_db)
+        }
 
 The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse <webargs.core.Parser.parse>`, :meth:`Parser.use_args <webargs.core.Parser.use_args>`, :meth:`Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
 
@@ -151,13 +169,13 @@ The full arguments dictionary can also be validated by passing ``validate`` to :
     from webargs import fields
     from webargs.flaskparser import parser
 
-    args = {
+    argmap = {
         'age': fields.Int(),
         'years_employed': fields.Int(),
     }
 
     # ...
-    result = parser.parse(args,
+    result = parser.parse(argmap,
                           validate=lambda args: args['years_employed'] < args['age'])
 
 

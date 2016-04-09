@@ -2,7 +2,7 @@
 """Field classes.
 
 Includes all fields from `marshmallow.fields` in addition to a custom
-`Nested` field.
+`Nested` field and `DelimitedList`.
 
 All fields can optionally take a special `location` keyword argument, which tells webargs
 where to parse the request argument from. ::
