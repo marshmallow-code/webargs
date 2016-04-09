@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import itertools
 import mock
 import sys
 
 import pytest
-from marshmallow import Schema, post_load
+import marshmallow
+from marshmallow import Schema, post_load, class_registry
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -18,6 +20,7 @@ from webargs import (
 )
 from webargs.core import Parser, get_value, argmap2schema, is_json, get_mimetype
 
+MARSHMALLOW_VERSION_INFO = tuple(map(int, marshmallow.__version__.split('.')))
 
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
@@ -892,6 +895,20 @@ def test_argmap2schema():
     assert schema.fields['id'].required
     assert schema.opts.strict is True
 
+# Regression test for https://github.com/sloria/webargs/issues/101
+@pytest.mark.skipif(MARSHMALLOW_VERSION_INFO < (2, 7, 1),
+                    reason='will only work on marshmallow>=2.7.1')
+def test_argmap2schema_doesnt_add_to_class_registry():
+    old_n_entries = len(
+        list(itertools.chain([classes for _, classes in class_registry._registry.items()]))
+    )
+    argmap = {'id': fields.Field()}
+    argmap2schema(argmap)
+    argmap2schema(argmap)
+    new_n_entries = len(
+        list(itertools.chain([classes for _, classes in class_registry._registry.items()]))
+    )
+    assert new_n_entries == old_n_entries
 
 def test_argmap2schema_with_nesting():
     argmap = {

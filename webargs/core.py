@@ -87,7 +87,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
     class Meta(object):
         strict = True
     attrs = dict(argmap, Meta=Meta)
-    cls = type(str('ArgSchema'), (ma.Schema,), attrs)
+    cls = type('', (ma.Schema,), attrs)
     return cls if not instance else cls(**kwargs)
 
 def is_multiple(field):

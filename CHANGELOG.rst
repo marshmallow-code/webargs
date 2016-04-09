@@ -6,6 +6,7 @@ Changelog
 
 Bug fixes:
 
+* Fix memory leak when calling ``parser.parse`` with a ``dict`` in a view (:issue:`101`). Thanks :user:`frankslaughter` for reporting.
 * aiohttpparser: Fix bug in handling bulk-type arguments.
 
 Support:
