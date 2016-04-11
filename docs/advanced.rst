@@ -251,6 +251,59 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
         """
         # ...
 
+Mixed locations
+---------------
+
+Arguments in different locations can be validated by specifying ``location`` for each field separately::
+
+    args = {
+        'page': fields.Int(locations='query')
+        'name': fields.Str(location='json'),
+    }
+    @app.route('/stacked', methods=['POST'])
+    @use_args(query_args)
+    def viewfunc(query_parsed, json_parsed):
+        # ...
+
+To avoid having to define ``location`` for each field separately, you can pass it to ``use_args``::
+
+    args = {
+        'page': fields.Int()
+        'name': fields.Str(),
+    }
+    @app.route('/stacked', methods=['POST'])
+    @use_args(query_args, locations=('query', 'json'))
+    def viewfunc(query_parsed, json_parsed):
+        # ...
+
+However, this would allow ``page`` to exist in request body and ``name`` to exist in query parameters, which is probably not what you wanted.
+
+As a compromise of the two approaches above, it's possible to pass ``use_args`` decorator multiple times::
+
+    query_args = {
+        'page': fields.Int()
+    }
+    json_args = {
+        'name': fields.Str(),
+    }
+    @app.route('/stacked', methods=['POST'])
+    @use_args(query_args, locations=('query', ))
+    @use_args(json_args, locations=('json', ))
+    def viewfunc(query_parsed, json_parsed):
+        # ...
+
+To reduce boilerplate even further, you could define shortcuts::
+
+    import functools
+    query = functools.partial(use_args, locations=('query', ))
+    body = functools.partial(use_args, locations=('json', ))
+
+And use them later as in::
+
+    @query(query_args)
+    @body(json_args)
+    def viewfunc(query_parsed, json_parsed):
+        # ...
 
 Next Steps
 ----------
