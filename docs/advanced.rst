@@ -251,6 +251,67 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
         """
         # ...
 
+Mixing Locations
+----------------
+
+Arguments for different locations can be specified by passing ``location`` to each field individually:
+
+.. code-block:: python
+
+    @app.route('/stacked', methods=['POST'])
+    @use_args({
+        'page': fields.Int(location='query')
+        'q': fields.Str(location='query')
+        'name': fields.Str(location='json'),
+    })
+    def viewfunc(args):
+        # ...
+
+Alternatively, you can pass multiple locations to `use_args <webargs.core.Parser.use_args>`:
+
+.. code-block:: python
+
+    @app.route('/stacked', methods=['POST'])
+    @use_args({
+        'page': fields.Int()
+        'q': fields.Str()
+        'name': fields.Str(),
+    } , locations=('query', 'json'))
+    def viewfunc(args):
+        # ...
+
+However, this allows ``page`` and ``q`` to be passed in the request body and ``name`` to be passed as a query parameter.
+
+To restrict the arguments to single locations without having to pass ``location`` to every field, you can call the `use_args <webargs.core.Parser.use_args>` multiple times:
+
+.. code-block:: python
+
+    query_args = {
+        'page': fields.Int()
+        'q': fields.Int()
+    }
+    json_args = {
+        'name': fields.Str(),
+    }
+    @app.route('/stacked', methods=['POST'])
+    @use_args(query_args, locations=('query', ))
+    @use_args(json_args, locations=('json', ))
+    def viewfunc(query_parsed, json_parsed):
+        # ...
+
+To reduce boilerplate, you could create shortcuts, like so:
+
+.. code-block:: python
+
+    import functools
+
+    query = functools.partial(use_args, locations=('query', ))
+    body = functools.partial(use_args, locations=('json', ))
+
+    @query(query_args)
+    @body(json_args)
+    def viewfunc(query_parsed, json_parsed):
+        # ...
 
 Next Steps
 ----------

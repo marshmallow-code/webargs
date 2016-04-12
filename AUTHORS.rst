@@ -25,3 +25,4 @@ Contributors (chronological)
 * immerrr <https://github.com/immerrr>
 * Brett Higgins <https://github.com/brettdh>
 * Vlad Frolov <https://github.com/frol>
+* Tuukka Mustonen <https://github.com/tuukkamustonen>
