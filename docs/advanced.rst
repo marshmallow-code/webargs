@@ -251,37 +251,44 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
         """
         # ...
 
-Mixed locations
----------------
+Mixing Locations
+----------------
 
-Arguments in different locations can be validated by specifying ``location`` for each field separately::
+Arguments for different locations can be specified by passing ``location`` to each field individually:
 
-    args = {
-        'page': fields.Int(locations='query')
+.. code-block:: python
+
+    @app.route('/stacked', methods=['POST'])
+    @use_args({
+        'page': fields.Int(location='query')
+        'q': fields.Str(location='query')
         'name': fields.Str(location='json'),
-    }
-    @app.route('/stacked', methods=['POST'])
-    @use_args(query_args)
-    def viewfunc(query_parsed, json_parsed):
+    })
+    def viewfunc(args):
         # ...
 
-To avoid having to define ``location`` for each field separately, you can pass it to ``use_args``::
+Alternatively, you can pass multiple locations to `use_args <webargs.core.Parser.use_args>`:
 
-    args = {
+.. code-block:: python
+
+    @app.route('/stacked', methods=['POST'])
+    @use_args({
         'page': fields.Int()
+        'q': fields.Str()
         'name': fields.Str(),
-    }
-    @app.route('/stacked', methods=['POST'])
-    @use_args(query_args, locations=('query', 'json'))
-    def viewfunc(query_parsed, json_parsed):
+    } , locations=('query', 'json'))
+    def viewfunc(args):
         # ...
 
-However, this would allow ``page`` to exist in request body and ``name`` to exist in query parameters, which is probably not what you wanted.
+However, this allows ``page`` and ``q`` to be passed in the request body and ``name`` to be passed as a query parameter.
 
-As a compromise of the two approaches above, it's possible to pass ``use_args`` decorator multiple times::
+To restrict the arguments to single locations without having to pass ``location`` to every field, you can call the `use_args <webargs.core.Parser.use_args>` multiple times:
+
+.. code-block:: python
 
     query_args = {
         'page': fields.Int()
+        'q': fields.Int()
     }
     json_args = {
         'name': fields.Str(),
@@ -292,13 +299,14 @@ As a compromise of the two approaches above, it's possible to pass ``use_args`` 
     def viewfunc(query_parsed, json_parsed):
         # ...
 
-To reduce boilerplate even further, you could define shortcuts::
+To reduce boilerplate, you could create shortcuts, like so:
+
+.. code-block:: python
 
     import functools
+
     query = functools.partial(use_args, locations=('query', ))
     body = functools.partial(use_args, locations=('json', ))
-
-And use them later as in::
 
     @query(query_args)
     @body(json_args)
