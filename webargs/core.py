@@ -357,7 +357,7 @@ class Parser(object):
         finally:
             self.clear_cache()
         if force_all:
-            fill_in_missing_args(ret, argmap)
+            fill_in_missing_args(ret, schema)
         return ret
 
     def clear_cache(self):

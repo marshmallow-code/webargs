@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.3.2 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix passing a schema factory to ``use_kwargs`` (:issue:`103`). Thanks :user:`ksesong` for reporting.
+
 1.3.1 (2016-04-13)
 ******************
 

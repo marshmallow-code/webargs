@@ -664,6 +664,18 @@ class TestPassingSchema:
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
 
+    def test_use_kwargs_can_be_passed_a_schema_factory(self, web_request, parser):
+        web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
+
+        def factory(req):
+            assert req is web_request
+            return self.UserSchema(context={'request': req}, strict=True)
+
+        @parser.use_kwargs(factory, web_request)
+        def viewfunc(email, password):
+            return {'email': email, 'password': password}
+        assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
+
     # Must skip on older versions of python due to
     # https://github.com/pytest-dev/pytest/issues/840
     @pytest.mark.skipif(sys.version_info < (3, 4),
