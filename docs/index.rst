@@ -72,7 +72,7 @@ Why Use It
 * **Self-documentation**. Webargs makes it easy to understand the expected arguments and their types for your view functions.
 * **Automatic documentation**. The metadata that webargs provides can serve as an aid for automatically generating API documentation.
 * **Cross-framework compatibility**. Webargs provides a consistent request-parsing interface that will work across many Python web frameworks.
-* **marshmallow integration**. Webargs uses `marshmallow <https://marshmallow.readthedocs.org/en/latest/>`_ under the hood. When you need more flexibility than dictionaries, you can use marshmallow `Schemas <marshmallow.Schema>` to define your request arguments.
+* **marshmallow integration**. Webargs uses `marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_ under the hood. When you need more flexibility than dictionaries, you can use marshmallow `Schemas <marshmallow.Schema>` to define your request arguments.
 
 Get It Now
 ----------

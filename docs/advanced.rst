@@ -75,7 +75,7 @@ If you need to parametrize a schema based on a given request, you can use a "Sch
 Consider the following use cases:
 
 - Filtering via a query parameter by passing ``only`` to the Schema.
-- Handle partial updates for PATCH requests using marshmallow's `partial loading <https://marshmallow.readthedocs.org/en/latest/quickstart.html#partial-loading>`_ API.
+- Handle partial updates for PATCH requests using marshmallow's `partial loading <https://marshmallow.readthedocs.io/en/latest/quickstart.html#partial-loading>`_ API.
 
 .. code-block:: python
 
@@ -144,7 +144,7 @@ Now we can attach input schemas to our view functions like so:
 Custom Fields
 -------------
 
-See the "Custom Fields" section of the marshmallow docs for a detailed guide on defining custom fields which you can pass to webargs parsers: https://marshmallow.readthedocs.org/en/latest/custom_fields.html.
+See the "Custom Fields" section of the marshmallow docs for a detailed guide on defining custom fields which you can pass to webargs parsers: https://marshmallow.readthedocs.io/en/latest/custom_fields.html.
 
 Using ``Method`` and ``Function`` Fields with webargs
 +++++++++++++++++++++++++++++++++++++++++++++++++++++

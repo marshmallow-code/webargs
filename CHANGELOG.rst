@@ -130,7 +130,7 @@ Bug fixes:
 0.16.0 (2015-09-27)
 *******************
 
-The major change in this release is that webargs now depends on `marshmallow <https://marshmallow.readthedocs.org/en/latest/>`_ for defining arguments and validation.
+The major change in this release is that webargs now depends on `marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_ for defining arguments and validation.
 
 Your code will need to be updated to use ``Fields`` rather than ``Args``.
 

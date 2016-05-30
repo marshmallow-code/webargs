@@ -22,8 +22,8 @@ default_role = 'py:obj'
 issues_github_path = 'sloria/webargs'
 
 intersphinx_mapping = {
-    'python': ('http://python.readthedocs.org/en/latest/', None),
-    'marshmallow': ('http://marshmallow.readthedocs.org/en/latest/', None),
+    'python': ('http://python.readthedocs.io/en/latest/', None),
+    'marshmallow': ('http://marshmallow.readthedocs.io/en/latest/', None),
 }
 
 # The master toctree document.

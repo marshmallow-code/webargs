@@ -1,7 +1,7 @@
 Install
 =======
 
-**webargs** requires Python >= 2.6 or >= 3.3. It depends on `marshmallow <https://marshmallow.readthedocs.org/en/latest/>`_ >= 2.0.
+**webargs** requires Python >= 2.6 or >= 3.3. It depends on `marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_ >= 2.0.
 
 From the PyPI
 -------------
