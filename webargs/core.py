@@ -144,8 +144,10 @@ def get_value(data, name, field, allow_many_nested=False):
             return data.getall(name)
         elif isinstance(val, (list, tuple)):
             return val
-        return [val]
-
+        if val is None:
+            return None
+        else:
+            return [val]
     return val
 
 def parse_json(s):

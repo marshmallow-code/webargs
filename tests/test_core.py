@@ -139,6 +139,19 @@ def test_parse_required_list(parser, web_request):
         parser.parse(args, web_request)
     assert excinfo.value.messages['foo'][0] == 'Missing data for required field.'
 
+# Regression test for https://github.com/sloria/webargs/issues/107
+def test_parse_list_allow_none(parser, web_request):
+    web_request.json = {'foo': None}
+    args = {'foo': fields.List(fields.Field(allow_none=True), allow_none=True)}
+    assert parser.parse(args, web_request) == {'foo': None}
+
+def test_parse_list_dont_allow_none(parser, web_request):
+    web_request.json = {'foo': None}
+    args = {'foo': fields.List(fields.Field(), allow_none=False)}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, web_request)
+    assert excinfo.value.messages['foo'][0] == 'Field may not be null.'
+
 def test_parse_empty_list(parser, web_request):
     web_request.json = {'things': []}
     args = {'things': fields.List(fields.Field())}

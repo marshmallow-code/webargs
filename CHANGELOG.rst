@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.3.3 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix behavior for nullable List fields (:issue:`107`). Thanks :user:`shaicantor` for reporting.
+
 1.3.2 (2016-04-14)
 ******************
 
