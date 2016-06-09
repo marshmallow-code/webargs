@@ -39,7 +39,7 @@ Here is an example error handler that returns validation messages to the client 
     from flask import jsonify
 
     @app.errorhandler(422)
-    def handle_bad_request(err):
+    def handle_unprocessable_entity(err):
         # webargs attaches additional metadata to the `data` attribute
         data = getattr(err, 'data')
         if data:
