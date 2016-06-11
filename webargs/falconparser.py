@@ -4,6 +4,7 @@
 import falcon
 
 from webargs import core
+from falcon.util.uri import parse_query_string
 
 HTTP_422 = '422 Unprocessable Entity'
 
@@ -37,6 +38,29 @@ def parse_json_body(req):
                 pass
     return {}
 
+# NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
+def parse_form_body(req):
+    if (
+        req.content_type is not None and
+        'application/x-www-form-urlencoded' in req.content_type
+    ):
+        body = req.stream.read()
+        try:
+            body = body.decode('ascii')
+        except UnicodeDecodeError:
+            body = None
+            req.log_error('Non-ASCII characters found in form body '
+                            'with Content-Type of '
+                            'application/x-www-form-urlencoded. Body '
+                            'will be ignored.')
+
+        if body:
+            return parse_query_string(
+                body,
+                keep_blank_qs_values=req.options.keep_blank_qs_values,
+            )
+    return {}
+
 class HTTPError(falcon.HTTPError):
     """HTTPError that stores a dictionary of validation error messages.
     """
@@ -61,11 +85,24 @@ class FalconParser(core.Parser):
         return core.get_value(req.params, name, field)
 
     def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return core.get_value(req.params, name, field)
+        """Pull a form value from the request.
+
+        .. note::
+
+            The request stream will be read and left at EOF.
+        """
+        form = self._cache.get('form')
+        if form is None:
+            self._cache['form'] = form = parse_form_body(req)
+        return core.get_value(form, name, field)
 
     def parse_json(self, req, name, field):
-        """Pull a JSON body value from the request."""
+        """Pull a JSON body value from the request.
+
+        .. note::
+
+            The request stream will be read and left at EOF.
+        """
         json_data = self._cache.get('json_data')
         if json_data is None:
             self._cache['json_data'] = json_data = parse_json_body(req)

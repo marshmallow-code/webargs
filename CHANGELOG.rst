@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.3.4 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix bug in parsing form in Falcon>=1.0.
+
 1.3.3 (2016-05-29)
 ******************
 
