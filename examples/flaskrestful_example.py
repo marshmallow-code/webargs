@@ -16,16 +16,16 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 import datetime as dt
 
 from flask import Flask
-from flask.ext import restful
+from flask_restful import Api, Resource
 
 from webargs import fields, validate
-from webargs.flaskparser import use_args, use_kwargs, parser
+from webargs.flaskparser import use_args, use_kwargs, parser, abort
 
 app = Flask(__name__)
-api = restful.Api(app)
+api = Api(app)
 
 
-class IndexResource(restful.Resource):
+class IndexResource(Resource):
     """A welcome page."""
 
     hello_args = {
@@ -37,7 +37,7 @@ class IndexResource(restful.Resource):
         return {'message': 'Welcome, {}!'.format(args['name'])}
 
 
-class AddResource(restful.Resource):
+class AddResource(Resource):
     """An addition endpoint."""
 
     add_args = {
@@ -50,7 +50,7 @@ class AddResource(restful.Resource):
         """An addition endpoint."""
         return {'result': x + y}
 
-class DateAddResource(restful.Resource):
+class DateAddResource(Resource):
 
     dateadd_args = {
         'value': fields.DateTime(required=False),
@@ -75,7 +75,7 @@ def handle_request_parsing_error(err):
     """webargs error handler that uses Flask-RESTful's abort function to return
     a JSON error response to the client.
     """
-    restful.abort(422, errors=err.messages)
+    abort(422, errors=err.messages)
 
 if __name__ == '__main__':
     api.add_resource(IndexResource, '/')
