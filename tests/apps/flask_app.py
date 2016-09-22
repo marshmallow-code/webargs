@@ -150,5 +150,4 @@ def echo_use_kwargs_missing(username, password):
 # Return validation errors as JSON
 @app.errorhandler(422)
 def handle_validation_error(err):
-    exc = err.data['exc']
-    return J({'errors': exc.messages}), 422
+    return J({'errors': err.exc.messages}), 422

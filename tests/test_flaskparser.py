@@ -70,3 +70,19 @@ def test_abort_with_message():
     with pytest.raises(HTTPException) as excinfo:
         abort(400, message='custom error message')
     assert excinfo.value.data['message'] == 'custom error message'
+
+def test_abort_has_serializable_data():
+    with pytest.raises(HTTPException) as excinfo:
+        abort(400, message='custom error message')
+    serialized_error = json.dumps(excinfo.value.data)
+    error = json.loads(serialized_error)
+    assert isinstance(error, dict)
+    assert error['message'] == 'custom error message'
+
+    with pytest.raises(HTTPException) as excinfo:
+        abort(400, message='custom error message',
+            exc=ValidationError('custom error message'))
+    serialized_error = json.dumps(excinfo.value.data)
+    error = json.loads(serialized_error)
+    assert isinstance(error, dict)
+    assert error['message'] == 'custom error message'
