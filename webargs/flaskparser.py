@@ -25,7 +25,7 @@ from werkzeug.exceptions import HTTPException
 from webargs import core
 
 
-def abort(http_status_code, **kwargs):
+def abort(http_status_code, exc=None, **kwargs):
     """Raise a HTTPException for the given http_status_code. Attach any keyword
     arguments to the exception for later processing.
 
@@ -36,6 +36,7 @@ def abort(http_status_code, **kwargs):
     except HTTPException as err:
         if len(kwargs):
             err.data = kwargs
+        err.exc = exc
         raise err
 
 
