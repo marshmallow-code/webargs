@@ -1,6 +1,27 @@
 Changelog
 ---------
 
+1.4.0 (2016-09-29)
+******************
+
+Bug fixes:
+
+* Prevent error when rendering validation errors to JSON in Flask (e.g. when using Flask-RESTful) (:issue:`122`). Thanks :user:`frol` for the catch and patch. NOTE: Though this is a bugfix, this is a potentially breaking change for code that needs to access the original ``ValidationError`` object.
+
+.. code-block:: python
+
+    # Before
+    @app.errorhandler(422)
+    def handle_validation_error(err):
+        return jsonify({'errors': err.messages}), 422
+
+    # After
+    @app.errorhandler(422)
+    def handle_validation_error(err):
+        # The marshmallow.ValidationError is available on err.exc
+        return jsonify({'errors': err.exc.messages}), 422
+
+
 1.3.4 (2016-06-11)
 ******************
 
