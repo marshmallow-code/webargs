@@ -24,4 +24,4 @@ webapp2>=2.5.2
 falcon>=0.3.0
 
 # Syntax checking
-flake8==2.4.1
+flake8==3.0.4
