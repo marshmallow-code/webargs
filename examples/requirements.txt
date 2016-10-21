@@ -1,5 +1,5 @@
 python-dateutil
-Flask
+Flask==0.11.1
 bottle
 tornado
 webapp2
