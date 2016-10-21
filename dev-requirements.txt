@@ -8,7 +8,7 @@ invoke==0.13.0
 pytest>=2.8.0
 tox>=1.5.0
 mock==1.0.1
-webtest
+webtest==2.0.23
 
 # Distribution
 wheel
