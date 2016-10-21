@@ -11,7 +11,7 @@ mock==1.0.1
 webtest
 
 # Distribution
-wheel
+wheel==0.29.0
 twine
 
 # Web frameworks
