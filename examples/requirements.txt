@@ -1,6 +1,6 @@
 python-dateutil
 Flask
 bottle
-tornado
+tornado==4.4.2
 webapp2
 flask-restful
