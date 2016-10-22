@@ -5,10 +5,10 @@ marshmallow
 invoke==0.13.0
 
 # Testing
-pytest>=2.8.0
-tox>=1.5.0
-mock==1.0.1
-webtest
+pytest==3.0.3
+tox==2.4.1
+mock==2.0.0
+webtest==2.0.23
 
 # Distribution
 wheel
@@ -17,7 +17,7 @@ twine
 # Web frameworks
 Flask>=0.10.1
 Django>=1.6.5
-bottle>=0.12.3
+bottle>=0.12.10
 tornado>=4.0
 pyramid>=1.5.2
 webapp2>=2.5.2
