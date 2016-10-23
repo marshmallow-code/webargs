@@ -12,7 +12,7 @@ webtest==2.0.23
 
 # Distribution
 wheel
-twine
+twine==1.8.1
 
 # Web frameworks
 Flask>=0.10.1
