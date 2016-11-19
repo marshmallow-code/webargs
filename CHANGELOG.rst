@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.5.0 (unreleased)
+******************
+
+Features:
+
+* The ``use_args`` and ``use_kwargs`` decorators add a reference to the undecorated function via the ``__wrapped__`` attribute. This is useful for unit-testing purposes (:issue:`144`). Thanks :user:`EFF` for the PR.
+
 1.4.0 (2016-09-29)
 ******************
 
