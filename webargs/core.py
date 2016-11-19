@@ -436,6 +436,7 @@ class Parser(object):
                     # Add parsed_args after other positional arguments
                     new_args = args + (parsed_args, )
                     return func(*new_args, **kwargs)
+            wrapper.__wrapped__ = func
             return wrapper
         return decorator
 
