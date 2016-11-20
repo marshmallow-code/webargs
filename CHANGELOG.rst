@@ -8,6 +8,10 @@ Features:
 
 * The ``use_args`` and ``use_kwargs`` decorators add a reference to the undecorated function via the ``__wrapped__`` attribute. This is useful for unit-testing purposes (:issue:`144`). Thanks :user:`EFF` for the PR.
 
+Bug fixes:
+
+* If ``load_from`` is specified on a field, first check the field name before checking ``load_from`` (:issue:`118`). Thanks :user:`jasonab` for reporting.
+
 1.4.0 (2016-09-29)
 ******************
 

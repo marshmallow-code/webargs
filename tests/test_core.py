@@ -268,7 +268,7 @@ def test_custom_location_handler(web_request):
 
     @parser.location_handler('data')
     def parse_data(req, name, arg):
-        return req.data.get(name)
+        return req.data.get(name, missing)
 
     result = parser.parse({'foo': fields.Int()}, web_request, locations=('data', ))
     assert result['foo'] == 42
@@ -279,8 +279,7 @@ def test_custom_location_handler_with_load_from(web_request):
 
     @parser.location_handler('data')
     def parse_data(req, name, arg):
-        assert name == 'X-Foo'
-        return req.data.get(name)
+        return req.data.get(name, missing)
 
     result = parser.parse({'x_foo': fields.Int(load_from='X-Foo')},
         web_request, locations=('data', ))
@@ -395,6 +394,14 @@ def test_parse_with_load_from(web_request):
     parsed = parser.parse(args, web_request, locations=('json',))
     assert parsed == {'content_type': 'application/json'}
 
+# https://github.com/sloria/webargs/issues/118
+def test_load_from_is_checked_after_given_key(web_request):
+    web_request.json = {'content_type': 'application/json'}
+
+    parser = MockRequestParser()
+    args = {'content_type': fields.Field(load_from='Content-Type')}
+    parsed = parser.parse(args, web_request, locations=('json',))
+    assert parsed == {'content_type': 'application/json'}
 
 def test_parse_with_load_from_retains_field_name_in_error(web_request):
     web_request.json = {'Content-Type': 12345}
