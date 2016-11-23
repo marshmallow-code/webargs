@@ -130,7 +130,6 @@ def get_value(data, name, field, allow_many_nested=False):
     if allow_many_nested and isinstance(field, ma.fields.Nested) and field.many:
         if is_collection(data):
             return data
-        missing_value = []
 
     if not hasattr(data, 'get'):
         return missing_value
@@ -269,6 +268,8 @@ class Parser(object):
                 req=req,
                 locations=locations
             )
+            if parsed is missing:
+                parsed = []
         else:
             argdict = schema.fields
             parsed = {}

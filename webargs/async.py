@@ -5,8 +5,9 @@ import collections
 import inspect
 import functools
 
-from marshmallow.compat import iteritems
 import marshmallow as ma
+from marshmallow.compat import iteritems
+from marshmallow.utils import missing
 
 from webargs import core
 
@@ -28,12 +29,18 @@ class AsyncParser(core.Parser):
                 req=req,
                 locations=locations
             )
+            if parsed is missing:
+                parsed = []
         else:
             argdict = schema.fields
             parsed = {}
             for argname, field_obj in iteritems(argdict):
-                argname = field_obj.load_from or argname
                 parsed_value = yield from self.parse_arg(argname, field_obj, req, locations)
+                # If load_from is specified on the field, try to parse from that key
+                if parsed_value is missing and field_obj.load_from:
+                    parsed_value = yield from self.parse_arg(field_obj.load_from,
+                                                             field_obj, req, locations)
+                    argname = field_obj.load_from
                 parsed[argname] = parsed_value
         return parsed
 
@@ -128,9 +135,8 @@ class AsyncParser(core.Parser):
         else:
             locations_to_check = self._validated_locations(locations or self.locations)
 
-        key = field.load_from or name
         for location in locations_to_check:
-            value = yield from self._get_value(key, field, req=req, location=location)
+            value = yield from self._get_value(name, field, req=req, location=location)
             # Found the value; validate and return it
             if value is not core.missing:
                 return value

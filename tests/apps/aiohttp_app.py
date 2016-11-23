@@ -118,6 +118,14 @@ def echo_nested_many(request):
     return json_response(parsed)
 
 @asyncio.coroutine
+def echo_nested_many_load_from(request):
+    args = {
+        'x_field': fields.Nested({'id': fields.Int()}, load_from='X-Field', many=True)
+    }
+    parsed = yield from parser.parse(args, request)
+    return json_response(parsed)
+
+@asyncio.coroutine
 def echo_match_info(request):
     parsed = yield from parser.parse({'mymatch': fields.Int(location='match_info')}, request)
     return json_response(parsed)
@@ -158,6 +166,7 @@ def create_app():
     add_route(app, ['GET'], '/echo_cookie', echo_cookie)
     add_route(app, ['POST'], '/echo_nested', echo_nested)
     add_route(app, ['POST'], '/echo_nested_many', echo_nested_many)
+    add_route(app, ['POST'], '/echo_nested_many_load_from', echo_nested_many_load_from)
     add_route(app, ['GET'], '/echo_match_info/{mymatch}', echo_match_info)
     add_route(app, ['GET'], '/echo_method', EchoHandler().get)
 

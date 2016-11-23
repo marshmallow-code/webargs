@@ -43,6 +43,18 @@ class TestFlaskParser(CommonTestCase):
         res = testapp.post('/echo_use_kwargs_missing', {'username': 'foo'})
         assert res.json == {'username': 'foo'}
 
+    # regression test for https://github.com/sloria/webargs/issues/145
+    def test_nested_many_with_load_from(self, testapp):
+        res = testapp.post_json('/echo_nested_many_load_from', {'x_field': [{'id': 42}]})
+        assert res.json == {'x_field': [{'id': 42}]}
+
+        res = testapp.post_json('/echo_nested_many_load_from', {'X-Field': [{'id': 24}]})
+        assert res.json == {'x_field': [{'id': 24}]}
+
+        res = testapp.post_json('/echo_nested_many_load_from', {})
+        assert res.json == {}
+
+
 @mock.patch('webargs.flaskparser.abort')
 def test_abort_called_on_validation_error(mock_abort):
     app = Flask('testapp')
