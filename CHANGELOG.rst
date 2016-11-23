@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+1.5.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix handling missing nested args when ``many=True`` (:issue:`120`, :issue:`145`).  Thanks :user:`chavz` and :user:`Bangertm` for reporting.
+* Fix behavior of ``load_from`` in ``AIOHTTPParser``.
+
 1.5.0 (2016-11-22)
 ******************
 
