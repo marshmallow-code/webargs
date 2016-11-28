@@ -37,8 +37,8 @@ def route(*args, response_formatter=jsonify, **kwargs):
 
 
 @route('/', methods=['GET'])
-def index(greeting, name: fields.Str(missing='Friend')):
-    return {'message': 'Hello, {}!'.format(greeting, name)}
+def index(name: fields.Str(missing='Friend')):
+    return {'message': 'Hello, {}!'.format(name)}
 
 
 @route('/add', methods=['POST'])
@@ -65,7 +65,7 @@ def user_detail(user_id, name: fields.Str(required=True)) -> UserSchema():
 # Return validation errors as JSON
 @app.errorhandler(422)
 def handle_validation_error(err):
-    exc = err.data['exc']
+    exc = err.exc
     return jsonify({'errors': exc.messages}), 422
 
 if __name__ == '__main__':

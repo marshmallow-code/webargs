@@ -60,7 +60,7 @@ def dateadd(value, addend, unit):
 # Return validation errors as JSON
 @app.errorhandler(422)
 def handle_validation_error(err):
-    exc = err.data['exc']
+    exc = err.exc
     return jsonify({'errors': exc.messages}), 422
 
 
