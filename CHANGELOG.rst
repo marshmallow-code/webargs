@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.5.2 (unreleased)
+******************
+
+Bug fixes:
+
+* Don't add ``marshmallow.missing`` to ``original_data`` when using ``marshmallow.validates_schema(pass_original=True)`` (:issue:`146`). Thanks :user:`lafrech` for reporting and for the fix.
+
 1.5.1 (2016-11-27)
 ******************
 

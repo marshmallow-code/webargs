@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import datetime as dt
 import sys
 import os
 
@@ -35,7 +35,7 @@ html_domain_indices = False
 templates_path = ['_templates']
 source_suffix = '.rst'
 project = u'webargs'
-copyright = u'2014-2015'
+copyright = u'2014-{0:Y}'.format(dt.datetime.utcnow())
 version = release = webargs.__version__
 exclude_patterns = ['_build']
 
