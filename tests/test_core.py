@@ -5,7 +5,7 @@ import sys
 
 import pytest
 import marshmallow
-from marshmallow import Schema, post_load, class_registry
+from marshmallow import Schema, post_load, class_registry, validates_schema
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
@@ -751,6 +751,21 @@ class TestPassingSchema:
         with pytest.raises(CustomError) as excinfo:
             viewfunc()
         assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
+
+    # Regression test for https://github.com/sloria/webargs/issues/146
+    def test_parse_does_not_add_missing_values_to_schema_validator(self, web_request, parser):
+        class UserSchema(Schema):
+            name = fields.Str()
+            location = fields.Field(required=False)
+
+            @validates_schema(pass_original=True)
+            def validate_schema(self, data, original_data):
+                assert 'location' not in original_data
+                return True
+
+        web_request.json = {'name': 'Eric Cartman'}
+        res = parser.parse(UserSchema, web_request, locations=('json', ))
+        assert res == {'name': 'Eric Cartman'}
 
 
 def test_use_args_with_custom_locations_in_parser(web_request, parser):
