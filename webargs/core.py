@@ -279,7 +279,8 @@ class Parser(object):
                 if parsed_value is missing and field_obj.load_from:
                     parsed_value = self.parse_arg(field_obj.load_from, field_obj, req, locations)
                     argname = field_obj.load_from
-                parsed[argname] = parsed_value
+                if parsed_value is not missing:
+                    parsed[argname] = parsed_value
         return parsed
 
     def load(self, data, argmap):
