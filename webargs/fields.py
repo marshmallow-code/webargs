@@ -63,9 +63,12 @@ class DelimitedList(ma.fields.List):
         return ret
 
     def _deserialize(self, value, attr, data):
-        ret = (
-            value
-            if ma.utils.is_iterable_but_not_string(value)
-            else value.split(self.delimiter)
-        )
+        try:
+            ret = (
+                value
+                if ma.utils.is_iterable_but_not_string(value)
+                else value.split(self.delimiter)
+            )
+        except AttributeError:
+            self.fail('invalid')
         return super(DelimitedList, self)._deserialize(ret, attr, data)

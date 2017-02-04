@@ -7,6 +7,7 @@ Changelog
 Bug fixes:
 
 * Port fix from release 1.5.2 to `AsyncParser`. This fixes :issue:`146` for ``AIOHTTPParser``.
+* Handle invalid types passed to ``DelimitedList`` (:issue:`149`). Thanks :user:`psconnect-dev` for reporting.
 
 1.5.2 (2017-01-08)
 ******************
