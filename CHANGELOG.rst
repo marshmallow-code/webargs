@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.5.3 (unreleased)
+******************
+
+Bug fixes:
+
+* Port fix from release 1.5.2 to `AsyncParser`. This fixes :issue:`146` for ``AIOHTTPParser``.
+
 1.5.2 (2017-01-08)
 ******************
 
