@@ -854,7 +854,7 @@ def test_delimited_list_passed_invalid_type(web_request, parser):
     schema = schema_cls()
 
     with pytest.raises(ValidationError) as excinfo:
-        parsed = parser.parse(schema, web_request)
+        parser.parse(schema, web_request)
     assert excinfo.value.messages == {'ids': ['Not a valid list.']}
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
