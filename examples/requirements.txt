@@ -3,4 +3,4 @@ Flask
 bottle
 tornado
 webapp2
-flask-restful
+flask-restful==0.3.5
