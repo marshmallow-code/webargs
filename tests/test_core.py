@@ -857,6 +857,59 @@ def test_delimited_list_passed_invalid_type(web_request, parser):
         parser.parse(schema, web_request)
     assert excinfo.value.messages == {'ids': ['Not a valid list.']}
 
+def test_delimited_paths_default_delimiter(web_request, parser):
+    web_request.json = {'include': 'author,article.comments,article.author'}
+    schema_cls = argmap2schema({'include': fields.DelimitedPaths()})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['include'] == {'author': {}, 'article': {'author': {}, 'comments': {}}}
+
+    dumped = schema.dump(parsed).data
+    assert dumped['include'] == ['article.author', 'article.comments', 'author']
+
+def test_delimited_paths_as_string(web_request, parser):
+    web_request.json = {'include': 'author,article.comments,article.author'}
+    schema_cls = argmap2schema({'include': fields.DelimitedPaths(as_string=True)})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['include'] == {'author': {}, 'article': {'author': {}, 'comments': {}}}
+
+    dumped = schema.dump(parsed).data
+    assert dumped['include'] == 'article.author,article.comments,author'
+
+def test_delimited_paths_custom_glue(web_request, parser):
+    """ Test alternative glue for the paths and delimiter for the list """
+    web_request.json = {'include': 'author|article/comments|article/author'}
+    schema_cls = argmap2schema({'include': fields.DelimitedPaths(glue='/', delimiter='|')})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['include'] == {'author': {}, 'article': {'author': {}, 'comments': {}}}
+
+def test_delimited_paths_load_list(web_request, parser):
+    web_request.json = {'include': ['author', 'article.comments', 'article.author']}
+    schema_cls = argmap2schema({'include': fields.DelimitedPaths()})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed['include'] == {'author': {}, 'article': {'author': {}, 'comments': {}}}
+
+def test_delimited_paths_load_dict(web_request, parser):
+    """ Also covers the same regression as test_delimited_list_passed_invalid_type """
+    web_request.json = {'include': {'author': {}, 'article': {'author': {}, 'comments': {}}}}
+    schema_cls = argmap2schema({'include': fields.DelimitedPaths()})
+    schema = schema_cls()
+
+    # Not sure why DelimitedList accepts an already split list, but DelimitedPaths
+    # Won't accept a dict at this time because python makes it annoying to figure
+    # out how to traverse something that could be either a collection or a mapping
+    # If this is really needed it could be done.
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(schema, web_request)
+    assert 'Not a valid list.' in str(excinfo)
+
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
     # arg missing in request
     web_request.json = {}
