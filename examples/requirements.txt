@@ -4,3 +4,4 @@ bottle
 tornado
 webapp2
 flask-restful
+pyramid
