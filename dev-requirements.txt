@@ -20,7 +20,7 @@ Django>=1.6.5
 bottle>=0.12.10
 tornado>=4.0
 pyramid>=1.5.2
-webapp2>=2.5.2
+webapp2>=3.0.0b1
 falcon>=0.3.0
 
 # Syntax checking
