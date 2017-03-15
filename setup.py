@@ -6,9 +6,9 @@ from setuptools import setup, find_packages
 REQUIREMENTS = ['marshmallow>=2.7.0']
 
 def find_version(fname):
-    '''Attempts to find the version number in the file names fname.
+    """Attempts to find the version number in the file names fname.
     Raises RuntimeError if not found.
-    '''
+    """
     version = ''
     with open(fname, 'r') as fp:
         reg = re.compile(r'__version__ = [\'"]([^\'"]*)[\'"]')
@@ -39,7 +39,7 @@ setup(
     author='Steven Loria',
     author_email='sloria1@gmail.com',
     url='https://github.com/sloria/webargs',
-    packages=find_packages(exclude=("test*", 'examples')),
+    packages=find_packages(exclude=('test*', 'examples')),
     package_dir={'webargs': 'webargs'},
     install_requires=REQUIREMENTS,
     license='MIT',
@@ -51,7 +51,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
