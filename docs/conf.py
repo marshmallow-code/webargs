@@ -44,7 +44,6 @@ exclude_patterns = ['_build']
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['./_themes']
 html_theme = 'lucuma'
-html_static_path = ['_static']
 templates_path = ['_templates']
 
 html_context = {

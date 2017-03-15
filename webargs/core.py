@@ -118,7 +118,7 @@ def get_value(data, name, field, allow_many_nested=False):
     """Get a value from a dictionary. Handles ``MultiDict`` types when
     ``multiple=True``. If the value is not found, return `missing`.
 
-    :param object data: Mapping (e.g. :type:`dict`) or list-like instance to
+    :param object data: Mapping (e.g. `dict`) or list-like instance to
         pull the value from.
     :param str name: Name of the key.
     :param bool multiple: Whether to handle multiple values.
