@@ -45,8 +45,8 @@ def decode_argument(value, name=None):
     try:
         return _unicode(value)
     except UnicodeDecodeError:
-        raise HTTPError(400, "Invalid unicode in %s: %r" %
-                        (name or "url", value[:40]))
+        raise HTTPError(400, 'Invalid unicode in %s: %r' %
+                        (name or 'url', value[:40]))
 
 def get_value(d, name, field):
     """Handle gets from 'multidicts' made of lists

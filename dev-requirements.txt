@@ -2,13 +2,13 @@
 marshmallow
 
 # Task running
-invoke==0.13.0
+invoke==0.15.0
 
 # Testing
-pytest==3.0.3
-tox==2.4.1
+pytest==3.0.7
+tox==2.6.0
 mock==2.0.0
-webtest==2.0.23
+webtest==2.0.26
 
 # Distribution
 wheel
@@ -24,4 +24,5 @@ webapp2>=3.0.0b1
 falcon>=0.3.0
 
 # Syntax checking
-flake8==2.4.1
+flake8==3.3.0
+flake8-quotes==0.9.0

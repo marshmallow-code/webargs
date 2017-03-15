@@ -28,7 +28,7 @@ hello_args = {
 }
 
 
-@view_config(route_name='hello', request_method="GET", renderer='json')
+@view_config(route_name='hello', request_method='GET', renderer='json')
 @use_args(hello_args)
 def index(request, args):
     """A welcome page.
@@ -43,7 +43,7 @@ add_args = {
 @use_kwargs(add_args)
 def add(request, x, y):
     """An addition endpoint."""
-    return {"result": x + y}
+    return {'result': x + y}
 
 dateadd_args = {
     'value': fields.DateTime(required=False),

@@ -772,12 +772,12 @@ def test_use_args_with_custom_locations_in_parser(web_request, parser):
 
     @parser.location_handler('custom')
     def parse_custom(req, name, arg):
-        return "bar"
+        return 'bar'
 
     @parser.use_args(custom_args, web_request)
     def viewfunc(args):
         return args
-    assert viewfunc() == {'foo': "bar"}
+    assert viewfunc() == {'foo': 'bar'}
 
 def test_use_kwargs(web_request, parser):
     user_args = {

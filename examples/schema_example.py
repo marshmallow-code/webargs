@@ -116,6 +116,6 @@ def handle_validation_error(err):
     exc = err.data['exc']
     return jsonify({'errors': exc.messages}), 422
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     User.insert(db=db, id=42, username='fred', first_name='Freddie', last_name='Mercury')
     app.run(port=5001, debug=True)

@@ -209,7 +209,7 @@ class Parser(object):
         given = set(locations)
         invalid_locations = given - valid_locations
         if len(invalid_locations):
-            msg = "Invalid locations arguments: {0}".format(list(invalid_locations))
+            msg = 'Invalid locations arguments: {0}'.format(list(invalid_locations))
             raise ValueError(msg)
         return locations
 
@@ -258,7 +258,7 @@ class Parser(object):
     def _parse_request(self, schema, req, locations):
         """Return a parsed arguments dictionary for the current request."""
         if schema.many:
-            assert 'json' in locations, "schema.many=True is only supported for JSON location"
+            assert 'json' in locations, 'schema.many=True is only supported for JSON location'
             # The ad hoc Nested field is more like a workaround or a helper, and it servers its
             # purpose fine. However, if somebody has a desire to re-design the support of
             # bulk-type arguments, go ahead.
@@ -289,7 +289,7 @@ class Parser(object):
         else:
             schema = argmap2schema(argmap)()
         if not schema.strict:
-            warnings.warn("It is highly recommended that you set strict=True on your schema "
+            warnings.warn('It is highly recommended that you set strict=True on your schema '
                 "so that the parser's error handler will be invoked when expected.", UserWarning)
         return schema.load(data)
 
