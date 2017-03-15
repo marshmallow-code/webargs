@@ -6,7 +6,7 @@ sudo: false
 
 env:
   # Lowest supported version
-  - MARSHMALLOW_VERSION="==2.0.0"
+  - MARSHMALLOW_VERSION="==2.7.0"
   # Latest release
   - MARSHMALLOW_VERSION=""
 

@@ -11,6 +11,7 @@ Bug fixes:
 Other changes:
 
 * Drop support for Python 2.6 and 3.3.
+* Support marshmallow>=2.7.0.
 
 1.5.3 (2017-02-04)
 ******************
