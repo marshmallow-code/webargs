@@ -4,19 +4,25 @@ language: python
 # http://blog.travis-ci.com/2014-12-17-faster-builds-with-container-based-infrastructure/
 sudo: false
 
+env:
+  # Lowest supported version
+  - MARSHMALLOW_VERSION="==2.0.0"
+  # Latest release
+  - MARSHMALLOW_VERSION=""
+
 python:
     - "3.6"
     - "3.5"
     - "3.4"
-    - "3.3"
     - "2.7"
-    - "2.6"
     - "pypy"
 
 install:
-    - pip install -U .
-    - if [[ $TRAVIS_PYTHON_VERSION == 2* || $TRAVIS_PYTHON_VERSION == 'pypy' || $TRAVIS_PYTHON_VERSION == '3.3' ]]; then pip install -r dev-requirements.txt; fi
+    - travis_retry pip install -U .
+    - if [[ $TRAVIS_PYTHON_VERSION == 2* || $TRAVIS_PYTHON_VERSION == 'pypy' || $TRAVIS_PYTHON_VERSION == '3.3' ]]; then travis_retry pip install -r dev-requirements.txt; fi
     # NOTE: aiohttp is not supported on 3.3
-    - if [[ $TRAVIS_PYTHON_VERSION == 3* && $TRAVIS_PYTHON_VERSION != '3.3' ]]; then pip install -r dev-requirements-py3.txt; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then travis_retry pip install -r dev-requirements-py3.txt; fi
+    - travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
+
 
 script: invoke test

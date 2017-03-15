@@ -326,6 +326,8 @@ class Parser(object):
         """
         if isinstance(argmap, ma.Schema):
             schema = argmap
+        elif isinstance(argmap, type) and issubclass(argmap, ma.Schema):
+            schema = argmap()
         elif callable(argmap):
             schema = argmap(req)
         else:

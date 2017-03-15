@@ -4,13 +4,9 @@ import mock
 import sys
 
 import pytest
-import marshmallow
 from marshmallow import Schema, post_load, class_registry, validates_schema
 from werkzeug.datastructures import MultiDict as WerkMultiDict
-
-PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
-if not PY26:  # django does not support python 2.6
-    from django.utils.datastructures import MultiValueDict as DjMultiDict
+from django.utils.datastructures import MultiValueDict as DjMultiDict
 from bottle import MultiDict as BotMultiDict
 
 from webargs import (
@@ -20,7 +16,7 @@ from webargs import (
 )
 from webargs.core import Parser, get_value, argmap2schema, is_json, get_mimetype
 
-MARSHMALLOW_VERSION_INFO = tuple(map(int, marshmallow.__version__.split('.')))
+from .common import MARSHMALLOW_VERSION_INFO
 
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
@@ -378,9 +374,8 @@ def create_bottle_multi_dict():
 multidicts = [
     WerkMultiDict([('foos', 'a'), ('foos', 'b')]),
     create_bottle_multi_dict(),
+    DjMultiDict({'foos': ['a', 'b']}),
 ]
-if not PY26:
-    multidicts.append(DjMultiDict({'foos': ['a', 'b']}))
 @pytest.mark.parametrize('input_dict', multidicts)
 def test_get_value_multidict(input_dict):
     field = fields.List(fields.Str())

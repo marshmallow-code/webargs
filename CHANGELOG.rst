@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+1.6.0 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix compatibility with marshmallow 3.x.
+
+Other changes:
+
+* Drop support for Python 2.6 and 3.3.
+
 1.5.3 (2017-02-04)
 ******************
 

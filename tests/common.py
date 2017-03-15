@@ -5,7 +5,9 @@ import marshmallow
 import pytest
 import webtest
 
-MARSHMALLOW_VERSION_INFO = marshmallow.__version__.split('.')
+MARSHMALLOW_VERSION_INFO = tuple(
+    [int(part) for part in marshmallow.__version__.split('.') if part.isdigit()]
+)
 
 class CommonTestCase(object):
     """Base test class that defines test methods for common functionality across all
@@ -103,7 +105,7 @@ class CommonTestCase(object):
         res = testapp.post_json('/error', {'text': 'foo'}, expect_errors=True)
         assert res.status_code == 422
 
-    @pytest.mark.skipif(int(MARSHMALLOW_VERSION_INFO[1]) < 7,
+    @pytest.mark.skipif(MARSHMALLOW_VERSION_INFO < (2, 7),
                         reason='status_code only works in marshmallow>=2.7')
     def test_user_validation_error_with_status_code(self, testapp):
         res = testapp.post_json('/error400', {'text': 'foo'}, expect_errors=True)

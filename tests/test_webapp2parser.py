@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 """Tests for the webapp2 parser"""
-import urllib
+try:
+    from urllib.parse import urlencode
+except ImportError:  # PY2
+    from urllib import urlencode
 import json
 
 import pytest
 from marshmallow import fields
-from marshmallow.compat import PY2
 from webargs import ValidationError
 
-pytestmark = pytest.mark.skipif(not PY2, reason='webapp2 is only compatible with Python 2')
-
 import webtest
-
-if PY2:
-    # everything should be skipped via `pytestmark` here so it is OK
-    import webapp2
-    from webargs.webapp2parser import parser
+import webapp2
+from webargs.webapp2parser import parser
 
 hello_args = {
     'name': fields.Str(missing='World'),
@@ -50,7 +47,7 @@ def test_parse_form():
 
 def test_parse_form_multiple():
     expected = {'name': ['steve', 'Loria']}
-    request = webapp2.Request.blank('/echo', POST=urllib.urlencode(expected, doseq=True))
+    request = webapp2.Request.blank('/echo', POST=urlencode(expected, doseq=True))
     assert parser.parse(hello_multiple, req=request) == expected
 
 

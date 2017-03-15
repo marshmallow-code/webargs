@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import sys
 
 import pytest
-
-PY26 = sys.version_info[0] == 2 and int(sys.version_info[1]) < 7
-PY33 = sys.version_info[0] == 3 and int(sys.version_info[1]) < 4
-if not PY26 and not PY33:
-    from tests.apps.django_app.base.wsgi import application
-
-pytestmark = pytest.mark.skipif(PY26 or PY33,
-                                reason='Django is not compatible with python 2.6 or 3.3')
+from tests.apps.django_app.base.wsgi import application
 
 from tests.common import CommonTestCase
 

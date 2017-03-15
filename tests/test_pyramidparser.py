@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-import pytest
-from marshmallow.compat import PY26
-
 from .common import CommonTestCase
-
-pytestmark = pytest.mark.skipif(PY26, reason='pyramid is not compatible with Python 2.6')
 
 class TestPyramidParser(CommonTestCase):
 

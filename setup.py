@@ -21,7 +21,7 @@ def find_version(fname):
         raise RuntimeError('Cannot find version information')
     return version
 
-__version__ = find_version("webargs/__init__.py")
+__version__ = find_version('webargs/__init__.py')
 
 
 def read(fname):
@@ -32,10 +32,10 @@ def read(fname):
 setup(
     name='webargs',
     version=__version__,
-    description=('A friendly library for parsing HTTP request arguments, '
+    description=('A friendly library for parsing and validating HTTP request arguments, '
         'with built-in support for popular web frameworks, including '
-        'Flask, Django, Bottle, Tornado, Pyramid, webapp2, and Falcon.'),
-    long_description=read("README.rst"),
+        'Flask, Django, Bottle, Tornado, Pyramid, webapp2, Falcon, and aiohttp.'),
+    long_description=read('README.rst'),
     author='Steven Loria',
     author_email='sloria1@gmail.com',
     url='https://github.com/sloria/webargs',
@@ -45,17 +45,15 @@ setup(
     license='MIT',
     zip_safe=False,
     keywords=('webargs', 'http', 'flask', 'django', 'bottle', 'tornado', 'aiohttp',
-      'webapp2', 'request', 'arguments', 'parameters', 'rest', 'api', 'marshmallow'),
+      'webapp2', 'request', 'arguments', 'validation', 'parameters', 'rest', 'api', 'marshmallow'),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
