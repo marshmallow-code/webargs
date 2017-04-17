@@ -1,0 +1,64 @@
+package:
+  name: webargs
+  version: "1.3.2"
+
+source:
+  path: ../
+#  fn: webargs-1.3.2.tar.gz
+#  url: https://pypi.python.org/packages/2e/45/416db0df1c634a372a05ebe0cef2927f098c0d0fbf86c55ec9a8f3296cb8/webargs-1.3.2.tar.gz
+#  md5: 54fb1cdf09c473a6c99ccec784f88bf1
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  # noarch_python: True
+  # preserve_egg_dir: True
+  # entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - webargs = webargs:main
+    #
+    # Would create an entry point called webargs that calls webargs.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - marshmallow >=2.0.0
+
+  run:
+    - python
+    - marshmallow >=2.0.0
+
+test:
+  # Python imports
+  imports:
+    - webargs
+
+  # commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: https://github.com/sloria/webargs
+  license: MIT License
+  summary: 'A friendly library for parsing HTTP request arguments, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, webapp2, and Falcon.'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
