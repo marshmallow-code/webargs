@@ -81,8 +81,7 @@ class AIOHTTPParser(AsyncParser):
         """Pull a form value from the request."""
         post_data = self._cache.get('post')
         if post_data is None:
-            yield from req.post()
-            self._cache['post'] = req.POST
+            self._cache['post'] = yield from req.post()
         return core.get_value(self._cache['post'], name, field)
 
     @asyncio.coroutine
