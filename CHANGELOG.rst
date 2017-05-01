@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.6.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix form parsing in aiohttp>=2.0.0. Thanks :user:`DmitriyS` for the PR.
+
 1.6.0 (2017-03-14)
 ******************
 
@@ -467,4 +474,3 @@ Bug fixes:
 * First release.
 * Parses JSON, querystring, forms, headers, and cookies.
 * Support for Flask and Django.
-
