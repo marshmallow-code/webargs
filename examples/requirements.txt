@@ -1,6 +1,6 @@
 python-dateutil==2.5.3
 Flask
-bottle
+bottle==0.12.10
 tornado
 webapp2
 flask-restful
