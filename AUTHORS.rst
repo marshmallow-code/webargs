@@ -29,3 +29,4 @@ Contributors (chronological)
 * Francois-Xavier Darveau <https://github.com/EFF> 
 * Jérôme Lafréchoux <https://github.com/lafrech> 
 * @DmitriyS <https://github.com/DmitriyS>
+* Svetlozar Argirov <https://github.com/zaro>

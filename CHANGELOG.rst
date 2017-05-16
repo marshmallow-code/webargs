@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.6.2 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix parsing multiple arguments in ``AIOHTTParser`` (:issue:`165`). Thanks :user:`ariddell` for reporting and thanks :user:`zaro` for reporting.
+
 1.6.1 (2017-04-30)
 ******************
 
