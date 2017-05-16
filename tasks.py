@@ -27,8 +27,9 @@ def test(ctx, coverage=False, browse=False):
 def flake(ctx):
     """Run flake8 on codebase."""
     cmd = 'flake8 .'
+    excludes = ['.direnv']
     if sys.version_info < (3, 4, 1):
-        excludes = [
+        excludes += [
             os.path.join('tests', 'apps', 'aiohttp_app.py'),
             os.path.join('tests', 'test_aiohttparser.py'),
             os.path.join('webargs', 'async.py'),
@@ -36,7 +37,7 @@ def flake(ctx):
             os.path.join('examples', 'annotations_example.py'),
             'build',
         ]
-        cmd += ' --exclude={0}'.format(','.join(excludes))
+    cmd += ' --exclude={0}'.format(','.join(excludes))
     ctx.run(cmd, echo=True)
 
 @task
