@@ -30,6 +30,11 @@ class TestAIOHTTPParser(CommonTestCase):
             testapp.get('/error_invalid?text=foo')
         assert excinfo.value.args[0] == 'No exception for 12345'
 
+    # regression test for https://github.com/sloria/webargs/issues/165
+    def test_multiple_args(self, testapp):
+        res = testapp.post_json('/echo_multiple_args', {'first': '1', 'last': '2', '_ignore': 0})
+        assert res.json == {'first': '1', 'last': '2'}
+
     # regression test for https://github.com/sloria/webargs/issues/145
     def test_nested_many_with_load_from(self, testapp):
         res = testapp.post_json('/echo_nested_many_load_from', {'x_field': [{'id': 42}]})
