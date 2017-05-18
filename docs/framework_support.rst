@@ -41,10 +41,10 @@ Here is an example error handler that returns validation messages to the client 
     @app.errorhandler(422)
     def handle_unprocessable_entity(err):
         # webargs attaches additional metadata to the `data` attribute
-        data = getattr(err, 'data')
-        if data:
+        exc = getattr(err, 'exc')
+        if exc:
             # Get validations from the ValidationError object
-            messages = data['exc'].messages
+            messages = exc.messages
         else:
             messages = ['Invalid request']
         return jsonify({
