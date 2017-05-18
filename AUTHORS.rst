@@ -30,3 +30,4 @@ Contributors (chronological)
 * Jérôme Lafréchoux <https://github.com/lafrech> 
 * @DmitriyS <https://github.com/DmitriyS>
 * Svetlozar Argirov <https://github.com/zaro>
+* Florian S. <https://github.com/nebularazer>

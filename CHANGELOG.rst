@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.6.3 (2017-05-18)
+******************
+
+Support:
+
+* Fix Flask error handling docs in "Framework support" section (:issue:`168`). Thanks :user:`nebularazer`.
+
 1.6.2 (2017-05-16)
 ******************
 
