@@ -4,12 +4,21 @@ import asyncio
 import collections
 import inspect
 import functools
+import sys
 
 import marshmallow as ma
 from marshmallow.compat import iteritems
 from marshmallow.utils import missing
 
 from webargs import core
+
+PY_35 = sys.version_info >= (3, 5)
+
+
+def iscoroutinefunction(func):
+    if PY_35:
+        return inspect.iscoroutinefunction(func)
+    return False
 
 class AsyncParser(core.Parser):
     """Asynchronous variant of `webargs.core.Parser`, where parsing methods may be
@@ -74,11 +83,6 @@ class AsyncParser(core.Parser):
     def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
         """Decorator that injects parsed arguments into a view function or method.
 
-        .. warning::
-            This will not work with `async def` coroutines. Either use a generator-based
-            coroutine decorated with `asyncio.coroutine` or use the
-            `parse <webargs.async.AsyncParser.parse>` method.
-
         Receives the same arguments as `webargs.core.Parser.use_args`.
         """
         locations = locations or self.locations
@@ -91,37 +95,54 @@ class AsyncParser(core.Parser):
         def decorator(func):
             req_ = request_obj
 
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                req_obj = req_
+            if iscoroutinefunction(func):
+                @functools.wraps(func)
+                async def wrapper(*args, **kwargs):
+                    req_obj = req_
 
-                # if as_kwargs is passed, must include all args
-                force_all = as_kwargs
+                    # if as_kwargs is passed, must include all args
+                    force_all = as_kwargs
 
-                if not req_obj:
-                    req_obj = self.get_request_from_view_args(func, args, kwargs)
-                # NOTE: At this point, argmap may be a Schema, callable, or dict
-                parsed_args = yield from self.parse(argmap,
-                                                    req=req_obj, locations=locations,
-                                                    validate=validate, force_all=force_all)
-                if as_kwargs:
-                    kwargs.update(parsed_args)
-                    return func(*args, **kwargs)
-                else:
-                    # Add parsed_args after other positional arguments
-                    new_args = args + (parsed_args, )
-                    return func(*new_args, **kwargs)
+                    if not req_obj:
+                        req_obj = self.get_request_from_view_args(func, args, kwargs)
+                    # NOTE: At this point, argmap may be a Schema, callable, or dict
+                    parsed_args = await self.parse(argmap,
+                                                        req=req_obj, locations=locations,
+                                                        validate=validate, force_all=force_all)
+                    if as_kwargs:
+                        kwargs.update(parsed_args)
+                        return await func(*args, **kwargs)
+                    else:
+                        # Add parsed_args after other positional arguments
+                        new_args = args + (parsed_args, )
+                        return await func(*new_args, **kwargs)
+            else:
+                @functools.wraps(func)
+                def wrapper(*args, **kwargs):
+                    req_obj = req_
+
+                    # if as_kwargs is passed, must include all args
+                    force_all = as_kwargs
+
+                    if not req_obj:
+                        req_obj = self.get_request_from_view_args(func, args, kwargs)
+                    # NOTE: At this point, argmap may be a Schema, callable, or dict
+                    parsed_args = yield from self.parse(argmap,
+                                                        req=req_obj, locations=locations,
+                                                        validate=validate, force_all=force_all)
+                    if as_kwargs:
+                        kwargs.update(parsed_args)
+                        return func(*args, **kwargs)
+                    else:
+                        # Add parsed_args after other positional arguments
+                        new_args = args + (parsed_args, )
+                        return func(*new_args, **kwargs)
             wrapper.__wrapped__ = func
             return wrapper
         return decorator
 
     def use_kwargs(self, *args, **kwargs):
         """Decorator that injects parsed arguments into a view function or method.
-
-        .. warning::
-            This will not work with `async def` coroutines. Either use a generator-based
-            coroutine decorated with `asyncio.coroutine` or use the
-            `parse <webargs.async.AsyncParser.parse>` method.
 
         Receives the same arguments as `webargs.core.Parser.use_kwargs`.
 
