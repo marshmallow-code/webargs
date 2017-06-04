@@ -16,8 +16,18 @@ def test(ctx, coverage=False, browse=False):
     if coverage:
         args.extend(['--cov=webargs', '--cov-report=term', '--cov-report=html'])
 
+    ignores = []
     if sys.version_info < (3, 4, 1):
-        args.append('--ignore={0}'.format(os.path.join('tests', 'test_aiohttpparser.py')))
+        ignores += [
+            os.path.join('tests', 'test_aiohttpparser.py')
+        ]
+    if sys.version_info < (3, 5, 0):
+        ignores += [
+            os.path.join('tests', 'test_aiohttpparser_async_functions.py')
+        ]
+    if ignores:
+        for each in ignores:
+            args.append('--ignore={0}'.format(each))
     retcode = pytest.main(args)
     if coverage and browse:
         webbrowser.open_new_tab(os.path.join('htmlcov', 'index.html'))
@@ -27,15 +37,23 @@ def test(ctx, coverage=False, browse=False):
 def flake(ctx):
     """Run flake8 on codebase."""
     cmd = 'flake8 .'
+    excludes = []
     if sys.version_info < (3, 4, 1):
         excludes = [
             os.path.join('tests', 'apps', 'aiohttp_app.py'),
             os.path.join('tests', 'test_aiohttparser.py'),
             os.path.join('webargs', 'async.py'),
+            os.path.join('webargs', 'async_decorators34.py'),
             os.path.join('webargs', 'aiohttpparser.py'),
             os.path.join('examples', 'annotations_example.py'),
             'build',
         ]
+    if sys.version_info < (3, 5, 0):
+        excludes += [
+            os.path.join('webargs', 'async_decorators.py'),
+            os.path.join('tests', 'test_aiohttpparser_async_functions.py'),
+        ]
+    if excludes:
         cmd += ' --exclude={0}'.format(','.join(excludes))
     ctx.run(cmd, echo=True)
 

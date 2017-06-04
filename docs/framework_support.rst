@@ -341,9 +341,8 @@ The `parse <webargs.aiohttpparser.AIOHTTPParser.parse>` method of `AIOHTTPParser
     handler_args = {
         'name': fields.Str(missing='World')
     }
-    @asyncio.coroutine
-    def handler(request):
-        args = yield from parser.parse(handler_args, request)
+    async def handler(request):
+        args = await parser.parse(handler_args, request)
         return web.Response(
             body='Hello, {}'.format(args['name']).encode('utf-8')
         )
@@ -362,9 +361,8 @@ When using the :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` d
     from webargs import fields
     from webargs.aiohttpparser import use_args
 
-    @asyncio.coroutine
     @use_args({'content': fields.Str(required=True)})
-    def create_comment(request, args):
+    async def create_comment(request, args):
         content = args['content']
         # ...
 
@@ -377,30 +375,21 @@ As with the other parser modules, :meth:`use_kwargs <webargs.aiohttpparser.AIOHT
 Usage with coroutines
 +++++++++++++++++++++
 
-The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` decorators will not work with `async def` coroutines. You must either use a generator-based coroutine decorated with `asyncio.coroutine` or use `parser.parse <webargs.aiohttpparser.AIOHTTPParser.parse>`.
+The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` decorators will work with both `async def` coroutines and generator-based coroutines decorated with `asyncio.coroutine`.
 
 .. code-block:: python
 
-    from aiohttp import web
+    import asyncio
 
+    from aiohttp import web
     from webargs import fields
+    from webargs.aiohttpparser import use_kwargs
 
     hello_args = {
         'name': fields.Str(missing='World')
     }
 
-    # YES
-    from webargs.aiohttpparser import parser
-
-    async def hello(request):
-        args = await parser.parse(hello_args, request)
-        return web.Response(
-            body='Hello, {}'.format(name).encode('utf-8')
-        )
-
-    # YES
-    import asyncio
-    from webargs.aiohttpparser import use_kwargs
+    # The following are equivalent
 
     @asyncio.coroutine
     @use_kwargs(hello_args)
@@ -409,7 +398,6 @@ The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`u
             body='Hello, {}'.format(name).encode('utf-8')
         )
 
-    # NO: use_args and use_kwargs are incompatible with async def
     @use_kwargs(hello_args)
     async def hello(request, name):
         return web.Response(
