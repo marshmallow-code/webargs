@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.7.0 (2017-06-03)
+******************
+
+Features:
+
+* ``AIOHTTPParser.use_args`` and ``AIOHTTPParser.use_kwargs`` work with `async def` coroutines (:issue:`170`). Thanks :user:`zaro`.
+
 1.6.3 (2017-05-18)
 ******************
 
