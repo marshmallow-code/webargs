@@ -2,6 +2,6 @@ python-dateutil==2.5.3
 Flask
 bottle
 tornado
-webapp2
+webapp2==2.5.2
 flask-restful
 pyramid
