@@ -1,5 +1,5 @@
 # Requirements
-marshmallow
+marshmallow==2.10.3
 
 # Task running
 invoke==0.15.0
