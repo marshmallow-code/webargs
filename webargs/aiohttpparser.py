@@ -119,7 +119,10 @@ class AIOHTTPParser(AsyncParser):
         if len(args) > 1:
             req = args[1]
         else:
-            req = args[0]
+            if isinstance(args[0], web.View):
+                req = args[0].request
+            else:
+                req = args[0]
         assert isinstance(req, web.Request), 'Request argument not found for handler'
         return req
 
