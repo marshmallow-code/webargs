@@ -147,9 +147,9 @@ class EchoHandler:
     @use_args(hello_args)
     def get(self, request, args):
         return json_response(args)
-    
+
 class EchoHandlerView(web.View):
-    
+
     @asyncio.corutine
     @use_args(hello_args)
     def get(self, args):
