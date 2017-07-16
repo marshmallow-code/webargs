@@ -2,6 +2,7 @@ import asyncio
 
 import aiohttp
 from aiohttp.web import json_response
+from aiohttp import web
 import marshmallow as ma
 
 from webargs import fields, ValidationError
