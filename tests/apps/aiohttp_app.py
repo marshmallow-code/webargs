@@ -146,6 +146,13 @@ class EchoHandler:
     @use_args(hello_args)
     def get(self, request, args):
         return json_response(args)
+    
+class EchoHandlerView(web.View):
+    
+    @asyncio.corutine
+    @use_args(hello_args)
+    def get(self, args):
+        return json_response(args)
 
 ##### App factory #####
 
@@ -180,5 +187,5 @@ def create_app():
     add_route(app, ['POST'], '/echo_nested_many_load_from', echo_nested_many_load_from)
     add_route(app, ['GET'], '/echo_match_info/{mymatch}', echo_match_info)
     add_route(app, ['GET'], '/echo_method', EchoHandler().get)
-
+    add_route(app, ['GET'], '/echo_method_view', EchoHandlerView)
     return app
