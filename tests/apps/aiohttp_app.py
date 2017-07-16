@@ -150,7 +150,7 @@ class EchoHandler:
 
 class EchoHandlerView(web.View):
 
-    @asyncio.corutine
+    @asyncio.coroutine
     @use_args(hello_args)
     def get(self, args):
         return json_response(args)
