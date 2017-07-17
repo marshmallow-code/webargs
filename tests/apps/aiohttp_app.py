@@ -2,6 +2,7 @@ import asyncio
 
 import aiohttp
 from aiohttp.web import json_response
+from aiohttp import web
 import marshmallow as ma
 
 from webargs import fields, ValidationError
@@ -147,6 +148,13 @@ class EchoHandler:
     def get(self, request, args):
         return json_response(args)
 
+class EchoHandlerView(web.View):
+
+    @asyncio.coroutine
+    @use_args(hello_args)
+    def get(self, args):
+        return json_response(args)
+
 ##### App factory #####
 
 def add_route(app, methods, route, handler):
@@ -180,5 +188,5 @@ def create_app():
     add_route(app, ['POST'], '/echo_nested_many_load_from', echo_nested_many_load_from)
     add_route(app, ['GET'], '/echo_match_info/{mymatch}', echo_match_info)
     add_route(app, ['GET'], '/echo_method', EchoHandler().get)
-
+    add_route(app, ['GET'], '/echo_method_view', EchoHandlerView)
     return app
