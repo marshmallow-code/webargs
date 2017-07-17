@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.8.0 (2017-07-16)
+******************
+
+Features:
+
+* ``AIOHTTPParser`` supports class-based views, i.e. ``aiohttp.web.View`` (:issue:`177`). Thanks :user:`daniel98321`.
+
 1.7.0 (2017-06-03)
 ******************
 
