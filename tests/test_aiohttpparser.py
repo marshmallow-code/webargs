@@ -50,4 +50,4 @@ class TestAIOHTTPParser(CommonTestCase):
 
     def test_schema_as_kwargs_view(self, testapp):
         assert testapp.get('/echo_use_schema_as_kwargs').json == {'name': 'World'}
-        assert testapp.get("/echo_use_schema_as_kwargs?name=Chandler").json == {"name": "Chandler"}
+        assert testapp.get('/echo_use_schema_as_kwargs?name=Chandler').json == {'name': 'Chandler'}

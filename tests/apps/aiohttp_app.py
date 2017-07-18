@@ -158,7 +158,7 @@ class EchoHandlerView(web.View):
 @asyncio.coroutine
 @use_args(HelloSchema, as_kwargs=True)
 def echo_use_schema_as_kwargs(request, name):
-    return json_response({"name": name})
+    return json_response({'name': name})
 
 ##### App factory #####
 
