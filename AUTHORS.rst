@@ -32,3 +32,4 @@ Contributors (chronological)
 * Svetlozar Argirov <https://github.com/zaro>
 * Florian S. <https://github.com/nebularazer>
 * @daniel98321 <https://github.com/daniel98321>
+* @Itayazolay <https://github.com/Itayazolay>

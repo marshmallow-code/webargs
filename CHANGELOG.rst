@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+1.8.1 (2017-07-17)
+******************
+
+Bug fixes:
+
+* Fix behavior of ``AIOHTTPParser.use_args`` when ``as_kwargs=True`` is passed with a ``Schema`` (:issue:`179`). Thanks :user:`Itayazolay`.
+
 1.8.0 (2017-07-16)
 ******************
 
