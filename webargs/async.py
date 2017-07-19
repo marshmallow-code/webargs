@@ -74,7 +74,7 @@ class AsyncParser(core.Parser):
         finally:
             self.clear_cache()
         if force_all:
-            core.fill_in_missing_args(ret, argmap)
+            core.fill_in_missing_args(ret, schema)
         return ret
 
     use_args = _use_args

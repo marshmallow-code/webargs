@@ -47,3 +47,7 @@ class TestAIOHTTPParser(CommonTestCase):
 
         res = testapp.post_json('/echo_nested_many_load_from', {})
         assert res.json == {}
+
+    def test_schema_as_kwargs_view(self, testapp):
+        assert testapp.get('/echo_use_schema_as_kwargs').json == {'name': 'World'}
+        assert testapp.get('/echo_use_schema_as_kwargs?name=Chandler').json == {'name': 'Chandler'}

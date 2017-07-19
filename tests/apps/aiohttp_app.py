@@ -155,6 +155,11 @@ class EchoHandlerView(web.View):
     def get(self, args):
         return json_response(args)
 
+@asyncio.coroutine
+@use_args(HelloSchema, as_kwargs=True)
+def echo_use_schema_as_kwargs(request, name):
+    return json_response({'name': name})
+
 ##### App factory #####
 
 def add_route(app, methods, route, handler):
@@ -189,4 +194,5 @@ def create_app():
     add_route(app, ['GET'], '/echo_match_info/{mymatch}', echo_match_info)
     add_route(app, ['GET'], '/echo_method', EchoHandler().get)
     add_route(app, ['GET'], '/echo_method_view', EchoHandlerView)
+    add_route(app, ['GET'], '/echo_use_schema_as_kwargs', echo_use_schema_as_kwargs)
     return app
