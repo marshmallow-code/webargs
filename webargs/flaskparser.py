@@ -34,8 +34,7 @@ def abort(http_status_code, exc=None, **kwargs):
     try:
         flask.abort(http_status_code)
     except HTTPException as err:
-        if len(kwargs):
-            err.data = kwargs
+        err.data = kwargs
         err.exc = exc
         raise err
 
