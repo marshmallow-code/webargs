@@ -70,7 +70,7 @@ class DateAddResource(object):
     """A datetime adder endpoint."""
 
     dateadd_args = {
-        'value': fields.DateTime(required=False),
+        'value': fields.Date(required=False),
         'addend': fields.Int(required=True, validate=validate.Range(min=1)),
         'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
     }

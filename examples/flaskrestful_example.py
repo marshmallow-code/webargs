@@ -53,14 +53,14 @@ class AddResource(Resource):
 class DateAddResource(Resource):
 
     dateadd_args = {
-        'value': fields.DateTime(required=False),
+        'value': fields.Date(required=False),
         'addend': fields.Int(required=True, validate=validate.Range(min=1)),
         'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
     }
 
     @use_kwargs(dateadd_args)
     def post(self, value, addend, unit):
-        """A datetime adder endpoint."""
+        """A date adder endpoint."""
         value = value or dt.datetime.utcnow()
         if unit == 'minutes':
             delta = dt.timedelta(minutes=addend)
