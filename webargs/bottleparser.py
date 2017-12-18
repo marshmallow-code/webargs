@@ -10,8 +10,7 @@ Example: ::
     hello_args = {
         'name': fields.Str(missing='World')
     }
-    @route('/', method='GET')
-    @use_args(hello_args)
+    @route('/', method='GET', apply=use_args(hello_args))
     def index(args):
         return 'Hello ' + args['name']
 

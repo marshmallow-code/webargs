@@ -422,3 +422,28 @@ The `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser>` supports parsing value
 
     app = web.Application()
     app.router.add_route('GET', '/articles/{slug}', article_detail)
+
+
+Bottle
+------
+
+Bottle support is available via the :mod:`webargs.bottleparser` module.
+
+Decorator Usage
++++++++++++++++
+
+The preferred way to apply decorators to Bottle routes is using the
+``apply`` argument.
+
+.. code-block:: python
+
+  from bottle import route
+
+  user_args = {
+      'name': fields.Str(missing='Friend')
+  }
+  @route('/users/<_id:int>', method='GET', apply=use_args(user_args))
+  def users(args, _id):
+      """A welcome page.
+      """
+      return {'message': 'Welcome, {}!'.format(args['name']), '_id': _id}

@@ -22,8 +22,7 @@ from webargs.bottleparser import use_args, use_kwargs
 hello_args = {
     'name': fields.Str(missing='Friend')
 }
-@route('/', method='GET')
-@use_args(hello_args)
+@route('/', method='GET', apply=use_args(hello_args))
 def index(args):
     """A welcome page.
     """
@@ -33,21 +32,19 @@ add_args = {
     'x': fields.Float(required=True),
     'y': fields.Float(required=True),
 }
-@route('/add', method='POST')
-@use_kwargs(add_args)
+@route('/add', method='POST', apply=use_kwargs(add_args))
 def add(x, y):
     """An addition endpoint."""
     return {'result': x + y}
 
 dateadd_args = {
-    'value': fields.DateTime(required=False),
+    'value': fields.Date(required=False),
     'addend': fields.Int(required=True, validate=validate.Range(min=1)),
     'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
 }
-@route('/dateadd', method='POST')
-@use_kwargs(dateadd_args)
+@route('/dateadd', method='POST', apply=use_kwargs(dateadd_args))
 def dateadd(value, addend, unit):
-    """A datetime adder endpoint."""
+    """A date adder endpoint."""
     value = value or dt.datetime.utcnow()
     if unit == 'minutes':
         delta = dt.timedelta(minutes=addend)
