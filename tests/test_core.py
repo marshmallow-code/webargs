@@ -4,6 +4,7 @@ import mock
 import sys
 
 import pytest
+import marshmallow
 from marshmallow import Schema, post_load, class_registry, validates_schema
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 from django.utils.datastructures import MultiValueDict as DjMultiDict
@@ -17,6 +18,8 @@ from webargs import (
 from webargs.core import Parser, get_value, argmap2schema, is_json, get_mimetype
 
 from .common import MARSHMALLOW_VERSION_INFO
+
+MARSHMALLOW_2 = marshmallow.__version__.startswith('2')
 
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
@@ -600,8 +603,9 @@ def test_use_args_callable(web_request, parser):
     class HelloSchema(Schema):
         name = fields.Str()
 
-        class Meta(object):
-            strict = True
+        if MARSHMALLOW_2:
+            class Meta(object):
+                strict = True
 
         @post_load
         def request_data(self, item):
@@ -633,7 +637,8 @@ class TestPassingSchema:
     def test_passing_schema_to_parse(self, parser, web_request):
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        result = parser.parse(self.UserSchema(strict=True), web_request)
+        kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+        result = parser.parse(self.UserSchema(**kwargs), web_request)
 
         assert result == {'email': 'foo@bar.com', 'password': 'bar'}
 
@@ -641,7 +646,9 @@ class TestPassingSchema:
 
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        @parser.use_args(self.UserSchema(strict=True), web_request)
+        kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+
+        @parser.use_args(self.UserSchema(**kwargs), web_request)
         def viewfunc(args):
             return args
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
@@ -651,7 +658,8 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={'request': req}, strict=True)
+            kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+            return self.UserSchema(context={'request': req}, **kwargs)
 
         result = parser.parse(factory, web_request)
 
@@ -662,7 +670,8 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={'request': req}, strict=True)
+            kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+            return self.UserSchema(context={'request': req}, **kwargs)
 
         @parser.use_args(factory, web_request)
         def viewfunc(args):
@@ -674,7 +683,9 @@ class TestPassingSchema:
 
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        @parser.use_kwargs(self.UserSchema(strict=True), web_request)
+        kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+
+        @parser.use_kwargs(self.UserSchema(**kwargs), web_request)
         def viewfunc(email, password):
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
@@ -684,7 +695,8 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={'request': req}, strict=True)
+            kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+            return self.UserSchema(context={'request': req}, **kwargs)
 
         @parser.use_kwargs(factory, web_request)
         def viewfunc(email, password):
@@ -695,6 +707,7 @@ class TestPassingSchema:
     # https://github.com/pytest-dev/pytest/issues/840
     @pytest.mark.skipif(sys.version_info < (3, 4),
                         reason="Skipping due to a bug in pytest's warning recording")
+    @pytest.mark.skipif(not MARSHMALLOW_2)
     def test_warning_raised_if_schema_is_not_in_strict_mode(
         self, web_request, parser
     ):
@@ -710,12 +723,15 @@ class TestPassingSchema:
             'page': 42,
         }
 
+        kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+
         @parser.use_kwargs({'page': fields.Int()}, web_request)
-        @parser.use_kwargs(self.UserSchema(strict=True), web_request)
+        @parser.use_kwargs(self.UserSchema(**kwargs), web_request)
         def viewfunc(email, password, page):
             return {'email': email, 'password': password, 'page': page}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar', 'page': 42}
 
+    @pytest.mark.skipif(not MARSHMALLOW_2)
     def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
             web_request, parser):
 

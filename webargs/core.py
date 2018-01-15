@@ -29,6 +29,8 @@ __all__ = [
     'parse_json',
 ]
 
+MARSHMALLOW_2 = ma.__version__.startswith('2')
+
 DEFAULT_VALIDATION_STATUS = 422
 
 
@@ -84,9 +86,11 @@ def argmap2schema(argmap, instance=False, **kwargs):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
     """
-    class Meta(object):
-        strict = True
-    attrs = dict(argmap, Meta=Meta)
+    attrs = argmap
+    if MARSHMALLOW_2:
+        class Meta(object):
+            strict = True
+        attrs['Meta'] = Meta
     cls = type(str(''), (ma.Schema,), attrs)
     return cls if not instance else cls(**kwargs)
 
@@ -288,7 +292,7 @@ class Parser(object):
             schema = argmap
         else:
             schema = argmap2schema(argmap)()
-        if not schema.strict:
+        if MARSHMALLOW_2 and not schema.strict:
             warnings.warn('It is highly recommended that you set strict=True on your schema '
                 "so that the parser's error handler will be invoked when expected.", UserWarning)
         return schema.load(data)
