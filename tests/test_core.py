@@ -393,6 +393,9 @@ def test_parse_with_load_from(web_request):
     assert parsed == {'content_type': 'application/json'}
 
 # https://github.com/sloria/webargs/issues/118
+@pytest.mark.skipif(not MARSHMALLOW_2,
+                    reason='Behaviour changed in marshmallow 3')
+# https://github.com/marshmallow-code/marshmallow/pull/714
 def test_load_from_is_checked_after_given_key(web_request):
     web_request.json = {'content_type': 'application/json'}
 
@@ -707,7 +710,8 @@ class TestPassingSchema:
     # https://github.com/pytest-dev/pytest/issues/840
     @pytest.mark.skipif(sys.version_info < (3, 4),
                         reason="Skipping due to a bug in pytest's warning recording")
-    @pytest.mark.skipif(not MARSHMALLOW_2)
+    @pytest.mark.skipif(not MARSHMALLOW_2,
+                        reason='"strict" parameter is removed in marshmallow 3')
     def test_warning_raised_if_schema_is_not_in_strict_mode(
         self, web_request, parser
     ):
@@ -731,7 +735,8 @@ class TestPassingSchema:
             return {'email': email, 'password': password, 'page': page}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar', 'page': 42}
 
-    @pytest.mark.skipif(not MARSHMALLOW_2)
+    @pytest.mark.skipif(not MARSHMALLOW_2,
+                        reason='"strict" parameter is removed in marshmallow 3')
     def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
             web_request, parser):
 
@@ -828,8 +833,9 @@ def test_delimited_list_default_delimiter(web_request, parser):
     parsed = parser.parse(schema, web_request)
     assert parsed['ids'] == [1, 2, 3]
 
-    dumped = schema.dump(parsed).data
-    assert dumped['ids'] == [1, 2, 3]
+    dumped = schema.dump(parsed)
+    data = dumped.data if MARSHMALLOW_2 else dumped
+    assert data['ids'] == [1, 2, 3]
 
 def test_delimited_list_as_string(web_request, parser):
     web_request.json = {'ids': '1,2,3'}
@@ -839,8 +845,9 @@ def test_delimited_list_as_string(web_request, parser):
     parsed = parser.parse(schema, web_request)
     assert parsed['ids'] == [1, 2, 3]
 
-    dumped = schema.dump(parsed).data
-    assert dumped['ids'] == '1,2,3'
+    dumped = schema.dump(parsed)
+    data = dumped.data if MARSHMALLOW_2 else dumped
+    assert data['ids'] == '1,2,3'
 
 def test_delimited_list_custom_delimiter(web_request, parser):
     web_request.json = {'ids': '1|2|3'}
@@ -961,7 +968,8 @@ def test_argmap2schema():
     for each in ['id', 'title', 'description', 'content_type']:
         assert each in schema.fields
     assert schema.fields['id'].required
-    assert schema.opts.strict is True
+    if MARSHMALLOW_2:
+        assert schema.opts.strict is True
 
 # Regression test for https://github.com/sloria/webargs/issues/101
 @pytest.mark.skipif(MARSHMALLOW_VERSION_INFO < (2, 7, 1),

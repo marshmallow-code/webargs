@@ -86,7 +86,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
     """
-    attrs = argmap
+    attrs = argmap.copy()
     if MARSHMALLOW_2:
         class Meta(object):
             strict = True
@@ -354,6 +354,7 @@ class Parser(object):
 
          :return: A dictionary of parsed arguments
         """
+        print(argmap, req)
         req = req if req is not None else self.get_default_request()
         assert req is not None, 'Must pass req object'
         ret = None
@@ -362,11 +363,13 @@ class Parser(object):
         try:
             parsed = self._parse_request(schema=schema, req=req, locations=locations)
             result = self.load(parsed, schema)
-            self._validate_arguments(result.data, validators)
+            data = result.data if MARSHMALLOW_2 else result
+            self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
         else:
-            ret = result.data
+            data = result.data if MARSHMALLOW_2 else result
+            ret = data
         finally:
             self.clear_cache()
         if force_all:
@@ -481,6 +484,9 @@ class Parser(object):
 
             @parser.location_handler('name')
             def parse_data(request, name, field):
+                # Marshmallow 3
+                return request.get(name)
+                # Marshmallow 2
                 return request.data.get(name)
 
         :param str name: The name of the location to register.

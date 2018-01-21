@@ -6,12 +6,15 @@ import mock
 from werkzeug.exceptions import HTTPException
 import pytest
 
+import marshmallow
 from flask import Flask
 from webargs import fields, ValidationError, missing
 from webargs.flaskparser import parser, abort
 
 from .apps.flask_app import app
 from .common import CommonTestCase
+
+MARSHMALLOW_2 = marshmallow.__version__.startswith('2')
 
 class TestFlaskParser(CommonTestCase):
 
@@ -46,7 +49,9 @@ class TestFlaskParser(CommonTestCase):
     # regression test for https://github.com/sloria/webargs/issues/145
     def test_nested_many_with_load_from(self, testapp):
         res = testapp.post_json('/echo_nested_many_load_from', {'x_field': [{'id': 42}]})
-        assert res.json == {'x_field': [{'id': 42}]}
+        # https://github.com/marshmallow-code/marshmallow/pull/714
+        if MARSHMALLOW_2:
+            assert res.json == {'x_field': [{'id': 42}]}
 
         res = testapp.post_json('/echo_nested_many_load_from', {'X-Field': [{'id': 24}]})
         assert res.json == {'x_field': [{'id': 24}]}

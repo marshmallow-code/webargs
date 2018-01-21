@@ -6,6 +6,8 @@ import marshmallow as ma
 from webargs import fields, ValidationError
 from webargs.djangoparser import parser, use_args, use_kwargs
 
+MARSHMALLOW_2 = ma.__version__.startswith('2')
+
 hello_args = {
     'name': fields.Str(missing='World', validate=lambda n: len(n) >= 3),
 }
@@ -16,7 +18,8 @@ hello_multiple = {
 class HelloSchema(ma.Schema):
     name = fields.Str(missing='World', validate=lambda n: len(n) >= 3)
 
-hello_many_schema = HelloSchema(strict=True, many=True)
+kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+hello_many_schema = HelloSchema(many=True, **kwargs)
 
 def json_response(data, **kwargs):
     return HttpResponse(
