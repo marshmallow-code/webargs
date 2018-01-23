@@ -484,9 +484,6 @@ class Parser(object):
 
             @parser.location_handler('name')
             def parse_data(request, name, field):
-                # Marshmallow 3
-                return request.get(name)
-                # Marshmallow 2
                 return request.data.get(name)
 
         :param str name: The name of the location to register.
