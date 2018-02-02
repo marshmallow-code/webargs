@@ -6,6 +6,8 @@ import marshmallow as ma
 from webargs import fields, ValidationError, missing
 from webargs.flaskparser import parser, use_args, use_kwargs
 
+MARSHMALLOW_2 = ma.__version__.startswith('2')
+
 class TestAppConfig:
     TESTING = True
     DEBUG = True
@@ -20,7 +22,8 @@ hello_multiple = {
 class HelloSchema(ma.Schema):
     name = fields.Str(missing='World', validate=lambda n: len(n) >= 3)
 
-hello_many_schema = HelloSchema(strict=True, many=True)
+kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
+hello_many_schema = HelloSchema(many=True, **kwargs)
 
 app = Flask(__name__)
 app.config.from_object(TestAppConfig)

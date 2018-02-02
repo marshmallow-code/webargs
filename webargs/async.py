@@ -17,6 +17,8 @@ if PY_34:
 else:
     from webargs.async_decorators import _use_args
 
+MARSHMALLOW_2 = ma.__version__.startswith('2')
+
 class AsyncParser(core.Parser):
     """Asynchronous variant of `webargs.core.Parser`, where parsing methods may be
     either coroutines or regular methods.
@@ -66,11 +68,13 @@ class AsyncParser(core.Parser):
         try:
             parsed = yield from self._parse_request(schema=schema, req=req, locations=locations)
             result = self.load(parsed, schema)
-            self._validate_arguments(result.data, validators)
+            data = result.data if MARSHMALLOW_2 else result
+            self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
         else:
-            ret = result.data
+            data = result.data if MARSHMALLOW_2 else result
+            ret = data
         finally:
             self.clear_cache()
         if force_all:

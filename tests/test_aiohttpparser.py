@@ -3,9 +3,13 @@
 import webtest_aiohttp
 import pytest
 
+import marshmallow
+
 from tests.common import CommonTestCase
 from tests.apps.aiohttp_app import create_app
 
+
+MARSHMALLOW_2 = marshmallow.__version__.startswith('2')
 
 class TestAIOHTTPParser(CommonTestCase):
     def create_app(self):
@@ -40,7 +44,9 @@ class TestAIOHTTPParser(CommonTestCase):
     # regression test for https://github.com/sloria/webargs/issues/145
     def test_nested_many_with_load_from(self, testapp):
         res = testapp.post_json('/echo_nested_many_load_from', {'x_field': [{'id': 42}]})
-        assert res.json == {'x_field': [{'id': 42}]}
+        # https://github.com/marshmallow-code/marshmallow/pull/714
+        if MARSHMALLOW_2:
+            assert res.json == {'x_field': [{'id': 42}]}
 
         res = testapp.post_json('/echo_nested_many_load_from', {'X-Field': [{'id': 24}]})
         assert res.json == {'x_field': [{'id': 24}]}

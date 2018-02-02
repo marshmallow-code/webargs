@@ -4,6 +4,7 @@ import mock
 import sys
 
 import pytest
+import marshmallow
 from marshmallow import Schema, post_load, class_registry, validates_schema
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 from django.utils.datastructures import MultiValueDict as DjMultiDict
@@ -17,6 +18,9 @@ from webargs import (
 from webargs.core import Parser, get_value, argmap2schema, is_json, get_mimetype
 
 from .common import MARSHMALLOW_VERSION_INFO
+
+MARSHMALLOW_2 = marshmallow.__version__.startswith('2')
+strict_kwargs = {} if not MARSHMALLOW_2 else {'strict': True}
 
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
@@ -390,6 +394,9 @@ def test_parse_with_load_from(web_request):
     assert parsed == {'content_type': 'application/json'}
 
 # https://github.com/sloria/webargs/issues/118
+@pytest.mark.skipif(not MARSHMALLOW_2,
+                    reason='Behaviour changed in marshmallow 3')
+# https://github.com/marshmallow-code/marshmallow/pull/714
 def test_load_from_is_checked_after_given_key(web_request):
     web_request.json = {'content_type': 'application/json'}
 
@@ -600,8 +607,9 @@ def test_use_args_callable(web_request, parser):
     class HelloSchema(Schema):
         name = fields.Str()
 
-        class Meta(object):
-            strict = True
+        if MARSHMALLOW_2:
+            class Meta(object):
+                strict = True
 
         @post_load
         def request_data(self, item):
@@ -633,7 +641,7 @@ class TestPassingSchema:
     def test_passing_schema_to_parse(self, parser, web_request):
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        result = parser.parse(self.UserSchema(strict=True), web_request)
+        result = parser.parse(self.UserSchema(**strict_kwargs), web_request)
 
         assert result == {'email': 'foo@bar.com', 'password': 'bar'}
 
@@ -641,7 +649,7 @@ class TestPassingSchema:
 
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        @parser.use_args(self.UserSchema(strict=True), web_request)
+        @parser.use_args(self.UserSchema(**strict_kwargs), web_request)
         def viewfunc(args):
             return args
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
@@ -651,7 +659,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={'request': req}, strict=True)
+            return self.UserSchema(context={'request': req}, **strict_kwargs)
 
         result = parser.parse(factory, web_request)
 
@@ -662,7 +670,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={'request': req}, strict=True)
+            return self.UserSchema(context={'request': req}, **strict_kwargs)
 
         @parser.use_args(factory, web_request)
         def viewfunc(args):
@@ -674,7 +682,7 @@ class TestPassingSchema:
 
         web_request.json = {'id': 12, 'email': 'foo@bar.com', 'password': 'bar'}
 
-        @parser.use_kwargs(self.UserSchema(strict=True), web_request)
+        @parser.use_kwargs(self.UserSchema(**strict_kwargs), web_request)
         def viewfunc(email, password):
             return {'email': email, 'password': password}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar'}
@@ -684,7 +692,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={'request': req}, strict=True)
+            return self.UserSchema(context={'request': req}, **strict_kwargs)
 
         @parser.use_kwargs(factory, web_request)
         def viewfunc(email, password):
@@ -695,6 +703,8 @@ class TestPassingSchema:
     # https://github.com/pytest-dev/pytest/issues/840
     @pytest.mark.skipif(sys.version_info < (3, 4),
                         reason="Skipping due to a bug in pytest's warning recording")
+    @pytest.mark.skipif(not MARSHMALLOW_2,
+                        reason='"strict" parameter is removed in marshmallow 3')
     def test_warning_raised_if_schema_is_not_in_strict_mode(
         self, web_request, parser
     ):
@@ -711,12 +721,12 @@ class TestPassingSchema:
         }
 
         @parser.use_kwargs({'page': fields.Int()}, web_request)
-        @parser.use_kwargs(self.UserSchema(strict=True), web_request)
+        @parser.use_kwargs(self.UserSchema(**strict_kwargs), web_request)
         def viewfunc(email, password, page):
             return {'email': email, 'password': password, 'page': page}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar', 'page': 42}
 
-    def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
+    def test_error_handler_is_called_regardless_of_schema_strict_setting(self,
             web_request, parser):
 
         class UserSchema(Schema):
@@ -731,17 +741,18 @@ class TestPassingSchema:
         def handle_error(error):
             raise CustomError(error.messages)
 
-        @parser.use_args(UserSchema(strict=True), web_request)
-        def viewfunc(args):
-            return args
+        if MARSHMALLOW_2:
+            @parser.use_args(UserSchema(strict=True), web_request)
+            def viewfunc_strict(args):
+                return args
+
+            with pytest.raises(CustomError) as excinfo:
+                viewfunc_strict()
+            assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
 
         @parser.use_args(UserSchema(), web_request)
-        def viewfunc2(args):
+        def viewfunc(args):
             return args
-
-        with pytest.raises(CustomError) as excinfo:
-            viewfunc()
-        assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
 
         with pytest.raises(CustomError) as excinfo:
             viewfunc()
@@ -812,8 +823,9 @@ def test_delimited_list_default_delimiter(web_request, parser):
     parsed = parser.parse(schema, web_request)
     assert parsed['ids'] == [1, 2, 3]
 
-    dumped = schema.dump(parsed).data
-    assert dumped['ids'] == [1, 2, 3]
+    dumped = schema.dump(parsed)
+    data = dumped.data if MARSHMALLOW_2 else dumped
+    assert data['ids'] == [1, 2, 3]
 
 def test_delimited_list_as_string(web_request, parser):
     web_request.json = {'ids': '1,2,3'}
@@ -823,8 +835,9 @@ def test_delimited_list_as_string(web_request, parser):
     parsed = parser.parse(schema, web_request)
     assert parsed['ids'] == [1, 2, 3]
 
-    dumped = schema.dump(parsed).data
-    assert dumped['ids'] == '1,2,3'
+    dumped = schema.dump(parsed)
+    data = dumped.data if MARSHMALLOW_2 else dumped
+    assert data['ids'] == '1,2,3'
 
 def test_delimited_list_custom_delimiter(web_request, parser):
     web_request.json = {'ids': '1|2|3'}
@@ -945,7 +958,8 @@ def test_argmap2schema():
     for each in ['id', 'title', 'description', 'content_type']:
         assert each in schema.fields
     assert schema.fields['id'].required
-    assert schema.opts.strict is True
+    if MARSHMALLOW_2:
+        assert schema.opts.strict is True
 
 # Regression test for https://github.com/sloria/webargs/issues/101
 @pytest.mark.skipif(MARSHMALLOW_VERSION_INFO < (2, 7, 1),
