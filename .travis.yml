@@ -10,6 +10,10 @@ env:
   # Latest release
   - MARSHMALLOW_VERSION=""
 
+matrix:
+  allow_failures:
+    - env: MARSHMALLOW_VERSION=""
+
 python:
   - "3.6"
   - "3.5"
