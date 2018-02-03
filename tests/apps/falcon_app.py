@@ -4,6 +4,7 @@ import falcon
 import marshmallow as ma
 from webargs import fields, ValidationError
 from webargs.falconparser import parser, use_args, use_kwargs
+from webargs.core import MARSHMALLOW_VERSION_INFO
 
 hello_args = {
     'name': fields.Str(missing='World', validate=lambda n: len(n) >= 3),
@@ -15,7 +16,8 @@ hello_multiple = {
 class HelloSchema(ma.Schema):
     name = fields.Str(missing='World', validate=lambda n: len(n) >= 3)
 
-hello_many_schema = HelloSchema(strict=True, many=True)
+strict_kwargs = {'strict': True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
+hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
 class Echo(object):
     def on_get(self, req, resp):

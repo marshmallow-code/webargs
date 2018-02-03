@@ -66,11 +66,13 @@ class AsyncParser(core.Parser):
         try:
             parsed = yield from self._parse_request(schema=schema, req=req, locations=locations)
             result = self.load(parsed, schema)
-            self._validate_arguments(result.data, validators)
+            data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
+            self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
         else:
-            ret = result.data
+            data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
+            ret = data
         finally:
             self.clear_cache()
         if force_all:

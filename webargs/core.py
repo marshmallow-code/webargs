@@ -29,6 +29,10 @@ __all__ = [
     'parse_json',
 ]
 
+MARSHMALLOW_VERSION_INFO = tuple(
+    [int(part) for part in ma.__version__.split('.') if part.isdigit()]
+)
+
 DEFAULT_VALIDATION_STATUS = 422
 
 
@@ -84,9 +88,11 @@ def argmap2schema(argmap, instance=False, **kwargs):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
     """
-    class Meta(object):
-        strict = True
-    attrs = dict(argmap, Meta=Meta)
+    attrs = argmap.copy()
+    if MARSHMALLOW_VERSION_INFO[0] < 3:
+        class Meta(object):
+            strict = True
+        attrs['Meta'] = Meta
     cls = type(str(''), (ma.Schema,), attrs)
     return cls if not instance else cls(**kwargs)
 
@@ -288,7 +294,7 @@ class Parser(object):
             schema = argmap
         else:
             schema = argmap2schema(argmap)()
-        if not schema.strict:
+        if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
             warnings.warn('It is highly recommended that you set strict=True on your schema '
                 "so that the parser's error handler will be invoked when expected.", UserWarning)
         return schema.load(data)
@@ -358,11 +364,13 @@ class Parser(object):
         try:
             parsed = self._parse_request(schema=schema, req=req, locations=locations)
             result = self.load(parsed, schema)
-            self._validate_arguments(result.data, validators)
+            data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
+            self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
         else:
-            ret = result.data
+            data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
+            ret = data
         finally:
             self.clear_cache()
         if force_all:
