@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+1.9.0 (2018-02-03)
+******************
+
+Changes:
+
+* ``HTTPExceptions`` raised with `webargs.flaskparser.abort` will always
+  have the ``data`` attribute, even if no additional keywords arguments
+  are passed (:issue:`184`). Thanks :user:`lafrech`.
+
+Support:
+
+* Fix examples in examples/ directory.
+
 1.8.1 (2017-07-17)
 ******************
 
