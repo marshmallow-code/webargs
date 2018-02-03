@@ -716,37 +716,6 @@ class TestPassingSchema:
             return {'email': email, 'password': password, 'page': page}
         assert viewfunc() == {'email': 'foo@bar.com', 'password': 'bar', 'page': 42}
 
-    def test_error_handler_is_called_when_regardless_of_schema_strict_setting(self,
-            web_request, parser):
-
-        class UserSchema(Schema):
-            email = fields.Email()
-
-        web_request.json = {'email': 'invalid'}
-
-        class CustomError(Exception):
-            pass
-
-        @parser.error_handler
-        def handle_error(error):
-            raise CustomError(error.messages)
-
-        @parser.use_args(UserSchema(strict=True), web_request)
-        def viewfunc(args):
-            return args
-
-        @parser.use_args(UserSchema(), web_request)
-        def viewfunc2(args):
-            return args
-
-        with pytest.raises(CustomError) as excinfo:
-            viewfunc()
-        assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
-
-        with pytest.raises(CustomError) as excinfo:
-            viewfunc()
-        assert excinfo.value.args[0] == {'email': ['Not a valid email address.']}
-
     # Regression test for https://github.com/sloria/webargs/issues/146
     def test_parse_does_not_add_missing_values_to_schema_validator(self, web_request, parser):
         class UserSchema(Schema):
