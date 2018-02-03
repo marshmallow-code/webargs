@@ -26,11 +26,21 @@ install:
 
 
 script: invoke test
-deploy:
-  provider: pypi
-  user: sloria
-  on:
-    tags: true
-  distributions: "sdist bdist_wheel"
-  password:
-    secure: TMeTi5OPl2cYsl5hNP4w1xESd2vQUOy8NgZ0c3KbrVSSeBuUCGOKyYJZNGzD9KDMucCvYFuxCwYiDxP8tB5iT85z3rhdVkzppZTy3/3kXMODjlhMzqTnCdJSOoZZ+D5/Y3Zqb8QxU78NggPutfX4bbUU/wNsVbdODXWHe5y2q3k=
+jobs:
+  include:
+  - stage: PyPI Release
+    if: tag IS present
+    python: "3.6"
+    env: []
+    # Override install, and script to no-ops
+    install: true
+    script: echo "Releasing to PyPI..."
+    after_success: true
+    deploy:
+      provider: pypi
+      user: sloria
+      on:
+        tags: true
+      distributions: sdist bdist_wheel
+      password:
+        secure: TMeTi5OPl2cYsl5hNP4w1xESd2vQUOy8NgZ0c3KbrVSSeBuUCGOKyYJZNGzD9KDMucCvYFuxCwYiDxP8tB5iT85z3rhdVkzppZTy3/3kXMODjlhMzqTnCdJSOoZZ+D5/Y3Zqb8QxU78NggPutfX4bbUU/wNsVbdODXWHe5y2q3k=

@@ -10,10 +10,6 @@ tox==2.6.0
 mock==2.0.0
 webtest==2.0.26
 
-# Distribution
-wheel
-twine==1.8.1
-
 # Web frameworks
 Flask>=0.10.1
 Django>=1.6.5
