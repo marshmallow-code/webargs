@@ -6,7 +6,7 @@ invoke==0.15.0
 
 # Testing
 pytest==3.0.7
-tox==2.6.0
+tox==2.9.1
 mock==2.0.0
 webtest==2.0.26
 
