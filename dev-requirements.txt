@@ -21,4 +21,4 @@ falcon>=0.3.0
 
 # Syntax checking
 flake8==3.3.0
-flake8-quotes==0.9.0
+flake8-quotes==0.13.0
