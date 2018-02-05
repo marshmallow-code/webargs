@@ -2,7 +2,7 @@
 marshmallow
 
 # Task running
-invoke==0.15.0
+invoke==0.22.1
 
 # Testing
 pytest==3.0.7
