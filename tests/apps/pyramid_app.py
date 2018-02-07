@@ -116,9 +116,9 @@ def create_app():
     add_route(config, '/echo_use_kwargs', echo_use_kwargs)
     add_route(config, '/echo_multi', echo_multi)
     add_route(config, '/echo_many_schema', echo_many_schema)
-    add_route(config, '/echo_use_args_with_path_param/{name:\w+}',
+    add_route(config, '/echo_use_args_with_path_param/{name}',
               echo_use_args_with_path_param)
-    add_route(config, '/echo_use_kwargs_with_path_param/{name:\w+}',
+    add_route(config, '/echo_use_kwargs_with_path_param/{name}',
               echo_use_kwargs_with_path_param)
     add_route(config, '/error', always_error)
     add_route(config, '/error400', error400)
@@ -128,6 +128,6 @@ def create_app():
     add_route(config, '/echo_nested', echo_nested)
     add_route(config, '/echo_nested_many', echo_nested_many)
     add_route(config, '/echo_callable', EchoCallable)
-    add_route(config, '/echo_matchdict/{mymatch:\d+}', echo_matchdict)
+    add_route(config, '/echo_matchdict/{mymatch}', echo_matchdict)
 
     return config.make_wsgi_app()
