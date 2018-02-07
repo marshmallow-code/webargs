@@ -74,7 +74,7 @@ class AIOHTTPParser(AsyncParser):
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+        return core.get_value(req.query, name, field)
 
     @asyncio.coroutine
     def parse_form(self, req, name, field):
