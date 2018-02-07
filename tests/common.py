@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
 
-import marshmallow
 import pytest
 import webtest
 
-MARSHMALLOW_VERSION_INFO = tuple(
-    [int(part) for part in marshmallow.__version__.split('.') if part.isdigit()]
-)
+from webargs.core import MARSHMALLOW_VERSION_INFO
+
 
 class CommonTestCase(object):
     """Base test class that defines test methods for common functionality across all
