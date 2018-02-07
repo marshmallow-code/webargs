@@ -2,13 +2,13 @@
 marshmallow
 
 # Task running
-invoke==0.15.0
+invoke==0.22.1
 
 # Testing
-pytest==3.0.7
-tox==2.6.0
+pytest==3.4.0
+tox==2.9.1
 mock==2.0.0
-webtest==2.0.26
+webtest==2.0.29
 
 # Web frameworks
 Flask>=0.10.1
@@ -20,5 +20,5 @@ webapp2>=3.0.0b1
 falcon>=0.3.0
 
 # Syntax checking
-flake8==3.3.0
-flake8-quotes==0.9.0
+flake8==3.5.0
+flake8-quotes==0.13.0
