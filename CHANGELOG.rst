@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+1.10.0 (2018-02-08)
+*******************
+
+Features:
+
+* Add support for marshmallow>=3.0.0b7 (:issue:`188`). Thanks
+  :user:`lafrech`.
+
+Deprecations:
+
+* Support for aiohttp<2.0.0 is deprecated and will be removed in webargs 2.0.0.
+
 1.9.0 (2018-02-03)
 ******************
 
