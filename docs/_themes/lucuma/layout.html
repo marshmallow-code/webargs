@@ -22,6 +22,9 @@
   <link href="{{ pathto('_static/styles/responsive.css', 1) }}" rel="stylesheet">
   <link href="{{ pathto('_static/styles/print.css', 1) }}" rel="stylesheet" media="print">
 
+  {% if hasdoc('genindex') -%}
+    <link rel="index" title="{{ t.nav_index }}" href="{{ pathto('genindex') }}">
+  {%- endif %}
   {% if parents -%}
     <link rel="up" title="{{ parents[-1].title|striptags|e }}" href="{{ parents[-1].link|e }}">
   {%- endif %}
