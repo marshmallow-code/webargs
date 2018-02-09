@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+2.0.0 (2018-02-08)
+******************
+
+Changes:
+
+* Drop support for aiohttp<2.0.0.
+* Remove use of deprecated `Request.has_body` attribute in
+  aiohttpparser (:issue:`186`). Thanks :user:`ariddell` for reporting.
+
 1.10.0 (2018-02-08)
 *******************
 
