@@ -97,7 +97,7 @@ class AIOHTTPParser(AsyncParser):
         """Pull a json value from the request."""
         json_data = self._cache.get('json')
         if json_data is None:
-            if not (req.has_body and is_json_request(req)):
+            if not (req.body_exists and is_json_request(req)):
                 return core.missing
             self._cache['json'] = json_data = yield from req.json()
         return core.get_value(json_data, name, field, allow_many_nested=True)
