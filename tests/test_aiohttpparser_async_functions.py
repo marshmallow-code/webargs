@@ -35,8 +35,8 @@ def app():
 
 
 @pytest.fixture()
-def testapp(app):
-    return webtest_aiohttp.TestApp(app)
+def testapp(app, loop):
+    return webtest_aiohttp.TestApp(app, loop=loop)
 
 ##### Tests #####
 

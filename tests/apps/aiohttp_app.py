@@ -169,9 +169,7 @@ def add_route(app, methods, route, handler):
         app.router.add_route(method, route, handler)
 
 def create_app():
-    loop = asyncio.get_event_loop()
-    asyncio.set_event_loop(loop)
-    app = aiohttp.web.Application(loop=loop)
+    app = aiohttp.web.Application()
 
     add_route(app, ['GET', 'POST'], '/echo', echo)
     add_route(app, ['GET'], '/echo_query', echo_query)

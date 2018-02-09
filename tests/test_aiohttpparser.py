@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import asyncio
 import webtest_aiohttp
 import pytest
 
@@ -12,7 +13,8 @@ class TestAIOHTTPParser(CommonTestCase):
         return create_app()
 
     def create_testapp(self, app):
-        return webtest_aiohttp.TestApp(app)
+        loop = asyncio.get_event_loop()
+        return webtest_aiohttp.TestApp(app, loop=loop)
 
     @pytest.mark.skip(reason='files location not supported for aiohttpparser')
     def test_parse_files(self, testapp):
@@ -28,9 +30,8 @@ class TestAIOHTTPParser(CommonTestCase):
         assert testapp.get('/echo_method_view?name=Steve').json == {'name': 'Steve'}
 
     def test_invalid_status_code_passed_to_validation_error(self, testapp):
-        with pytest.raises(LookupError) as excinfo:
-            testapp.get('/error_invalid?text=foo')
-        assert excinfo.value.args[0] == 'No exception for 12345'
+        res = testapp.get('/error_invalid?text=foo', expect_errors=True)
+        assert res.status_code == 500
 
     # regression test for https://github.com/sloria/webargs/issues/165
     def test_multiple_args(self, testapp):
