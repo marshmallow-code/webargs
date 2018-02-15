@@ -23,14 +23,14 @@ strict_kwargs = {'strict': True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
-    def parse_querystring(self, req, name, field):
-        return get_value(req.query, name, field)
+    def parse_querystring(self, req):
+        return req.query
 
-    def parse_json(self, req, name, field):
-        return get_value(req.json, name, field)
+    def parse_json(self, req):
+        return req.json
 
-    def parse_cookies(self, req, name, field):
-        return get_value(req.cookies, name, field)
+    def parse_cookies(self, req):
+        return req.cookies
 
 
 @pytest.yield_fixture(scope='function')
