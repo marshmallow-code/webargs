@@ -51,11 +51,11 @@ class FlaskParser(core.Parser):
         **core.Parser.__location_map__
     )
 
-    def parse_view_args(self, req, name, field):
+    def parse_view_args(self, req):
         """Pull a value from the request's ``view_args``."""
-        return core.get_value(req.view_args, name, field)
+        return req.view_args
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req):
         """Pull a json value from the request."""
         # Pass force in order to handle vendor media types,
         # e.g. applications/vnd.json+api
@@ -69,32 +69,32 @@ class FlaskParser(core.Parser):
             # Flask <= 0.9.x
             json_data = req.json
         if json_data is None:
-            return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+            return {}
+        return json_data
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req):
         """Pull a querystring value from the request."""
-        return core.get_value(req.args, name, field)
+        return req.args
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req):
         """Pull a form value from the request."""
         try:
-            return core.get_value(req.form, name, field)
+            return req.form
         except AttributeError:
             pass
-        return core.missing
+        return {}
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+        return req.headers
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req):
         """Pull a value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+        return req.cookies
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req):
         """Pull a file from the request."""
-        return core.get_value(req.files, name, field)
+        return req.files
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
