@@ -133,7 +133,7 @@ class CommonTestCase(object):
 
     def test_parsing_headers(self, testapp):
         res = testapp.get('/echo_headers', headers={'name': 'Fred'})
-        assert res.json == {'name': 'Fred'}
+        assert set({'name': 'Fred'}) - set(res.json) == set()
 
     def test_parsing_cookies(self, testapp):
         testapp.set_cookie('name', 'Steve')
