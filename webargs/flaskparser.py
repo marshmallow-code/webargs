@@ -74,12 +74,12 @@ class FlaskParser(core.Parser):
 
     def parse_querystring(self, req):
         """Pull a querystring value from the request."""
-        return req.args
+        return self._flatten_multidict(req.args)
 
     def parse_form(self, req):
         """Pull a form value from the request."""
         try:
-            return req.form
+            return self._flatten_multidict(req.form)
         except AttributeError:
             return {}
 
@@ -93,7 +93,7 @@ class FlaskParser(core.Parser):
 
     def parse_files(self, req):
         """Pull a file from the request."""
-        return req.files
+        return self._flatten_multidict(req.files)
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
@@ -105,6 +105,14 @@ class FlaskParser(core.Parser):
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""
         return flask.request
+
+    def _flatten_multidict(self, multidict):
+        flat = multidict.to_dict(flat=False)
+        print(flat)
+        for key, value in flat.items():
+            if len(value) == 1:
+                flat[key] = value[0]
+        return flat
 
 parser = FlaskParser()
 use_args = parser.use_args
