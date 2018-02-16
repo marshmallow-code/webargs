@@ -194,10 +194,9 @@ def test_arg_with_default_and_location(parser, web_request):
     assert parser.parse(args, web_request) == {'p': 1}
 
 def test_value_error_raised_if_parse_arg_called_with_invalid_location(web_request):
-    field = fields.Field()
     p = Parser()
     with pytest.raises(ValueError) as excinfo:
-        p.parse_arg('foo', field, web_request, locations=('invalidlocation', 'headers'))
+        p.parse_arg(web_request, locations=('invalidlocation', 'headers'))
     assert 'Invalid locations arguments: {0}'.format(['invalidlocation']) in str(excinfo)
 
 def test_value_error_raised_if_invalid_location_on_field(web_request, parser):
