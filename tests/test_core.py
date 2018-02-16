@@ -265,8 +265,8 @@ def test_custom_location_handler(web_request):
     parser = Parser()
 
     @parser.location_handler('data')
-    def parse_data(req, name, arg):
-        return req.data.get(name, missing)
+    def parse_data(req):
+        return req.data
 
     result = parser.parse({'foo': fields.Int()}, web_request, locations=('data', ))
     assert result['foo'] == 42
@@ -276,8 +276,8 @@ def test_custom_location_handler_with_load_from(web_request):
     parser = Parser()
 
     @parser.location_handler('data')
-    def parse_data(req, name, arg):
-        return req.data.get(name, missing)
+    def parse_data(req,):
+        return req.data
 
     result = parser.parse({'x_foo': fields.Int(load_from='X-Foo')},
         web_request, locations=('data', ))
@@ -748,8 +748,8 @@ def test_use_args_with_custom_locations_in_parser(web_request, parser):
     parser.locations = ('custom',)
 
     @parser.location_handler('custom')
-    def parse_custom(req, name, arg):
-        return 'bar'
+    def parse_custom(req):
+        return {'foo': 'bar'}
 
     @parser.use_args(custom_args, web_request)
     def viewfunc(args):

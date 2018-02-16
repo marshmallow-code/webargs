@@ -251,7 +251,7 @@ class Parser(object):
         locations_to_check = self._validated_locations(locations or self.locations)
         print('parse_arg: locations', locations_to_check)
 
-        values = MultiDict()
+        values = {}
         for location in locations_to_check:
             new_values = self._get_value(req=req, location=location)
             print('parse_arg: new_values:', new_values, 'from', location)
