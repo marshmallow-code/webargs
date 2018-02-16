@@ -276,6 +276,7 @@ class Parser(object):
             argdict = schema.fields
             for argname, field_obj in iteritems(argdict):
                 loc = field_obj.metadata.get('location')
+                multiple = is_multiple(field_obj)
                 if loc:
                     print('getting', argname, 'from', loc)
                     locations_to_check = self._validated_locations([loc])
@@ -284,6 +285,9 @@ class Parser(object):
                                            allow_many_nested=True)
                     if value is not missing:
                         parsed[argname] = value
+                val = parsed.get(argname)
+                if multiple and val is not None and not isinstance(val, (list, tuple)):
+                    parsed[argname] = [val]
         return parsed
 
     def load(self, data, argmap):
