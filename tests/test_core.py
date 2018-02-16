@@ -89,11 +89,10 @@ def test_parse_headers_called_when_headers_is_a_location(parse_headers, web_requ
 
 @mock.patch('webargs.core.Parser.parse_cookies')
 def test_parse_cookies_called_when_cookies_is_a_location(parse_cookies, web_request):
-    field = fields.Field()
     p = Parser()
-    p.parse_arg('foo', field, web_request)
+    p.parse_arg(web_request)
     assert parse_cookies.call_count == 0
-    p.parse_arg('foo', field, web_request, locations=('cookies',))
+    p.parse_arg(web_request, locations=('cookies',))
     parse_cookies.assert_called()
 
 @mock.patch('webargs.core.Parser.parse_json')
