@@ -78,8 +78,8 @@ def test_abort_called_on_validation_error(mock_abort):
 
 def test_parse_form_returns_missing_if_no_form():
     req = mock.Mock()
-    req.form.get.side_effect = AttributeError('no form')
-    assert parser.parse_form(req, 'foo', fields.Field()) is missing
+    del req.form
+    assert parser.parse_form(req) == {}
 
 def test_abort_with_message():
     with pytest.raises(HTTPException) as excinfo:
