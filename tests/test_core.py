@@ -73,18 +73,16 @@ def test_parse_form_called_by_parse_arg(parse_form, web_request):
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse_json_not_called_when_json_not_a_location(parse_json, web_request):
-    field = fields.Field()
     p = Parser()
-    p.parse_arg('foo', field, web_request, locations=('form', 'querystring'))
+    p.parse_arg(web_request, locations=('form', 'querystring'))
     assert parse_json.call_count == 0
 
 @mock.patch('webargs.core.Parser.parse_headers')
 def test_parse_headers_called_when_headers_is_a_location(parse_headers, web_request):
-    field = fields.Field()
     p = Parser()
-    p.parse_arg('foo', field, web_request)
+    p.parse_arg(web_request)
     assert parse_headers.call_count == 0
-    p.parse_arg('foo', field, web_request, locations=('headers',))
+    p.parse_arg(web_request, locations=('headers',))
     parse_headers.assert_called()
 
 @mock.patch('webargs.core.Parser.parse_cookies')
