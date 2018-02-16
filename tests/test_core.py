@@ -52,23 +52,20 @@ def parser():
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse_json_called_by_parse_arg(parse_json, web_request):
-    field = fields.Field()
     p = Parser()
-    p.parse_arg('foo', field, web_request)
-    parse_json.assert_called_with(web_request, 'foo', field)
+    p.parse_arg(web_request)
+    parse_json.assert_called_with(web_request)
 
 @mock.patch('webargs.core.Parser.parse_querystring')
 def test_parse_querystring_called_by_parse_arg(parse_querystring, web_request):
-    field = fields.Field()
     p = Parser()
-    p.parse_arg('foo', field, web_request)
+    p.parse_arg(web_request)
     assert parse_querystring.called_once()
 
 @mock.patch('webargs.core.Parser.parse_form')
 def test_parse_form_called_by_parse_arg(parse_form, web_request):
-    field = fields.Field()
     p = Parser()
-    p.parse_arg('foo', field, web_request)
+    p.parse_arg(web_request)
     assert parse_form.called_once()
 
 @mock.patch('webargs.core.Parser.parse_json')
