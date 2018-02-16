@@ -37,8 +37,12 @@ class MockRequestParser(Parser):
 def web_request():
     req = mock.Mock()
     req.query = {}
+    req.json = {}
+    req.cookies = {}
     yield req
     req.query = {}
+    req.json = {}
+    req.cookies = {}
 
 @pytest.fixture
 def parser():
