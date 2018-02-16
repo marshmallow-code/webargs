@@ -81,8 +81,7 @@ class FlaskParser(core.Parser):
         try:
             return req.form
         except AttributeError:
-            pass
-        return {}
+            return {}
 
     def parse_headers(self, req):
         """Pull a value from the header data."""
