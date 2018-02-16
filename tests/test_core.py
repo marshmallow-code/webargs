@@ -92,7 +92,7 @@ def test_parse_cookies_called_when_cookies_is_a_location(parse_cookies, web_requ
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse(parse_json, web_request):
-    parse_json.return_value = 42
+    parse_json.return_value = { 'username': 42, 'password': 42}
     argmap = {
         'username': fields.Field(),
         'password': fields.Field(),
