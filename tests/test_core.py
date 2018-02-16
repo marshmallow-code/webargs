@@ -128,11 +128,10 @@ def test_arg_allow_none(parser, web_request):
 
 @mock.patch('webargs.core.Parser.parse_json')
 def test_parse_required_arg(parse_json, web_request):
-    arg = fields.Field(required=True)
-    parse_json.return_value = 42
+    parse_json.return_value = {'foo': 42}
     p = Parser()
-    result = p.parse_arg('foo', arg, web_request, locations=('json', ))
-    assert result == 42
+    result = p.parse_arg(web_request, locations=('json', ))
+    assert result == {'foo': 42}
 
 def test_parse_required_list(parser, web_request):
     web_request.json = {'bar': []}
