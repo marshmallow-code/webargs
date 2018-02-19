@@ -28,7 +28,7 @@ Example usage: ::
 import collections
 import functools
 
-from webob.multidict import MultiDict, NoVars
+from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
 from marshmallow.compat import text_type
@@ -126,7 +126,6 @@ class PyramidParser(core.Parser):
 
     def _flatten_multidict(self, multidict):
         flat = multidict.dict_of_lists()
-        print(flat)
         for key, value in flat.items():
             if len(value) == 1:
                 flat[key] = value[0]
