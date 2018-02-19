@@ -34,33 +34,33 @@ class DjangoParser(core.Parser):
         the parser and returning the appropriate `HTTPResponse`.
     """
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req):
         """Pull the querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+        return self._flatten_multidict(req.GET)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req):
         """Pull the form value from the request."""
-        return core.get_value(req.POST, name, field)
+        return self._flatten_multidict(req.POST)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req):
         """Pull a json value from the request body."""
         try:
             json_data = json.loads(req.body.decode('utf-8'))
         except (AttributeError, ValueError):
-            return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+            return {}
+        return json_data
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.COOKIES, name, field)
+        return req.COOKIES
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req):
         raise NotImplementedError('Header parsing not supported by {0}'
             .format(self.__class__.__name__))
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req):
         """Pull a file from the request."""
-        return core.get_value(req.FILES, name, field)
+        return self._flatten_multidict(req.FILES)
 
     def get_request_from_view_args(self, view, args, kwargs):
         # The first argument is either `self` or `request`
@@ -68,6 +68,16 @@ class DjangoParser(core.Parser):
             return args[0].request
         except AttributeError:  # first arg is request
             return args[0]
+
+    def _flatten_multidict(self, multidict):
+        flat = {}
+        for key, value in multidict.lists():
+            count = len(value)
+            if count == 1:
+                flat[key] = value[0]
+            elif count > 1:
+                flat[key] = value
+        return flat
 
 parser = DjangoParser()
 use_args = parser.use_args
