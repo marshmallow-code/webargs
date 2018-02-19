@@ -25,37 +25,37 @@ from webargs import core
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req):
         """Pull a querystring value from the request."""
-        return core.get_value(req.query, name, field)
+        return self._flatten_multidict(req.query)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req):
         """Pull a form value from the request."""
-        return core.get_value(req.forms, name, field)
+        return self._flatten_multidict(req.forms)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req):
         """Pull a json value from the request."""
         json_data = self._cache.get('json')
         if json_data is None:
             try:
                 self._cache['json'] = json_data = req.json
             except (AttributeError, ValueError):
-                return core.missing
+                return {}
             if json_data is None:
-                return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+                return {}
+        return json_data
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+        return req.headers
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req):
         """Pull a value from the cookiejar."""
-        return req.get_cookie(name)
+        return req.cookies
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req):
         """Pull a file from the request."""
-        return core.get_value(req.files, name, field)
+        return req.files
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current request with a
@@ -69,6 +69,17 @@ class BottleParser(core.Parser):
     def get_default_request(self):
         """Override to use bottle's thread-local request object by default."""
         return bottle.request
+
+    def _flatten_multidict(self, multidict):
+        flat = {}
+        for key in multidict.keys():
+            value = multidict.getall(key)
+            count = len(value)
+            if count == 1:
+                flat[key] = value[0]
+            elif count > 1:
+                flat[key] = value
+        return flat
 
 parser = BottleParser()
 use_args = parser.use_args
