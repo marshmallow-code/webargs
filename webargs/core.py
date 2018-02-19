@@ -15,7 +15,6 @@ import marshmallow as ma
 from marshmallow.compat import iteritems
 from marshmallow.utils import missing, is_collection
 
-from werkzeug import MultiDict
 
 logger = logging.getLogger(__name__)
 
@@ -236,7 +235,7 @@ class Parser(object):
             raise ValueError('Invalid location: "{0}"'.format(location))
         return value
 
-    def parse_arg(self, req, locations=None):
+    def parse_arg(self, req, locations=None, need_list=False):
         """Parse a single argument from a request.
 
         .. note::
@@ -251,25 +250,36 @@ class Parser(object):
         locations_to_check = self._validated_locations(locations or self.locations)
         print('parse_arg: locations', locations_to_check)
 
-        values = {}
+        values = [] if need_list else {}
         for location in locations_to_check:
             new_values = self._get_value(req=req, location=location)
             print('parse_arg: new_values:', new_values, 'from', location)
-            values.update(new_values)
+            try:
+                if isinstance(new_values, list) and need_list:
+                    values.extend(new_values)
+                elif isinstance(values, dict) and need_list:
+                    values.append(new_values)
+                elif isinstance(values, dict):
+                    values.update(new_values)  # it's probably a list
+            except (TypeError, ValueError) as ex:
+                print('Failed to read a dictionary of values. Got:', new_values, ':', ex)
 
         return values
 
     def _parse_request(self, schema, req, locations):
         """Return a parsed arguments dictionary for the current request."""
         if schema.many:
+            print('Schema many case')
             assert 'json' in locations, 'schema.many=True is only supported for JSON location'
             # The ad hoc Nested field is more like a workaround or a helper, and it servers its
             # purpose fine. However, if somebody has a desire to re-design the support of
             # bulk-type arguments, go ahead.
             parsed = self.parse_arg(
                 req=req,
-                locations=locations
+                locations=locations,
+                need_list=True
             )
+            print('Parse request got:', parsed)
         else:
             print('_parse_request, locations:', locations)
             parsed = self.parse_arg(req, locations)
@@ -282,12 +292,14 @@ class Parser(object):
                     locations_to_check = self._validated_locations([loc])
                     parsed_value = self.parse_arg(req, locations_to_check)
                     value = get_value(parsed_value, argname, field_obj,
-                                           allow_many_nested=True)
+                                            allow_many_nested=True)
                     if value is not missing:
                         parsed[argname] = value
-                val = parsed.get(argname)
-                if multiple and val is not None and not isinstance(val, (list, tuple)):
-                    parsed[argname] = [val]
+                if isinstance(parsed, dict):
+                    val = parsed.get(argname)
+                    if multiple and val is not None and not isinstance(val, (list, tuple)):
+                        parsed[argname] = [val]
+        print('parse request returning:', parsed)
         return parsed
 
     def load(self, data, argmap):
@@ -304,13 +316,21 @@ class Parser(object):
         if (isinstance(error, ma.exceptions.ValidationError) and not
                 isinstance(error, ValidationError)):
             # Raise a webargs error instead
+            print('Error:', repr(error))
+            print('Error message:', {str(c): d for (c, d) in error.messages.items()})
+            print('Error field_name:', error.field_names)
+            print('Error fields:', error.fields)
+            print('Error data:', error.data)
+            print('Error extra:', getattr(error, 'kwargs', {}))
             error = ValidationError(
-                error.messages,
+                {str(c): d for (c, d) in error.messages.items()},
                 field_names=error.field_names,
                 fields=error.fields,
                 data=error.data,
                 **getattr(error, 'kwargs', {})
             )
+            print(error)
+            print(repr(error))
         if self.error_callback:
             self.error_callback(error)
         else:
@@ -369,11 +389,14 @@ class Parser(object):
             # This needs to be get *everything* from all the locations *not*
             # get the maching things from each location.
             parsed = self._parse_request(schema=schema, req=req, locations=locations)
-            print("Parsed values:", parsed)
+            print('Parsed values:', parsed, 'with schema', schema)
             result = self.load(parsed, schema)
+            print('Parsed result:', result)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
+            print('Parsed data:', data)
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
+            print("Parsed Validation error", error)
             self._on_validation_error(error)
         else:
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
