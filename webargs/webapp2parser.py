@@ -36,34 +36,46 @@ import webob.multidict
 class Webapp2Parser(core.Parser):
     """webapp2 request argument parser."""
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req):
         """Pull a json value from the request."""
         try:
             json_data = webapp2_extras.json.decode(req.body)
         except ValueError:
-            return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+            return {}
+        return json_data
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req):
         """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+        return req.GET.mixed()
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req):
         """Pull a form value from the request."""
-        return core.get_value(req.POST, name, field)
+        return req.POST.mixed()
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+        return req.cookies
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+        headers = {}
+        for key, value in req.headers.items():
+            headers[key] = value
+        return headers
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
-        return core.get_value(webob.multidict.MultiDict(files), name, field)
+        files_map = {}
+        for key, value in files:
+            current = files_map.get(key)
+            if current is None:
+                files_map[key] = value
+            elif isinstance(current, list):
+                current.append(value)
+            else:
+                files_map[key] = [value, current]
+        return files_map
 
     def get_default_request(self):
         return webapp2.get_request()
