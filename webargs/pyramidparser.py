@@ -28,7 +28,7 @@ Example usage: ::
 import collections
 import functools
 
-from webob.multidict import MultiDict
+from webob.multidict import MultiDict, NoVars
 from pyramid.httpexceptions import exception_response
 
 from marshmallow.compat import text_type
@@ -42,38 +42,37 @@ class PyramidParser(core.Parser):
         matchdict='parse_matchdict',
         **core.Parser.__location_map__)
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req):
         """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+        return self._flatten_multidict(req.GET)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req):
         """Pull a form value from the request."""
-        return core.get_value(req.POST, name, field)
+        return self._flatten_multidict(req.POST)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req):
         """Pull a json value from the request."""
         try:
-            json_data = req.json_body
+            return req.json_body
         except ValueError:
-            return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+            return {}
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req):
         """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+        return req.cookies
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req):
         """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+        return req.headers
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
-        return core.get_value(MultiDict(files), name, field)
+        return MultiDict(files)
 
-    def parse_matchdict(self, req, name, field):
+    def parse_matchdict(self, req):
         """Pull a value from the request's `matchdict`."""
-        return core.get_value(req.matchdict, name, field)
+        return req.matchdict
 
     def handle_error(self, error):
         """Handles errors during parsing. Aborts the current HTTP request and
@@ -124,6 +123,14 @@ class PyramidParser(core.Parser):
             wrapper.__wrapped__ = func
             return wrapper
         return decorator
+
+    def _flatten_multidict(self, multidict):
+        flat = multidict.dict_of_lists()
+        print(flat)
+        for key, value in flat.items():
+            if len(value) == 1:
+                flat[key] = value[0]
+        return flat
 
 parser = PyramidParser()
 use_args = parser.use_args
