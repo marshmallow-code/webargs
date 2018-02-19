@@ -75,39 +75,34 @@ class TornadoParser(core.Parser):
         super(TornadoParser, self).__init__(*args, **kwargs)
         self.json = None
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req):
         """Pull a json value from the request."""
         json_data = self._cache.get('json')
         if json_data is None:
             self._cache['json'] = json_data = parse_json_body(req)
             if json_data is None:
-                return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+                return {}
+        return json_data
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req):
         """Pull a querystring value from the request."""
-        return get_value(req.query_arguments, name, field)
+        return self._flatten_multidict(req.query_arguments)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req):
         """Pull a form value from the request."""
-        return get_value(req.body_arguments, name, field)
+        return self._flatten_multidict(req.body_arguments)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req):
         """Pull a value from the header data."""
-        return get_value(req.headers, name, field)
+        return req.headers
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req):
         """Pull a value from the header data."""
-        cookie = req.cookies.get(name)
+        return self._flatten_cookies(req.cookies)
 
-        if cookie is not None:
-            return [cookie.value] if core.is_multiple(field) else cookie.value
-        else:
-            return [] if core.is_multiple(field) else None
-
-    def parse_files(self, req, name, field):
+    def parse_files(self, req):
         """Pull a file from the request."""
-        return get_value(req.files, name, field)
+        return self._flatten_files(req.files)
 
     def handle_error(self, error):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
@@ -123,6 +118,36 @@ class TornadoParser(core.Parser):
 
     def get_request_from_view_args(self, view, args, kwargs):
         return args[0].request
+
+    def _flatten_multidict(self, multidict):
+        flat = {}
+        for key, value in multidict.items():
+            if len(value) == 1:
+                flat[key] = value[0].decode('utf-8')
+            else:
+                flat[key] = list(map(lambda x: x.decode('utf-8'), value))
+        return flat
+
+    def _flatten_files(self, multidict):
+        flat = {}
+        for key, value in multidict.items():
+            if len(value) == 1:
+                flat[key] = value[0]
+            else:
+                flat[key] = value
+        return flat
+
+    def _flatten_cookies(self, cookies):
+        flat = {}
+        for key, value in cookies.items():
+            current = flat.get(key)
+            if current is None:
+                flat[key] = value.value
+            elif isinstance(current, list):
+                current.append(value.value)
+            else:
+                flat[key] = [current, value.value]
+        return flat
 
 parser = TornadoParser()
 use_args = parser.use_args

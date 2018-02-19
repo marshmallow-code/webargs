@@ -39,42 +39,35 @@ class TestQueryArgs(object):
 
     def test_it_should_get_single_values(self):
         query = [(name, value)]
-        field = fields.Field()
         request = make_get_request(query)
 
-        result = parser.parse_querystring(request, name, field)
+        result = parser.parse_querystring(request)
 
-        assert result == value
+        assert result[name] == value
 
     def test_it_should_get_multiple_values(self):
         query = [(name, value), (name, value)]
-        field = fields.List(fields.Field())
         request = make_get_request(query)
 
-        result = parser.parse_querystring(request, name, field)
+        result = parser.parse_querystring(request)
 
-        assert result == [value, value]
+        assert result[name] == [value, value]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
-        field = fields.Field()
-        field2 = fields.List(fields.Int())
         request = make_get_request(query)
 
-        result = parser.parse_querystring(request, name, field)
-        result2 = parser.parse_querystring(request, name, field2)
+        result = parser.parse_querystring(request)
 
-        assert result is missing
-        assert result2 is missing
+        assert result == {}
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []
-        field = fields.List(fields.Field())
         request = make_get_request(query)
 
-        result = parser.parse_querystring(request, name, field)
+        result = parser.parse_querystring(request)
 
-        assert result is missing
+        assert result == {}
 
 
 class TestFormArgs:
@@ -87,7 +80,7 @@ class TestFormArgs:
         field = fields.Field()
         request = make_form_request(query)
 
-        result = parser.parse_form(request, name, field)
+        result = parser.parse_form(request)[name]
 
         assert result == value
 
@@ -96,27 +89,25 @@ class TestFormArgs:
         field = fields.List(fields.Field())
         request = make_form_request(query)
 
-        result = parser.parse_form(request, name, field)
+        result = parser.parse_form(request)[name]
 
         assert result == [value, value]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
-        field = fields.Field()
         request = make_form_request(query)
 
-        result = parser.parse_form(request, name, field)
+        result = parser.parse_form(request)
 
-        assert result is missing
+        assert result == {}
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []
-        field = fields.List(fields.Field())
         request = make_form_request(query)
 
-        result = parser.parse_form(request, name, field)
+        result = parser.parse_form(request)
 
-        assert result is missing
+        assert result == {}
 
 
 class TestJSONArgs(object):
@@ -128,65 +119,58 @@ class TestJSONArgs(object):
         query = {name: value}
         field = fields.Field()
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)[name]
 
         assert result == value
 
     def test_parsing_request_with_vendor_content_type(self):
         query = {name: value}
-        field = fields.Field()
         request = make_json_request(query, content_type='application/vnd.api+json; charset=UTF-8')
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)[name]
 
         assert result == value
 
     def test_it_should_get_multiple_values(self):
         query = {name: [value, value]}
-        field = fields.List(fields.Field())
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)[name]
 
         assert result == [value, value]
 
     def test_it_should_get_multiple_nested_values(self):
         query = {name: [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]}
-        field = fields.List(fields.Nested({'id': fields.Field(), 'name': fields.Field()}))
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)
         assert result == [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]
 
     def test_it_should_return_missing_if_not_present(self):
         query = {}
-        field = fields.Field()
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)
 
-        assert result is missing
+        assert result == {}
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = {}
-        field = fields.List(fields.Field())
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)
 
-        assert result is missing
+        assert result == {}
 
     def test_it_should_handle_type_error_on_parse_json(self):
-        field = fields.Field()
         request = make_request(
             body=tornado.concurrent.Future,
             headers={'Content-Type': 'application/json'},
         )
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)
         assert parser._cache['json'] == {}
-        assert result is missing
+        assert result == {}
 
     def test_it_should_handle_value_error_on_parse_json(self):
-        field = fields.Field()
         request = make_request('this is json not')
-        result = parser.parse_json(request, name, field)
+        result = parser.parse_json(request)
         assert parser._cache['json'] == {}
-        assert result is missing
+        assert result == {}
 
 
 class TestHeadersArgs(object):
@@ -196,19 +180,17 @@ class TestHeadersArgs(object):
 
     def test_it_should_get_single_values(self):
         query = {name: value}
-        field = fields.Field()
         request = make_request(headers=query)
 
-        result = parser.parse_headers(request, name, field)
+        result = parser.parse_headers(request)[name]
 
         assert result == value
 
     def test_it_should_get_multiple_values(self):
         query = {name: [value, value]}
-        field = fields.List(fields.Field())
         request = make_request(headers=query)
 
-        result = parser.parse_headers(request, name, field)
+        result = parser.parse_headers(request)[name]
 
         assert result == [value, value]
 
@@ -216,18 +198,17 @@ class TestHeadersArgs(object):
         field = fields.Field(multiple=False)
         request = make_request()
 
-        result = parser.parse_headers(request, name, field)
+        result = parser.parse_headers(request)
 
-        assert result is missing
+        assert result == {}
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = {}
-        field = fields.List(fields.Field())
         request = make_request(headers=query)
 
-        result = parser.parse_headers(request, name, field)
+        result = parser.parse_headers(request)
 
-        assert result is missing
+        assert result == {}
 
 
 class TestFilesArgs(object):
@@ -237,39 +218,35 @@ class TestFilesArgs(object):
 
     def test_it_should_get_single_values(self):
         query = [(name, value)]
-        field = fields.Field()
         request = make_files_request(query)
 
-        result = parser.parse_files(request, name, field)
+        result = parser.parse_files(request)[name]
 
         assert result == value
 
     def test_it_should_get_multiple_values(self):
         query = [(name, value), (name, value)]
-        field = fields.List(fields.Field())
         request = make_files_request(query)
 
-        result = parser.parse_files(request, name, field)
+        result = parser.parse_files(request)[name]
 
         assert result == [value, value]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
-        field = fields.Field()
         request = make_files_request(query)
 
-        result = parser.parse_files(request, name, field)
+        result = parser.parse_files(request)
 
-        assert result is missing
+        assert result == {}
 
     def test_it_should_return_empty_list_if_multiple_and_not_present(self):
         query = []
-        field = fields.List(fields.Field())
         request = make_files_request(query)
 
-        result = parser.parse_files(request, name, field)
+        result = parser.parse_files(request)
 
-        assert result is missing
+        assert result == {}
 
 
 class TestErrorHandler(object):
@@ -304,7 +281,7 @@ class TestParse(object):
             'string': 'value',
             'integer': [1, 2]
         })
-        string_result = parser.parse_json(request, 'string', fields.Str())
+        string_result = parser.parse_json(request)['string']
         assert string_result == 'value'
         assert 'json' in parser._cache
         assert 'string' in parser._cache['json']
