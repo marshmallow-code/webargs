@@ -108,7 +108,6 @@ class FlaskParser(core.Parser):
 
     def _flatten_multidict(self, multidict):
         flat = multidict.to_dict(flat=False)
-        print(flat)
         for key, value in flat.items():
             if len(value) == 1:
                 flat[key] = value[0]
