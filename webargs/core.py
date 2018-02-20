@@ -230,7 +230,6 @@ class Parser(object):
             else:
                 function = getattr(self, func)
             value = function(req)
-            #TODO print(value)
         else:
             raise ValueError('Invalid location: "{0}"'.format(location))
         return value
@@ -248,12 +247,10 @@ class Parser(object):
             on the request.
         """
         locations_to_check = self._validated_locations(locations or self.locations)
-        print('parse_arg: locations', locations_to_check)
 
         values = [] if need_list else {}
         for location in locations_to_check:
             new_values = self._get_value(req=req, location=location)
-            print('parse_arg: new_values:', new_values, 'from', location)
             try:
                 if isinstance(new_values, list) and need_list:
                     values.extend(new_values)
@@ -262,14 +259,13 @@ class Parser(object):
                 elif isinstance(values, dict):
                     values.update(new_values)  # it's probably a list
             except (TypeError, ValueError) as ex:
-                print('Failed to read a dictionary of values. Got:', new_values, ':', ex)
+                logger.error('Failed to read a dictionary of values. Got:', new_values, ':', ex)
 
         return values
 
     def _parse_request(self, schema, req, locations):
         """Return a parsed arguments dictionary for the current request."""
         if schema.many:
-            print('Schema many case')
             assert 'json' in locations, 'schema.many=True is only supported for JSON location'
             # The ad hoc Nested field is more like a workaround or a helper, and it servers its
             # purpose fine. However, if somebody has a desire to re-design the support of
@@ -279,16 +275,13 @@ class Parser(object):
                 locations=locations,
                 need_list=True
             )
-            print('Parse request got:', parsed)
         else:
-            print('_parse_request, locations:', locations)
             parsed = self.parse_arg(req, locations)
             argdict = schema.fields
             for argname, field_obj in iteritems(argdict):
                 loc = field_obj.metadata.get('location')
                 multiple = is_multiple(field_obj)
                 if loc:
-                    print('getting', argname, 'from', loc)
                     locations_to_check = self._validated_locations([loc])
                     parsed_value = self.parse_arg(req, locations_to_check)
                     value = get_value(parsed_value, argname, field_obj,
@@ -299,7 +292,6 @@ class Parser(object):
                     val = parsed.get(argname)
                     if multiple and val is not None and not isinstance(val, (list, tuple)):
                         parsed[argname] = [val]
-        print('parse request returning:', parsed)
         return parsed
 
     def load(self, data, argmap):
@@ -316,12 +308,6 @@ class Parser(object):
         if (isinstance(error, ma.exceptions.ValidationError) and not
                 isinstance(error, ValidationError)):
             # Raise a webargs error instead
-            print('Error:', repr(error))
-            print('Error message:', {str(c): d for (c, d) in error.messages.items()})
-            print('Error field_name:', error.field_names)
-            print('Error fields:', error.fields)
-            print('Error data:', error.data)
-            print('Error extra:', getattr(error, 'kwargs', {}))
             error = ValidationError(
                 {str(c): d for (c, d) in error.messages.items()},
                 field_names=error.field_names,
@@ -329,8 +315,6 @@ class Parser(object):
                 data=error.data,
                 **getattr(error, 'kwargs', {})
             )
-            print(error)
-            print(repr(error))
         if self.error_callback:
             self.error_callback(error)
         else:
@@ -383,20 +367,13 @@ class Parser(object):
         validators = _ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
         try:
-            #TODO print(req)
-            #TODO print(req.args)
-            print("Parse: Locations:", locations)
             # This needs to be get *everything* from all the locations *not*
             # get the maching things from each location.
             parsed = self._parse_request(schema=schema, req=req, locations=locations)
-            print('Parsed values:', parsed, 'with schema', schema)
             result = self.load(parsed, schema)
-            print('Parsed result:', result)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
-            print('Parsed data:', data)
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            print("Parsed Validation error", error)
             self._on_validation_error(error)
         else:
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
