@@ -140,7 +140,7 @@ class TestJSONArgs(object):
     def test_it_should_get_multiple_nested_values(self):
         query = {name: [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]}
         request = make_json_request(query)
-        result = parser.parse_json(request)
+        result = parser.parse_json(request)[name]
         assert result == [{'id': 1, 'name': 'foo'}, {'id': 2, 'name': 'bar'}]
 
     def test_it_should_return_missing_if_not_present(self):

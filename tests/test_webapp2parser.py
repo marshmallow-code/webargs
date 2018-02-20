@@ -86,9 +86,10 @@ def test_parsing_cookies():
 
 
 def test_parsing_headers():
-    expected = {'name': 'Fred'}
+    expected = {'Name': 'Fred'}
     request = webapp2.Request.blank('/', headers=expected)
-    assert parser.parse(hello_args, req=request, locations=('headers',)) == expected
+    assert parser.parse({'Name': fields.Str(missing='World')},
+                        req=request, locations=('headers',)) == expected
 
 
 def test_parse_files():
