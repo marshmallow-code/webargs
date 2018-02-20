@@ -30,7 +30,6 @@ Example: ::
 from webargs import core
 import webapp2
 import webapp2_extras.json
-import webob.multidict
 
 
 class Webapp2Parser(core.Parser):
@@ -57,7 +56,10 @@ class Webapp2Parser(core.Parser):
         return req.cookies
 
     def parse_headers(self, req):
-        """Pull a value from the header data."""
+        """Pull a value from the header data.
+
+        This also does case normalisation which is a problem
+        """
         headers = {}
         for key, value in req.headers.items():
             headers[key] = value
