@@ -57,7 +57,7 @@ When you need more flexibility in defining input schemas, you can pass a marshma
     def profile_update(username, password, first_name, last_name):
         # ...
 
-    # You can add additional paramters
+    # You can add additional parameters
     @use_kwargs({'posts_per_page': fields.Int(missing=10, location='query')})
     @use_args(UserSchema())
     def profile_posts(args, posts_per_page):
