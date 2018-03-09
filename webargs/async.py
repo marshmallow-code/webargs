@@ -60,7 +60,7 @@ class AsyncParser(core.Parser):
         """
         req = req if req is not None else self.get_default_request()
         assert req is not None, 'Must pass req object'
-        ret = None
+        data = None
         validators = core._ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
         try:
@@ -70,14 +70,11 @@ class AsyncParser(core.Parser):
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(error)
-        else:
-            data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
-            ret = data
         finally:
             self.clear_cache()
         if force_all:
-            core.fill_in_missing_args(ret, schema)
-        return ret
+            core.fill_in_missing_args(data, schema)
+        return data
 
     use_args = _use_args
 
