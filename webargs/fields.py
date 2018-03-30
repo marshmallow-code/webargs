@@ -9,10 +9,11 @@ where to parse the request argument from. ::
 
     args = {
         'active': fields.Bool(location='query')
-        'content_type': fields.Str(load_from='Content-Type',
+        'content_type': fields.Str(data_key='Content-Type',
                                    location='headers')
     }
 
+Note: `data_key` replaced `load_from` in marshmallow 3. When using marshmallow 2, use `load_from`.
 """
 import marshmallow as ma
 

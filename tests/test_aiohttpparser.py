@@ -39,16 +39,16 @@ class TestAIOHTTPParser(CommonTestCase):
         assert res.json == {'first': '1', 'last': '2'}
 
     # regression test for https://github.com/sloria/webargs/issues/145
-    def test_nested_many_with_load_from(self, testapp):
-        res = testapp.post_json('/echo_nested_many_load_from', {'x_field': [{'id': 42}]})
+    def test_nested_many_with_data_key(self, testapp):
+        res = testapp.post_json('/echo_nested_many_data_key', {'x_field': [{'id': 42}]})
         # https://github.com/marshmallow-code/marshmallow/pull/714
         if MARSHMALLOW_VERSION_INFO[0] < 3:
             assert res.json == {'x_field': [{'id': 42}]}
 
-        res = testapp.post_json('/echo_nested_many_load_from', {'X-Field': [{'id': 24}]})
+        res = testapp.post_json('/echo_nested_many_data_key', {'X-Field': [{'id': 24}]})
         assert res.json == {'x_field': [{'id': 24}]}
 
-        res = testapp.post_json('/echo_nested_many_load_from', {})
+        res = testapp.post_json('/echo_nested_many_data_key', {})
         assert res.json == {}
 
     def test_schema_as_kwargs_view(self, testapp):

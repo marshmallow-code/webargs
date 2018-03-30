@@ -271,7 +271,7 @@ def test_custom_location_handler(web_request):
     result = parser.parse({'foo': fields.Int()}, web_request, locations=('data', ))
     assert result['foo'] == 42
 
-def test_custom_location_handler_with_load_from(web_request):
+def test_custom_location_handler_with_data_key(web_request):
     web_request.data = {'X-Foo': 42}
     parser = Parser()
 
@@ -279,7 +279,9 @@ def test_custom_location_handler_with_load_from(web_request):
     def parse_data(req, name, arg):
         return req.data.get(name, missing)
 
-    result = parser.parse({'x_foo': fields.Int(load_from='X-Foo')},
+    data_key_kwarg = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'X-Foo'}
+    result = parser.parse({'x_foo': fields.Int(**data_key_kwarg)},
         web_request, locations=('data', ))
     assert result['x_foo'] == 42
 
@@ -383,11 +385,14 @@ def test_get_value_multidict(input_dict):
     field = fields.List(fields.Str())
     assert get_value(input_dict, 'foos', field) == ['a', 'b']
 
-def test_parse_with_load_from(web_request):
+
+def test_parse_with_data_key(web_request):
     web_request.json = {'Content-Type': 'application/json'}
 
     parser = MockRequestParser()
-    args = {'content_type': fields.Field(load_from='Content-Type')}
+    data_key_kwargs = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'Content-Type'}
+    args = {'content_type': fields.Field(**data_key_kwargs)}
     parsed = parser.parse(args, web_request, locations=('json',))
     assert parsed == {'content_type': 'application/json'}
 
@@ -403,11 +408,13 @@ def test_load_from_is_checked_after_given_key(web_request):
     parsed = parser.parse(args, web_request, locations=('json',))
     assert parsed == {'content_type': 'application/json'}
 
-def test_parse_with_load_from_retains_field_name_in_error(web_request):
+def test_parse_with_data_key_retains_field_name_in_error(web_request):
     web_request.json = {'Content-Type': 12345}
 
     parser = MockRequestParser()
-    args = {'content_type': fields.Str(load_from='Content-Type')}
+    data_key_kwargs = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'Content-Type'}
+    args = {'content_type': fields.Str(**data_key_kwargs)}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request, locations=('json',))
     assert 'Content-Type' in excinfo.value.messages
@@ -423,13 +430,15 @@ def test_parse_with_force_all(web_request, parser):
     assert parsed['foo'] == 42
     assert parsed['bar'] is missing
 
-def test_parse_nested_with_load_from(web_request):
+def test_parse_nested_with_data_key(web_request):
     parser = MockRequestParser()
     web_request.json = {
         'nested_arg': {'wrong': 'OK'}
     }
+    data_key_kwarg = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'wrong'}
     args = {
-        'nested_arg': fields.Nested({'right': fields.Field(load_from='wrong')})
+        'nested_arg': fields.Nested({'right': fields.Field(**data_key_kwarg)})
     }
 
     parsed = parser.parse(args, web_request, locations=('json',))
@@ -437,7 +446,7 @@ def test_parse_nested_with_load_from(web_request):
         'nested_arg': {'right': 'OK'}
     }
 
-def test_parse_nested_with_missing_key_and_load_from(web_request):
+def test_parse_nested_with_missing_key_and_data_key(web_request):
     parser = MockRequestParser()
 
     web_request.json = {
@@ -445,9 +454,11 @@ def test_parse_nested_with_missing_key_and_load_from(web_request):
             'payload': 'OK'
         }
     }
+    data_key_kwargs = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'miss'}
     args = {
         'nested_arg': fields.Nested({
-            'found': fields.Field(missing=None, allow_none=True, load_from='miss')
+            'found': fields.Field(missing=None, allow_none=True, **data_key_kwargs)
         })
     }
 
@@ -909,11 +920,13 @@ def test_parse_raises_validation_error_if_data_invalid(web_request, parser):
 
 
 def test_argmap2schema():
+    data_key_kwargs = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'content-type'}
     argmap = {
         'id': fields.Int(required=True),
         'title': fields.Str(),
         'description': fields.Str(),
-        'content_type': fields.Str(load_from='content-type')
+        'content_type': fields.Str(**data_key_kwargs)
     }
 
     schema_cls = argmap2schema(argmap)

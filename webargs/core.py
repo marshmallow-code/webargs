@@ -280,11 +280,16 @@ class Parser(object):
             argdict = schema.fields
             parsed = {}
             for argname, field_obj in iteritems(argdict):
-                parsed_value = self.parse_arg(argname, field_obj, req, locations)
-                # If load_from is specified on the field, try to parse from that key
-                if parsed_value is missing and field_obj.load_from:
-                    parsed_value = self.parse_arg(field_obj.load_from, field_obj, req, locations)
-                    argname = field_obj.load_from
+                if MARSHMALLOW_VERSION_INFO[0] < 3:
+                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
+                    # If load_from is specified on the field, try to parse from that key
+                    if parsed_value is missing and field_obj.load_from:
+                        parsed_value = self.parse_arg(
+                            field_obj.load_from, field_obj, req, locations)
+                        argname = field_obj.load_from
+                else:
+                    argname = field_obj.data_key or argname
+                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
                 if parsed_value is not missing:
                     parsed[argname] = parsed_value
         return parsed
