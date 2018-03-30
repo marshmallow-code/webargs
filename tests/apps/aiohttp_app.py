@@ -131,9 +131,11 @@ def echo_nested_many(request):
     return json_response(parsed)
 
 @asyncio.coroutine
-def echo_nested_many_load_from(request):
+def echo_nested_many_data_key(request):
+    data_key_kwarg = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'X-Field'}
     args = {
-        'x_field': fields.Nested({'id': fields.Int()}, load_from='X-Field', many=True)
+        'x_field': fields.Nested({'id': fields.Int()}, many=True, **data_key_kwarg)
     }
     parsed = yield from parser.parse(args, request)
     return json_response(parsed)
@@ -190,7 +192,7 @@ def create_app():
     add_route(app, ['POST'], '/echo_nested', echo_nested)
     add_route(app, ['POST'], '/echo_multiple_args', echo_multiple_args)
     add_route(app, ['POST'], '/echo_nested_many', echo_nested_many)
-    add_route(app, ['POST'], '/echo_nested_many_load_from', echo_nested_many_load_from)
+    add_route(app, ['POST'], '/echo_nested_many_data_key', echo_nested_many_data_key)
     add_route(app, ['GET'], '/echo_match_info/{mymatch}', echo_match_info)
     add_route(app, ['GET'], '/echo_method', EchoHandler().get)
     add_route(app, ['GET'], '/echo_method_view', EchoHandlerView)

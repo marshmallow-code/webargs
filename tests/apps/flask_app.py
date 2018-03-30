@@ -124,10 +124,12 @@ def echo_nested_many():
     }
     return J(parser.parse(args))
 
-@app.route('/echo_nested_many_load_from', methods=['POST'])
-def echo_nested_many_with_load_from():
+@app.route('/echo_nested_many_data_key', methods=['POST'])
+def echo_nested_many_with_data_key():
+    data_key_kwarg = {
+        'load_from' if (MARSHMALLOW_VERSION_INFO[0] < 3) else 'data_key': 'X-Field'}
     args = {
-        'x_field': fields.Nested({'id': fields.Int()}, load_from='X-Field', many=True)
+        'x_field': fields.Nested({'id': fields.Int()}, many=True, **data_key_kwarg)
     }
     return J(parser.parse(args))
 
