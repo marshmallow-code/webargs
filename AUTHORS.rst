@@ -6,6 +6,7 @@ Lead
 ----
 
 * Steven Loria <sloria1@gmail.com>
+* Jérôme Lafréchoux <https://github.com/lafrech> 
 
 Contributors (chronological)
 ----------------------------
