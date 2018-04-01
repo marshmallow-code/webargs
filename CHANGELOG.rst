@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+2.1.0 (2018-04-01)
+******************
+
+Features:
+
+* Respect ``data_key`` field argument (in marshmallow 3). Thanks
+  :user:`lafrech`.
+
 2.0.0 (2018-02-08)
 ******************
 
