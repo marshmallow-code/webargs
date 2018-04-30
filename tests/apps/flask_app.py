@@ -9,7 +9,6 @@ from webargs.core import MARSHMALLOW_VERSION_INFO
 
 class TestAppConfig:
     TESTING = True
-    DEBUG = True
 
 hello_args = {
     'name': fields.Str(missing='World', validate=lambda n: len(n) >= 3),
