@@ -84,7 +84,7 @@ def fill_in_missing_args(ret, argmap):
         ret[key] = missing
     return ret
 
-def argmap2schema(argmap, instance=False, **kwargs):
+def argmap2schema(argmap):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
     """
@@ -93,8 +93,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
         class Meta(object):
             strict = True
         attrs['Meta'] = Meta
-    cls = type(str(''), (ma.Schema,), attrs)
-    return cls if not instance else cls(**kwargs)
+    return type(str(''), (ma.Schema,), attrs)
 
 def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
