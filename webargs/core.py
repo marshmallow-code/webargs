@@ -293,11 +293,7 @@ class Parser(object):
                     parsed[argname] = parsed_value
         return parsed
 
-    def load(self, data, argmap):
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        else:
-            schema = argmap2schema(argmap)()
+    def load(self, data, schema):
         if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
             warnings.warn('It is highly recommended that you set strict=True on your schema '
                 "so that the parser's error handler will be invoked when expected.", UserWarning)
