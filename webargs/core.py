@@ -84,7 +84,7 @@ def fill_in_missing_args(ret, argmap):
         ret[key] = missing
     return ret
 
-def argmap2schema(argmap, instance=False, **kwargs):
+def argmap2schema(argmap):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
     """
@@ -93,8 +93,7 @@ def argmap2schema(argmap, instance=False, **kwargs):
         class Meta(object):
             strict = True
         attrs['Meta'] = Meta
-    cls = type(str(''), (ma.Schema,), attrs)
-    return cls if not instance else cls(**kwargs)
+    return type(str(''), (ma.Schema,), attrs)
 
 def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
@@ -294,16 +293,6 @@ class Parser(object):
                     parsed[argname] = parsed_value
         return parsed
 
-    def load(self, data, argmap):
-        if isinstance(argmap, ma.Schema):
-            schema = argmap
-        else:
-            schema = argmap2schema(argmap)()
-        if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
-            warnings.warn('It is highly recommended that you set strict=True on your schema '
-                "so that the parser's error handler will be invoked when expected.", UserWarning)
-        return schema.load(data)
-
     def _on_validation_error(self, error):
         if (isinstance(error, ma.exceptions.ValidationError) and not
                 isinstance(error, ValidationError)):
@@ -343,6 +332,9 @@ class Parser(object):
             schema = argmap(req)
         else:
             schema = argmap2schema(argmap)()
+        if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
+            warnings.warn('It is highly recommended that you set strict=True on your schema '
+                "so that the parser's error handler will be invoked when expected.", UserWarning)
         return schema
 
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
@@ -368,7 +360,7 @@ class Parser(object):
         schema = self._get_schema(argmap, req)
         try:
             parsed = self._parse_request(schema=schema, req=req, locations=locations)
-            result = self.load(parsed, schema)
+            result = schema.load(parsed)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
