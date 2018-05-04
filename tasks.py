@@ -17,13 +17,11 @@ def test(ctx, coverage=False, browse=False):
         args.extend(['--cov=webargs', '--cov-report=term', '--cov-report=html'])
 
     ignores = []
-    if sys.version_info < (3, 4, 1):
+    # aiohttp support python>=3.5
+    if sys.version_info < (3, 5):
         ignores += [
-            os.path.join('tests', 'test_aiohttpparser.py')
-        ]
-    if sys.version_info < (3, 5, 0):
-        ignores += [
-            os.path.join('tests', 'test_aiohttpparser_async_functions.py')
+            os.path.join('tests', 'test_aiohttpparser.py'),
+            os.path.join('tests', 'test_aiohttpparser_async_functions.py'),
         ]
     if ignores:
         for each in ignores:

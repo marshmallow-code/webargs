@@ -4,12 +4,14 @@ Changelog
 3.0.0 (unreleased)
 ******************
 
-Changes :
+Changes:
 
-* Remove unused ``instance`` and ``kwargs`` arguments of ``argmap2schema``
-* Remove ``Parser.load`` method (``Parser`` now calls ``Schema.load`` directly)
+* Remove unused ``instance`` and ``kwargs`` arguments of ``argmap2schema``.
+* Remove ``Parser.load`` method (``Parser`` now calls ``Schema.load`` directly).
 
-Those changes shouldn't affect most users. However, they might break custom parsers calling these methods. (:issue: `222`)
+These changes shouldn't affect most users. However, they might break custom parsers calling these methods. (:issue: `222`)
+
+* Drop support for aiohttp<3.0.0.
 
 2.1.0 (2018-04-01)
 ******************

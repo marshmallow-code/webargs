@@ -1,5 +1,4 @@
 -r dev-requirements.txt
-# webtest-aiohttp doesn't yet support aiohttp>=2.0.0
-aiohttp>=2.3.8
+aiohttp>=3.0.0
 webtest-aiohttp==2.0.0
 pytest-aiohttp>=0.3.0
