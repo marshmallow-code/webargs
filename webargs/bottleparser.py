@@ -57,7 +57,7 @@ class BottleParser(core.Parser):
         """Pull a file from the request."""
         return core.get_value(req.files, name, field)
 
-    def handle_error(self, error):
+    def handle_error(self, error, req):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """

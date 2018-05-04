@@ -109,7 +109,7 @@ class TornadoParser(core.Parser):
         """Pull a file from the request."""
         return get_value(req.files, name, field)
 
-    def handle_error(self, error):
+    def handle_error(self, error, req):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
