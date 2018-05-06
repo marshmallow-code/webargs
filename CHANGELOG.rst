@@ -1,13 +1,13 @@
 Changelog
 ---------
 
-3.0.0 (unreleased)
+3.0.0 (2018-05-06)
 ******************
 
 Changes:
 
 * *Backwards-incompatible*: Custom error handlers receive the request object as the second
-  argument. Update any decorated functions to take a `req` argument, like so:
+  argument. Update any functions decorated with ``Parser.error_handler`` to take a `req` argument, like so:
 
 .. code-block:: python
 
