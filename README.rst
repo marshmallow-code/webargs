@@ -8,6 +8,10 @@ webargs
 .. image:: https://travis-ci.org/sloria/webargs.svg?branch=pypi
     :target: https://travis-ci.org/sloria/webargs
 
+.. image:: https://img.shields.io/badge/marshmallow-3-blue.svg
+    :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
+    :alt: marshmallow 3 compatible
+
 Homepage: https://webargs.readthedocs.io/
 
 webargs is a Python library for parsing and validating HTTP request arguments, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, webapp2, Falcon, and aiohttp.
