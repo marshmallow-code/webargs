@@ -132,7 +132,7 @@ class FalconParser(core.Parser):
         raise NotImplementedError('Parsing files not yet supported by {0}'
             .format(self.__class__.__name__))
 
-    def handle_error(self, error):
+    def handle_error(self, error, req):
         """Handles errors during parsing."""
         status = status_map.get(error.status_code)
         if status is None:

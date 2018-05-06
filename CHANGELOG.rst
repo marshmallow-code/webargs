@@ -6,8 +6,23 @@ Changelog
 
 Changes:
 
-* Remove unused ``instance`` and ``kwargs`` arguments of ``argmap2schema``.
-* Remove ``Parser.load`` method (``Parser`` now calls ``Schema.load`` directly).
+* *Backwards-incompatible*: Custom error handlers receive the request object as the second
+  argument. Update any decorated functions to take a `req` argument, like so:
+
+.. code-block:: python
+
+    # 2.x
+    @parser.error_handler
+    def handle_error(error):
+        raise CustomError(error.messages)
+
+    # 3.x
+    @parser.error_handler
+    def handle_error(error, req):
+        raise CustomError(error.messages)
+
+* *Backwards-incompatible*: Remove unused ``instance`` and ``kwargs`` arguments of ``argmap2schema``.
+* *Backwards-incompatible*: Remove ``Parser.load`` method (``Parser`` now calls ``Schema.load`` directly).
 
 These changes shouldn't affect most users. However, they might break custom parsers calling these methods. (:issue:`222`)
 

@@ -186,7 +186,9 @@ The full arguments dictionary can also be validated by passing ``validate`` to :
 Error Handling
 --------------
 
-Each parser has a default error handling method. To override the error handling callback, write a function that receives an error and handles it, then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
+Each parser has a default error handling method. To override the error handling callback, write a function that
+receives an error and the request and handles the error.
+Then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
 
 .. code-block:: python
 
@@ -197,7 +199,7 @@ Each parser has a default error handling method. To override the error handling 
         pass
 
     @parser.error_handler
-    def handle_error(error):
+    def handle_error(error, req):
         raise CustomError(error.messages)
 
 Nesting Fields

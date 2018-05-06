@@ -293,7 +293,7 @@ class Parser(object):
                     parsed[argname] = parsed_value
         return parsed
 
-    def _on_validation_error(self, error):
+    def _on_validation_error(self, error, req):
         if (isinstance(error, ma.exceptions.ValidationError) and not
                 isinstance(error, ValidationError)):
             # Raise a webargs error instead
@@ -305,9 +305,9 @@ class Parser(object):
                 **getattr(error, 'kwargs', {})
             )
         if self.error_callback:
-            self.error_callback(error)
+            self.error_callback(error, req)
         else:
-            self.handle_error(error)
+            self.handle_error(error, req)
 
     def _validate_arguments(self, data, validators):
         for validator in validators:
@@ -364,7 +364,7 @@ class Parser(object):
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(error)
+            self._on_validation_error(error, req)
         finally:
             self.clear_cache()
         if force_all:
@@ -490,7 +490,7 @@ class Parser(object):
 
     def error_handler(self, func):
         """Decorator that registers a custom error handling function. The
-        function should received the raised error. Overrides
+        function should received the raised error and the request object. Overrides
         the parser's ``handle_error`` method.
 
         Example: ::
@@ -502,7 +502,7 @@ class Parser(object):
                 pass
 
             @parser.error_handler
-            def handle_error(error):
+            def handle_error(error, request):
                 raise CustomError(error)
 
         :param callable func: The error callback to register.
@@ -548,7 +548,7 @@ class Parser(object):
         """
         return missing
 
-    def handle_error(self, error):
+    def handle_error(self, error, req):
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
         """
