@@ -109,6 +109,23 @@ def test_parse_required_arg_raises_validation_error(parser, web_request):
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
     assert 'Missing data for required field.' in str(excinfo)
+    exc = excinfo.value
+    assert exc.status_code == 422
+
+# https://github.com/sloria/webargs/issues/180#issuecomment-394869645
+def test_overriding_default_status_code(web_request):
+    class MockRequestParserThatReturns400s(MockRequestParser):
+        DEFAULT_VALIDATION_STATUS = 400
+    parser = MockRequestParserThatReturns400s()
+
+    web_request.json = {}
+    args = {'foo': fields.Field(required=True)}
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(args, web_request)
+    assert 'Missing data for required field.' in str(excinfo)
+    exc = excinfo.value
+    assert exc.status_code == 400
+
 
 def test_arg_not_required_excluded_in_parsed_output(parser, web_request):
     web_request.json = {'first': 'Steve'}
