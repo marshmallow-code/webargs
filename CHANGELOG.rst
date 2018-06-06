@@ -10,6 +10,10 @@ Bug fixes:
   explicitly passed to `ValidationError` (:issue:`180`). Thanks :user:`foresmac` for
   finding this.
 
+Support:
+
+* Add "Returning HTTP 400 Responses" section to docs (:issue:`180`).
+
 3.0.0 (2018-05-06)
 ******************
 

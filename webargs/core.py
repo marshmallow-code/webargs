@@ -183,7 +183,9 @@ class Parser(object):
     """
 
     DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
+    #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
+    #: Default error message for validation errors
     DEFAULT_VALIDATION_MESSAGE = 'Invalid value.'
 
     #: Maps location => method name
