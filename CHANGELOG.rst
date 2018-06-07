@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+3.0.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Respect `Parser.DEFAULT_VALIDATION_STATUS` when a `status_code` is not
+  explicitly passed to `ValidationError` (:issue:`180`). Thanks :user:`foresmac` for
+  finding this.
+
+Support:
+
+* Add "Returning HTTP 400 Responses" section to docs (:issue:`180`).
+
 3.0.0 (2018-05-06)
 ******************
 

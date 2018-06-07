@@ -183,7 +183,9 @@ class Parser(object):
     """
 
     DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
+    #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
+    #: Default error message for validation errors
     DEFAULT_VALIDATION_MESSAGE = 'Invalid value.'
 
     #: Maps location => method name
@@ -297,12 +299,15 @@ class Parser(object):
         if (isinstance(error, ma.exceptions.ValidationError) and not
                 isinstance(error, ValidationError)):
             # Raise a webargs error instead
+            error_kwargs = getattr(error, 'kwargs', {})
+            if 'status_code' not in error_kwargs:
+                error_kwargs['status_code'] = self.DEFAULT_VALIDATION_STATUS
             error = ValidationError(
                 error.messages,
                 field_names=error.field_names,
                 fields=error.fields,
                 data=error.data,
-                **getattr(error, 'kwargs', {})
+                **error_kwargs
             )
         if self.error_callback:
             self.error_callback(error, req)

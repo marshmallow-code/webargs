@@ -215,6 +215,24 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
             structure_dict_pair(r, k, v)
         return r
 
+Returning HTTP 400 Responses
+----------------------------
+
+If you'd prefer validation errors to return status code ``400`` instead
+of ``422``, you can override ``DEFAULT_VALIDATION_STATUS`` on a :class:`Parser <webargs.core.Parser>`.
+
+
+.. code-block:: python
+
+    from webargs.falconparser import FalconParser
+
+    class Parser(FalconParser):
+        DEFAULT_VALIDATION_STATUS = 400
+
+    parser = Parser()
+    use_args = parser.use_args
+    use_kwargs = parser.use_kwargs
+
 Bulk-type Arguments
 -------------------
 
