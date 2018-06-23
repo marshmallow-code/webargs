@@ -8,7 +8,7 @@ invoke==1.0.0
 pytest==3.6.2
 tox==3.0.0
 mock==2.0.0
-webtest==2.0.29
+webtest==2.0.30
 
 # Web frameworks
 Flask>=0.10.1
