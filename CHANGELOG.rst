@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+3.0.2 (2018-07-05)
+******************
+
+Bug fixes:
+
+* Fix compatibility with marshmallow 3.0.0b12 (:issue:`242`). Thanks :user:`lafrech`.
+
 3.0.1 (2018-06-06)
 ******************
 
