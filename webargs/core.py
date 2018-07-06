@@ -299,16 +299,14 @@ class Parser(object):
         if (isinstance(error, ma.exceptions.ValidationError) and not
                 isinstance(error, ValidationError)):
             # Raise a webargs error instead
-            error_kwargs = getattr(error, 'kwargs', {})
-            if 'status_code' not in error_kwargs:
-                error_kwargs['status_code'] = self.DEFAULT_VALIDATION_STATUS
-            error = ValidationError(
-                error.messages,
-                field_names=error.field_names,
-                fields=error.fields,
-                data=error.data,
-                **error_kwargs
-            )
+            kwargs = getattr(error, 'kwargs', {})
+            kwargs['field_names'] = error.field_names
+            kwargs['data'] = error.data
+            if MARSHMALLOW_VERSION_INFO[0] < 3:
+                kwargs['fields'] = error.fields
+            if 'status_code' not in kwargs:
+                kwargs['status_code'] = self.DEFAULT_VALIDATION_STATUS
+            error = ValidationError(error.messages, **kwargs)
         if self.error_callback:
             self.error_callback(error, req)
         else:
