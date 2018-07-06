@@ -22,3 +22,6 @@ falcon>=0.3.0
 # Syntax checking
 flake8==3.5.0
 flake8-quotes==1.0.0
+
+# Install this package in development mode
+-e '.'

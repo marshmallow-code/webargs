@@ -33,9 +33,8 @@ Setting Up for Local Development
     # After activating your virtualenv
     $ pip install -r dev-requirements.txt
 
-3. Install webargs in develop mode. ::
-
-   $ pip install -e .
+    # If you're using a Python 3 environment
+    $ pip install -r dev-requirements-py3.txt
 
 Git Branch Structure
 ++++++++++++++++++++
