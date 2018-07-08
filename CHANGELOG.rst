@@ -10,6 +10,12 @@ Bug fixes:
   ``webargs.asyncparser`` to fix compatibility with Python 3.7
   (:issue:`240`). Thanks :user:`Reskov` for the catch and patch.
 
+
+Other changes:
+
+* *Backwards-incompatible*: Drop support for Python 3.4 (:issue:`243`). Python 2.7 and
+  >=3.5 are supported.
+
 3.0.2 (2018-07-05)
 ******************
 

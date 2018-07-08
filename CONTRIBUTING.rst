@@ -82,7 +82,7 @@ To run all tests: ::
 
     $ invoke test
 
-To run tests on Python 2.7, 3.4, 3.5, and 3.6 virtual environments (must have each interpreter installed): ::
+To run tests on Python 2.7, 3.5, 3.6, and 3.7 virtual environments (must have each interpreter installed): ::
 
     $ tox
 

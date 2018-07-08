@@ -10,15 +10,14 @@ build_dir = os.path.join(docs_dir, '_build')
 
 @task
 def test(ctx, coverage=False, browse=False):
-    flake(ctx)
     import pytest
+    flake(ctx)
     args = []
     if coverage:
         args.extend(['--cov=webargs', '--cov-report=term', '--cov-report=html'])
 
     ignores = []
-    # aiohttp support python>=3.5
-    if sys.version_info < (3, 5):
+    if sys.version_info < (3, ):
         ignores += [
             os.path.join('tests', 'test_aiohttpparser.py'),
             os.path.join('tests', 'test_aiohttpparser_async_functions.py'),
@@ -36,20 +35,16 @@ def flake(ctx):
     """Run flake8 on codebase."""
     cmd = 'flake8 .'
     excludes = []
-    if sys.version_info < (3, 4, 1):
-        excludes = [
-            os.path.join('tests', 'apps', 'aiohttp_app.py'),
-            os.path.join('tests', 'test_aiohttparser.py'),
-            os.path.join('webargs', 'asyncparser.py'),
-            os.path.join('webargs', 'async_decorators34.py'),
-            os.path.join('webargs', 'aiohttpparser.py'),
-            os.path.join('examples', 'annotations_example.py'),
-            'build',
-        ]
-    if sys.version_info < (3, 5, 0):
+    if sys.version_info < (3, ):
         excludes += [
             os.path.join('webargs', 'async_decorators.py'),
             os.path.join('tests', 'test_aiohttpparser_async_functions.py'),
+            os.path.join('tests', 'apps', 'aiohttp_app.py'),
+            os.path.join('tests', 'test_aiohttparser.py'),
+            os.path.join('webargs', 'asyncparser.py'),
+            os.path.join('webargs', 'aiohttpparser.py'),
+            os.path.join('examples', 'annotations_example.py'),
+            'build',
         ]
     if excludes:
         cmd += ' --exclude={0}'.format(','.join(excludes))
