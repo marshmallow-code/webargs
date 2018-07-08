@@ -28,46 +28,45 @@ api = Api(app)
 class IndexResource(Resource):
     """A welcome page."""
 
-    hello_args = {
-        'name': fields.Str(missing='Friend')
-    }
+    hello_args = {"name": fields.Str(missing="Friend")}
 
     @use_args(hello_args)
     def get(self, args):
-        return {'message': 'Welcome, {}!'.format(args['name'])}
+        return {"message": "Welcome, {}!".format(args["name"])}
 
 
 class AddResource(Resource):
     """An addition endpoint."""
 
-    add_args = {
-        'x': fields.Float(required=True),
-        'y': fields.Float(required=True),
-    }
+    add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
 
     @use_kwargs(add_args)
     def post(self, x, y):
         """An addition endpoint."""
-        return {'result': x + y}
+        return {"result": x + y}
+
 
 class DateAddResource(Resource):
 
     dateadd_args = {
-        'value': fields.Date(required=False),
-        'addend': fields.Int(required=True, validate=validate.Range(min=1)),
-        'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
+        "value": fields.Date(required=False),
+        "addend": fields.Int(required=True, validate=validate.Range(min=1)),
+        "unit": fields.Str(
+            missing="days", validate=validate.OneOf(["minutes", "days"])
+        ),
     }
 
     @use_kwargs(dateadd_args)
     def post(self, value, addend, unit):
         """A date adder endpoint."""
         value = value or dt.datetime.utcnow()
-        if unit == 'minutes':
+        if unit == "minutes":
             delta = dt.timedelta(minutes=addend)
         else:
             delta = dt.timedelta(days=addend)
         result = value + delta
-        return {'result': result.isoformat()}
+        return {"result": result.isoformat()}
+
 
 # This error handler is necessary for usage with Flask-RESTful
 @parser.error_handler
@@ -77,8 +76,9 @@ def handle_request_parsing_error(err, req):
     """
     abort(422, errors=err.messages)
 
-if __name__ == '__main__':
-    api.add_resource(IndexResource, '/')
-    api.add_resource(AddResource, '/add')
-    api.add_resource(DateAddResource, '/dateadd')
+
+if __name__ == "__main__":
+    api.add_resource(IndexResource, "/")
+    api.add_resource(AddResource, "/add")
+    api.add_resource(DateAddResource, "/dateadd")
     app.run(port=5001, debug=True)

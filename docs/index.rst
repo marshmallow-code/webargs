@@ -22,16 +22,16 @@ webargs is a Python library for parsing HTTP request arguments, with built-in su
 
     app = Flask(__name__)
 
-    hello_args = {
-        'name': fields.Str(required=True)
-    }
+    hello_args = {"name": fields.Str(required=True)}
 
-    @app.route('/')
+
+    @app.route("/")
     @use_args(hello_args)
     def index(args):
-        return 'Hello ' + args['name']
+        return "Hello " + args["name"]
 
-    if __name__ == '__main__':
+
+    if __name__ == "__main__":
         app.run()
 
     # curl http://localhost:5000/\?name\='World'

@@ -6,6 +6,7 @@ import functools
 import inspect
 import logging
 import warnings
+
 try:
     import simplejson as json
 except ImportError:
@@ -19,18 +20,18 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = [
-    'WebargsError',
-    'ValidationError',
-    'argmap2schema',
-    'is_multiple',
-    'Parser',
-    'get_value',
-    'missing',
-    'parse_json',
+    "WebargsError",
+    "ValidationError",
+    "argmap2schema",
+    "is_multiple",
+    "Parser",
+    "get_value",
+    "missing",
+    "parse_json",
 ]
 
 MARSHMALLOW_VERSION_INFO = tuple(
-    [int(part) for part in ma.__version__.split('.') if part.isdigit()]
+    [int(part) for part in ma.__version__.split(".") if part.isdigit()]
 )
 
 DEFAULT_VALIDATION_STATUS = 422
@@ -38,6 +39,7 @@ DEFAULT_VALIDATION_STATUS = 422
 
 class WebargsError(Exception):
     """Base class for all webargs-related errors."""
+
     pass
 
 
@@ -46,7 +48,10 @@ class ValidationError(WebargsError, ma.exceptions.ValidationError):
     `marshmallow.ValidationError`, with the addition of the ``status_code`` and
     ``headers`` arguments.
     """
-    def __init__(self, message, status_code=DEFAULT_VALIDATION_STATUS, headers=None, **kwargs):
+
+    def __init__(
+        self, message, status_code=DEFAULT_VALIDATION_STATUS, headers=None, **kwargs
+    ):
         self.status_code = status_code
         self.headers = headers
         ma.exceptions.ValidationError.__init__(
@@ -54,23 +59,26 @@ class ValidationError(WebargsError, ma.exceptions.ValidationError):
         )
 
     def __repr__(self):
-        return 'ValidationError({0!r}, status_code={1}, headers={2})'.format(
+        return "ValidationError({0!r}, status_code={1}, headers={2})".format(
             self.args[0], self.status_code, self.headers
         )
+
 
 def _callable_or_raise(obj):
     """Makes sure an object is callable if it is not ``None``. If not
     callable, a ValueError is raised.
     """
     if obj and not callable(obj):
-        raise ValueError('{0!r} is not callable.'.format(obj))
+        raise ValueError("{0!r} is not callable.".format(obj))
     else:
         return obj
 
+
 def get_field_names_for_argmap(argmap):
     if isinstance(argmap, ma.Schema):
-        all_field_names = set([fname for fname, fobj in iteritems(argmap.fields)
-            if not fobj.dump_only])
+        all_field_names = set(
+            [fname for fname, fobj in iteritems(argmap.fields) if not fobj.dump_only]
+        )
     else:
         all_field_names = set(argmap.keys())
     return all_field_names
@@ -84,24 +92,29 @@ def fill_in_missing_args(ret, argmap):
         ret[key] = missing
     return ret
 
+
 def argmap2schema(argmap):
     """Generate a `marshmallow.Schema` class given a dictionary of argument
     names to `Fields <marshmallow.fields.Field>`.
     """
     attrs = argmap.copy()
     if MARSHMALLOW_VERSION_INFO[0] < 3:
+
         class Meta(object):
             strict = True
-        attrs['Meta'] = Meta
-    return type(str(''), (ma.Schema,), attrs)
+
+        attrs["Meta"] = Meta
+    return type(str(""), (ma.Schema,), attrs)
+
 
 def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
-    return isinstance(field, ma.fields.List) and not hasattr(field, 'delimiter')
+    return isinstance(field, ma.fields.List) and not hasattr(field, "delimiter")
 
 
 def get_mimetype(content_type):
-    return content_type.split(';')[0].strip() if content_type else None
+    return content_type.split(";")[0].strip() if content_type else None
+
 
 # Adapted from werkzeug: https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
 def is_json(mimetype):
@@ -111,13 +124,14 @@ def is_json(mimetype):
     """
     if not mimetype:
         return False
-    if ';' in mimetype:  # Allow Content-Type header to be passed
+    if ";" in mimetype:  # Allow Content-Type header to be passed
         mimetype = get_mimetype(mimetype)
-    if mimetype == 'application/json':
+    if mimetype == "application/json":
         return True
-    if mimetype.startswith('application/') and mimetype.endswith('+json'):
+    if mimetype.startswith("application/") and mimetype.endswith("+json"):
         return True
     return False
+
 
 def get_value(data, name, field, allow_many_nested=False):
     """Get a value from a dictionary. Handles ``MultiDict`` types when
@@ -136,15 +150,15 @@ def get_value(data, name, field, allow_many_nested=False):
         if is_collection(data):
             return data
 
-    if not hasattr(data, 'get'):
+    if not hasattr(data, "get"):
         return missing_value
 
     multiple = is_multiple(field)
     val = data.get(name, missing_value)
     if multiple and val is not missing:
-        if hasattr(data, 'getlist'):
+        if hasattr(data, "getlist"):
             return data.getlist(name)
-        elif hasattr(data, 'getall'):
+        elif hasattr(data, "getall"):
             return data.getall(name)
         elif isinstance(val, (list, tuple)):
             return val
@@ -154,10 +168,12 @@ def get_value(data, name, field, allow_many_nested=False):
             return [val]
     return val
 
+
 def parse_json(s):
     if isinstance(s, bytes):
-        s = s.decode('utf-8')
+        s = s.decode("utf-8")
     return json.loads(s)
+
 
 def _ensure_list_of_callables(obj):
     if obj:
@@ -166,10 +182,13 @@ def _ensure_list_of_callables(obj):
         elif callable(obj):
             validators = [obj]
         else:
-            raise ValueError('{0!r} is not a callable or list of callables.'.format(obj))
+            raise ValueError(
+                "{0!r} is not a callable or list of callables.".format(obj)
+            )
     else:
         validators = []
     return validators
+
 
 class Parser(object):
     """Base parser class that provides high-level implementation for parsing
@@ -182,21 +201,21 @@ class Parser(object):
     :param callable error_handler: Custom error handler function.
     """
 
-    DEFAULT_LOCATIONS = ('querystring', 'form', 'json',)
+    DEFAULT_LOCATIONS = ("querystring", "form", "json")
     #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
-    DEFAULT_VALIDATION_MESSAGE = 'Invalid value.'
+    DEFAULT_VALIDATION_MESSAGE = "Invalid value."
 
     #: Maps location => method name
     __location_map__ = {
-        'json': 'parse_json',
-        'querystring': 'parse_querystring',
-        'query': 'parse_querystring',
-        'form': 'parse_form',
-        'headers': 'parse_headers',
-        'cookies': 'parse_cookies',
-        'files': 'parse_files',
+        "json": "parse_json",
+        "querystring": "parse_querystring",
+        "query": "parse_querystring",
+        "form": "parse_form",
+        "headers": "parse_headers",
+        "cookies": "parse_cookies",
+        "files": "parse_files",
     }
 
     def __init__(self, locations=None, error_handler=None):
@@ -216,7 +235,7 @@ class Parser(object):
         given = set(locations)
         invalid_locations = given - valid_locations
         if len(invalid_locations):
-            msg = 'Invalid locations arguments: {0}'.format(list(invalid_locations))
+            msg = "Invalid locations arguments: {0}".format(list(invalid_locations))
             raise ValueError(msg)
         return locations
 
@@ -249,7 +268,7 @@ class Parser(object):
         :return: The unvalidated argument value or `missing` if the value cannot be found
             on the request.
         """
-        location = field.metadata.get('location')
+        location = field.metadata.get("location")
         if location:
             locations_to_check = self._validated_locations([location])
         else:
@@ -265,15 +284,17 @@ class Parser(object):
     def _parse_request(self, schema, req, locations):
         """Return a parsed arguments dictionary for the current request."""
         if schema.many:
-            assert 'json' in locations, 'schema.many=True is only supported for JSON location'
+            assert (
+                "json" in locations
+            ), "schema.many=True is only supported for JSON location"
             # The ad hoc Nested field is more like a workaround or a helper, and it servers its
             # purpose fine. However, if somebody has a desire to re-design the support of
             # bulk-type arguments, go ahead.
             parsed = self.parse_arg(
-                name='json',
+                name="json",
                 field=ma.fields.Nested(schema, many=True),
                 req=req,
-                locations=locations
+                locations=locations,
             )
             if parsed is missing:
                 parsed = []
@@ -286,7 +307,8 @@ class Parser(object):
                     # If load_from is specified on the field, try to parse from that key
                     if parsed_value is missing and field_obj.load_from:
                         parsed_value = self.parse_arg(
-                            field_obj.load_from, field_obj, req, locations)
+                            field_obj.load_from, field_obj, req, locations
+                        )
                         argname = field_obj.load_from
                 else:
                     argname = field_obj.data_key or argname
@@ -296,16 +318,17 @@ class Parser(object):
         return parsed
 
     def _on_validation_error(self, error, req):
-        if (isinstance(error, ma.exceptions.ValidationError) and not
-                isinstance(error, ValidationError)):
+        if isinstance(error, ma.exceptions.ValidationError) and not isinstance(
+            error, ValidationError
+        ):
             # Raise a webargs error instead
-            kwargs = getattr(error, 'kwargs', {})
-            kwargs['field_names'] = error.field_names
-            kwargs['data'] = error.data
+            kwargs = getattr(error, "kwargs", {})
+            kwargs["field_names"] = error.field_names
+            kwargs["data"] = error.data
             if MARSHMALLOW_VERSION_INFO[0] < 3:
-                kwargs['fields'] = error.fields
-            if 'status_code' not in kwargs:
-                kwargs['status_code'] = self.DEFAULT_VALIDATION_STATUS
+                kwargs["fields"] = error.fields
+            if "status_code" not in kwargs:
+                kwargs["status_code"] = self.DEFAULT_VALIDATION_STATUS
             error = ValidationError(error.messages, **kwargs)
         if self.error_callback:
             self.error_callback(error, req)
@@ -336,8 +359,11 @@ class Parser(object):
         else:
             schema = argmap2schema(argmap)()
         if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
-            warnings.warn('It is highly recommended that you set strict=True on your schema '
-                "so that the parser's error handler will be invoked when expected.", UserWarning)
+            warnings.warn(
+                "It is highly recommended that you set strict=True on your schema "
+                "so that the parser's error handler will be invoked when expected.",
+                UserWarning,
+            )
         return schema
 
     def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
@@ -357,7 +383,7 @@ class Parser(object):
          :return: A dictionary of parsed arguments
         """
         req = req if req is not None else self.get_default_request()
-        assert req is not None, 'Must pass req object'
+        assert req is not None, "Must pass req object"
         data = None
         validators = _ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
@@ -399,7 +425,9 @@ class Parser(object):
         """
         return None
 
-    def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
+    def use_args(
+        self, argmap, req=None, locations=None, as_kwargs=False, validate=None
+    ):
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -438,18 +466,24 @@ class Parser(object):
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
                 # NOTE: At this point, argmap may be a Schema, or a callable
-                parsed_args = self.parse(argmap, req=req_obj,
-                                         locations=locations, validate=validate,
-                                         force_all=force_all)
+                parsed_args = self.parse(
+                    argmap,
+                    req=req_obj,
+                    locations=locations,
+                    validate=validate,
+                    force_all=force_all,
+                )
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(*args, **kwargs)
                 else:
                     # Add parsed_args after other positional arguments
-                    new_args = args + (parsed_args, )
+                    new_args = args + (parsed_args,)
                     return func(*new_args, **kwargs)
+
             wrapper.__wrapped__ = func
             return wrapper
+
         return decorator
 
     def use_kwargs(self, *args, **kwargs):
@@ -467,7 +501,7 @@ class Parser(object):
 
         Receives the same ``args`` and ``kwargs`` as :meth:`use_args`.
         """
-        kwargs['as_kwargs'] = True
+        kwargs["as_kwargs"] = True
         return self.use_args(*args, **kwargs)
 
     def location_handler(self, name):
@@ -486,9 +520,11 @@ class Parser(object):
 
         :param str name: The name of the location to register.
         """
+
         def decorator(func):
             self.__location_map__[name] = func
             return func
+
         return decorator
 
     def error_handler(self, func):

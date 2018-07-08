@@ -19,15 +19,17 @@ class AsyncParser(core.Parser):
     @asyncio.coroutine
     def _parse_request(self, schema, req, locations):
         if schema.many:
-            assert 'json' in locations, 'schema.many=True is only supported for JSON location'
+            assert (
+                "json" in locations
+            ), "schema.many=True is only supported for JSON location"
             # The ad hoc Nested field is more like a workaround or a helper, and it servers its
             # purpose fine. However, if somebody has a desire to re-design the support of
             # bulk-type arguments, go ahead.
             parsed = yield from self.parse_arg(
-                name='json',
+                name="json",
                 field=ma.fields.Nested(schema, many=True),
                 req=req,
-                locations=locations
+                locations=locations,
             )
             if parsed is missing:
                 parsed = []
@@ -36,15 +38,20 @@ class AsyncParser(core.Parser):
             parsed = {}
             for argname, field_obj in argdict.items():
                 if core.MARSHMALLOW_VERSION_INFO[0] < 3:
-                    parsed_value = yield from self.parse_arg(argname, field_obj, req, locations)
+                    parsed_value = yield from self.parse_arg(
+                        argname, field_obj, req, locations
+                    )
                     # If load_from is specified on the field, try to parse from that key
                     if parsed_value is missing and field_obj.load_from:
-                        parsed_value = yield from self.parse_arg(field_obj.load_from,
-                                                                 field_obj, req, locations)
+                        parsed_value = yield from self.parse_arg(
+                            field_obj.load_from, field_obj, req, locations
+                        )
                         argname = field_obj.load_from
                 else:
                     argname = field_obj.data_key or argname
-                    parsed_value = yield from self.parse_arg(argname, field_obj, req, locations)
+                    parsed_value = yield from self.parse_arg(
+                        argname, field_obj, req, locations
+                    )
                 if parsed_value is not missing:
                     parsed[argname] = parsed_value
         return parsed
@@ -57,12 +64,14 @@ class AsyncParser(core.Parser):
         Receives the same arguments as `webargs.core.Parser.parse`.
         """
         req = req if req is not None else self.get_default_request()
-        assert req is not None, 'Must pass req object'
+        assert req is not None, "Must pass req object"
         data = None
         validators = core._ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
         try:
-            parsed = yield from self._parse_request(schema=schema, req=req, locations=locations)
+            parsed = yield from self._parse_request(
+                schema=schema, req=req, locations=locations
+            )
             result = schema.load(parsed)
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
@@ -74,7 +83,9 @@ class AsyncParser(core.Parser):
             core.fill_in_missing_args(data, schema)
         return data
 
-    def use_args(self, argmap, req=None, locations=None, as_kwargs=False, validate=None):
+    def use_args(
+        self, argmap, req=None, locations=None, as_kwargs=False, validate=None
+    ):
         """Decorator that injects parsed arguments into a view function or method.
 
         Receives the same arguments as `webargs.core.Parser.use_args`.
@@ -90,6 +101,7 @@ class AsyncParser(core.Parser):
             req_ = request_obj
 
             if inspect.iscoroutinefunction(func):
+
                 @functools.wraps(func)
                 async def wrapper(*args, **kwargs):
                     req_obj = req_
@@ -100,17 +112,23 @@ class AsyncParser(core.Parser):
                     if not req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
-                    parsed_args = await self.parse(argmap,
-                                                        req=req_obj, locations=locations,
-                                                        validate=validate, force_all=force_all)
+                    parsed_args = await self.parse(
+                        argmap,
+                        req=req_obj,
+                        locations=locations,
+                        validate=validate,
+                        force_all=force_all,
+                    )
                     if as_kwargs:
                         kwargs.update(parsed_args)
                         return await func(*args, **kwargs)
                     else:
                         # Add parsed_args after other positional arguments
-                        new_args = args + (parsed_args, )
+                        new_args = args + (parsed_args,)
                         return await func(*new_args, **kwargs)
+
             else:
+
                 @functools.wraps(func)
                 def wrapper(*args, **kwargs):
                     req_obj = req_
@@ -121,18 +139,24 @@ class AsyncParser(core.Parser):
                     if not req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
-                    parsed_args = yield from self.parse(argmap,
-                                                        req=req_obj, locations=locations,
-                                                        validate=validate, force_all=force_all)
+                    parsed_args = yield from self.parse(
+                        argmap,
+                        req=req_obj,
+                        locations=locations,
+                        validate=validate,
+                        force_all=force_all,
+                    )
                     if as_kwargs:
                         kwargs.update(parsed_args)
                         return func(*args, **kwargs)
                     else:
                         # Add parsed_args after other positional arguments
-                        new_args = args + (parsed_args, )
+                        new_args = args + (parsed_args,)
                         return func(*new_args, **kwargs)
+
             wrapper.__wrapped__ = func
             return wrapper
+
         return decorator
 
     def use_kwargs(self, *args, **kwargs):
@@ -145,7 +169,7 @@ class AsyncParser(core.Parser):
 
     @asyncio.coroutine
     def parse_arg(self, name, field, req, locations=None):
-        location = field.metadata.get('location')
+        location = field.metadata.get("location")
         if location:
             locations_to_check = self._validated_locations([location])
         else:

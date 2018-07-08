@@ -20,12 +20,13 @@ When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decor
     from webargs import fields
     from webargs.flaskparser import use_args
 
-    @app.route('/user/<int:uid>')
-    @use_args({'per_page': fields.Int()})
+
+    @app.route("/user/<int:uid>")
+    @use_args({"per_page": fields.Int()})
     def user_detail(args, uid):
-        return ('The user page for user {uid}, '
-                'showing {per_page} posts.').format(uid=uid,
-                                                    per_page=args['per_page'])
+        return ("The user page for user {uid}, " "showing {per_page} posts.").format(
+            uid=uid, per_page=args["per_page"]
+        )
 
 Error Handling
 ++++++++++++++
@@ -38,18 +39,17 @@ Here is an example error handler that returns validation messages to the client 
 
     from flask import jsonify
 
+
     @app.errorhandler(422)
     def handle_unprocessable_entity(err):
         # webargs attaches additional metadata to the `data` attribute
-        exc = getattr(err, 'exc')
+        exc = getattr(err, "exc")
         if exc:
             # Get validations from the ValidationError object
             messages = exc.messages
         else:
-            messages = ['Invalid request']
-        return jsonify({
-            'messages': messages,
-        }), 422
+            messages = ["Invalid request"]
+        return jsonify({"messages": messages}), 422
 
 URL Matches
 +++++++++++
@@ -60,10 +60,11 @@ The `FlaskParser` supports parsing values from a request's ``view_args``.
 
     from webargs.flaskparser import use_args
 
-    @app.route('/greeting/<name>/')
-    @use_args({'name': fields.Str(location='view_args')})
+
+    @app.route("/greeting/<name>/")
+    @use_args({"name": fields.Str(location="view_args")})
     def greeting(args, **kwargs):
-        return 'Hello {}'.format(args['name'])
+        return "Hello {}".format(args["name"])
 
 
 Django
@@ -87,15 +88,16 @@ When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` dec
   from webargs.djangoparser import use_args
 
   account_args = {
-    'username': fields.Str(required=True),
-    'password': fields.Str(required=True),
+      "username": fields.Str(required=True),
+      "password": fields.Str(required=True),
   }
+
 
   @use_args(account_args)
   def login_user(request, args):
-      if request.method == 'POST':
-          login(args['username'], args['password'])
-      return HttpResponse('Login page')
+      if request.method == "POST":
+          login(args["username"], args["password"])
+      return HttpResponse("Login page")
 
 **Class-based Views**
 
@@ -106,19 +108,14 @@ When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` dec
     from webargs import fields
     from webargs.djangoparser import use_args
 
-    blog_args = {
-        'title': fields.Str(),
-        'author': fields.Str(),
-    }
+    blog_args = {"title": fields.Str(), "author": fields.Str()}
+
 
     class BlogPostView(View):
-
         @use_args(blog_args)
         def get(self, request, args):
-          blog_post = Post.objects.get(title__iexact=args['title'],
-                                       author=args['author'])
-          return render_to_response('post_template.html',
-                                    {'post': blog_post})
+            blog_post = Post.objects.get(title__iexact=args["title"], author=args["author"])
+            return render_to_response("post_template.html", {"post": blog_post})
 
 Error Handling
 ++++++++++++++
@@ -131,15 +128,15 @@ The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Pa
 
     from webargs import fields, ValidationError
 
-    argmap = {
-        'name': fields.Str(required=True)
-    }
+    argmap = {"name": fields.Str(required=True)}
+
+
     def index(request):
         try:
             args = parser.parse(argmap, request)
         except ValidationError as err:
             return JsonResponse(err.messages, status=err.status_code)
-        return JsonResponse({'message': 'Hello {name}'.format(name=name)})
+        return JsonResponse({"message": "Hello {name}".format(name=name)})
 
 Tornado
 -------
@@ -159,20 +156,15 @@ The :class:`webargs.tornadoparser.TornadoParser` parses arguments from a :class:
 
     class HelloHandler(tornado.web.RequestHandler):
 
-        hello_args = {
-            'name': fields.Str()
-        }
+        hello_args = {"name": fields.Str()}
 
         def post(self, id):
             reqargs = parser.parse(self.hello_args, self.request)
-            response = {
-                'message': 'Hello {}'.format(reqargs['name'])
-            }
+            response = {"message": "Hello {}".format(reqargs["name"])}
             self.write(response)
 
-    application = tornado.web.Application([
-        (r"/hello/([0-9]+)", HelloHandler),
-    ], debug=True)
+
+    application = tornado.web.Application([(r"/hello/([0-9]+)", HelloHandler)], debug=True)
 
     if __name__ == "__main__":
         application.listen(8888)
@@ -189,18 +181,15 @@ When using the :meth:`use_args <webargs.tornadoparser.TornadoParser.use_args>` d
     from webargs import fields
     from webargs.tornadoparser import use_args
 
-    class HelloHandler(tornado.web.RequestHandler):
 
-        @use_args({'name': fields.Str()})
+    class HelloHandler(tornado.web.RequestHandler):
+        @use_args({"name": fields.Str()})
         def post(self, id, reqargs):
-            response = {
-                'message': 'Hello {}'.format(reqargs['name'])
-            }
+            response = {"message": "Hello {}".format(reqargs["name"])}
             self.write(response)
 
-    application = tornado.web.Application([
-        (r"/hello/([0-9]+)", HelloHandler),
-    ], debug=True)
+
+    application = tornado.web.Application([(r"/hello/([0-9]+)", HelloHandler)], debug=True)
 
 As with the other parser modules, :meth:`use_kwargs <webargs.tornadoparser.TornadoParser.use_kwargs>` will add keyword arguments to the view callable.
 
@@ -215,15 +204,15 @@ Here is how you could write the error messages to a JSON response.
 
     from tornado.web import RequestHandler
 
-    class MyRequestHandler(RequestHandler):
 
+    class MyRequestHandler(RequestHandler):
         def write_error(self, status_code, **kwargs):
             """Write errors as JSON."""
-            self.set_header('Content-Type', 'application/json')
-            if 'exc_info' in kwargs:
-                etype, value, traceback = kwargs['exc_info']
-                if hasattr(value, 'messages'):
-                    self.write({'errors': value.messages})
+            self.set_header("Content-Type", "application/json")
+            if "exc_info" in kwargs:
+                etype, value, traceback = kwargs["exc_info"]
+                if hasattr(value, "messages"):
+                    self.write({"errors": value.messages})
                     self.finish()
 
 Pyramid
@@ -242,11 +231,15 @@ When using the :meth:`use_args <webargs.pyramidparser.PyramidParser.use_args>` d
     from webargs import fields
     from webargs.pyramidparser import use_args
 
-    @use_args({'per_page': fields.Int()})
+
+    @use_args({"uid": fields.Str(), "per_page": fields.Int()})
     def user_detail(request, args):
-        return Response('The user page for user {uid}, '
-                'showing {per_page} posts.').format(uid=uid,
-                                                    per_page=args['per_page']))
+        uid = args["uid"]
+        return Response(
+            "The user page for user {uid}, showing {per_page} posts.".format(
+                uid=uid, per_page=args["per_page"]
+            )
+        )
 
 As with the other parser modules, :meth:`use_kwargs <webargs.pyramidparser.PyramidParser.use_kwargs>` will add keyword arguments to the view callable.
 
@@ -260,9 +253,10 @@ The `PyramidParser` supports parsing values from a request's matchdict.
     from pyramid.response import Response
     from webargs.pyramidparser import use_args
 
-    @parser.use_args({'mymatch': fields.Int()}, locations=('matchdict',))
+
+    @use_args({"mymatch": fields.Int()}, locations=("matchdict",))
     def matched(request, args):
-        return Response('The value for mymatch is {}'.format(args['mymatch'])))
+        return Response("The value for mymatch is {}".format(args["mymatch"]))
 
 Falcon
 ------
@@ -281,18 +275,18 @@ When using the :meth:`use_args <webargs.falconparser.FalconParser.use_args>` dec
     from webargs import fields
     from webargs.falconparser import use_args
 
+
     class BlogResource:
-        request_args = {
-            'title': fields.Str(required=True)
-        }
+        request_args = {"title": fields.Str(required=True)}
 
         @use_args(request_args)
         def on_post(self, req, resp, args, post_id):
-            content = args['title']
+            content = args["title"]
             # ...
 
+
     api = application = falcon.API()
-    api.add_route('/blogs/{post_id}')
+    api.add_route("/blogs/{post_id}")
 
 As with the other parser modules, :meth:`use_kwargs <webargs.falconparser.FalconParser.use_kwargs>` will add keyword arguments to your resource methods.
 
@@ -307,18 +301,20 @@ You can easily implement hooks by using `parser.parse <webargs.falconparser.Falc
     from webargs import fields
     from webargs.falconparser import parser
 
+
     def add_args(argmap, **kwargs):
         def hook(req, resp, params):
             parsed_args = parser.parse(argmap, req=req, **kwargs)
-            req.context['args'] = parsed_args
+            req.context["args"] = parsed_args
+
         return hook
 
-    @falcon.before(add_args({'page': fields.Int(location='query')}))
-    class AuthorResource:
 
+    @falcon.before(add_args({"page": fields.Int(location="query")}))
+    class AuthorResource:
         def on_get(self, req, resp):
-            args = req.context['args']
-            page = args.get('page')
+            args = req.context["args"]
+            page = args.get("page")
             # ...
 
 aiohttp
@@ -338,14 +334,12 @@ The `parse <webargs.aiohttpparser.AIOHTTPParser.parse>` method of `AIOHTTPParser
     from webargs import fields
     from webargs.aiohttpparser import parser
 
-    handler_args = {
-        'name': fields.Str(missing='World')
-    }
+    handler_args = {"name": fields.Str(missing="World")}
+
+
     async def handler(request):
         args = await parser.parse(handler_args, request)
-        return web.Response(
-            body='Hello, {}'.format(args['name']).encode('utf-8')
-        )
+        return web.Response(body="Hello, {}".format(args["name"]).encode("utf-8"))
 
 
 Decorator Usage
@@ -361,13 +355,15 @@ When using the :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` d
     from webargs import fields
     from webargs.aiohttpparser import use_args
 
-    @use_args({'content': fields.Str(required=True)})
+
+    @use_args({"content": fields.Str(required=True)})
     async def create_comment(request, args):
-        content = args['content']
+        content = args["content"]
         # ...
 
+
     app = web.Application()
-    app.router.add_route('POST', '/comments/', create_comment)
+    app.router.add_route("POST", "/comments/", create_comment)
 
 As with the other parser modules, :meth:`use_kwargs <webargs.aiohttpparser.AIOHTTPParser.use_kwargs>` will add keyword arguments to your resource methods.
 
@@ -385,24 +381,20 @@ The :meth:`use_args <webargs.aiohttpparser.AIOHTTPParser.use_args>` and :meth:`u
     from webargs import fields
     from webargs.aiohttpparser import use_kwargs
 
-    hello_args = {
-        'name': fields.Str(missing='World')
-    }
+    hello_args = {"name": fields.Str(missing="World")}
 
     # The following are equivalent
+
 
     @asyncio.coroutine
     @use_kwargs(hello_args)
     def hello(request, name):
-        return web.Response(
-            body='Hello, {}'.format(name).encode('utf-8')
-        )
+        return web.Response(body="Hello, {}".format(name).encode("utf-8"))
+
 
     @use_kwargs(hello_args)
     async def hello(request, name):
-        return web.Response(
-            body='Hello, {}'.format(name).encode('utf-8')
-        )
+        return web.Response(body="Hello, {}".format(name).encode("utf-8"))
 
 URL Matches
 +++++++++++
@@ -414,14 +406,14 @@ The `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser>` supports parsing value
     from aiohttp import web
     from webargs.aiohttpparser import use_args
 
-    @parser.use_args({'slug': fields.Str(location='match_info')})
+
+    @parser.use_args({"slug": fields.Str(location="match_info")})
     def article_detail(request, args):
-        return web.Response(
-            body='Slug: {}'.format(args['slug']).encode('utf-8')
-        )
+        return web.Response(body="Slug: {}".format(args["slug"]).encode("utf-8"))
+
 
     app = web.Application()
-    app.router.add_route('GET', '/articles/{slug}', article_detail)
+    app.router.add_route("GET", "/articles/{slug}", article_detail)
 
 
 Bottle
@@ -439,11 +431,11 @@ The preferred way to apply decorators to Bottle routes is using the
 
   from bottle import route
 
-  user_args = {
-      'name': fields.Str(missing='Friend')
-  }
-  @route('/users/<_id:int>', method='GET', apply=use_args(user_args))
+  user_args = {"name": fields.Str(missing="Friend")}
+
+
+  @route("/users/<_id:int>", method="GET", apply=use_args(user_args))
   def users(args, _id):
       """A welcome page.
       """
-      return {'message': 'Welcome, {}!'.format(args['name']), '_id': _id}
+      return {"message": "Welcome, {}!".format(args["name"]), "_id": _id}

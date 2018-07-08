@@ -38,9 +38,7 @@ from webargs import core
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
-    __location_map__ = dict(
-        matchdict='parse_matchdict',
-        **core.Parser.__location_map__)
+    __location_map__ = dict(matchdict="parse_matchdict", **core.Parser.__location_map__)
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
@@ -68,7 +66,7 @@ class PyramidParser(core.Parser):
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
-        files = ((k, v) for k, v in req.POST.items() if hasattr(v, 'file'))
+        files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
         return core.get_value(MultiDict(files), name, field)
 
     def parse_matchdict(self, req, name, field):
@@ -79,11 +77,17 @@ class PyramidParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        status_code = getattr(error, 'status_code', 422)
+        status_code = getattr(error, "status_code", 422)
         raise exception_response(status_code, detail=text_type(error))
 
-    def use_args(self, argmap, req=None, locations=core.Parser.DEFAULT_LOCATIONS,
-                 as_kwargs=False, validate=None):
+    def use_args(
+        self,
+        argmap,
+        req=None,
+        locations=core.Parser.DEFAULT_LOCATIONS,
+        as_kwargs=False,
+        validate=None,
+    ):
         """Decorator that injects parsed arguments into a view callable.
         Supports the *Class-based View* pattern where `request` is saved as an instance
         attribute on a view class.
@@ -113,17 +117,24 @@ class PyramidParser(core.Parser):
                 except AttributeError:  # first arg is request
                     request = obj
                 # NOTE: At this point, argmap may be a Schema, callable, or dict
-                parsed_args = self.parse(argmap, req=request,
-                                         locations=locations, validate=validate,
-                                         force_all=as_kwargs)
+                parsed_args = self.parse(
+                    argmap,
+                    req=request,
+                    locations=locations,
+                    validate=validate,
+                    force_all=as_kwargs,
+                )
                 if as_kwargs:
                     kwargs.update(parsed_args)
                     return func(obj, *args, **kwargs)
                 else:
                     return func(obj, parsed_args, *args, **kwargs)
+
             wrapper.__wrapped__ = func
             return wrapper
+
         return decorator
+
 
 parser = PyramidParser()
 use_args = parser.use_args

@@ -23,57 +23,58 @@ from webargs import fields, validate
 from webargs.pyramidparser import use_args, use_kwargs
 
 
-hello_args = {
-    'name': fields.Str(missing='Friend')
-}
+hello_args = {"name": fields.Str(missing="Friend")}
 
 
-@view_config(route_name='hello', request_method='GET', renderer='json')
+@view_config(route_name="hello", request_method="GET", renderer="json")
 @use_args(hello_args)
 def index(request, args):
     """A welcome page.
     """
-    return {'message': 'Welcome, {}!'.format(args['name'])}
+    return {"message": "Welcome, {}!".format(args["name"])}
 
-add_args = {
-    'x': fields.Float(required=True),
-    'y': fields.Float(required=True),
-}
-@view_config(route_name='add', request_method='POST', renderer='json')
+
+add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
+
+
+@view_config(route_name="add", request_method="POST", renderer="json")
 @use_kwargs(add_args)
 def add(request, x, y):
     """An addition endpoint."""
-    return {'result': x + y}
+    return {"result": x + y}
+
 
 dateadd_args = {
-    'value': fields.Date(required=False),
-    'addend': fields.Int(required=True, validate=validate.Range(min=1)),
-    'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
+    "value": fields.Date(required=False),
+    "addend": fields.Int(required=True, validate=validate.Range(min=1)),
+    "unit": fields.Str(missing="days", validate=validate.OneOf(["minutes", "days"])),
 }
-@view_config(route_name='dateadd', request_method='POST', renderer='json')
+
+
+@view_config(route_name="dateadd", request_method="POST", renderer="json")
 @use_kwargs(dateadd_args)
 def dateadd(request, value, addend, unit):
     """A date adder endpoint."""
     value = value or dt.datetime.utcnow()
-    if unit == 'minutes':
+    if unit == "minutes":
         delta = dt.timedelta(minutes=addend)
     else:
         delta = dt.timedelta(days=addend)
     result = value + delta
-    return {'result': result}
+    return {"result": result}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     config = Configurator()
 
     json_renderer = JSON()
     json_renderer.add_adapter(dt.datetime, lambda v, request: v.isoformat())
-    config.add_renderer('json', json_renderer)
+    config.add_renderer("json", json_renderer)
 
-    config.add_route('hello', '/')
-    config.add_route('add', '/add')
-    config.add_route('dateadd', '/dateadd')
+    config.add_route("hello", "/")
+    config.add_route("add", "/add")
+    config.add_route("dateadd", "/dateadd")
     config.scan(__name__)
     app = config.make_wsgi_app()
-    server = make_server('0.0.0.0', 5001, app)
+    server = make_server("0.0.0.0", 5001, app)
     server.serve_forever()
