@@ -32,7 +32,7 @@ from aiohttp import web
 from aiohttp import web_exceptions
 
 from webargs import core
-from webargs.async import AsyncParser
+from webargs.asyncparser import AsyncParser
 
 AIOHTTP_MAJOR_VERSION = int(aiohttp.__version__.split('.')[0])
 if AIOHTTP_MAJOR_VERSION < 2:

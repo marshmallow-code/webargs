@@ -40,7 +40,7 @@ def flake(ctx):
         excludes = [
             os.path.join('tests', 'apps', 'aiohttp_app.py'),
             os.path.join('tests', 'test_aiohttparser.py'),
-            os.path.join('webargs', 'async.py'),
+            os.path.join('webargs', 'asyncparser.py'),
             os.path.join('webargs', 'async_decorators34.py'),
             os.path.join('webargs', 'aiohttpparser.py'),
             os.path.join('examples', 'annotations_example.py'),
