@@ -1,7 +1,7 @@
 Install
 =======
 
-**webargs** requires Python >= 2.7 or >= 3.4. It depends on `marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_ >= 2.7.0.
+**webargs** requires Python >= 2.7 or >= 3.5. It depends on `marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_ >= 2.7.0.
 
 From the PyPI
 -------------
@@ -10,7 +10,7 @@ To install the latest version from the PyPI:
 
 ::
 
-   pip install -U webargs
+    $ pip install -U webargs
 
 
 Get the Bleeding Edge Version

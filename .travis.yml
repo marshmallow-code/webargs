@@ -14,16 +14,14 @@ env:
 python:
   - "3.6"
   - "3.5"
-  - "3.4"
   - "2.7"
   - "pypy"
 
 install:
-    - travis_retry pip install -U .
-    - if [[ $TRAVIS_PYTHON_VERSION == 2* || $TRAVIS_PYTHON_VERSION == 3.4* || $TRAVIS_PYTHON_VERSION == 'pypy' || $TRAVIS_PYTHON_VERSION == '3.3' ]]; then travis_retry pip install -r dev-requirements.txt; fi
-    # NOTE: aiohttp supports python>=3.5
-    - if [[ $TRAVIS_PYTHON_VERSION == 3* && $TRAVIS_PYTHON_VERSION != 3.4* ]] ; then travis_retry pip install -r dev-requirements-py3.txt; fi
-    - travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
+  - travis_retry pip install -U .
+  - if [[ $TRAVIS_PYTHON_VERSION == 2* || $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then travis_retry pip install -r dev-requirements.txt; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]] ; then travis_retry pip install -r dev-requirements-py3.txt; fi
+  - travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
 
 
 script: invoke test
