@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+4.0.0 (unreleased)
+******************
+
+Bug fixes:
+
+* *Backwards-incompatible*: Rename ``webargs.async`` to
+  ``webargs.asyncparser`` to fix compatibility with Python 3.7
+  (:issue:`240`). Thanks :user:`Reskov` for the catch and patch.
+
 3.0.2 (2018-07-05)
 ******************
 
