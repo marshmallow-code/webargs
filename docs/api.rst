@@ -16,10 +16,10 @@ webargs.fields
 .. automodule:: webargs.fields
     :members: Nested, DelimitedList
 
-webargs.async
--------------
+webargs.asyncparser
+-------------------
 
-.. automodule:: webargs.async
+.. automodule:: webargs.asyncparser
     :inherited-members:
 
 webargs.flaskparser
