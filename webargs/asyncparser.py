@@ -16,8 +16,7 @@ class AsyncParser(core.Parser):
     either coroutines or regular methods.
     """
 
-    @asyncio.coroutine
-    def _parse_request(self, schema, req, locations):
+    async def _parse_request(self, schema, req, locations):
         if schema.many:
             assert (
                 "json" in locations
@@ -25,7 +24,7 @@ class AsyncParser(core.Parser):
             # The ad hoc Nested field is more like a workaround or a helper, and it servers its
             # purpose fine. However, if somebody has a desire to re-design the support of
             # bulk-type arguments, go ahead.
-            parsed = yield from self.parse_arg(
+            parsed = await self.parse_arg(
                 name="json",
                 field=ma.fields.Nested(schema, many=True),
                 req=req,
@@ -38,18 +37,18 @@ class AsyncParser(core.Parser):
             parsed = {}
             for argname, field_obj in argdict.items():
                 if core.MARSHMALLOW_VERSION_INFO[0] < 3:
-                    parsed_value = yield from self.parse_arg(
+                    parsed_value = await self.parse_arg(
                         argname, field_obj, req, locations
                     )
                     # If load_from is specified on the field, try to parse from that key
                     if parsed_value is missing and field_obj.load_from:
-                        parsed_value = yield from self.parse_arg(
+                        parsed_value = await self.parse_arg(
                             field_obj.load_from, field_obj, req, locations
                         )
                         argname = field_obj.load_from
                 else:
                     argname = field_obj.data_key or argname
-                    parsed_value = yield from self.parse_arg(
+                    parsed_value = await self.parse_arg(
                         argname, field_obj, req, locations
                     )
                 if parsed_value is not missing:
@@ -57,8 +56,9 @@ class AsyncParser(core.Parser):
         return parsed
 
     # TODO: Lots of duplication from core.Parser here. Rethink.
-    @asyncio.coroutine
-    def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
+    async def parse(
+        self, argmap, req=None, locations=None, validate=None, force_all=False
+    ):
         """Coroutine variant of `webargs.core.Parser`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
@@ -69,7 +69,7 @@ class AsyncParser(core.Parser):
         validators = core._ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
         try:
-            parsed = yield from self._parse_request(
+            parsed = await self._parse_request(
                 schema=schema, req=req, locations=locations
             )
             result = schema.load(parsed)
@@ -139,7 +139,7 @@ class AsyncParser(core.Parser):
                     if not req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
-                    parsed_args = yield from self.parse(
+                    parsed_args = yield from self.parse(  # noqa: B901
                         argmap,
                         req=req_obj,
                         locations=locations,
@@ -148,7 +148,7 @@ class AsyncParser(core.Parser):
                     )
                     if as_kwargs:
                         kwargs.update(parsed_args)
-                        return func(*args, **kwargs)
+                        return func(*args, **kwargs)  # noqa: B901
                     else:
                         # Add parsed_args after other positional arguments
                         new_args = args + (parsed_args,)
@@ -167,8 +167,7 @@ class AsyncParser(core.Parser):
         """
         return super().use_kwargs(*args, **kwargs)
 
-    @asyncio.coroutine
-    def parse_arg(self, name, field, req, locations=None):
+    async def parse_arg(self, name, field, req, locations=None):
         location = field.metadata.get("location")
         if location:
             locations_to_check = self._validated_locations([location])
@@ -176,14 +175,13 @@ class AsyncParser(core.Parser):
             locations_to_check = self._validated_locations(locations or self.locations)
 
         for location in locations_to_check:
-            value = yield from self._get_value(name, field, req=req, location=location)
+            value = await self._get_value(name, field, req=req, location=location)
             # Found the value; validate and return it
             if value is not core.missing:
                 return value
         return core.missing
 
-    @asyncio.coroutine
-    def _get_value(self, name, argobj, req, location):
+    async def _get_value(self, name, argobj, req, location):
         # Parsing function to call
         # May be a method name (str) or a function
         func = self.__location_map__.get(location)
@@ -193,7 +191,7 @@ class AsyncParser(core.Parser):
             else:
                 function = getattr(self, func)
             if asyncio.iscoroutinefunction(function):
-                value = yield from function(req, name, argobj)
+                value = await function(req, name, argobj)
             else:
                 value = function(req, name, argobj)
         else:

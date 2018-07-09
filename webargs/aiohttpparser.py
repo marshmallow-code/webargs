@@ -23,7 +23,6 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
-import asyncio
 import json
 import warnings
 
@@ -85,22 +84,20 @@ class AIOHTTPParser(AsyncParser):
         """Pull a querystring value from the request."""
         return core.get_value(req.query, name, field)
 
-    @asyncio.coroutine
-    def parse_form(self, req, name, field):
+    async def parse_form(self, req, name, field):
         """Pull a form value from the request."""
         post_data = self._cache.get("post")
         if post_data is None:
-            self._cache["post"] = yield from req.post()
+            self._cache["post"] = await req.post()
         return core.get_value(self._cache["post"], name, field)
 
-    @asyncio.coroutine
-    def parse_json(self, req, name, field):
+    async def parse_json(self, req, name, field):
         """Pull a json value from the request."""
         json_data = self._cache.get("json")
         if json_data is None:
             if not (req.body_exists and is_json_request(req)):
                 return core.missing
-            self._cache["json"] = json_data = yield from req.json()
+            self._cache["json"] = json_data = await req.json()
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):

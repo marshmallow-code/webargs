@@ -23,9 +23,8 @@ from webargs.aiohttpparser import use_args, use_kwargs
 hello_args = {"name": fields.Str(missing="Friend")}
 
 
-@asyncio.coroutine
 @use_args(hello_args)
-def index(request, args):
+async def index(request, args):
     """A welcome page.
     """
     return json_response({"message": "Welcome, {}!".format(args["name"])})
@@ -34,9 +33,8 @@ def index(request, args):
 add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
 
 
-@asyncio.coroutine
 @use_kwargs(add_args)
-def add(request, x, y):
+async def add(request, x, y):
     """An addition endpoint."""
     return json_response({"result": x + y})
 
@@ -48,9 +46,8 @@ dateadd_args = {
 }
 
 
-@asyncio.coroutine
 @use_kwargs(dateadd_args)
-def dateadd(request, value, addend, unit):
+async def dateadd(request, value, addend, unit):
     """A datetime adder endpoint."""
     value = value or dt.datetime.utcnow()
     if unit == "minutes":

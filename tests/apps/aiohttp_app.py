@@ -23,140 +23,119 @@ hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 ##### Handlers #####
 
 
-@asyncio.coroutine
-def echo(request):
-    parsed = yield from parser.parse(hello_args, request)
+async def echo(request):
+    parsed = await parser.parse(hello_args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_query(request):
-    parsed = yield from parser.parse(hello_args, request, locations=("query",))
+async def echo_query(request):
+    parsed = await parser.parse(hello_args, request, locations=("query",))
     return json_response(parsed)
 
 
-@asyncio.coroutine
 @use_args(hello_args)
-def echo_use_args(request, args):
+async def echo_use_args(request, args):
     return json_response(args)
 
 
-@asyncio.coroutine
 @use_kwargs(hello_args)
-def echo_use_kwargs(request, name):
+async def echo_use_kwargs(request, name):
     return json_response({"name": name})
 
 
-@asyncio.coroutine
 @use_args({"value": fields.Int()}, validate=lambda args: args["value"] > 42)
-def echo_use_args_validated(request, args):
+async def echo_use_args_validated(request, args):
     return json_response(args)
 
 
-@asyncio.coroutine
-def echo_multi(request):
-    parsed = yield from parser.parse(hello_multiple, request)
+async def echo_multi(request):
+    parsed = await parser.parse(hello_multiple, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_many_schema(request):
-    parsed = yield from parser.parse(hello_many_schema, request, locations=("json",))
+async def echo_many_schema(request):
+    parsed = await parser.parse(hello_many_schema, request, locations=("json",))
     return json_response(parsed)
 
 
-@asyncio.coroutine
 @use_args({"value": fields.Int()})
-def echo_use_args_with_path_param(request, args):
+async def echo_use_args_with_path_param(request, args):
     return json_response(args)
 
 
-@asyncio.coroutine
 @use_kwargs({"value": fields.Int()})
-def echo_use_kwargs_with_path_param(request, value):
+async def echo_use_kwargs_with_path_param(request, value):
     return json_response({"value": value})
 
 
-@asyncio.coroutine
-def always_error(request):
+async def always_error(request):
     def always_fail(value):
         raise ValidationError("something went wrong")
 
     args = {"text": fields.Str(validate=always_fail)}
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def error400(request):
+async def error400(request):
     def always_fail(value):
         raise ValidationError("something went wrong", status_code=400)
 
     args = {"text": fields.Str(validate=always_fail)}
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def error_invalid(request):
+async def error_invalid(request):
     def always_fail(value):
         raise ValidationError("something went wrong", status_code=12345)
 
     args = {"text": fields.Str(validate=always_fail)}
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_headers(request):
-    parsed = yield from parser.parse(hello_args, request, locations=("headers",))
+async def echo_headers(request):
+    parsed = await parser.parse(hello_args, request, locations=("headers",))
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_cookie(request):
-    parsed = yield from parser.parse(hello_args, request, locations=("cookies",))
+async def echo_cookie(request):
+    parsed = await parser.parse(hello_args, request, locations=("cookies",))
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_nested(request):
+async def echo_nested(request):
     args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_multiple_args(request):
+async def echo_multiple_args(request):
     args = {"first": fields.Str(), "last": fields.Str()}
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_nested_many(request):
+async def echo_nested_many(request):
     args = {
         "users": fields.Nested({"id": fields.Int(), "name": fields.Str()}, many=True)
     }
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_nested_many_data_key(request):
+async def echo_nested_many_data_key(request):
     data_key_kwarg = {
         "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "X-Field"
     }
     args = {"x_field": fields.Nested({"id": fields.Int()}, many=True, **data_key_kwarg)}
-    parsed = yield from parser.parse(args, request)
+    parsed = await parser.parse(args, request)
     return json_response(parsed)
 
 
-@asyncio.coroutine
-def echo_match_info(request):
-    parsed = yield from parser.parse(
-        {"mymatch": fields.Int(location="match_info")}, request
-    )
+async def echo_match_info(request):
+    parsed = await parser.parse({"mymatch": fields.Int(location="match_info")}, request)
     return json_response(parsed)
 
 
