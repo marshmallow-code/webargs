@@ -45,7 +45,7 @@ class DjangoParser(core.Parser):
     def parse_json(self, req, name, field):
         """Pull a json value from the request body."""
         try:
-            json_data = json.loads(req.body.decode('utf-8'))
+            json_data = json.loads(req.body.decode("utf-8"))
         except (AttributeError, ValueError):
             return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
@@ -55,8 +55,9 @@ class DjangoParser(core.Parser):
         return core.get_value(req.COOKIES, name, field)
 
     def parse_headers(self, req, name, field):
-        raise NotImplementedError('Header parsing not supported by {0}'
-            .format(self.__class__.__name__))
+        raise NotImplementedError(
+            "Header parsing not supported by {0}".format(self.__class__.__name__)
+        )
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
@@ -68,6 +69,7 @@ class DjangoParser(core.Parser):
             return args[0].request
         except AttributeError:  # first arg is request
             return args[0]
+
 
 parser = DjangoParser()
 use_args = parser.use_args

@@ -16,14 +16,16 @@ To add your own custom location handler, write a function that receives a reques
     from webargs import fields
     from webargs.flaskparser import parser
 
-    @parser.location_handler('data')
+
+    @parser.location_handler("data")
     def parse_data(request, name, field):
         return request.data.get(name)
 
+
     # Now 'data' can be specified as a location
-    @parser.use_args({'per_page': fields.Int()}, locations=('data', ))
+    @parser.use_args({"per_page": fields.Int()}, locations=("data",))
     def posts(args):
-        return 'displaying {} posts'.format(args['per_page'])
+        return "displaying {} posts".format(args["per_page"])
 
 
 Marshmallow Integration
@@ -37,12 +39,13 @@ When you need more flexibility in defining input schemas, you can pass a marshma
     from marshmallow import Schema, fields
     from webargs.flaskparser import use_args
 
+
     class UserSchema(Schema):
         id = fields.Int(dump_only=True)  # read-only (won't be parsed by webargs)
         username = fields.Str(required=True)
         password = fields.Str(load_only=True)  # write-only
-        first_name = fields.Str(missing='')
-        last_name = fields.Str(missing='')
+        first_name = fields.Str(missing="")
+        last_name = fields.Str(missing="")
         date_registered = fields.DateTime(dump_only=True)
 
         class Meta:
@@ -51,16 +54,21 @@ When you need more flexibility in defining input schemas, you can pass a marshma
 
     @use_args(UserSchema())
     def profile_view(args):
+        username = args["userame"]
         # ...
+
 
     @use_kwargs(UserSchema())
     def profile_update(username, password, first_name, last_name):
+        update_profile(username, password, first_name, last_name)
         # ...
 
+
     # You can add additional parameters
-    @use_kwargs({'posts_per_page': fields.Int(missing=10, location='query')})
+    @use_kwargs({"posts_per_page": fields.Int(missing=10, location="query")})
     @use_args(UserSchema())
     def profile_posts(args, posts_per_page):
+        username = args["username"]
         # ...
 
 .. warning::
@@ -85,28 +93,32 @@ Consider the following use cases:
     from marshmallow import Schema, fields
     from webargs.flaskparser import use_args
 
+
     class UserSchema(Schema):
         id = fields.Int(dump_only=True)
         username = fields.Str(required=True)
         password = fields.Str(load_only=True)
-        first_name = fields.Str(missing='')
-        last_name = fields.Str(missing='')
+        first_name = fields.Str(missing="")
+        last_name = fields.Str(missing="")
         date_registered = fields.DateTime(dump_only=True)
 
         class Meta:
             strict = True
 
+
     def make_user_schema(request):
         # Filter based on 'fields' query parameter
-        only = request.args.get('fields', None)
+        only = request.args.get("fields", None)
         # Respect partial updates for PATCH requests
-        partial = request.method == 'PATCH'
+        partial = request.method == "PATCH"
         # Add current request to the schema's context
-        return UserSchema(only=only, partial=partial, context={'request': request})
+        return UserSchema(only=only, partial=partial, context={"request": request})
+
 
     # Pass the factory to .parse, .use_args, or .use_kwargs
-    @use_args(make_user_schema):
+    @use_args(make_user_schema)
     def profile_view(args):
+        username = args["username"]
         # ...
 
 
@@ -119,19 +131,25 @@ We can reduce boilerplate and improve [re]usability with a simple helper functio
 
     from webargs.flaskparser import use_args
 
+
     def use_args_with(schema_cls, schema_kwargs=None, **kwargs):
         schema_kwargs = schema_kwargs or {}
+
         def factory(request):
             # Filter based on 'fields' query parameter
-            only = request.args.get('fields', None)
+            only = request.args.get("fields", None)
             # Respect partial updates for PATCH requests
-            partial = request.method == 'PATCH'
+            partial = request.method == "PATCH"
             # Add current request to the schema's context
             # and ensure we're always using strict mode
             return schema_cls(
-                only=only, partial=partial, strict=True,
-                context={'request': request}, **schema_kwargs
+                only=only,
+                partial=partial,
+                strict=True,
+                context={"request": request},
+                **schema_kwargs
             )
+
         return use_args(factory, **kwargs)
 
 
@@ -142,6 +160,7 @@ Now we can attach input schemas to our view functions like so:
     @use_args_with(UserSchema)
     def profile_view(args):
         # ...
+        get_profile(**args)
 
 
 Custom Fields
@@ -157,11 +176,9 @@ Using the :class:`Method <marshmallow.fields.Method>` and :class:`Function <mars
 
 .. code-block:: python
 
-    @use_args({
-        'cube': fields.Function(deserialize=lambda x: int(x) ** 3)
-    })
+    @use_args({"cube": fields.Function(deserialize=lambda x: int(x) ** 3)})
     def math_view(args):
-        cube = args['cube']
+        cube = args["cube"]
         # ...
 
 .. _custom-parsers:
@@ -178,6 +195,7 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
 
     from webargs import core
     from webargs.flaskparser import FlaskParser
+
 
     class NestedQueryFlaskParser(FlaskParser):
         """Parses nested query args
@@ -203,13 +221,14 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
 
     def _structure_dict(dict_):
         def structure_dict_pair(r, key, value):
-            m = re.match(r'(\w+)\.(.*)', key)
+            m = re.match(r"(\w+)\.(.*)", key)
             if m:
                 if r.get(m.group(1)) is None:
                     r[m.group(1)] = {}
                 structure_dict_pair(r[m.group(1)], m.group(2), value)
             else:
                 r[key] = value
+
         r = {}
         for k, v in dict_.items():
             structure_dict_pair(r, k, v)
@@ -226,8 +245,10 @@ of ``422``, you can override ``DEFAULT_VALIDATION_STATUS`` on a :class:`Parser <
 
     from webargs.falconparser import FalconParser
 
+
     class Parser(FalconParser):
         DEFAULT_VALIDATION_STATUS = 400
+
 
     parser = Parser()
     use_args = parser.use_args
@@ -247,10 +268,11 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
     from webargs.flaskparser import use_args
     from marshmallow import Schema, validate
 
+
     class PatchSchema(Schema):
         op = fields.Str(
             required=True,
-            validate=validate.OneOf(['add', 'remove', 'replace', 'move', 'copy'])
+            validate=validate.OneOf(["add", "remove", "replace", "move", "copy"]),
         )
         path = fields.Str(required=True)
         value = fields.Str(required=True)
@@ -259,8 +281,8 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
             strict = True
 
 
-    @app.route('/profile/', methods=['patch'])
-    @use_args(PatchSchema(many=True), locations=('json', ))
+    @app.route("/profile/", methods=["patch"])
+    @use_args(PatchSchema(many=True), locations=("json",))
     def patch_blog(args):
         """Implements JSON Patch for the user profile
 
@@ -279,26 +301,29 @@ Arguments for different locations can be specified by passing ``location`` to ea
 
 .. code-block:: python
 
-    @app.route('/stacked', methods=['POST'])
-    @use_args({
-        'page': fields.Int(location='query')
-        'q': fields.Str(location='query')
-        'name': fields.Str(location='json'),
-    })
+    @app.route("/stacked", methods=["POST"])
+    @use_args(
+        {
+            "page": fields.Int(location="query"),
+            "q": fields.Str(location="query"),
+            "name": fields.Str(location="json"),
+        }
+    )
     def viewfunc(args):
+        page = args["page"]
         # ...
 
 Alternatively, you can pass multiple locations to `use_args <webargs.core.Parser.use_args>`:
 
 .. code-block:: python
 
-    @app.route('/stacked', methods=['POST'])
-    @use_args({
-        'page': fields.Int()
-        'q': fields.Str()
-        'name': fields.Str(),
-    } , locations=('query', 'json'))
+    @app.route("/stacked", methods=["POST"])
+    @use_args(
+        {"page": fields.Int(), "q": fields.Str(), "name": fields.Str()},
+        locations=("query", "json"),
+    )
     def viewfunc(args):
+        page = args["page"]
         # ...
 
 However, this allows ``page`` and ``q`` to be passed in the request body and ``name`` to be passed as a query parameter.
@@ -307,17 +332,16 @@ To restrict the arguments to single locations without having to pass ``location`
 
 .. code-block:: python
 
-    query_args = {
-        'page': fields.Int()
-        'q': fields.Int()
-    }
-    json_args = {
-        'name': fields.Str(),
-    }
-    @app.route('/stacked', methods=['POST'])
-    @use_args(query_args, locations=('query', ))
-    @use_args(json_args, locations=('json', ))
+    query_args = {"page": fields.Int(), "q": fields.Int()}
+    json_args = {"name": fields.Str()}
+
+
+    @app.route("/stacked", methods=["POST"])
+    @use_args(query_args, locations=("query",))
+    @use_args(json_args, locations=("json",))
     def viewfunc(query_parsed, json_parsed):
+        page = query_parsed["page"]
+        name = json_parsed["name"]
         # ...
 
 To reduce boilerplate, you could create shortcuts, like so:
@@ -326,12 +350,15 @@ To reduce boilerplate, you could create shortcuts, like so:
 
     import functools
 
-    query = functools.partial(use_args, locations=('query', ))
-    body = functools.partial(use_args, locations=('json', ))
+    query = functools.partial(use_args, locations=("query",))
+    body = functools.partial(use_args, locations=("json",))
+
 
     @query(query_args)
     @body(json_args)
     def viewfunc(query_parsed, json_parsed):
+        page = query_parsed["page"]
+        name = json_parsed["name"]
         # ...
 
 Next Steps

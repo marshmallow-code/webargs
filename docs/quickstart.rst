@@ -13,32 +13,23 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
     from webargs import fields, validate
 
     user_args = {
-
         # Required arguments
-        'username': fields.Str(required=True),
-
+        "username": fields.Str(required=True),
         # Validation
-        'password': fields.Str(validate=lambda p: len(p) >= 6),
-
+        "password": fields.Str(validate=lambda p: len(p) >= 6),
         # OR use marshmallow's built-in validators
-        'password': fields.Str(validate=validate.Length(min=6)),
-
+        "password": fields.Str(validate=validate.Length(min=6)),
         # Default value when argument is missing
-        'display_per_page': fields.Int(missing=10),
-
+        "display_per_page": fields.Int(missing=10),
         # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
-        'nickname': fields.List(fields.Str()),
-
+        "nickname": fields.List(fields.Str()),
         # Delimited list, e.g. "/?languages=python,javascript"
-        'languages': fields.DelimitedList(fields.Str())
-
+        "languages": fields.DelimitedList(fields.Str()),
         # When you know where an argument should be parsed from
-        'active': fields.Bool(location='query')
-
+        "active": fields.Bool(location="query"),
         # When value is keyed on a variable-unsafe name
         # or you want to rename a key
-        'content_type': fields.Str(load_from='Content-Type',
-                                   location='headers')
+        "content_type": fields.Str(load_from="Content-Type", location="headers"),
     }
 
 .. note::
@@ -52,11 +43,16 @@ To parse request arguments, use the :meth:`parse <webargs.core.Parser.parse>` me
     from flask import request
     from webargs.flaskparser import parser
 
-    @app.route('/register', methods=['POST'])
+
+    @app.route("/register", methods=["POST"])
     def register():
         args = parser.parse(user_args, request)
-        return register_user(args['username'], args['password'],
-            fullname=args['fullname'], per_page=args['display_per_page'])
+        return register_user(
+            args["username"],
+            args["password"],
+            fullname=args["fullname"],
+            per_page=args["display_per_page"],
+        )
 
 
 Decorator API
@@ -68,16 +64,22 @@ As an alternative to `Parser.parse`, you can decorate your view with :meth:`use_
 
     from webargs.flaskparser import use_args, use_kwargs
 
-    @app.route('/register', methods=['POST'])
+
+    @app.route("/register", methods=["POST"])
     @use_args(user_args)  # Injects args dictionary
     def register(args):
-        return register_user(args['username'], args['password'],
-            fullname=args['fullname'], per_page=args['display_per_page'])
+        return register_user(
+            args["username"],
+            args["password"],
+            fullname=args["fullname"],
+            per_page=args["display_per_page"],
+        )
 
-    @app.route('/settings', methods=['POST'])
+
+    @app.route("/settings", methods=["POST"])
     @use_kwargs(user_args)  # Injects keyword arguments
     def user_settings(username, password, fullname, display_per_page, nickname):
-        return render_template('settings.html', username=username, nickname=nickname)
+        return render_template("settings.html", username=username, nickname=nickname)
 
 
 .. note::
@@ -88,10 +90,12 @@ As an alternative to `Parser.parse`, you can decorate your view with :meth:`use_
 
         from webargs import fields, missing
 
-        @use_kwargs({'name': fields.Str(), 'nickname': fields.Str(required=False)})
+
+        @use_kwargs({"name": fields.Str(), "nickname": fields.Str(required=False)})
         def myview(name, nickname):
             if nickname is missing:
                 # ...
+                pass
 
 Request "Locations"
 -------------------
@@ -100,10 +104,10 @@ By default, webargs will search for arguments from the URL query string (e.g. ``
 
 .. code-block:: python
 
-    @app.route('/register')
-    @use_args(user_args, locations=('json', 'form'))
+    @app.route("/register")
+    @use_args(user_args, locations=("json", "form"))
     def register(args):
-        return 'registration page'
+        return "registration page"
 
 Available locations include:
 
@@ -123,9 +127,7 @@ Each :class:`Field <marshmallow.fields.Field>` object can be validated individua
 
     from webargs import fields
 
-    args = {
-        'age': fields.Int(validate=lambda val: val > 0)
-    }
+    args = {"age": fields.Int(validate=lambda val: val > 0)}
 
 The validator may return either a `boolean` or raise a :exc:`ValidationError <webargs.core.ValidationError>`.
 
@@ -133,14 +135,14 @@ The validator may return either a `boolean` or raise a :exc:`ValidationError <we
 
     from webargs import fields, ValidationError
 
+
     def must_exist_in_db(val):
         if not User.query.get(val):
             # Optionally pass a status_code
-            raise ValidationError('User does not exist')
+            raise ValidationError("User does not exist")
 
-    argmap = {
-        'id': fields.Int(validate=must_exist_in_db)
-    }
+
+    argmap = {"id": fields.Int(validate=must_exist_in_db)}
 
 .. note::
 
@@ -173,14 +175,12 @@ The full arguments dictionary can also be validated by passing ``validate`` to :
     from webargs import fields
     from webargs.flaskparser import parser
 
-    argmap = {
-        'age': fields.Int(),
-        'years_employed': fields.Int(),
-    }
+    argmap = {"age": fields.Int(), "years_employed": fields.Int()}
 
     # ...
-    result = parser.parse(argmap,
-                          validate=lambda args: args['years_employed'] < args['age'])
+    result = parser.parse(
+        argmap, validate=lambda args: args["years_employed"] < args["age"]
+    )
 
 
 Error Handling
@@ -193,10 +193,13 @@ Then decorate that function with :func:`Parser.error_handler <webargs.core.Parse
 .. code-block:: python
 
     from webargs import core
+
     parser = core.Parser()
+
 
     class CustomError(Exception):
         pass
+
 
     @parser.error_handler
     def handle_error(error, req):
@@ -212,10 +215,9 @@ Nesting Fields
     from webargs import fields
 
     args = {
-        'name': fields.Nested({
-            'first': fields.Str(required=True),
-            'last': fields.Str(required=True),
-        })
+        "name": fields.Nested(
+            {"first": fields.Str(required=True), "last": fields.Str(required=True)}
+        )
     }
 
 .. note::

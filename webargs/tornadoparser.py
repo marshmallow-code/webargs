@@ -25,18 +25,20 @@ class HTTPError(tornado.web.HTTPError):
     """`tornado.web.HTTPError` that stores validation errors."""
 
     def __init__(self, *args, **kwargs):
-        self.messages = kwargs.pop('messages', {})
+        self.messages = kwargs.pop("messages", {})
         super(HTTPError, self).__init__(*args, **kwargs)
+
 
 def parse_json_body(req):
     """Return the decoded JSON body from the request."""
-    content_type = req.headers.get('Content-Type')
+    content_type = req.headers.get("Content-Type")
     if content_type and core.is_json(content_type):
         try:
             return core.parse_json(req.body)
         except (TypeError, ValueError):
             pass
     return {}
+
 
 # From tornado.web.RequestHandler.decode_argument
 def decode_argument(value, name=None):
@@ -45,8 +47,8 @@ def decode_argument(value, name=None):
     try:
         return _unicode(value)
     except UnicodeDecodeError:
-        raise HTTPError(400, 'Invalid unicode in %s: %r' %
-                        (name or 'url', value[:40]))
+        raise HTTPError(400, "Invalid unicode in %s: %r" % (name or "url", value[:40]))
+
 
 def get_value(d, name, field):
     """Handle gets from 'multidicts' made of lists
@@ -58,8 +60,9 @@ def get_value(d, name, field):
     if value is core.missing:
         return core.missing
     if multiple and value is not core.missing:
-        return [decode_argument(v, name) if isinstance(v, basestring) else v
-                for v in value]
+        return [
+            decode_argument(v, name) if isinstance(v, basestring) else v for v in value
+        ]
     ret = value
     if value and isinstance(value, (list, tuple)):
         ret = value[0]
@@ -67,6 +70,7 @@ def get_value(d, name, field):
         return decode_argument(ret, name)
     else:
         return ret
+
 
 class TornadoParser(core.Parser):
     """Tornado request argument parser."""
@@ -77,9 +81,9 @@ class TornadoParser(core.Parser):
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        json_data = self._cache.get('json')
+        json_data = self._cache.get("json")
         if json_data is None:
-            self._cache['json'] = json_data = parse_json_body(req)
+            self._cache["json"] = json_data = parse_json_body(req)
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
@@ -113,16 +117,21 @@ class TornadoParser(core.Parser):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
-        status_code = getattr(error, 'status_code', core.DEFAULT_VALIDATION_STATUS)
+        status_code = getattr(error, "status_code", core.DEFAULT_VALIDATION_STATUS)
         if status_code == 422:
-            reason = 'Unprocessable Entity'
+            reason = "Unprocessable Entity"
         else:
             reason = None
-        raise HTTPError(status_code, log_message=str(error.messages),
-                reason=reason, messages=error.messages)
+        raise HTTPError(
+            status_code,
+            log_message=str(error.messages),
+            reason=reason,
+            messages=error.messages,
+        )
 
     def get_request_from_view_args(self, view, args, kwargs):
         return args[0].request
+
 
 parser = TornadoParser()
 use_args = parser.use_args

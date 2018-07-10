@@ -19,9 +19,11 @@ pyramid>=1.5.2
 webapp2>=3.0.0b1
 falcon>=0.3.0
 
+# Pre-commit hooks (runs black)
+pre-commit==1.10.3
+
 # Syntax checking
 flake8==3.5.0
-flake8-quotes==1.0.0
 
 # Install this package in development mode
 -e '.'

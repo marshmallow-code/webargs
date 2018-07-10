@@ -19,45 +19,50 @@ from webargs import fields, validate
 from webargs.bottleparser import use_args, use_kwargs
 
 
-hello_args = {
-    'name': fields.Str(missing='Friend')
-}
-@route('/', method='GET', apply=use_args(hello_args))
+hello_args = {"name": fields.Str(missing="Friend")}
+
+
+@route("/", method="GET", apply=use_args(hello_args))
 def index(args):
     """A welcome page.
     """
-    return {'message': 'Welcome, {}!'.format(args['name'])}
+    return {"message": "Welcome, {}!".format(args["name"])}
 
-add_args = {
-    'x': fields.Float(required=True),
-    'y': fields.Float(required=True),
-}
-@route('/add', method='POST', apply=use_kwargs(add_args))
+
+add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
+
+
+@route("/add", method="POST", apply=use_kwargs(add_args))
 def add(x, y):
     """An addition endpoint."""
-    return {'result': x + y}
+    return {"result": x + y}
+
 
 dateadd_args = {
-    'value': fields.Date(required=False),
-    'addend': fields.Int(required=True, validate=validate.Range(min=1)),
-    'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
+    "value": fields.Date(required=False),
+    "addend": fields.Int(required=True, validate=validate.Range(min=1)),
+    "unit": fields.Str(missing="days", validate=validate.OneOf(["minutes", "days"])),
 }
-@route('/dateadd', method='POST', apply=use_kwargs(dateadd_args))
+
+
+@route("/dateadd", method="POST", apply=use_kwargs(dateadd_args))
 def dateadd(value, addend, unit):
     """A date adder endpoint."""
     value = value or dt.datetime.utcnow()
-    if unit == 'minutes':
+    if unit == "minutes":
         delta = dt.timedelta(minutes=addend)
     else:
         delta = dt.timedelta(days=addend)
     result = value + delta
-    return {'result': result.isoformat()}
+    return {"result": result.isoformat()}
+
 
 # Return validation errors as JSON
 @error(422)
 def error422(err):
-    response.content_type = 'application/json'
+    response.content_type = "application/json"
     return err.body
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run(port=5001, reloader=True, debug=True)

@@ -36,6 +36,15 @@ Setting Up for Local Development
     # If you're using a Python 3 environment
     $ pip install -r dev-requirements-py3.txt
 
+3. (Optional, but recommended) Install the pre-commit hooks, which will format and lint your git staged files. ::
+
+    # The pre-commit CLI was installed above
+    $ pre-commit install
+
+.. note::
+
+    webargs uses `black <https://github.com/ambv/black>`_ for code formatting, which is only compatible with Python>=3.6. Therefore, the ``pre-commit install`` command will only work if you have the ``python3.6`` interpreter installed.
+
 Git Branch Structure
 ++++++++++++++++++++
 
@@ -78,9 +87,14 @@ Pull Requests
 Running Tests
 +++++++++++++
 
-To run all tests: ::
+To run all tests (including syntax checking): ::
 
     $ invoke test
+
+To run tests without syntax-checking (use this if you don't have the
+``python3.6`` interpreter): ::
+
+    $ invoke test --no-syntax
 
 To run tests on Python 2.7, 3.5, 3.6, and 3.7 virtual environments (must have each interpreter installed): ::
 

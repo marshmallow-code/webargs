@@ -20,57 +20,58 @@ from aiohttp.web import json_response
 from webargs import fields, validate
 from webargs.aiohttpparser import use_args, use_kwargs
 
-hello_args = {
-    'name': fields.Str(missing='Friend')
-}
-@asyncio.coroutine
+hello_args = {"name": fields.Str(missing="Friend")}
+
+
 @use_args(hello_args)
-def index(request, args):
+async def index(request, args):
     """A welcome page.
     """
-    return json_response({'message': 'Welcome, {}!'.format(args['name'])})
+    return json_response({"message": "Welcome, {}!".format(args["name"])})
 
-add_args = {
-    'x': fields.Float(required=True),
-    'y': fields.Float(required=True),
-}
-@asyncio.coroutine
+
+add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
+
+
 @use_kwargs(add_args)
-def add(request, x, y):
+async def add(request, x, y):
     """An addition endpoint."""
-    return json_response({'result': x + y})
+    return json_response({"result": x + y})
+
 
 dateadd_args = {
-    'value': fields.Date(required=False),
-    'addend': fields.Int(required=True, validate=validate.Range(min=1)),
-    'unit': fields.Str(missing='days', validate=validate.OneOf(['minutes', 'days']))
+    "value": fields.Date(required=False),
+    "addend": fields.Int(required=True, validate=validate.Range(min=1)),
+    "unit": fields.Str(missing="days", validate=validate.OneOf(["minutes", "days"])),
 }
-@asyncio.coroutine
+
+
 @use_kwargs(dateadd_args)
-def dateadd(request, value, addend, unit):
+async def dateadd(request, value, addend, unit):
     """A datetime adder endpoint."""
     value = value or dt.datetime.utcnow()
-    if unit == 'minutes':
+    if unit == "minutes":
         delta = dt.timedelta(minutes=addend)
     else:
         delta = dt.timedelta(days=addend)
     result = value + delta
-    return json_response({'result': result.isoformat()})
+    return json_response({"result": result.isoformat()})
 
 
 def create_app():
     app = web.Application()
-    app.router.add_route('GET', '/', index)
-    app.router.add_route('POST', '/add', add)
-    app.router.add_route('POST', '/dateadd', dateadd)
+    app.router.add_route("GET", "/", index)
+    app.router.add_route("POST", "/add", add)
+    app.router.add_route("POST", "/dateadd", dateadd)
     return app
+
 
 def run(app, port=5001):
     loop = asyncio.get_event_loop()
     handler = app.make_handler()
-    f = loop.create_server(handler, '0.0.0.0', port)
+    f = loop.create_server(handler, "0.0.0.0", port)
     srv = loop.run_until_complete(f)
-    print('serving on', srv.sockets[0].getsockname())
+    print("serving on", srv.sockets[0].getsockname())
     try:
         loop.run_forever()
     except KeyboardInterrupt:
@@ -82,6 +83,7 @@ def run(app, port=5001):
         loop.run_until_complete(app.finish())
     loop.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = create_app()
     run(app)

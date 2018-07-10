@@ -23,7 +23,6 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
-import asyncio
 import json
 import warnings
 
@@ -34,12 +33,13 @@ from aiohttp import web_exceptions
 from webargs import core
 from webargs.asyncparser import AsyncParser
 
-AIOHTTP_MAJOR_VERSION = int(aiohttp.__version__.split('.')[0])
+AIOHTTP_MAJOR_VERSION = int(aiohttp.__version__.split(".")[0])
 if AIOHTTP_MAJOR_VERSION < 2:
     warnings.warn(
-        'Support for aiohttp<2.0.0 is deprecated and is removed in webargs 2.0.0',
-        DeprecationWarning
+        "Support for aiohttp<2.0.0 is deprecated and is removed in webargs 2.0.0",
+        DeprecationWarning,
     )
+
 
 def is_json_request(req):
     content_type = req.content_type
@@ -49,11 +49,10 @@ def is_json_request(req):
 class HTTPUnprocessableEntity(web.HTTPClientError):
     status_code = 422
 
+
 # Mapping of status codes to exception classes
 # Adapted from werkzeug
-exception_map = {
-    422: HTTPUnprocessableEntity
-}
+exception_map = {422: HTTPUnprocessableEntity}
 # Collect all exceptions from aiohttp.web_exceptions
 def _find_exceptions():
     for name in web_exceptions.__all__:
@@ -68,6 +67,8 @@ def _find_exceptions():
         if old_obj is not None and issubclass(obj, old_obj):
             continue
         exception_map[obj.status_code] = obj
+
+
 _find_exceptions()
 del _find_exceptions
 
@@ -76,30 +77,27 @@ class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
     __location_map__ = dict(
-        match_info='parse_match_info',
-        **core.Parser.__location_map__
+        match_info="parse_match_info", **core.Parser.__location_map__
     )
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
         return core.get_value(req.query, name, field)
 
-    @asyncio.coroutine
-    def parse_form(self, req, name, field):
+    async def parse_form(self, req, name, field):
         """Pull a form value from the request."""
-        post_data = self._cache.get('post')
+        post_data = self._cache.get("post")
         if post_data is None:
-            self._cache['post'] = yield from req.post()
-        return core.get_value(self._cache['post'], name, field)
+            self._cache["post"] = await req.post()
+        return core.get_value(self._cache["post"], name, field)
 
-    @asyncio.coroutine
-    def parse_json(self, req, name, field):
+    async def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        json_data = self._cache.get('json')
+        json_data = self._cache.get("json")
         if json_data is None:
             if not (req.body_exists and is_json_request(req)):
                 return core.missing
-            self._cache['json'] = json_data = yield from req.json()
+            self._cache["json"] = json_data = await req.json()
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
@@ -112,8 +110,8 @@ class AIOHTTPParser(AsyncParser):
 
     def parse_files(self, req, name, field):
         raise NotImplementedError(
-            'parse_files is not implemented. You may be able to use parse_form for '
-            'parsing upload data.'
+            "parse_files is not implemented. You may be able to use parse_form for "
+            "parsing upload data."
         )
 
     def parse_match_info(self, req, name, field):
@@ -131,17 +129,17 @@ class AIOHTTPParser(AsyncParser):
                 req = args[0].request
             else:
                 req = args[0]
-        assert isinstance(req, web.Request), 'Request argument not found for handler'
+        assert isinstance(req, web.Request), "Request argument not found for handler"
         return req
 
     def handle_error(self, error, req):
         """Handle ValidationErrors and return a JSON response of error messages to the client."""
         error_class = exception_map.get(error.status_code)
         if not error_class:
-            raise LookupError('No exception for {0}'.format(error.status_code))
+            raise LookupError("No exception for {0}".format(error.status_code))
         raise error_class(
-            body=json.dumps(error.messages).encode('utf-8'),
-            content_type='application/json'
+            body=json.dumps(error.messages).encode("utf-8"),
+            content_type="application/json",
         )
 
 

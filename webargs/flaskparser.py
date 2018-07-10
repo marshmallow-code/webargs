@@ -46,10 +46,7 @@ def is_json_request(req):
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
-    __location_map__ = dict(
-        view_args='parse_view_args',
-        **core.Parser.__location_map__
-    )
+    __location_map__ = dict(view_args="parse_view_args", **core.Parser.__location_map__)
 
     def parse_view_args(self, req, name, field):
         """Pull a value from the request's ``view_args``."""
@@ -62,7 +59,7 @@ class FlaskParser(core.Parser):
         # this should be unnecessary in Flask 1.0
         force = is_json_request(req)
         # Fail silently so that the webargs parser can handle the error
-        if hasattr(req, 'get_json'):
+        if hasattr(req, "get_json"):
             # Flask >= 0.10.x
             json_data = req.get_json(force=force, silent=True)
         else:
@@ -100,12 +97,13 @@ class FlaskParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
-        status_code = getattr(error, 'status_code', self.DEFAULT_VALIDATION_STATUS)
+        status_code = getattr(error, "status_code", self.DEFAULT_VALIDATION_STATUS)
         abort(status_code, messages=error.messages, exc=error)
 
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""
         return flask.request
+
 
 parser = FlaskParser()
 use_args = parser.use_args

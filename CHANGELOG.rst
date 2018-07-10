@@ -15,6 +15,8 @@ Other changes:
 
 * *Backwards-incompatible*: Drop support for Python 3.4 (:issue:`243`). Python 2.7 and
   >=3.5 are supported.
+* Use `black <https://github.com/ambv/black>`_ with `pre-commit <https://pre-commit.com/>`_
+  for code formatting.
 
 3.0.2 (2018-07-05)
 ******************
@@ -50,6 +52,7 @@ Changes:
     @parser.error_handler
     def handle_error(error):
         raise CustomError(error.messages)
+
 
     # 3.x
     @parser.error_handler
@@ -209,13 +212,14 @@ Bug fixes:
     # Before
     @app.errorhandler(422)
     def handle_validation_error(err):
-        return jsonify({'errors': err.messages}), 422
+        return jsonify({"errors": err.messages}), 422
+
 
     # After
     @app.errorhandler(422)
     def handle_validation_error(err):
         # The marshmallow.ValidationError is available on err.exc
-        return jsonify({'errors': err.exc.messages}), 422
+        return jsonify({"errors": err.exc.messages}), 422
 
 
 1.3.4 (2016-06-11)
@@ -364,32 +368,26 @@ Your code will need to be updated to use ``Fields`` rather than ``Args``.
     from webargs import Arg
 
     args = {
-        'name': Arg(str, required=True)
-        'password': Arg(str, validate=lambda p: len(p) >= 6),
-        'display_per_page': Arg(int, default=10),
-        'nickname': Arg(multiple=True),
-        'Content-Type': Arg(dest='content_type', location='headers'),
-        'location': Arg({
-            'city': Arg(str),
-            'state': Arg(str)
-        })
-        'meta': Arg(dict),
+        "name": Arg(str, required=True),
+        "password": Arg(str, validate=lambda p: len(p) >= 6),
+        "display_per_page": Arg(int, default=10),
+        "nickname": Arg(multiple=True),
+        "Content-Type": Arg(dest="content_type", location="headers"),
+        "location": Arg({"city": Arg(str), "state": Arg(str)}),
+        "meta": Arg(dict),
     }
 
     # New API
     from webargs import fields
 
     args = {
-        'name': fields.Str(required=True)
-        'password': fields.Str(validate=lambda p: len(p) >= 6),
-        'display_per_page': fields.Int(missing=10),
-        'nickname': fields.List(fields.Str()),
-        'content_type': fields.Str(load_from='Content-Type'),
-        'location': fields.Nested({
-            'city': fields.Str(),
-            'state': fields.Str()
-        }),
-        'meta': fields.Dict(),
+        "name": fields.Str(required=True),
+        "password": fields.Str(validate=lambda p: len(p) >= 6),
+        "display_per_page": fields.Int(missing=10),
+        "nickname": fields.List(fields.Str()),
+        "content_type": fields.Str(load_from="Content-Type"),
+        "location": fields.Nested({"city": fields.Str(), "state": fields.Str()}),
+        "meta": fields.Dict(),
     }
 
 Features:
