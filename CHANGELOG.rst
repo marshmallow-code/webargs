@@ -15,6 +15,8 @@ Other changes:
 
 * *Backwards-incompatible*: Drop support for Python 3.4 (:issue:`243`). Python 2.7 and
   >=3.5 are supported.
+* *Backwards-incompatible*: Drop support for marshmallow<2.15.0.
+  marshmallow>=2.15.0 and >=3.0.0b12 are officially supported.
 * Use `black <https://github.com/ambv/black>`_ with `pre-commit <https://pre-commit.com/>`_
   for code formatting.
 

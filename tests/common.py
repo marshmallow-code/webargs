@@ -19,9 +19,17 @@ class CommonTestCase(object):
     def create_testapp(self, app):
         return webtest.TestApp(app)
 
+    def before_create_app(self):
+        pass
+
+    def after_create_app(self):
+        pass
+
     @pytest.fixture(scope="class")
     def testapp(self):
-        return self.create_testapp(self.create_app())
+        self.before_create_app()
+        yield self.create_testapp(self.create_app())
+        self.after_create_app()
 
     def test_parse_querystring_args(self, testapp):
         assert testapp.get("/echo?name=Fred").json == {"name": "Fred"}

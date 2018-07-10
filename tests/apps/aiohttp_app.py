@@ -16,6 +16,11 @@ hello_multiple = {"name": fields.List(fields.Str())}
 class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
 
+    if MARSHMALLOW_VERSION_INFO[0] < 3:
+
+        class Meta:
+            strict = True
+
 
 strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
 hello_many_schema = HelloSchema(many=True, **strict_kwargs)
@@ -140,9 +145,8 @@ async def echo_match_info(request):
 
 
 class EchoHandler:
-    @asyncio.coroutine
     @use_args(hello_args)
-    def get(self, request, args):
+    async def get(self, request, args):
         return json_response(args)
 
 
