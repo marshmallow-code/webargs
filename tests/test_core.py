@@ -647,6 +647,11 @@ def test_parse_with_callable(web_request, parser):
     class MySchema(Schema):
         foo = fields.Field()
 
+        if MARSHMALLOW_VERSION_INFO[0] < 3:
+
+            class Meta:
+                strict = True
+
     def make_schema(req):
         assert req is web_request
         return MySchema(context={"request": req})
@@ -662,7 +667,7 @@ def test_use_args_callable(web_request, parser):
 
         if MARSHMALLOW_VERSION_INFO[0] < 3:
 
-            class Meta(object):
+            class Meta:
                 strict = True
 
         @post_load
@@ -689,6 +694,10 @@ class TestPassingSchema:
         id = fields.Int(dump_only=True)
         email = fields.Email()
         password = fields.Str(load_only=True)
+        if MARSHMALLOW_VERSION_INFO[0] < 3:
+
+            class Meta:
+                strict = True
 
     def test_passing_schema_to_parse(self, parser, web_request):
         web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
@@ -793,6 +802,10 @@ class TestPassingSchema:
         class UserSchema(Schema):
             name = fields.Str()
             location = fields.Field(required=False)
+            if MARSHMALLOW_VERSION_INFO[0] < 3:
+
+                class Meta:
+                    strict = True
 
             @validates_schema(pass_original=True)
             def validate_schema(self, data, original_data):
