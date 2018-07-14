@@ -13,19 +13,19 @@ Bug fixes:
 
 Other changes:
 
-* *Backwards-incompatible*: Drop support for Python 3.4 (:issue:`243`). Python 2.7 and
+* *Backwards-incompatible*: Drop support for Python 3.4 (:pr:`243`). Python 2.7 and
   >=3.5 are supported.
 * *Backwards-incompatible*: Drop support for marshmallow<2.15.0.
   marshmallow>=2.15.0 and >=3.0.0b12 are officially supported.
 * Use `black <https://github.com/ambv/black>`_ with `pre-commit <https://pre-commit.com/>`_
-  for code formatting.
+  for code formatting (:pr:`244`).
 
 3.0.2 (2018-07-05)
 ******************
 
 Bug fixes:
 
-* Fix compatibility with marshmallow 3.0.0b12 (:issue:`242`). Thanks :user:`lafrech`.
+* Fix compatibility with marshmallow 3.0.0b12 (:pr:`242`). Thanks :user:`lafrech`.
 
 3.0.1 (2018-06-06)
 ******************
@@ -64,7 +64,7 @@ Changes:
 * *Backwards-incompatible*: Remove unused ``instance`` and ``kwargs`` arguments of ``argmap2schema``.
 * *Backwards-incompatible*: Remove ``Parser.load`` method (``Parser`` now calls ``Schema.load`` directly).
 
-These changes shouldn't affect most users. However, they might break custom parsers calling these methods. (:issue:`222`)
+These changes shouldn't affect most users. However, they might break custom parsers calling these methods. (:pr:`222`)
 
 * Drop support for aiohttp<3.0.0.
 
@@ -90,7 +90,7 @@ Changes:
 
 Features:
 
-* Add support for marshmallow>=3.0.0b7 (:issue:`188`). Thanks
+* Add support for marshmallow>=3.0.0b7 (:pr:`188`). Thanks
   :user:`lafrech`.
 
 Deprecations:
@@ -104,7 +104,7 @@ Changes:
 
 * ``HTTPExceptions`` raised with `webargs.flaskparser.abort` will always
   have the ``data`` attribute, even if no additional keywords arguments
-  are passed (:issue:`184`). Thanks :user:`lafrech`.
+  are passed (:pr:`184`). Thanks :user:`lafrech`.
 
 Support:
 

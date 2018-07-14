@@ -1,5 +1,3 @@
-.. _advanced:
-
 Advanced Usage
 ==============
 
@@ -364,5 +362,5 @@ To reduce boilerplate, you could create shortcuts, like so:
 Next Steps
 ----------
 
-- See the :ref:`Framework Support <frameworks>` page for framework-specific guides.
+- See the :doc:`Framework Support <framework_support>` page for framework-specific guides.
 - For example applications, check out the `examples <https://github.com/sloria/webargs/tree/dev/examples>`_ directory.
