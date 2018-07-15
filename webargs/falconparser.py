@@ -140,7 +140,7 @@ class FalconParser(core.Parser):
             "Parsing files not yet supported by {0}".format(self.__class__.__name__)
         )
 
-    def handle_error(self, error, req):
+    def handle_error(self, error, req, schema):
         """Handles errors during parsing."""
         status = status_map.get(error.status_code)
         if status is None:

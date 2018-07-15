@@ -265,7 +265,7 @@ def test_handle_error_called_when_parsing_raises_error(
 def test_handle_error_reraises_errors(web_request):
     p = Parser()
     with pytest.raises(ValidationError):
-        p.handle_error(ValidationError("error raised"), web_request)
+        p.handle_error(ValidationError("error raised"), web_request, Schema())
 
 
 @mock.patch("webargs.core.Parser.parse_headers")
@@ -287,7 +287,8 @@ def test_custom_error_handler(parse_json, web_request):
     class CustomError(Exception):
         pass
 
-    def error_handler(error, req):
+    def error_handler(error, req, schema):
+        assert isinstance(schema, Schema)
         raise CustomError(error)
 
     parse_json.side_effect = ValidationError("parse_json failed")
@@ -306,7 +307,8 @@ def test_custom_error_handler_decorator(parse_json, web_request):
     parser = Parser()
 
     @parser.error_handler
-    def handle_error(error, req):
+    def handle_error(error, req, schema):
+        assert isinstance(schema, Schema)
         raise CustomError(error)
 
     with pytest.raises(CustomError):

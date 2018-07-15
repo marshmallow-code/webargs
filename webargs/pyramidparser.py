@@ -73,7 +73,7 @@ class PyramidParser(core.Parser):
         """Pull a value from the request's `matchdict`."""
         return core.get_value(req.matchdict, name, field)
 
-    def handle_error(self, error, req):
+    def handle_error(self, error, req, schema):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """

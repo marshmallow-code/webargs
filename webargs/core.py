@@ -317,7 +317,7 @@ class Parser(object):
                     parsed[argname] = parsed_value
         return parsed
 
-    def _on_validation_error(self, error, req):
+    def _on_validation_error(self, error, req, schema):
         if isinstance(error, ma.exceptions.ValidationError) and not isinstance(
             error, ValidationError
         ):
@@ -331,9 +331,9 @@ class Parser(object):
                 kwargs["status_code"] = self.DEFAULT_VALIDATION_STATUS
             error = ValidationError(error.messages, **kwargs)
         if self.error_callback:
-            self.error_callback(error, req)
+            self.error_callback(error, req, schema)
         else:
-            self.handle_error(error, req)
+            self.handle_error(error, req, schema)
 
     def _validate_arguments(self, data, validators):
         for validator in validators:
@@ -393,7 +393,7 @@ class Parser(object):
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(error, req)
+            self._on_validation_error(error, req, schema)
         finally:
             self.clear_cache()
         if force_all:
@@ -514,7 +514,7 @@ class Parser(object):
             from webargs import core
             parser = core.Parser()
 
-            @parser.location_handler('name')
+            @parser.location_handler("name")
             def parse_data(request, name, field):
                 return request.data.get(name)
 
@@ -529,20 +529,24 @@ class Parser(object):
 
     def error_handler(self, func):
         """Decorator that registers a custom error handling function. The
-        function should received the raised error and the request object. Overrides
+        function should received the raised error, request object, and the
+        `marshmallow.Schema` instance used to parse the request. Overrides
         the parser's ``handle_error`` method.
 
         Example: ::
 
-            from webargs import core
-            parser = core.Parser()
+            from webargs import flaskparser
+
+            parser = flaskparser.FlaskParser()
+
 
             class CustomError(Exception):
                 pass
 
+
             @parser.error_handler
-            def handle_error(error, request):
-                raise CustomError(error)
+            def handle_error(error, req, schema):
+                raise CustomError(error.messages)
 
         :param callable func: The error callback to register.
         """
@@ -587,7 +591,7 @@ class Parser(object):
         """
         return missing
 
-    def handle_error(self, error, req):
+    def handle_error(self, error, req, schema):
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
         """
