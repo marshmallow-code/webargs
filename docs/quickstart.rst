@@ -185,14 +185,14 @@ Error Handling
 --------------
 
 Each parser has a default error handling method. To override the error handling callback, write a function that
-receives an error and the request and handles the error.
+receives an error, the request, and the `marshmallow.Schema` instance.
 Then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
 
 .. code-block:: python
 
-    from webargs import core
+    from webargs import flaskparser
 
-    parser = core.Parser()
+    parser = flaskparser.FlaskParser()
 
 
     class CustomError(Exception):
@@ -200,7 +200,7 @@ Then decorate that function with :func:`Parser.error_handler <webargs.core.Parse
 
 
     @parser.error_handler
-    def handle_error(error, req):
+    def handle_error(error, req, schema):
         raise CustomError(error.messages)
 
 Nesting Fields

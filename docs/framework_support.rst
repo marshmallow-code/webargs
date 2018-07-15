@@ -31,7 +31,8 @@ When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decor
 Error Handling
 ++++++++++++++
 
-Webargs uses Flask's ``abort`` function to raise an ``HTTPException`` when a validation error occurs. If you use the ``Flask.errorhandler`` method to handle errors, you can access validation messages from the ``data`` attribute of an error.
+Webargs uses Flask's ``abort`` function to raise an ``HTTPException`` when a validation error occurs.
+If you use the ``Flask.errorhandler`` method to handle errors, you can access validation messages from the ``data`` attribute of an error.
 
 Here is an example error handler that returns validation messages to the client as JSON.
 

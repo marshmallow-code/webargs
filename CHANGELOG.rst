@@ -4,6 +4,30 @@ Changelog
 4.0.0 (unreleased)
 ******************
 
+Features:
+
+* *Backwards-incompatible*: Custom error handlers receive the
+  `marshmallow.Schema` instance as the third argument. Update any
+  functions decorated with `Parser.error_handler` to take a ``schema``
+  argument, like so:
+
+.. code-block:: python
+
+    # 3.x
+    @parser.error_handler
+    def handle_error(error, req):
+        raise CustomError(error.messages)
+
+
+    # 4.x
+    @parser.error_handler
+    def handle_error(error, req, schema):
+        raise CustomError(error.messages)
+
+
+See `marshmallow-code/marshmallow#840 (comment) <https://github.com/marshmallow-code/marshmallow/issues/840#issuecomment-403481686>`_
+for more information about this change.
+
 Bug fixes:
 
 * *Backwards-incompatible*: Rename ``webargs.async`` to
