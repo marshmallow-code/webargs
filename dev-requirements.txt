@@ -20,7 +20,7 @@ webapp2>=3.0.0b1
 falcon>=0.3.0
 
 # Pre-commit hooks (runs black)
-pre-commit==1.10.4
+pre-commit==1.10.5
 
 # Syntax checking
 flake8==3.5.0
