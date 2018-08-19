@@ -84,8 +84,8 @@ class CommonTestCase(object):
         assert res.status_code == 422
 
     def test_parse_json_many_schema(self, testapp):
-        res = testapp.post_json("/echo_many_schema", [{"extra": "data"}]).json
-        assert res == [{"name": "World"}]
+        res = testapp.post_json("/echo_many_schema", [{"name": "Steve"}]).json
+        assert res == [{"name": "Steve"}]
 
     def test_parse_json_many_schema_ignore_malformed_data(self, testapp):
         assert testapp.post_json("/echo_many_schema", {"extra": "data"}).json == []

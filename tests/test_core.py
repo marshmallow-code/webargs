@@ -702,7 +702,7 @@ class TestPassingSchema:
                 strict = True
 
     def test_passing_schema_to_parse(self, parser, web_request):
-        web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
+        web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         result = parser.parse(self.UserSchema(**strict_kwargs), web_request)
 
@@ -710,7 +710,7 @@ class TestPassingSchema:
 
     def test_use_args_can_be_passed_a_schema(self, web_request, parser):
 
-        web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
+        web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         @parser.use_args(self.UserSchema(**strict_kwargs), web_request)
         def viewfunc(args):
@@ -719,7 +719,7 @@ class TestPassingSchema:
         assert viewfunc() == {"email": "foo@bar.com", "password": "bar"}
 
     def test_passing_schema_factory_to_parse(self, parser, web_request):
-        web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
+        web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         def factory(req):
             assert req is web_request
@@ -730,7 +730,7 @@ class TestPassingSchema:
         assert result == {"email": "foo@bar.com", "password": "bar"}
 
     def test_use_args_can_be_passed_a_schema_factory(self, web_request, parser):
-        web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
+        web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         def factory(req):
             assert req is web_request
@@ -744,7 +744,7 @@ class TestPassingSchema:
 
     def test_use_kwargs_can_be_passed_a_schema(self, web_request, parser):
 
-        web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
+        web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         @parser.use_kwargs(self.UserSchema(**strict_kwargs), web_request)
         def viewfunc(email, password):
@@ -753,7 +753,7 @@ class TestPassingSchema:
         assert viewfunc() == {"email": "foo@bar.com", "password": "bar"}
 
     def test_use_kwargs_can_be_passed_a_schema_factory(self, web_request, parser):
-        web_request.json = {"id": 12, "email": "foo@bar.com", "password": "bar"}
+        web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         def factory(req):
             assert req is web_request
@@ -783,12 +783,7 @@ class TestPassingSchema:
         assert "strict=True" in str(warning.message)
 
     def test_use_kwargs_stacked(self, web_request, parser):
-        web_request.json = {
-            "id": 12,
-            "email": "foo@bar.com",
-            "password": "bar",
-            "page": 42,
-        }
+        web_request.json = {"email": "foo@bar.com", "password": "bar", "page": 42}
 
         @parser.use_kwargs({"page": fields.Int()}, web_request)
         @parser.use_kwargs(self.UserSchema(**strict_kwargs), web_request)
