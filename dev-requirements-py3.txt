@@ -1,6 +1,6 @@
 -r dev-requirements.txt
 # Additional syntax checking for Python 3
-flake8-bugbear==18.2.0
+flake8-bugbear==18.8.0
 
 # aiohttp
 aiohttp>=3.0.0
