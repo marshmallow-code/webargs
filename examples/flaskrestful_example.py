@@ -70,7 +70,7 @@ class DateAddResource(Resource):
 
 # This error handler is necessary for usage with Flask-RESTful
 @parser.error_handler
-def handle_request_parsing_error(err, req):
+def handle_request_parsing_error(err, req, schema):
     """webargs error handler that uses Flask-RESTful's abort function to return
     a JSON error response to the client.
     """
