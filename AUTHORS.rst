@@ -6,7 +6,7 @@ Lead
 ----
 
 * Steven Loria <sloria1@gmail.com>
-* Jérôme Lafréchoux <https://github.com/lafrech> 
+* Jérôme Lafréchoux <https://github.com/lafrech>
 
 Contributors (chronological)
 ----------------------------
@@ -27,11 +27,12 @@ Contributors (chronological)
 * Brett Higgins <https://github.com/brettdh>
 * Vlad Frolov <https://github.com/frol>
 * Tuukka Mustonen <https://github.com/tuukkamustonen>
-* Francois-Xavier Darveau <https://github.com/EFF> 
-* Jérôme Lafréchoux <https://github.com/lafrech> 
+* Francois-Xavier Darveau <https://github.com/EFF>
+* Jérôme Lafréchoux <https://github.com/lafrech>
 * @DmitriyS <https://github.com/DmitriyS>
 * Svetlozar Argirov <https://github.com/zaro>
 * Florian S. <https://github.com/nebularazer>
 * @daniel98321 <https://github.com/daniel98321>
 * @Itayazolay <https://github.com/Itayazolay>
 * @Reskov <https://github.com/Reskov>
+* @cedzz <https://github.com/cedzz>
