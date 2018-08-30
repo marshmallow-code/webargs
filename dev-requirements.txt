@@ -5,7 +5,7 @@ marshmallow
 invoke==1.1.1
 
 # Testing
-pytest==3.7.3
+pytest==3.7.4
 tox==3.2.1
 mock==2.0.0
 webtest==2.0.30
