@@ -82,4 +82,8 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     ],
     test_suite="tests",
+    project_urls={
+        "Issues": "https://github.com/sloria/webargs/issues",
+        "Changelog": "https://webargs.readthedocs.io/en/latest/changelog.html",
+    },
 )
