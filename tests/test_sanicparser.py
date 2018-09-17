@@ -16,6 +16,7 @@ import asyncio
 import pytest
 import io
 
+
 class TestSanicParser(CommonTestCase):
 
     def create_app(self):
@@ -127,3 +128,4 @@ def test_abort_has_serializable_data():
     error = json.loads(serialized_error)
     assert isinstance(error, dict)
     assert error["message"] == "custom error message"
+
