@@ -527,7 +527,7 @@ def test_parse_nested_with_data_key(web_request):
 def test_parse_nested_with_missing_key_and_data_key(web_request):
     parser = MockRequestParser()
 
-    web_request.json = {"nested_arg": {"payload": "OK"}}
+    web_request.json = {"nested_arg": {}}
     data_key_kwargs = {
         "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "miss"
     }
