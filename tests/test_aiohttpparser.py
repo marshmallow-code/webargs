@@ -5,7 +5,7 @@ import webtest_aiohttp
 import pytest
 
 from webargs.core import MARSHMALLOW_VERSION_INFO
-from tests.common import CommonTestCase
+from webargs.testing import CommonTestCase
 from tests.apps.aiohttp_app import create_app
 
 

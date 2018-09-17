@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import pytest
 from tests.apps.django_app.base.wsgi import application
 
-from tests.common import CommonTestCase
+from webargs.testing import CommonTestCase
 
 
 class TestDjangoParser(CommonTestCase):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from tests.common import CommonTestCase
+from webargs.testing import CommonTestCase
 from tests.apps.falcon_app import create_app
 
 

@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Utilities for testing. Includes a base test class
+for testing parsers.
+
+.. warning::
+
+    Methods and functions in this module may change without
+    warning and without a major version change.
+"""
 import json
 
 import pytest

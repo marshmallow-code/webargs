@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .common import CommonTestCase
+from webargs.testing import CommonTestCase
 
 
 class TestPyramidParser(CommonTestCase):
