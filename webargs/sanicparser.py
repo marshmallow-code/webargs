@@ -21,7 +21,6 @@ Example: ::
 """
 import sanic
 
-
 from webargs import core
 from webargs.asyncparser import AsyncParser
 
@@ -67,7 +66,9 @@ class SanicParser(AsyncParser):
             req = args[1]
         else:
             req = args[0]
-        assert isinstance(req, sanic.request.Request), "Request argument not found for handler"
+        assert isinstance(
+            req, sanic.request.Request
+        ), "Request argument not found for handler"
         return req
 
     def parse_json(self, req, name, field):
@@ -107,6 +108,7 @@ class SanicParser(AsyncParser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
+
         status_code = getattr(error, "status_code", self.DEFAULT_VALIDATION_STATUS)
         abort(status_code, exc=error, messages=error.messages, schema=schema)
 

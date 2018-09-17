@@ -18,7 +18,6 @@ import io
 
 
 class TestSanicParser(CommonTestCase):
-
     def create_app(self):
         return app
 
@@ -89,11 +88,10 @@ def test_abort_called_on_validation_error(mock_abort, loop):
     assert abort_kwargs["messages"] == [expected_msg]
     assert type(abort_kwargs["exc"]) == ValidationError
 
+
 def test_parse_files(loop):
     res = app.test_client.post(
-        "/echo_file",
-        data={"myfile": io.BytesIO(b"data")},
-        gather_request=False
+        "/echo_file", data={"myfile": io.BytesIO(b"data")}, gather_request=False
     )
     assert res.json == {"myfile": "data"}
 
@@ -128,4 +126,3 @@ def test_abort_has_serializable_data():
     error = json.loads(serialized_error)
     assert isinstance(error, dict)
     assert error["message"] == "custom error message"
-

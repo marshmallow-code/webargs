@@ -2,7 +2,6 @@ from sanic import Sanic
 from sanic.response import json as J
 from sanic.views import HTTPMethodView
 
-
 import marshmallow as ma
 from webargs import fields, ValidationError, missing
 from webargs.sanicparser import parser, use_args, use_kwargs, HandleValidationError
@@ -47,7 +46,9 @@ async def echo_use_args(request, args):
 
 
 @app.route("/echo_use_args_validated", methods=["GET", "POST"])
-@use_args({"value": fields.Int(required=True)}, validate=lambda args: args["value"] > 42)
+@use_args(
+    {"value": fields.Int(required=True)}, validate=lambda args: args["value"] > 42
+)
 async def echo_use_args_validated(request, args):
     return J(args)
 
@@ -126,7 +127,9 @@ async def echo_file(request):
 
 @app.route("/echo_view_arg/<view_arg>")
 async def echo_view_arg(request, view_arg):
-    parsed = await parser.parse({"view_arg": fields.Int()}, request, locations=("view_args",))
+    parsed = await parser.parse(
+        {"view_arg": fields.Int()}, request, locations=("view_args",)
+    )
     return J(parsed)
 
 
@@ -167,8 +170,8 @@ class EchoMethodViewUseArgs(HTTPMethodView):
     async def post(self, request, args):
         return J(args)
 
-app.add_route(EchoMethodViewUseArgs.as_view(), '/echo_method_view_use_args')
 
+app.add_route(EchoMethodViewUseArgs.as_view(), "/echo_method_view_use_args")
 
 
 class EchoMethodViewUseKwargs(HTTPMethodView):
@@ -176,7 +179,8 @@ class EchoMethodViewUseKwargs(HTTPMethodView):
     async def post(self, request, val):
         return J({"val": val})
 
-app.add_route(EchoMethodViewUseKwargs.as_view(), '/echo_method_view_use_kwargs')
+
+app.add_route(EchoMethodViewUseKwargs.as_view(), "/echo_method_view_use_kwargs")
 
 
 @app.route("/echo_use_kwargs_missing", methods=["POST"])
@@ -184,6 +188,7 @@ app.add_route(EchoMethodViewUseKwargs.as_view(), '/echo_method_view_use_kwargs')
 async def echo_use_kwargs_missing(request, username, password):
     assert password is missing
     return J({"username": username})
+
 
 # Return validation errors as JSON
 @app.exception(HandleValidationError)
