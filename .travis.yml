@@ -34,9 +34,8 @@ jobs:
     python: "3.6"
     env: []
     # Override install, and script to no-ops
-    install: true
+    install: skip
     script: echo "Releasing to PyPI..."
-    after_success: true
     deploy:
       provider: pypi
       user: sloria
