@@ -4,4 +4,4 @@ rules:
       required_status_checks:
         contexts:
           - continuous-integration/travis-ci
-      enabling_label: mergify
+    enabling_label: mergify
