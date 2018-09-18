@@ -12,7 +12,7 @@ from webargs.flaskparser import parser, abort
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
 from .apps.flask_app import app
-from .common import CommonTestCase
+from webargs.testing import CommonTestCase
 
 
 class TestFlaskParser(CommonTestCase):

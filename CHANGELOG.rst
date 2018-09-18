@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+4.1.0 (unreleased)
+******************
+
+Features:
+
+* Add ``webargs.testing`` module, which exposes ``CommonTestCase``
+  to third-party parser libraries (see comments in :pr:`287`).
+
 4.0.0 (2018-07-15)
 ******************
 
