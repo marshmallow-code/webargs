@@ -70,7 +70,7 @@ When you need more flexibility in defining input schemas, you can pass a marshma
         # ...
 
 .. warning::
-    You should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
+    If you're using marshmallow 2, you should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
 
 .. warning::
     Any `Schema <marshmallow.Schema>` passed to `use_kwargs <webargs.core.Parser.use_kwargs>` MUST deserialize to a dictionary of data. Keep this in mind when writing `post_load <marshmallow.decorators.post_load>` methods.
