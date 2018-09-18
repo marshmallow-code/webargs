@@ -13,17 +13,30 @@ In General
 In Particular
 -------------
 
-Questions, Feature Requests, Bug Reports, and Feedback. . .
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Questions, Feature Requests, Bug Reports, and Feedback…
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-. . .should all be reported on the `Github Issue Tracker`_ .
+…should all be reported on the `GitHub Issue Tracker`_ .
 
-.. _`Github Issue Tracker`: https://github.com/sloria/webargs/issues?state=open
+.. _`GitHub Issue Tracker`: https://github.com/sloria/webargs/issues?state=open
+
+
+Integration with a Another Web Framework…
++++++++++++++++++++++++++++++++++++++++++
+
+…should be released as a separate package.
+
+**Pull requests adding support for another framework will not be
+accepted**. In order to keep webargs small and easy to maintain, we are
+not currently adding support for more frameworks. Instead, release your
+framework integration as a separate package and add it to the
+`Ecosystem <https://github.com/sloria/webargs/wiki/Ecosystem>`_ page in
+the `GitHub wiki <https://github.com/sloria/webargs/wiki/Ecosystem>`_ .
 
 Setting Up for Local Development
 ++++++++++++++++++++++++++++++++
 
-1. Fork webargs_ on Github. ::
+1. Fork webargs_ on GitHub. ::
 
     $ git clone https://github.com/sloria/webargs.git
     $ cd webargs
