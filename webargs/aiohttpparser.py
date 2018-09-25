@@ -100,7 +100,7 @@ class AIOHTTPParser(AsyncParser):
             try:
                 json_data = await req.json()
             except json.JSONDecodeError as e:
-                if e.doc == '':
+                if e.doc == "":
                     return core.missing
                 else:
                     raise e
