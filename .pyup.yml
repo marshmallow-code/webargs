@@ -1,5 +1,0 @@
-
-requirements:
-  - docs/requirements.txt
-  - dev-requirements.txt:
-      pin: False
