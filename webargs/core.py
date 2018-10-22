@@ -86,8 +86,21 @@ def get_field_names_for_argmap(argmap):
 
 def fill_in_missing_args(ret, argmap):
     # WARNING: We modify ret in-place
+    partial = getattr(argmap, "partial")
+
+    if partial is True:
+        return ret
+
+    # WARNING: We modify ret in-place
     all_field_names = get_field_names_for_argmap(argmap)
     missing_args = all_field_names - set(ret.keys())
+
+    if isinstance(partial, (tuple, list)):
+        for key in missing_args:
+            if key not in partial:
+                ret[key] = missing
+        return ret
+
     for key in missing_args:
         ret[key] = missing
     return ret
