@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 import itertools
 import mock
 import sys
@@ -850,6 +851,45 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
         return {"username": username, "password": password}
 
     assert viewfunc() == {"username": "foo", "password": missing}
+
+
+def test_use_kwargs_with_arg_missing_and_partial(web_request, parser):
+    class UserSchema(Schema):
+        id = fields.Int(dump_only=True)
+        email = fields.Email()
+        password = fields.Str(load_only=True)
+        if MARSHMALLOW_VERSION_INFO[0] < 3:
+
+            class Meta:
+                strict = True
+
+    # test partial is True
+    web_request.json = {"email": "foo@bar.com"}
+    kwargs = deepcopy(strict_kwargs)
+    kwargs["partial"] = True
+
+    @parser.use_kwargs(UserSchema(**kwargs), web_request)
+    def viewfunc(**kwargs):
+        return kwargs
+
+    assert viewfunc() == {"email": "foo@bar.com"}
+
+    # test partial is list or tuple
+    kwargs["partial"] = ["email"]
+
+    @parser.use_kwargs(UserSchema(**kwargs), web_request)
+    def viewfunc(**kwargs):
+        return kwargs
+
+    assert viewfunc() == {"email": "foo@bar.com", "password": missing}
+
+    kwargs["partial"] = ["password"]
+
+    @parser.use_kwargs(UserSchema(**kwargs), web_request)
+    def viewfunc(**kwargs):
+        return kwargs
+
+    assert viewfunc() == {"email": "foo@bar.com"}
 
 
 def test_delimited_list_default_delimiter(web_request, parser):
