@@ -91,7 +91,6 @@ def fill_in_missing_args(ret, argmap):
     if partial is True:
         return ret
 
-    # WARNING: We modify ret in-place
     all_field_names = get_field_names_for_argmap(argmap)
     missing_args = all_field_names - set(ret.keys())
 
