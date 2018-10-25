@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+4.1.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix bug in ``AIOHTTPParser`` that caused a ``JSONDecode`` error
+  when parsing empty payloads (:issue:`229`). Thanks :user:`explosic4`
+  for reporting and thanks user :user:`kochab` for the PR.
+
 4.1.0 (2018-09-17)
 ******************
 
