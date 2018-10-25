@@ -43,12 +43,12 @@ def route(*args, response_formatter=jsonify, **kwargs):
 
 
 @route("/", methods=["GET"])
-def index(name: fields.Str(missing="Friend")):
+def index(name: fields.Str(missing="Friend")):  # noqa: E252
     return {"message": "Hello, {}!".format(name)}
 
 
 @route("/add", methods=["POST"])
-def add(x: fields.Float(required=True), y: fields.Float(required=True)):
+def add(x: fields.Float(required=True), y: fields.Float(required=True)):  # noqa: E252
     return {"result": x + y}
 
 
@@ -66,7 +66,7 @@ class User:
 
 
 @route("/users/<int:user_id>", methods=["POST"])
-def user_detail(user_id, name: fields.Str(required=True)) -> UserSchema():
+def user_detail(user_id, name: fields.Str(required=True)) -> UserSchema():  # noqa: E252
     user = User(id=user_id, name=name)
     return user
 
