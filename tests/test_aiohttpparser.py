@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import webtest
 import webtest_aiohttp
 import pytest
 
+from io import BytesIO
 from webargs.core import MARSHMALLOW_VERSION_INFO
 from webargs.testing import CommonTestCase
 from tests.apps.aiohttp_app import create_app
@@ -63,3 +65,10 @@ class TestAIOHTTPParser(CommonTestCase):
         assert testapp.get("/echo_use_schema_as_kwargs?name=Chandler").json == {
             "name": "Chandler"
         }
+
+    # https://github.com/sloria/webargs/pull/297
+    def test_empty_json_body(self, testapp):
+        environ = {"CONTENT_TYPE": "application/json", "wsgi.input": BytesIO(b"")}
+        req = webtest.TestRequest.blank("/echo", environ)
+        resp = testapp.do_request(req)
+        assert resp.json == {"name": "World"}

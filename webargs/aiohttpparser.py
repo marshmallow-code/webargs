@@ -97,7 +97,14 @@ class AIOHTTPParser(AsyncParser):
         if json_data is None:
             if not (req.body_exists and is_json_request(req)):
                 return core.missing
-            self._cache["json"] = json_data = await req.json()
+            try:
+                json_data = await req.json()
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    raise e
+            self._cache["json"] = json_data
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
