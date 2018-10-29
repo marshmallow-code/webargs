@@ -1,4 +1,4 @@
-python-dateutil==2.7.4
+python-dateutil==2.7.5
 Flask
 bottle
 tornado
