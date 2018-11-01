@@ -58,7 +58,7 @@ class DelimitedList(ma.fields.List):
     def _serialize(self, value, attr, obj):
         ret = super(DelimitedList, self)._serialize(value, attr, obj)
         if self.as_string:
-            return self.delimiter.join(format(each) for each in value)
+            return self.delimiter.join(format(each) for each in ret)
         return ret
 
     def _deserialize(self, value, attr, data):
