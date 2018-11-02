@@ -882,7 +882,6 @@ def test_delimited_list_as_string(web_request, parser):
 
 
 def test_delimited_list_as_string_v2(web_request, parser):
-	# b26793ee8021b6cfe525ac4f05570c3c68a4debd commit info
 	web_request.json = {"dates": "2018-11-01,2018-11-02"}
 	schema_cls = argmap2schema(
 		{"dates": fields.DelimitedList(fields.DateTime(format="%Y-%m-%d"), as_string=True)}
