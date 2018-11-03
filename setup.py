@@ -4,13 +4,13 @@ from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = ["marshmallow>=2.15.2"]
 FRAMEWORKS = [
-    "Flask>=0.10.1",
-    "Django>=1.6.5",
-    "bottle>=0.12.10",
-    "tornado>=4.0",
-    "pyramid>=1.5.2",
+    "Flask>=0.12.2",
+    "Django>=1.11.16",
+    "bottle>=0.12.13",
+    "tornado>=4.5.2",
+    "pyramid>=1.8.5",
     "webapp2>=3.0.0b1",
-    "falcon>=0.3.0",
+    "falcon>=1.3.0",
     'aiohttp>=3.0.0; python_version >= "3.5"',
 ]
 EXTRAS_REQUIRE = {
