@@ -1,8 +1,13 @@
 Changelog
 ---------
 
-4.2.0 (unreleased)
+4.1.2 (unreleased)
 ******************
+
+Bug fixes:
+
+* Fix serialization behavior of ``DelimitedList`` (:pr:`319`).
+  Thanks :user:`lee3164` for the PR.
 
 Other changes:
 
