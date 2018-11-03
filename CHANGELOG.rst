@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+4.2.0 (unreleased)
+******************
+
+Other changes:
+
+* Test against Python 3.7.
+
 4.1.1 (2018-10-25)
 ******************
 

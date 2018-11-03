@@ -36,20 +36,25 @@ the `GitHub wiki <https://github.com/sloria/webargs/wiki/Ecosystem>`_ .
 Setting Up for Local Development
 ++++++++++++++++++++++++++++++++
 
-1. Fork webargs_ on GitHub. ::
+1. Fork webargs_ on GitHub. 
+
+::
 
     $ git clone https://github.com/sloria/webargs.git
     $ cd webargs
 
-2. Install development requirements. It is highly recommended that you use a virtualenv. ::
+2. Install development requirements. **It is highly recommended that you use a virtualenv.**
+   Use the following command to install an editable version of
+   webargs along with its development requirements.
+
+::
 
     # After activating your virtualenv
-    $ pip install -r dev-requirements.txt
+    $ pip install -e '.[dev]'
 
-    # If you're using a Python 3 environment
-    $ pip install -r dev-requirements-py3.txt
+3. (Optional, but recommended) Install the pre-commit hooks, which will format and lint your git staged files. 
 
-3. (Optional, but recommended) Install the pre-commit hooks, which will format and lint your git staged files. ::
+::
 
     # The pre-commit CLI was installed above
     $ pre-commit install
@@ -76,6 +81,7 @@ Pull Requests
 ++++++++++++++
 
 1. Create a new local branch.
+
 ::
 
     # For a new feature
@@ -85,6 +91,7 @@ Pull Requests
     $ git checkout -b fix-something 1.2-line
 
 2. Commit your changes. Write `good commit messages <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_.
+
 ::
 
     $ git commit -m "Detailed commit message"
@@ -98,35 +105,30 @@ Pull Requests
 4. Submit a pull request to ``sloria:dev`` or the appropriate maintenance branch. The `Travis CI <https://travis-ci.org/sloria/webargs>`_ build must be passing before your pull request is merged.
 
 Running Tests
-+++++++++++++
+*************
 
-To run all tests (including syntax checking): ::
+To run all tests: ::
 
-    $ invoke test
+    $ pytest
 
-To run tests without syntax-checking (use this if you don't have the
-``python3.6`` interpreter): ::
+To run syntax checks: ::
 
-    $ invoke test --no-syntax
+    $ tox -e lint
 
-To run tests on Python 2.7, 3.5, 3.6, and 3.7 virtual environments (must have each interpreter installed): ::
+(Optional) To run tests on Python 2.7, 3.5, 3.6, and 3.7 virtual environments (must have each interpreter installed): ::
 
     $ tox
 
 Documentation
-+++++++++++++
+*************
 
 Contributions to the documentation are welcome. Documentation is written in `reStructured Text`_ (rST). A quick rST reference can be found `here <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_. Builds are powered by Sphinx_.
 
-To install the packages for building the docs: ::
+To build the docs in "watch" mode: ::
 
-    $ pip install -r docs/requirements.txt
+   $ tox -e watch-docs
 
-To build the docs: ::
-
-    $ invoke docs -b
-
-The ``-b`` (for "browse") automatically opens up the docs in your browser after building.
+Changes in the `docs/` directory will automatically trigger a rebuild.
 
 Contributing Examples
 +++++++++++++++++++++

@@ -2,8 +2,34 @@
 import re
 from setuptools import setup, find_packages
 
-# Requirements
-REQUIREMENTS = ["marshmallow>=2.15.2"]
+INSTALL_REQUIRES = ["marshmallow>=2.15.2"]
+FRAMEWORKS = [
+    "Flask>=0.10.1",
+    "Django>=1.6.5",
+    "bottle>=0.12.10",
+    "tornado>=4.0",
+    "pyramid>=1.5.2",
+    "webapp2>=3.0.0b1",
+    "falcon>=0.3.0",
+    'aiohttp>=3.0.0; python_version >= "3.5"',
+]
+EXTRAS_REQUIRE = {
+    "frameworks": FRAMEWORKS,
+    "tests": [
+        "pytest",
+        "mock",
+        "webtest==2.0.32",
+        'webtest-aiohttp==2.0.0; python_version >= "3.5"',
+        'pytest-aiohttp>=0.3.0; python_version >= "3.5"',
+    ]
+    + FRAMEWORKS,
+    "lint": [
+        "flake8==3.6.0",
+        'flake8-bugbear==18.8.0; python_version >= "3.5"',
+        "pre-commit==1.12.0",
+    ],
+}
+EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
 
 
 def find_version(fname):
@@ -46,7 +72,8 @@ setup(
     url="https://github.com/sloria/webargs",
     packages=find_packages(exclude=("test*", "examples")),
     package_dir={"webargs": "webargs"},
-    install_requires=REQUIREMENTS,
+    install_requires=INSTALL_REQUIRES,
+    extras_require=EXTRAS_REQUIRE,
     license="MIT",
     zip_safe=False,
     keywords=(
@@ -76,6 +103,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",

@@ -1,41 +1,33 @@
-# Config file for automatic testing at travis-ci.org
-
 language: python
-# http://blog.travis-ci.com/2014-12-17-faster-builds-with-container-based-infrastructure/
 sudo: false
 cache: pip
-
-env:
-  # Lowest supported version
-  - MARSHMALLOW_VERSION="==2.15.0"
-  # Latest release
-  - MARSHMALLOW_VERSION=""
-
-python:
-  - "3.6"
-  - "3.5"
-  - "2.7"
-  - "pypy"
-
-install:
-  - travis_retry pip install -U .
-  - if [[ $TRAVIS_PYTHON_VERSION == 2* || $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then travis_retry pip install -r dev-requirements.txt; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]] ; then travis_retry pip install -r dev-requirements-py3.txt; fi
-  - travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
-
-
-script:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then invoke test; fi
-  - if [[ $TRAVIS_PYTHON_VERSION != 3.6* ]]; then invoke test --no-syntax; fi
+install: travis_retry pip install -U tox
+script: tox
 jobs:
+  fast_finish: true
+
   include:
+  - { python: '3.6', env: TOXENV=lint }
+
+  - { python: '2.7', env: TOXENV=py27-marshmallow2 }
+  - { python: '2.7', env: TOXENV=py27-marshmallow3 }
+
+  - { python: '3.5', env: TOXENV=py35-marshmallow2 }
+  - { python: '3.5', env: TOXENV=py35-marshmallow3 }
+
+  - { python: '3.6', env: TOXENV=py36-marshmallow2 }
+  - { python: '3.6', env: TOXENV=py36-marshmallow3 }
+
+  - { python: '3.7', env: TOXENV=py37-marshmallow2, dist: xenial, sudo: required }
+  - { python: '3.7', env: TOXENV=py37-marshmallow3, dist: xenial, sudo: required }
+
+  - { python: '3.6', env: TOXENV=docs }
+
   - stage: PyPI Release
     if: tag IS present
     python: "3.6"
-    env: []
-    # Override install, and script to no-ops
     install: skip
-    script: echo "Releasing to PyPI..."
+    script: skip
     deploy:
       provider: pypi
       user: sloria
