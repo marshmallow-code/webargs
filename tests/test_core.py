@@ -882,18 +882,25 @@ def test_delimited_list_as_string(web_request, parser):
 
 
 def test_delimited_list_as_string_v2(web_request, parser):
-	web_request.json = {"dates": "2018-11-01,2018-11-02"}
-	schema_cls = argmap2schema(
-		{"dates": fields.DelimitedList(fields.DateTime(format="%Y-%m-%d"), as_string=True)}
-	)
-	schema = schema_cls()
+    web_request.json = {"dates": "2018-11-01,2018-11-02"}
+    schema_cls = argmap2schema(
+        {
+            "dates": fields.DelimitedList(
+                fields.DateTime(format="%Y-%m-%d"), as_string=True
+            )
+        }
+    )
+    schema = schema_cls()
 
-	parsed = parser.parse(schema, web_request)
-	assert parsed["dates"] == [datetime.datetime(2018, 11, 1), datetime.datetime(2018, 11, 2)]
+    parsed = parser.parse(schema, web_request)
+    assert parsed["dates"] == [
+        datetime.datetime(2018, 11, 1),
+        datetime.datetime(2018, 11, 2),
+    ]
 
-	dumped = schema.dump(parsed)
-	data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
-	assert data["dates"] == "2018-11-01,2018-11-02"
+    dumped = schema.dump(parsed)
+    data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
+    assert data["dates"] == "2018-11-01,2018-11-02"
 
 
 def test_delimited_list_custom_delimiter(web_request, parser):
