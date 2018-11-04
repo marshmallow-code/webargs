@@ -12,4 +12,4 @@ repos:
   rev: v0.3.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==18.6b4]
+    additional_dependencies: [black==18.9b0]
