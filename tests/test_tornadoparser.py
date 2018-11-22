@@ -594,10 +594,7 @@ class AlwaysFailHandler(tornado.web.RequestHandler):
 
 
 validate_app = tornado.web.Application(
-    [
-        (r"/echo", ValidateHandler),
-        (r"/alwaysfail", AlwaysFailHandler),
-    ]
+    [(r"/echo", ValidateHandler), (r"/alwaysfail", AlwaysFailHandler)]
 )
 
 
