@@ -15,10 +15,3 @@ class TestFalconParser(CommonTestCase):
 
     def test_use_args_hook(self, testapp):
         assert testapp.get("/echo_use_args_hook?name=Fred").json == {"name": "Fred"}
-
-    def test_raises_lookup_error_if_invalid_code_is_passed_to_validation_error(
-        self, testapp
-    ):
-        with pytest.raises(LookupError) as excinfo:
-            testapp.get("/error_invalid?text=foo")
-        assert excinfo.value.args[0] == "Status code 12345 not supported"

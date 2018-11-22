@@ -88,24 +88,6 @@ async def always_error(request):
     return json_response(parsed)
 
 
-async def error400(request):
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
-
-    args = {"text": fields.Str(validate=always_fail)}
-    parsed = await parser.parse(args, request)
-    return json_response(parsed)
-
-
-async def error_invalid(request):
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=12345)
-
-    args = {"text": fields.Str(validate=always_fail)}
-    parsed = await parser.parse(args, request)
-    return json_response(parsed)
-
-
 async def echo_headers(request):
     parsed = await parser.parse(hello_args, request, locations=("headers",))
     return json_response(parsed)
@@ -201,8 +183,6 @@ def create_app():
     )
     add_route(app, ["POST"], "/echo_use_args_multiple", echo_use_args_multiple)
     add_route(app, ["GET", "POST"], "/error", always_error)
-    add_route(app, ["GET", "POST"], "/error400", error400)
-    add_route(app, ["GET"], "/error_invalid", error_invalid)
     add_route(app, ["GET"], "/echo_headers", echo_headers)
     add_route(app, ["GET"], "/echo_cookie", echo_cookie)
     add_route(app, ["POST"], "/echo_nested", echo_nested)

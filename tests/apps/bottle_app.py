@@ -82,15 +82,6 @@ def always_error():
     return parser.parse(args)
 
 
-@app.route("/error400", method=["GET", "POST"])
-def error400():
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
-
-    args = {"text": fields.Str(validate=always_fail)}
-    return parser.parse(args)
-
-
 @app.route("/echo_headers")
 def echo_headers():
     return parser.parse(hello_args, request, locations=("headers",))

@@ -95,26 +95,6 @@ class AlwaysError(object):
     on_post = on_get
 
 
-class Error400(object):
-    def on_get(self, req, resp):
-        def always_fail(value):
-            raise ValidationError("something went wrong", status_code=400)
-
-        args = {"text": fields.Str(validate=always_fail)}
-        resp.body = json.dumps(parser.parse(args, req))
-
-    on_post = on_get
-
-
-class ErrorInvalid(object):
-    def on_get(self, req, resp):
-        def always_fail(value):
-            raise ValidationError("something went wrong", status_code=12345)
-
-        args = {"text": fields.Str(validate=always_fail)}
-        resp.body = json.dumps(parser.parse(args, req))
-
-
 class EchoHeaders(object):
     def on_get(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_args, req, locations=("headers",)))
@@ -169,11 +149,9 @@ def create_app():
         "/echo_use_kwargs_with_path_param/{name}", EchoUseKwargsWithPathParam()
     )
     app.add_route("/error", AlwaysError())
-    app.add_route("/error400", Error400())
     app.add_route("/echo_headers", EchoHeaders())
     app.add_route("/echo_cookie", EchoCookie())
     app.add_route("/echo_nested", EchoNested())
     app.add_route("/echo_nested_many", EchoNestedMany())
     app.add_route("/echo_use_args_hook", EchoUseArgsHook())
-    app.add_route("/error_invalid", ErrorInvalid())
     return app

@@ -77,7 +77,7 @@ class PyramidParser(core.Parser):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        status_code = error_status_code or getattr(error, "status_code", 422)
+        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
         raise exception_response(
             status_code, detail=text_type(error), headers=error_headers
         )

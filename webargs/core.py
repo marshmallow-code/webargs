@@ -98,9 +98,7 @@ class ValidationError(WebargsError, ma.exceptions.ValidationError):
                 RemovedInWebargs5Warning,
             )
         self.headers = headers
-        ma.exceptions.ValidationError.__init__(
-            self, message, status_code=status_code, headers=headers, **kwargs
-        )
+        ma.exceptions.ValidationError.__init__(self, message, **kwargs)
 
     def __repr__(self):
         return "ValidationError({0!r}, status_code={1}, headers={2})".format(

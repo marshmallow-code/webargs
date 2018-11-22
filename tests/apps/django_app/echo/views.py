@@ -79,17 +79,6 @@ def always_error(request):
         return json_response(err.messages, status=err.status_code)
 
 
-def error400(request):
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
-
-    argmap = {"text": fields.Str(validate=always_fail)}
-    try:
-        return parser.parse(argmap, request)
-    except ValidationError as err:
-        return json_response(err.messages, status=err.status_code)
-
-
 def echo_headers(request):
     return json_response(parser.parse(hello_args, request, locations=("headers",)))
 

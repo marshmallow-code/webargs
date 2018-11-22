@@ -66,14 +66,6 @@ def always_error(request):
     return parser.parse(argmap, request)
 
 
-def error400(request):
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
-
-    argmap = {"text": fields.Str(validate=always_fail)}
-    return parser.parse(argmap, request)
-
-
 def echo_headers(request):
     return parser.parse(hello_args, request, locations=("headers",))
 
@@ -141,7 +133,6 @@ def create_app():
         echo_use_kwargs_with_path_param,
     )
     add_route(config, "/error", always_error)
-    add_route(config, "/error400", error400)
     add_route(config, "/echo_headers", echo_headers)
     add_route(config, "/echo_cookie", echo_cookie)
     add_route(config, "/echo_file", echo_file)
