@@ -129,13 +129,14 @@ class AIOHTTPParser(AsyncParser):
         """Get request object from a handler function or method. Used internally by
         ``use_args`` and ``use_kwargs``.
         """
-        if len(args) > 1:
-            req = args[1]
-        else:
-            if isinstance(args[0], web.View):
-                req = args[0].request
-            else:
-                req = args[0]
+        req = None
+        for arg in args:
+            if isinstance(arg, web.Request):
+                req = arg
+                break
+            elif isinstance(arg, web.View):
+                req = arg.request
+                break
         assert isinstance(req, web.Request), "Request argument not found for handler"
         return req
 

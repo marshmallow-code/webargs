@@ -72,3 +72,12 @@ class TestAIOHTTPParser(CommonTestCase):
         req = webtest.TestRequest.blank("/echo", environ)
         resp = testapp.do_request(req)
         assert resp.json == {"name": "World"}
+
+    def test_use_args_multiple(self, testapp):
+        res = testapp.post_json(
+            "/echo_use_args_multiple?page=2&q=10", {"name": "Steve"}
+        )
+        assert res.json == {
+            "query_parsed": {"page": 2, "q": 10},
+            "json_parsed": {"name": "Steve"},
+        }
