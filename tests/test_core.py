@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
 import itertools
 import mock
 import sys
@@ -875,10 +874,8 @@ def test_use_kwargs_with_arg_missing_and_partial(
                 strict = True
 
     web_request.json = {"email": "foo@bar.com"}
-    kwargs = deepcopy(strict_kwargs)
-    kwargs["partial"] = partial
 
-    @parser.use_kwargs(UserSchema(**kwargs), web_request)
+    @parser.use_kwargs(UserSchema(partial=partial, **strict_kwargs), web_request)
     def viewfunc(**kwargs):
         return kwargs
 
