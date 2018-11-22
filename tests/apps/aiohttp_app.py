@@ -73,6 +73,12 @@ async def echo_use_kwargs_with_path_param(request, value):
     return json_response({"value": value})
 
 
+@use_args({"page": fields.Int(), "q": fields.Int()}, locations=("query",))
+@use_args({"name": fields.Str()}, locations=("json",))
+async def echo_use_args_multiple(request, query_parsed, json_parsed):
+    return json_response({"query_parsed": query_parsed, "json_parsed": json_parsed})
+
+
 async def always_error(request):
     def always_fail(value):
         raise ValidationError("something went wrong")
@@ -193,6 +199,7 @@ def create_app():
         "/echo_use_kwargs_with_path_param/{name}",
         echo_use_kwargs_with_path_param,
     )
+    add_route(app, ["POST"], "/echo_use_args_multiple", echo_use_args_multiple)
     add_route(app, ["GET", "POST"], "/error", always_error)
     add_route(app, ["GET", "POST"], "/error400", error400)
     add_route(app, ["GET"], "/error_invalid", error_invalid)

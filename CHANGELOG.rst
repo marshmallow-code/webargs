@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+4.1.3 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix bug in ``AIOHTTParser`` that prevented calling
+  ``use_args`` on the same view function multiple times (:issue:`273`).
+  Thanks to :user:`dnp1` for reporting and :user:`jangelo` for the fix.
+
 4.1.2 (2018-11-03)
 ******************
 
