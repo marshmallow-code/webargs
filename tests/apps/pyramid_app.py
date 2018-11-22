@@ -1,7 +1,7 @@
 from pyramid.config import Configurator
 import marshmallow as ma
 
-from webargs import fields, ValidationError
+from webargs import fields
 from webargs.pyramidparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -60,7 +60,7 @@ def echo_use_kwargs_with_path_param(request, value):
 
 def always_error(request):
     def always_fail(value):
-        raise ValidationError("something went wrong")
+        raise ma.ValidationError("something went wrong")
 
     argmap = {"text": fields.Str(validate=always_fail)}
     return parser.parse(argmap, request)

@@ -63,7 +63,10 @@ class BottleParser(core.Parser):
         """
         status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
         raise bottle.HTTPError(
-            status=status_code, body=error.messages, headers=error_headers, exception=error
+            status=status_code,
+            body=error.messages,
+            headers=error_headers,
+            exception=error,
         )
 
     def get_default_request(self):

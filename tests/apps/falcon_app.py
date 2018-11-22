@@ -2,7 +2,7 @@ import json
 
 import falcon
 import marshmallow as ma
-from webargs import fields, ValidationError
+from webargs import fields
 from webargs.falconparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -87,7 +87,7 @@ class EchoUseKwargsWithPathParam(object):
 class AlwaysError(object):
     def on_get(self, req, resp):
         def always_fail(value):
-            raise ValidationError("something went wrong")
+            raise ma.ValidationError("something went wrong")
 
         args = {"text": fields.Str(validate=always_fail)}
         resp.body = json.dumps(parser.parse(args, req))

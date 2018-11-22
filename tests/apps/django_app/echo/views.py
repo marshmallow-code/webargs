@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.views.generic import View
 
 import marshmallow as ma
-from webargs import fields, ValidationError
+from webargs import fields
 from webargs.djangoparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -26,7 +26,7 @@ def json_response(data, **kwargs):
 def echo(request):
     try:
         args = parser.parse(hello_args, request)
-    except ValidationError as err:
+    except ma.ValidationError as err:
         return json_response(err.messages, status=err.status_code)
     return json_response(args)
 
@@ -54,7 +54,7 @@ def echo_many_schema(request):
         return json_response(
             parser.parse(hello_many_schema, request, locations=("json",))
         )
-    except ValidationError as err:
+    except ma.ValidationError as err:
         return json_response(err.messages, status=err.status_code)
 
 
@@ -70,12 +70,12 @@ def echo_use_kwargs_with_path_param(request, value, name):
 
 def always_error(request):
     def always_fail(value):
-        raise ValidationError("something went wrong")
+        raise ma.ValidationError("something went wrong")
 
     argmap = {"text": fields.Str(validate=always_fail)}
     try:
         return parser.parse(argmap, request)
-    except ValidationError as err:
+    except ma.ValidationError as err:
         return json_response(err.messages, status=err.status_code)
 
 
@@ -111,7 +111,7 @@ class EchoCBV(View):
     def get(self, request):
         try:
             args = parser.parse(hello_args, self.request)
-        except ValidationError as err:
+        except ma.ValidationError as err:
             return json_response(err.messages, status=err.status_code)
         return json_response(args)
 
