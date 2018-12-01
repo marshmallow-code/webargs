@@ -270,7 +270,10 @@ class Parser(object):
         """
         location = field.metadata.get("location")
         if location:
-            locations_to_check = self._validated_locations([location])
+            if isinstance(location, tuple) or isinstance(location, list):
+                locations_to_check = self._validated_locations(location)
+            else:
+                locations_to_check = self._validated_locations([location])
         else:
             locations_to_check = self._validated_locations(locations or self.locations)
 
