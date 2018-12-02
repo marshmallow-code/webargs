@@ -6,6 +6,7 @@ import functools
 import inspect
 import logging
 import warnings
+from distutils.version import LooseVersion
 
 try:
     import simplejson as json
@@ -30,9 +31,7 @@ __all__ = [
     "parse_json",
 ]
 
-MARSHMALLOW_VERSION_INFO = tuple(
-    [int(part) for part in ma.__version__.split(".") if part.isdigit()]
-)
+MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)
 
 DEFAULT_VALIDATION_STATUS = 422
 
@@ -323,10 +322,13 @@ class Parser(object):
         ):
             # Raise a webargs error instead
             kwargs = getattr(error, "kwargs", {})
-            kwargs["field_names"] = error.field_names
             kwargs["data"] = error.data
             if MARSHMALLOW_VERSION_INFO[0] < 3:
                 kwargs["fields"] = error.fields
+            if LooseVersion(ma.__version__) < LooseVersion("3.0.0rc1"):
+                kwargs["field_names"] = error.field_names
+            else:
+                kwargs["field_name"] = error.field_name
             if "status_code" not in kwargs:
                 kwargs["status_code"] = self.DEFAULT_VALIDATION_STATUS
             error = ValidationError(error.messages, **kwargs)

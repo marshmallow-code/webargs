@@ -395,7 +395,8 @@ def test_required_with_custom_error(web_request):
         parser.parse(args, web_request, locations=("json",))
 
     assert "We need foo" in excinfo.value.messages["foo"]
-    assert "foo" in excinfo.value.field_names
+    if MARSHMALLOW_VERSION_INFO[0] < 3:
+        assert "foo" in excinfo.value.field_names
 
 
 def test_required_with_custom_error_and_validation_error(web_request):
@@ -413,7 +414,8 @@ def test_required_with_custom_error_and_validation_error(web_request):
         parser.parse(args, web_request, locations=("json",))
 
     assert "foo required length is 3" in excinfo.value.args[0]["foo"]
-    assert "foo" in excinfo.value.field_names
+    if MARSHMALLOW_VERSION_INFO[0] < 3:
+        assert "foo" in excinfo.value.field_names
 
 
 def test_full_input_validator_receives_nonascii_input(web_request):
