@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-4.1.3 (unreleased)
+4.1.3 (2018-12-02)
 ******************
 
 Bug fixes:
@@ -9,6 +9,7 @@ Bug fixes:
 * Fix bug in ``AIOHTTParser`` that prevented calling
   ``use_args`` on the same view function multiple times (:issue:`273`).
   Thanks to :user:`dnp1` for reporting and :user:`jangelo` for the fix.
+* Fix compatibility with marshmallow 3.0.0rc1 (:pr:`330`).
 
 4.1.2 (2018-11-03)
 ******************
