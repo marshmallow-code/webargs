@@ -1,13 +1,6 @@
-:orphan:
-
 =======
 webargs
 =======
-
-.. container:: lead
-
-    A friendly library for parsing HTTP request arguments.
-
 
 Release v\ |version|. (:doc:`Changelog <changelog>`)
 
