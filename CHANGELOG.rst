@@ -8,6 +8,53 @@ Features:
 
 * Add ``force_all`` argument to ``use_args`` and ``use_kwargs``
   (:issue:`252`, :issue:`307`). Thanks :user:`piroux` for reporting.
+* The ``status_code`` and ``headers`` arguments to ``ValidationError``
+  are deprecated. Pass ``error_status_code`` and ``error_headers`` to
+  `Parser.parse`, `Parser.use_args`, and `Parser.use_kwargs` instead.
+  (:issue:`327`, :issue:`336`).
+* Custom error handlers receive ``error_status_code`` and ``error_headers`` arguments.
+  (:issue:`327`).
+
+.. code-block:: python
+
+    # <4.2.0
+    @parser.error_handler
+    def handle_error(error, req, schema):
+        raise CustomError(error.messages)
+
+
+    class MyParser(FlaskParser):
+        def handle_error(self, error, req, schema):
+            # ...
+            raise CustomError(error.messages)
+
+
+    # >=4.2.0
+    @parser.error_handler
+    def handle_error(error, req, schema, status_code, headers):
+        raise CustomError(error.messages)
+
+
+    # OR
+
+
+    @parser.error_handler
+    def handle_error(error, **kwargs):
+        raise CustomError(error.messages)
+
+
+    class MyParser(FlaskParser):
+        def handle_error(self, error, req, schema, status_code, headers):
+            # ...
+            raise CustomError(error.messages)
+
+        # OR
+
+        def handle_error(self, error, req, **kwargs):
+            # ...
+            raise CustomError(error.messages)
+
+Legacy error handlers will be supported until version 5.0.0.
 
 4.1.3 (2018-12-02)
 ******************

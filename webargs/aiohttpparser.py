@@ -140,9 +140,9 @@ class AIOHTTPParser(AsyncParser):
         assert isinstance(req, web.Request), "Request argument not found for handler"
         return req
 
-    def handle_error(self, error, req, schema):
+    def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handle ValidationErrors and return a JSON response of error messages to the client."""
-        error_class = exception_map.get(error.status_code)
+        error_class = exception_map.get(error_status_code or error.status_code)
         if not error_class:
             raise LookupError("No exception for {0}".format(error.status_code))
         raise error_class(

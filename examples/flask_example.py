@@ -35,7 +35,7 @@ add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
 
 
 @app.route("/add", methods=["POST"])
-@use_kwargs(add_args)
+@use_kwargs(add_args, error_status_code=400)
 def add(x, y):
     """An addition endpoint."""
     return jsonify({"result": x + y})
@@ -63,6 +63,7 @@ def dateadd(value, addend, unit):
 
 # Return validation errors as JSON
 @app.errorhandler(422)
+@app.errorhandler(400)
 def handle_validation_error(err):
     exc = getattr(err, "exc", None)
     if exc:

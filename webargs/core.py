@@ -31,6 +31,30 @@ __all__ = [
     "parse_json",
 ]
 
+
+# Copied from marshmallow.utils
+def _signature(func):
+    if hasattr(inspect, "signature"):
+        return list(inspect.signature(func).parameters.keys())
+    if hasattr(func, "__self__"):
+        # Remove bound arg to match inspect.signature()
+        return inspect.getargspec(func).args[1:]
+    # All args are unbound
+    return inspect.getargspec(func).args
+
+
+def get_func_args(func):
+    """Given a callable, return a tuple of argument names. Handles
+    `functools.partial` objects and class-based callables.
+    """
+    if isinstance(func, functools.partial):
+        return _signature(func.func)
+    if inspect.isfunction(func) or inspect.ismethod(func):
+        return _signature(func)
+    # Callable class
+    return _signature(func.__call__)
+
+
 MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)
 
 DEFAULT_VALIDATION_STATUS = 422
@@ -43,15 +67,32 @@ class WebargsError(Exception):
 
 
 class ValidationError(WebargsError, ma.exceptions.ValidationError):
-    """Raised when validation fails on user input. Same as
-    `marshmallow.ValidationError`, with the addition of the ``status_code`` and
-    ``headers`` arguments.
+    """Raised when validation fails on user input.
+
+    .. versionchanged:: 4.2.0
+        status_code and headers arguments are deprecated. Pass
+        error_status_code and error_headers to `Parser.parse`,
+        `Parser.use_args`, and `Parser.use_kwargs` instead.
     """
 
-    def __init__(
-        self, message, status_code=DEFAULT_VALIDATION_STATUS, headers=None, **kwargs
-    ):
-        self.status_code = status_code
+    def __init__(self, message, status_code=None, headers=None, **kwargs):
+        if status_code is not None:
+            warnings.warn(
+                "The status_code argument to ValidationError is deprecated "
+                "and will be removed in 5.0.0. "
+                "Pass error_status_code to Parser.parse, Parser.use_args, "
+                "or Parser.use_kwargs instead.",
+                DeprecationWarning,
+            )
+        self.status_code = status_code or DEFAULT_VALIDATION_STATUS
+        if headers is not None:
+            warnings.warn(
+                "The headers argument to ValidationError is deprecated "
+                "and will be removed in 5.0.0. "
+                "Pass error_headers to Parser.parse, Parser.use_args, "
+                "or Parser.use_kwargs instead.",
+                DeprecationWarning,
+            )
         self.headers = headers
         ma.exceptions.ValidationError.__init__(
             self, message, status_code=status_code, headers=headers, **kwargs
@@ -316,7 +357,9 @@ class Parser(object):
                     parsed[argname] = parsed_value
         return parsed
 
-    def _on_validation_error(self, error, req, schema):
+    def _on_validation_error(
+        self, error, req, schema, error_status_code, error_headers
+    ):
         if isinstance(error, ma.exceptions.ValidationError) and not isinstance(
             error, ValidationError
         ):
@@ -333,9 +376,27 @@ class Parser(object):
                 kwargs["status_code"] = self.DEFAULT_VALIDATION_STATUS
             error = ValidationError(error.messages, **kwargs)
         if self.error_callback:
-            self.error_callback(error, req, schema)
+            if len(get_func_args(self.error_callback)) > 3:
+                self.error_callback(
+                    error, req, schema, error_status_code, error_headers
+                )
+            else:  # Backwards compat with webargs<=4.2.0
+                warnings.warn(
+                    "Error handler functions should include error_status_code and "
+                    "error_headers args, or include **kwargs in the signature",
+                    DeprecationWarning,
+                )
+                self.error_callback(error, req, schema)
         else:
-            self.handle_error(error, req, schema)
+            if len(get_func_args(self.handle_error)) > 3:
+                self.handle_error(error, req, schema, error_status_code, error_headers)
+            else:
+                warnings.warn(
+                    "handle_error methods should include error_status_code and "
+                    "error_headers args, or include **kwargs in the signature",
+                    DeprecationWarning,
+                )
+                self.handle_error(error, req, schema)
 
     def _validate_arguments(self, data, validators):
         for validator in validators:
@@ -368,7 +429,16 @@ class Parser(object):
             )
         return schema
 
-    def parse(self, argmap, req=None, locations=None, validate=None, force_all=False):
+    def parse(
+        self,
+        argmap,
+        req=None,
+        locations=None,
+        validate=None,
+        force_all=False,
+        error_status_code=None,
+        error_headers=None,
+    ):
         """Main request parsing method.
 
         :param argmap: Either a `marshmallow.Schema`, a `dict`
@@ -381,6 +451,12 @@ class Parser(object):
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
+        :param bool force_all: If `True`, missing arguments will be replaced with
+            `missing <marshmallow.utils.missing>`.
+        :param int error_status_code: Status code passed to error handler functions when
+            a `ValidationError` is raised.
+        :param dict error_headers: Headers passed to error handler functions when a
+            a `ValidationError` is raised.
 
          :return: A dictionary of parsed arguments
         """
@@ -395,7 +471,9 @@ class Parser(object):
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(error, req, schema)
+            self._on_validation_error(
+                error, req, schema, error_status_code, error_headers
+            )
         finally:
             self.clear_cache()
         if force_all:
@@ -435,6 +513,8 @@ class Parser(object):
         as_kwargs=False,
         validate=None,
         force_all=None,
+        error_status_code=None,
+        error_headers=None,
     ):
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -482,6 +562,8 @@ class Parser(object):
                     locations=locations,
                     validate=validate,
                     force_all=force_all_,
+                    error_status_code=error_status_code,
+                    error_headers=error_headers,
                 )
                 if as_kwargs:
                     kwargs.update(parsed_args)
@@ -539,8 +621,9 @@ class Parser(object):
 
     def error_handler(self, func):
         """Decorator that registers a custom error handling function. The
-        function should received the raised error, request object, and the
-        `marshmallow.Schema` instance used to parse the request. Overrides
+        function should receive the raised error, request object,
+        `marshmallow.Schema` instance used to parse the request, error status code,
+        and headers to use for the error response. Overrides
         the parser's ``handle_error`` method.
 
         Example: ::
@@ -555,7 +638,7 @@ class Parser(object):
 
 
             @parser.error_handler
-            def handle_error(error, req, schema):
+            def handle_error(error, req, schema, status_code, headers):
                 raise CustomError(error.messages)
 
         :param callable func: The error callback to register.
@@ -601,7 +684,9 @@ class Parser(object):
         """
         return missing
 
-    def handle_error(self, error, req, schema):
+    def handle_error(
+        self, error, req, schema, error_status_code=None, error_headers=None
+    ):
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
         """

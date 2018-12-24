@@ -73,11 +73,11 @@ class PyramidParser(core.Parser):
         """Pull a value from the request's `matchdict`."""
         return core.get_value(req.matchdict, name, field)
 
-    def handle_error(self, error, req, schema):
+    def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
-        status_code = getattr(error, "status_code", 422)
+        status_code = error_status_code or getattr(error, "status_code", 422)
         raise exception_response(status_code, detail=text_type(error))
 
     def use_args(
