@@ -19,10 +19,9 @@ Example: ::
     def index(args):
         return 'Hello ' + args['name']
 """
-import json
+import simplejson as json
 
 import flask
-from flask import json as flask_json
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
@@ -64,7 +63,7 @@ class FlaskParser(core.Parser):
             # JSONDecodeErrors consistently
             data = req._get_data_for_json(cache=True)
             try:
-                self._cache["json"] = json_data = flask_json.loads(data)
+                self._cache["json"] = json_data = core.parse_json(data)
             except json.JSONDecodeError as e:
                 if e.doc == "":
                     return core.missing

@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 from flask import Flask, jsonify as J, Response, request
 from flask.views import MethodView
 

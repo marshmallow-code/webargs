@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
-import json
+import simplejson as json
 
 import falcon
 from falcon.util.uri import parse_query_string

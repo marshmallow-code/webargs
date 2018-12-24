@@ -14,7 +14,7 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-import json
+import simplejson as json
 import tornado.web
 from tornado.escape import _unicode
 

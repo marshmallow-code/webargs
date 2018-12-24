@@ -2,7 +2,7 @@
 import re
 from setuptools import setup, find_packages
 
-INSTALL_REQUIRES = ["marshmallow>=2.15.2"]
+INSTALL_REQUIRES = ["marshmallow>=2.15.2", "simplejson"]
 FRAMEWORKS = [
     "Flask>=0.12.2",
     "Django>=1.11.16",

@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 from bottle import Bottle, HTTPResponse, debug, request, response
 
 import marshmallow as ma

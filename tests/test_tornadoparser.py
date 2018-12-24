@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import json
+import simplejson as json
 
 try:
     from urllib import urlencode  # python2

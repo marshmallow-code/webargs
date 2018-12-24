@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 
 import falcon
 import marshmallow as ma

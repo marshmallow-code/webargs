@@ -9,6 +9,11 @@ Changelog
   error message for invalid JSON payloads instead of passing silently
   (:issue:`329`). Thanks :user:`zedrdave` for reporting.
 
+Other changes:
+
+* `simplejson <https://pypi.org/project/simplejson/>`_ is now a dependency.
+  This ensures consistency of behavior across Python 2 and 3.
+
 4.3.0 (2018-12-30)
 ******************
 

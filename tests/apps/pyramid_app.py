@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPBadRequest
@@ -25,7 +25,7 @@ def echo(request):
         return parser.parse(hello_args, request)
     except json.JSONDecodeError:
         error = HTTPBadRequest()
-        error.text = json.dumps(["Invalid JSON."])
+        error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
         error.content_type = "application/json"
         raise error
 

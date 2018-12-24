@@ -12,7 +12,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=1973-04-10 addend=63
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
-import json
+import simplejson as json
 import datetime as dt
 
 from bottle import route, run, error, response, HTTPResponse
