@@ -61,6 +61,14 @@ def test_parse_json():
     assert parser.parse(hello_args, req=request) == expected
 
 
+def test_parse_invalid_json():
+    request = webapp2.Request.blank(
+        "/echo", POST='{"foo": "bar", }', headers={"content-type": "application/json"}
+    )
+    with pytest.raises(json.JSONDecodeError):
+        parser.parse(hello_args, req=request)
+
+
 def test_parse_json_with_vendor_media_type():
     expected = {"name": "Fred"}
     request = webapp2.Request.blank(

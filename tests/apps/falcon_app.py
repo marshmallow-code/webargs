@@ -20,8 +20,13 @@ hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
 class Echo(object):
     def on_get(self, req, resp):
-        parsed = parser.parse(hello_args, req)
-        resp.body = json.dumps(parsed)
+        try:
+            parsed = parser.parse(hello_args, req)
+        except json.JSONDecodeError:
+            resp.body = json.dumps(["Invalid JSON."])
+            resp.status = falcon.HTTP_400
+        else:
+            resp.body = json.dumps(parsed)
 
     on_post = on_get
 

@@ -14,6 +14,7 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
+import json
 import tornado.web
 from tornado.escape import _unicode
 
@@ -36,8 +37,13 @@ def parse_json_body(req):
     if content_type and core.is_json(content_type):
         try:
             return core.parse_json(req.body)
-        except (TypeError, ValueError):
+        except TypeError:
             pass
+        except json.JSONDecodeError as e:
+            if e.doc == "":
+                return core.missing
+            else:
+                raise
     return {}
 
 

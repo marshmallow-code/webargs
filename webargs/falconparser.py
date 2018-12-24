@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
+import json
+
 import falcon
+from falcon.util.uri import parse_query_string
 
 from webargs import core
-from falcon.util.uri import parse_query_string
 
 HTTP_422 = "422 Unprocessable Entity"
 
@@ -38,8 +40,11 @@ def parse_json_body(req):
         if body:
             try:
                 return core.parse_json(body)
-            except (TypeError, ValueError):
-                pass
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    raise
     return {}
 
 

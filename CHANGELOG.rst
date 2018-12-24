@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+5.0.0 (unreleased)
+******************
+
+* *Backwards-incompatible*: A ``JSONDecodeError`` is raised when an
+  invalid JSON payload is passed. This allows users to return a proper
+  error message for invalid JSON payloads instead of passing silently
+  (:issue:`329`). Thanks :user:`zedrdave` for reporting.
+
 4.3.0 (2018-12-30)
 ******************
 

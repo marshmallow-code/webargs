@@ -46,8 +46,13 @@ class DjangoParser(core.Parser):
         """Pull a json value from the request body."""
         try:
             json_data = json.loads(req.body.decode("utf-8"))
-        except (AttributeError, ValueError):
+        except AttributeError:
             return core.missing
+        except json.JSONDecodeError as e:
+            if e.doc == "":
+                return core.missing
+            else:
+                raise
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_cookies(self, req, name, field):

@@ -331,6 +331,15 @@ class TestParse(object):
         assert parsed["integer"] == [1, 2]
         assert parsed["string"] == value
 
+    def test_it_should_raise_when_json_is_invalid(self):
+        attrs = {"foo": fields.Str()}
+
+        request = make_request(
+            body='{"foo": 42,}', headers={"Content-Type": "application/json"}
+        )
+        with pytest.raises(json.JSONDecodeError):
+            parser.parse(attrs, request)
+
     def test_it_should_parse_header_arguments(self):
         attrs = {"string": fields.Str(), "integer": fields.List(fields.Int())}
 

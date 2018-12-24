@@ -25,6 +25,7 @@ Example usage: ::
         server = make_server('0.0.0.0', 6543, app)
         server.serve_forever()
 """
+import json
 import collections
 import functools
 
@@ -52,8 +53,11 @@ class PyramidParser(core.Parser):
         """Pull a json value from the request."""
         try:
             json_data = req.json_body
-        except ValueError:
-            return core.missing
+        except json.JSONDecodeError as e:
+            if e.doc == "":
+                return core.missing
+            else:
+                raise
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_cookies(self, req, name, field):

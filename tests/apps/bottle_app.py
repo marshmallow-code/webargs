@@ -1,5 +1,5 @@
 import json
-from bottle import Bottle, HTTPResponse, debug, request, response, error
+from bottle import Bottle, HTTPResponse, debug, request, response
 
 import marshmallow as ma
 from webargs import fields
@@ -115,7 +115,18 @@ def echo_nested_many():
     return parser.parse(args)
 
 
-@error(422)
+@app.error(422)
 def handle_422(err):
     response.content_type = "application/json"
+    return err.body
+
+
+@app.error(500)
+def handle_500(err):
+    if isinstance(err.exception, json.JSONDecodeError):
+        return HTTPResponse(
+            json.dumps(["Invalid JSON."]),
+            status=400,
+            headers={"Content-Type": "application/json"},
+        )
     return err.body

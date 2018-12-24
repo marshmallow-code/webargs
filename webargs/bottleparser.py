@@ -17,6 +17,7 @@ Example: ::
     if __name__ == '__main__':
         run(debug=True)
 """
+import json
 import bottle
 
 from webargs import core
@@ -39,8 +40,13 @@ class BottleParser(core.Parser):
         if json_data is None:
             try:
                 self._cache["json"] = json_data = req.json
-            except (AttributeError, ValueError):
+            except AttributeError:
                 return core.missing
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    raise
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)

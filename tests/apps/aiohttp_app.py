@@ -1,3 +1,4 @@
+import json
 import asyncio
 
 import aiohttp
@@ -29,7 +30,13 @@ hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
 
 async def echo(request):
-    parsed = await parser.parse(hello_args, request)
+    try:
+        parsed = await parser.parse(hello_args, request)
+    except json.JSONDecodeError:
+        raise web.HTTPBadRequest(
+            body=json.dumps(["Invalid JSON."]).encode("utf-8"),
+            content_type="application/json",
+        )
     return json_response(parsed)
 
 
