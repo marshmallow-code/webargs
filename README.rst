@@ -2,17 +2,17 @@
 webargs
 =======
 
-.. image:: https://badge.fury.io/py/webargs.svg
+.. image:: https://badgen.net/pypi/v/webargs
     :target: http://badge.fury.io/py/webargs
 
-.. image:: https://travis-ci.org/sloria/webargs.svg?branch=pypi
+.. image:: https://badgen.net/travis/sloria/webargs
     :target: https://travis-ci.org/sloria/webargs
 
-.. image:: https://img.shields.io/badge/marshmallow-3-blue.svg
+.. image:: https://badgen.net/badge/marshmallow/2,3?list=1
     :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
-    :alt: marshmallow 3 compatible
+    :alt: marshmallow 2/3 compatible
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+.. image:: https://badgen.net/badge/code%20style/black/000
     :target: https://github.com/ambv/black
     :alt: code style: black
 
