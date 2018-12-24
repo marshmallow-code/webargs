@@ -64,8 +64,13 @@ def dateadd(value, addend, unit):
 # Return validation errors as JSON
 @app.errorhandler(422)
 def handle_validation_error(err):
-    exc = err.exc
-    return jsonify({"errors": exc.messages}), 422
+    exc = getattr(err, "exc", None)
+    if exc:
+        # Get validation messages from the ValidationError object
+        messages = exc.messages
+    else:
+        messages = ["Invalid request"]
+    return jsonify({"messages": messages}), err.code
 
 
 if __name__ == "__main__":

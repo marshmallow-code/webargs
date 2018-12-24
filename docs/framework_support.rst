@@ -32,7 +32,8 @@ Error Handling
 ++++++++++++++
 
 Webargs uses Flask's ``abort`` function to raise an ``HTTPException`` when a validation error occurs.
-If you use the ``Flask.errorhandler`` method to handle errors, you can access validation messages from the ``data`` attribute of an error.
+If you use the ``Flask.errorhandler`` method to handle errors, you can access validation messages from the ``messages`` attribute of 
+the attached ``ValidationError``.
 
 Here is an example error handler that returns validation messages to the client as JSON.
 
@@ -42,15 +43,14 @@ Here is an example error handler that returns validation messages to the client 
 
 
     @app.errorhandler(422)
-    def handle_unprocessable_entity(err):
-        # webargs attaches additional metadata to the `data` attribute
-        exc = getattr(err, "exc")
+    def handle_invalid_requests(err):
+        exc = getattr(err, "exc", None)
         if exc:
-            # Get validations from the ValidationError object
+            # Get validation messages from the ValidationError object
             messages = exc.messages
         else:
             messages = ["Invalid request"]
-        return jsonify({"messages": messages}), 422
+        return jsonify({"messages": messages}), err.code
 
 URL Matches
 +++++++++++
