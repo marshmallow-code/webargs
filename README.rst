@@ -3,10 +3,12 @@ webargs
 =======
 
 .. image:: https://badgen.net/pypi/v/webargs
-    :target: http://badge.fury.io/py/webargs
+    :target: https://badge.fury.io/py/webargs
+    :alt: PyPI version
 
 .. image:: https://badgen.net/travis/sloria/webargs
     :target: https://travis-ci.org/sloria/webargs
+    :alt: TravisCI build status
 
 .. image:: https://badgen.net/badge/marshmallow/2,3?list=1
     :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
@@ -61,8 +63,8 @@ Full documentation is available at https://webargs.readthedocs.io/.
 Project Links
 -------------
 
-- Docs: http://webargs.readthedocs.io/
-- Changelog: http://webargs.readthedocs.io/en/latest/changelog.html
+- Docs: https://webargs.readthedocs.io/
+- Changelog: https://webargs.readthedocs.io/en/latest/changelog.html
 - PyPI: https://pypi.python.org/pypi/webargs
 - Issues: https://github.com/sloria/webargs/issues
 
