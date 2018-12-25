@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+4.2.0 (unreleased)
+******************
+
+Features:
+
+* Add ``force_all`` argument to ``use_args`` and ``use_kwargs``
+  (:issue:`252`, :issue:`307`). Thanks :user:`piroux` for reporting.
+
 4.1.3 (2018-12-02)
 ******************
 

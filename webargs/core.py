@@ -428,7 +428,13 @@ class Parser(object):
         return None
 
     def use_args(
-        self, argmap, req=None, locations=None, as_kwargs=False, validate=None
+        self,
+        argmap,
+        req=None,
+        locations=None,
+        as_kwargs=False,
+        validate=None,
+        force_all=None,
     ):
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -447,6 +453,10 @@ class Parser(object):
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
+        :param bool force_all: If `True`, missing arguments will be included
+            in the parsed arguments dictionary with the ``missing`` value.
+            If `False`, missing values will be omitted. If `None`, fall back
+            to the value of ``as_kwargs``.
         """
         locations = locations or self.locations
         request_obj = req
@@ -457,13 +467,11 @@ class Parser(object):
 
         def decorator(func):
             req_ = request_obj
+            force_all_ = force_all if force_all is not None else as_kwargs
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 req_obj = req_
-
-                # if as_kwargs is passed, must include all args
-                force_all = as_kwargs
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
@@ -473,7 +481,7 @@ class Parser(object):
                     req=req_obj,
                     locations=locations,
                     validate=validate,
-                    force_all=force_all,
+                    force_all=force_all_,
                 )
                 if as_kwargs:
                     kwargs.update(parsed_args)
