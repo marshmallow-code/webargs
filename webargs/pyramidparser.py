@@ -78,7 +78,9 @@ class PyramidParser(core.Parser):
         responds with a 400 error.
         """
         status_code = error_status_code or getattr(error, "status_code", 422)
-        raise exception_response(status_code, detail=text_type(error))
+        raise exception_response(
+            status_code, detail=text_type(error), headers=error_headers
+        )
 
     def use_args(
         self,
@@ -87,6 +89,8 @@ class PyramidParser(core.Parser):
         locations=core.Parser.DEFAULT_LOCATIONS,
         as_kwargs=False,
         validate=None,
+        error_status_code=None,
+        error_headers=None,
     ):
         """Decorator that injects parsed arguments into a view callable.
         Supports the *Class-based View* pattern where `request` is saved as an instance
@@ -123,6 +127,8 @@ class PyramidParser(core.Parser):
                     locations=locations,
                     validate=validate,
                     force_all=as_kwargs,
+                    error_status_code=error_status_code,
+                    error_headers=error_headers,
                 )
                 if as_kwargs:
                     kwargs.update(parsed_args)

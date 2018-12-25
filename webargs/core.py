@@ -537,6 +537,10 @@ class Parser(object):
             in the parsed arguments dictionary with the ``missing`` value.
             If `False`, missing values will be omitted. If `None`, fall back
             to the value of ``as_kwargs``.
+        :param int error_status_code: Status code passed to error handler functions when
+            a `ValidationError` is raised.
+        :param dict error_headers: Headers passed to error handler functions when a
+            a `ValidationError` is raised.
         """
         locations = locations or self.locations
         request_obj = req

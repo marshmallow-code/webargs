@@ -35,7 +35,7 @@ add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
 
 
 @app.route("/add", methods=["POST"])
-@use_kwargs(add_args, error_status_code=400)
+@use_kwargs(add_args)
 def add(x, y):
     """An addition endpoint."""
     return jsonify({"result": x + y})
@@ -67,11 +67,15 @@ def dateadd(value, addend, unit):
 def handle_validation_error(err):
     exc = getattr(err, "exc", None)
     if exc:
-        # Get validation messages from the ValidationError object
+        headers = err.data["headers"]
         messages = exc.messages
     else:
-        messages = ["Invalid request"]
-    return jsonify({"messages": messages}), err.code
+        headers = None
+        messages = ["Invalid request."]
+    if headers:
+        return jsonify({"errors": messages}), err.code, headers
+    else:
+        return jsonify({"errors": messages}), err.code
 
 
 if __name__ == "__main__":

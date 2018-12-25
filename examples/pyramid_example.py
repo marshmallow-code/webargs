@@ -76,5 +76,7 @@ if __name__ == "__main__":
     config.add_route("dateadd", "/dateadd")
     config.scan(__name__)
     app = config.make_wsgi_app()
-    server = make_server("0.0.0.0", 5001, app)
+    port = 5001
+    server = make_server("0.0.0.0", port, app)
+    print("Serving on port {}".format(port))
     server.serve_forever()

@@ -26,6 +26,7 @@ class HTTPError(tornado.web.HTTPError):
 
     def __init__(self, *args, **kwargs):
         self.messages = kwargs.pop("messages", {})
+        self.headers = kwargs.pop("headers", None)
         super(HTTPError, self).__init__(*args, **kwargs)
 
 
@@ -129,6 +130,7 @@ class TornadoParser(core.Parser):
             log_message=str(error.messages),
             reason=reason,
             messages=error.messages,
+            headers=error_headers,
         )
 
     def get_request_from_view_args(self, view, args, kwargs):

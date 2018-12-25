@@ -100,7 +100,14 @@ class FlaskParser(core.Parser):
         status_code = error_status_code or getattr(
             error, "status_code", self.DEFAULT_VALIDATION_STATUS
         )
-        abort(status_code, exc=error, messages=error.messages, schema=schema)
+        headers = error_headers or getattr(error, "headers", None)
+        abort(
+            status_code,
+            exc=error,
+            messages=error.messages,
+            schema=schema,
+            headers=headers,
+        )
 
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""

@@ -145,8 +145,10 @@ class AIOHTTPParser(AsyncParser):
         error_class = exception_map.get(error_status_code or error.status_code)
         if not error_class:
             raise LookupError("No exception for {0}".format(error.status_code))
+        headers = error_headers or error.headers
         raise error_class(
             body=json.dumps(error.messages).encode("utf-8"),
+            headers=headers,
             content_type="application/json",
         )
 

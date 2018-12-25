@@ -28,6 +28,9 @@ class BaseRequestHandler(RequestHandler):
             etype, exc, traceback = kwargs["exc_info"]
             if hasattr(exc, "messages"):
                 self.write({"errors": exc.messages})
+                if getattr(exc, "headers", None):
+                    for name, val in exc.headers.items():
+                        self.set_header(name, val)
                 self.finish()
 
 
@@ -80,5 +83,7 @@ if __name__ == "__main__":
         [(r"/", HelloHandler), (r"/add", AdderHandler), (r"/dateadd", DateAddHandler)],
         debug=True,
     )
-    app.listen(5001)
+    port = 5001
+    app.listen(port)
+    print("Serving on port {}".format(port))
     tornado.ioloop.IOLoop.instance().start()
