@@ -605,18 +605,12 @@ def test_use_kwargs_stacked(web_request, parser):
     assert viewfunc() == {"json": {"username": "foo"}, "query": {"page": 42}}
 
 
-def test_use_args_doesnt_change_docstring(parser):
-    @parser.use_args({"val": fields.Int()})
-    def viewfunc(args):
-        """View docstring"""
-        pass
+@pytest.mark.parametrize("decorator_name", ["use_args", "use_kwargs"])
+def test_decorators_dont_change_docstring(parser, decorator_name):
+    decorator = getattr(parser, decorator_name)
 
-    assert viewfunc.__doc__ == "View docstring"
-
-
-def test_use_kwargs_doesnt_change_docstring(parser):
-    @parser.use_kwargs({"val": fields.Int()})
-    def viewfunc(val):
+    @decorator({"val": fields.Int()})
+    def viewfunc(*args, **kwargs):
         """View docstring"""
         pass
 
@@ -853,6 +847,33 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
         return {"username": username, "password": password}
 
     assert viewfunc() == {"username": "foo", "password": missing}
+
+
+# https://github.com/sloria/webargs/issues/252
+def test_use_kwargs_force_all_false(web_request, parser):
+    user_args = {"username": fields.Str(required=True), "password": fields.Str()}
+    web_request.json = {"username": "foo"}
+
+    @parser.use_kwargs(user_args, web_request, force_all=False)
+    def viewfunc(username, **kwargs):
+        assert "password" not in kwargs
+        return {"username": username}
+
+    assert viewfunc() == {"username": "foo"}
+
+    class MySchema(Schema):
+        username = fields.Str(required=True)
+        password = fields.Str()
+
+    web_request.json = {"username": "sloria"}
+
+    # https://github.com/sloria/webargs/pull/307#issuecomment-441139909
+    @parser.use_kwargs(MySchema(partial=True), web_request, force_all=False)
+    def viewfunc2(username, **kwargs):
+        assert "password" not in kwargs
+        return {"username": username}
+
+    assert viewfunc2() == {"username": "sloria"}
 
 
 def test_delimited_list_default_delimiter(web_request, parser):
