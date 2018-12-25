@@ -84,7 +84,13 @@ class AsyncParser(core.Parser):
         return data
 
     def use_args(
-        self, argmap, req=None, locations=None, as_kwargs=False, validate=None
+        self,
+        argmap,
+        req=None,
+        locations=None,
+        as_kwargs=False,
+        validate=None,
+        force_all=None,
     ):
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -92,6 +98,7 @@ class AsyncParser(core.Parser):
         """
         locations = locations or self.locations
         request_obj = req
+        force_all_ = force_all if force_all is not None else as_kwargs
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, collections.Mapping):
@@ -106,9 +113,6 @@ class AsyncParser(core.Parser):
                 async def wrapper(*args, **kwargs):
                     req_obj = req_
 
-                    # if as_kwargs is passed, must include all args
-                    force_all = as_kwargs
-
                     if not req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
@@ -117,7 +121,7 @@ class AsyncParser(core.Parser):
                         req=req_obj,
                         locations=locations,
                         validate=validate,
-                        force_all=force_all,
+                        force_all=force_all_,
                     )
                     if as_kwargs:
                         kwargs.update(parsed_args)
@@ -133,9 +137,6 @@ class AsyncParser(core.Parser):
                 def wrapper(*args, **kwargs):
                     req_obj = req_
 
-                    # if as_kwargs is passed, must include all args
-                    force_all = as_kwargs
-
                     if not req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
@@ -144,7 +145,7 @@ class AsyncParser(core.Parser):
                         req=req_obj,
                         locations=locations,
                         validate=validate,
-                        force_all=force_all,
+                        force_all=force_all_,
                     )
                     if as_kwargs:
                         kwargs.update(parsed_args)
