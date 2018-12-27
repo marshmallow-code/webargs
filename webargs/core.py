@@ -368,7 +368,6 @@ class Parser(object):
             kwargs["data"] = error.data
             if MARSHMALLOW_VERSION_INFO[0] < 3:
                 kwargs["fields"] = error.fields
-            if LooseVersion(ma.__version__) < LooseVersion("3.0.0rc1"):
                 kwargs["field_names"] = error.field_names
             else:
                 kwargs["field_name"] = error.field_name
