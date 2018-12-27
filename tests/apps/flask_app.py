@@ -184,4 +184,4 @@ def echo_use_kwargs_missing(username, password):
 @app.errorhandler(422)
 def handle_validation_error(err):
     assert isinstance(err.data["schema"], ma.Schema)
-    return J({"errors": err.exc.messages}), 422
+    return J({"errors": err.exc.messages}), err.code

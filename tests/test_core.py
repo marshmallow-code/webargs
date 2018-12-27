@@ -24,6 +24,13 @@ from webargs.core import (
 strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
 
 
+class MockHTTPError(Exception):
+    def __init__(self, status_code, headers):
+        self.status_code = status_code
+        self.headers = headers
+        super(MockHTTPError, self).__init__(self, "HTTP Error occurred")
+
+
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
@@ -999,12 +1006,14 @@ def test_validation_errors_in_validator_are_passed_to_handle_error(parser, web_r
 
 
 class TestValidationError:
-    def test_can_store_status_code(self):
-        err = ValidationError("foo", status_code=401)
+    def test_status_code_is_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            err = ValidationError("foo", status_code=401)
         assert err.status_code == 401
 
-    def test_can_store_headers(self):
-        err = ValidationError("foo", headers={"X-Food-Header": "pizza"})
+    def test_headers_is_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            err = ValidationError("foo", headers={"X-Food-Header": "pizza"})
         assert err.headers == {"X-Food-Header": "pizza"}
 
     def test_str(self):
@@ -1101,3 +1110,25 @@ def test_get_mimetype():
     assert get_mimetype("application/json") == "application/json"
     assert get_mimetype("application/json;charset=utf8") == "application/json"
     assert get_mimetype(None) is None
+
+
+class MockRequestParserWithErrorHandler(MockRequestParser):
+    def handle_error(
+        self, error, req, schema, error_status_code=None, error_headers=None
+    ):
+        assert isinstance(error, ValidationError)
+        assert isinstance(schema, Schema)
+        raise MockHTTPError(error_status_code, error_headers)
+
+
+def test_parse_with_error_status_code_and_headers(web_request):
+    parser = MockRequestParserWithErrorHandler()
+    web_request.json = {"foo": 42}
+    args = {"foo": fields.Field(validate=lambda x: False)}
+    with pytest.raises(MockHTTPError) as excinfo:
+        parser.parse(
+            args, web_request, error_status_code=418, error_headers={"X-Foo": "bar"}
+        )
+    error = excinfo.value
+    assert error.status_code == 418
+    assert error.headers == {"X-Foo": "bar"}

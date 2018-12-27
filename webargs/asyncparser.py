@@ -57,7 +57,14 @@ class AsyncParser(core.Parser):
 
     # TODO: Lots of duplication from core.Parser here. Rethink.
     async def parse(
-        self, argmap, req=None, locations=None, validate=None, force_all=False
+        self,
+        argmap,
+        req=None,
+        locations=None,
+        validate=None,
+        force_all=False,
+        error_status_code=None,
+        error_headers=None,
     ):
         """Coroutine variant of `webargs.core.Parser`.
 
@@ -76,7 +83,9 @@ class AsyncParser(core.Parser):
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(error, req, schema)
+            self._on_validation_error(
+                error, req, schema, error_status_code, error_headers
+            )
         finally:
             self.clear_cache()
         if force_all:
@@ -91,6 +100,8 @@ class AsyncParser(core.Parser):
         as_kwargs=False,
         validate=None,
         force_all=None,
+        error_status_code=None,
+        error_headers=None,
     ):
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -122,6 +133,8 @@ class AsyncParser(core.Parser):
                         locations=locations,
                         validate=validate,
                         force_all=force_all_,
+                        error_status_code=error_status_code,
+                        error_headers=error_headers,
                     )
                     if as_kwargs:
                         kwargs.update(parsed_args)
@@ -146,6 +159,8 @@ class AsyncParser(core.Parser):
                         locations=locations,
                         validate=validate,
                         force_all=force_all_,
+                        error_status_code=error_status_code,
+                        error_headers=error_headers,
                     )
                     if as_kwargs:
                         kwargs.update(parsed_args)

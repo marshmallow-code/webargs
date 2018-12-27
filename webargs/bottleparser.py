@@ -57,12 +57,14 @@ class BottleParser(core.Parser):
         """Pull a file from the request."""
         return core.get_value(req.files, name, field)
 
-    def handle_error(self, error, req, schema):
+    def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """
-        status_code = getattr(error, "status_code", self.DEFAULT_VALIDATION_STATUS)
-        headers = getattr(error, "headers", {})
+        status_code = error_status_code or getattr(
+            error, "status_code", self.DEFAULT_VALIDATION_STATUS
+        )
+        headers = error_headers or getattr(error, "headers", {})
         raise bottle.HTTPError(
             status=status_code, body=error.messages, headers=headers, exception=error
         )

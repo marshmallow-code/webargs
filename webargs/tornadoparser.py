@@ -26,6 +26,7 @@ class HTTPError(tornado.web.HTTPError):
 
     def __init__(self, *args, **kwargs):
         self.messages = kwargs.pop("messages", {})
+        self.headers = kwargs.pop("headers", None)
         super(HTTPError, self).__init__(*args, **kwargs)
 
 
@@ -113,11 +114,13 @@ class TornadoParser(core.Parser):
         """Pull a file from the request."""
         return get_value(req.files, name, field)
 
-    def handle_error(self, error, req, schema):
+    def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
-        status_code = getattr(error, "status_code", core.DEFAULT_VALIDATION_STATUS)
+        status_code = error_status_code or getattr(
+            error, "status_code", core.DEFAULT_VALIDATION_STATUS
+        )
         if status_code == 422:
             reason = "Unprocessable Entity"
         else:
@@ -127,6 +130,7 @@ class TornadoParser(core.Parser):
             log_message=str(error.messages),
             reason=reason,
             messages=error.messages,
+            headers=error_headers,
         )
 
     def get_request_from_view_args(self, view, args, kwargs):
