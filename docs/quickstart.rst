@@ -212,4 +212,4 @@ Next Steps
 
 - Go on to :doc:`Advanced Usage <advanced>` to learn how to add custom location handlers, use marshmallow Schemas, and more.
 - See the :doc:`Framework Support <framework_support>` page for framework-specific guides.
-- For example applications, check out the `examples <https://github.com/sloria/webargs/tree/dev/examples>`_ directory.
+- For example applications, check out the `examples <https://github.com/marshmallow-code/webargs/tree/dev/examples>`_ directory.

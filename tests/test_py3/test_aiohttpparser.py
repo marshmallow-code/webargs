@@ -40,14 +40,14 @@ class TestAIOHTTPParser(CommonTestCase):
         res = testapp.get("/error_invalid?text=foo", expect_errors=True)
         assert res.status_code == 500
 
-    # regression test for https://github.com/sloria/webargs/issues/165
+    # regression test for https://github.com/marshmallow-code/webargs/issues/165
     def test_multiple_args(self, testapp):
         res = testapp.post_json(
             "/echo_multiple_args", {"first": "1", "last": "2", "_ignore": 0}
         )
         assert res.json == {"first": "1", "last": "2"}
 
-    # regression test for https://github.com/sloria/webargs/issues/145
+    # regression test for https://github.com/marshmallow-code/webargs/issues/145
     def test_nested_many_with_data_key(self, testapp):
         res = testapp.post_json("/echo_nested_many_data_key", {"x_field": [{"id": 42}]})
         # https://github.com/marshmallow-code/marshmallow/pull/714
@@ -66,7 +66,7 @@ class TestAIOHTTPParser(CommonTestCase):
             "name": "Chandler"
         }
 
-    # https://github.com/sloria/webargs/pull/297
+    # https://github.com/marshmallow-code/webargs/pull/297
     def test_empty_json_body(self, testapp):
         environ = {"CONTENT_TYPE": "application/json", "wsgi.input": BytesIO(b"")}
         req = webtest.TestRequest.blank("/echo", environ)

@@ -18,7 +18,7 @@ Questions, Feature Requests, Bug Reports, and Feedback…
 
 …should all be reported on the `GitHub Issue Tracker`_ .
 
-.. _`GitHub Issue Tracker`: https://github.com/sloria/webargs/issues?state=open
+.. _`GitHub Issue Tracker`: https://github.com/marshmallow-code/webargs/issues?state=open
 
 
 Integration with a Another Web Framework…
@@ -30,8 +30,8 @@ Integration with a Another Web Framework…
 accepted**. In order to keep webargs small and easy to maintain, we are
 not currently adding support for more frameworks. Instead, release your
 framework integration as a separate package and add it to the
-`Ecosystem <https://github.com/sloria/webargs/wiki/Ecosystem>`_ page in
-the `GitHub wiki <https://github.com/sloria/webargs/wiki/Ecosystem>`_ .
+`Ecosystem <https://github.com/marshmallow-code/webargs/wiki/Ecosystem>`_ page in
+the `GitHub wiki <https://github.com/marshmallow-code/webargs/wiki/Ecosystem>`_ .
 
 Setting Up for Local Development
 ++++++++++++++++++++++++++++++++
@@ -40,7 +40,7 @@ Setting Up for Local Development
 
 ::
 
-    $ git clone https://github.com/sloria/webargs.git
+    $ git clone https://github.com/marshmallow-code/webargs.git
     $ cd webargs
 
 2. Install development requirements. **It is highly recommended that you use a virtualenv.**
@@ -102,7 +102,7 @@ Pull Requests
 - If the pull request adds functionality, it is tested and the docs are updated.
 - You've added yourself to ``AUTHORS.rst``.
 
-4. Submit a pull request to ``sloria:dev`` or the appropriate maintenance branch. The `Travis CI <https://travis-ci.org/sloria/webargs>`_ build must be passing before your pull request is merged.
+4. Submit a pull request to ``marshmallow-code:dev`` or the appropriate maintenance branch. The `Travis CI <https://travis-ci.org/marshmallow-code/webargs>`_ build must be passing before your pull request is merged.
 
 Running Tests
 *************
@@ -133,9 +133,9 @@ Changes in the `docs/` directory will automatically trigger a rebuild.
 Contributing Examples
 +++++++++++++++++++++
 
-Have a usage example you'd like to share? Feel free to add it to the `examples <https://github.com/sloria/webargs/tree/dev/examples>`_ directory and send a pull request.
+Have a usage example you'd like to share? Feel free to add it to the `examples <https://github.com/marshmallow-code/webargs/tree/dev/examples>`_ directory and send a pull request.
 
 
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _`reStructured Text`: http://docutils.sourceforge.net/rst.html
-.. _webargs: https://github.com/sloria/webargs
+.. _webargs: https://github.com/marshmallow-code/webargs
