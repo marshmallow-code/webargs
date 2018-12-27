@@ -1,4 +1,4 @@
-import simplejson as json
+from webargs.core import json
 
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPBadRequest

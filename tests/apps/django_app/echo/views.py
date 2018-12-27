@@ -1,4 +1,4 @@
-import simplejson as json
+from webargs.core import json
 from django.http import HttpResponse
 from django.views.generic import View
 

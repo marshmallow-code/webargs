@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import json
 import mock
 
 from werkzeug.exceptions import HTTPException
@@ -9,7 +8,7 @@ import pytest
 from flask import Flask
 from webargs import fields, ValidationError, missing
 from webargs.flaskparser import parser, abort
-from webargs.core import MARSHMALLOW_VERSION_INFO
+from webargs.core import MARSHMALLOW_VERSION_INFO, json
 
 from .apps.flask_app import app
 from webargs.testing import CommonTestCase

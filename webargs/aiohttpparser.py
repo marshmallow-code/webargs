@@ -23,7 +23,6 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
-import json
 import warnings
 
 import aiohttp
@@ -31,6 +30,7 @@ from aiohttp import web
 from aiohttp import web_exceptions
 
 from webargs import core
+from webargs.core import json
 from webargs.asyncparser import AsyncParser
 
 AIOHTTP_MAJOR_VERSION = int(aiohttp.__version__.split(".")[0])
@@ -98,7 +98,7 @@ class AIOHTTPParser(AsyncParser):
             if not (req.body_exists and is_json_request(req)):
                 return core.missing
             try:
-                json_data = await req.json()
+                json_data = await req.json(loads=json.loads)
             except json.JSONDecodeError as e:
                 if e.doc == "":
                     return core.missing

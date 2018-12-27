@@ -8,7 +8,10 @@ import logging
 import warnings
 from distutils.version import LooseVersion
 
-import simplejson as json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 import marshmallow as ma
 from marshmallow import ValidationError

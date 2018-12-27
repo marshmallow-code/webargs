@@ -27,10 +27,11 @@ Example: ::
         webapp2.Route(r'/hello_dict', MainPage, handler_method='get_kwargs'),
     ], debug=True)
 """
-import simplejson as json
-from webargs import core
 import webapp2
 import webob.multidict
+
+from webargs import core
+from webargs.core import json
 
 
 class Webapp2Parser(core.Parser):

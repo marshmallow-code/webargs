@@ -18,9 +18,8 @@ Example usage: ::
         def get(self, args, request):
             return HttpResponse('Hello ' + args['name'])
 """
-import simplejson as json
-
 from webargs import core
+from webargs.core import json
 
 
 class DjangoParser(core.Parser):

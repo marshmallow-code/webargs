@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import simplejson as json
+from webargs.core import json
 
 try:
     from urllib import urlencode  # python2

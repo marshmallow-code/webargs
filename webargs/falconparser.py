@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
-import simplejson as json
-
 import falcon
 from falcon.util.uri import parse_query_string
 
 from webargs import core
+from webargs.core import json
 
 HTTP_422 = "422 Unprocessable Entity"
 

@@ -7,10 +7,10 @@ for testing parsers.
     Methods and functions in this module may change without
     warning and without a major version change.
 """
-import json
-
 import pytest
 import webtest
+
+from webargs.core import json
 
 
 class CommonTestCase(object):

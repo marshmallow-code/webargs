@@ -1,4 +1,4 @@
-import simplejson as json
+from webargs.core import json
 from flask import Flask, jsonify as J, Response, request
 from flask.views import MethodView
 

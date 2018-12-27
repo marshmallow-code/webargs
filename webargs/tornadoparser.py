@@ -14,12 +14,12 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-import simplejson as json
 import tornado.web
 from tornado.escape import _unicode
 
 from marshmallow.compat import basestring
 from webargs import core
+from webargs.core import json
 
 
 class HTTPError(tornado.web.HTTPError):

@@ -25,7 +25,6 @@ Example usage: ::
         server = make_server('0.0.0.0', 6543, app)
         server.serve_forever()
 """
-import simplejson as json
 import collections
 import functools
 
@@ -34,6 +33,7 @@ from pyramid.httpexceptions import exception_response
 
 from marshmallow.compat import text_type
 from webargs import core
+from webargs.core import json
 
 
 class PyramidParser(core.Parser):

@@ -4,7 +4,7 @@ try:
     from urllib.parse import urlencode
 except ImportError:  # PY2
     from urllib import urlencode
-import simplejson as json
+from webargs.core import json
 
 import pytest
 from marshmallow import fields, ValidationError

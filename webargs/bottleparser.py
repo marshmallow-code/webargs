@@ -17,10 +17,10 @@ Example: ::
     if __name__ == '__main__':
         run(debug=True)
 """
-import simplejson as json
 import bottle
 
 from webargs import core
+from webargs.core import json
 
 
 class BottleParser(core.Parser):

@@ -19,12 +19,11 @@ Example: ::
     def index(args):
         return 'Hello ' + args['name']
 """
-import simplejson as json
-
 import flask
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
+from webargs.core import json
 
 
 def abort(http_status_code, exc=None, **kwargs):

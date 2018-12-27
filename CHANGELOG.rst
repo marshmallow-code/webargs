@@ -11,7 +11,8 @@ Changelog
 
 Other changes:
 
-* `simplejson <https://pypi.org/project/simplejson/>`_ is now a dependency.
+* `simplejson <https://pypi.org/project/simplejson/>`_ is now a required
+  dependency on Python 2 (:pr:`334`).
   This ensures consistency of behavior across Python 2 and 3.
 
 4.3.0 (2018-12-30)

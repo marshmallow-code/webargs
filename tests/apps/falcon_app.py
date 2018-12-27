@@ -1,4 +1,4 @@
-import simplejson as json
+from webargs.core import json
 
 import falcon
 import marshmallow as ma
