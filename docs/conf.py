@@ -20,7 +20,7 @@ extensions = [
 primary_domain = "py"
 default_role = "py:obj"
 
-github_user = "sloria"
+github_user = "marshmallow-code"
 github_repo = "webargs"
 
 issues_github_path = "{}/{}".format(github_user, github_repo)

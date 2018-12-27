@@ -20,4 +20,4 @@ To get the latest development version of webargs, run
 
 ::
 
-    $ pip install -U git+https://github.com/sloria/webargs.git@dev
+    $ pip install -U git+https://github.com/marshmallow-code/webargs.git@dev

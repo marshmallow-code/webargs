@@ -74,7 +74,7 @@ Get It Now
 
     pip install -U webargs
 
-Ready to get started? Go on to the :doc:`Quickstart tutorial <quickstart>` or check out some `examples <https://github.com/sloria/webargs/tree/dev/examples>`_.
+Ready to get started? Go on to the :doc:`Quickstart tutorial <quickstart>` or check out some `examples <https://github.com/marshmallow-code/webargs/tree/dev/examples>`_.
 
 User Guide
 ----------

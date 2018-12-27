@@ -6,8 +6,8 @@ webargs
     :target: https://badge.fury.io/py/webargs
     :alt: PyPI version
 
-.. image:: https://badgen.net/travis/sloria/webargs
-    :target: https://travis-ci.org/sloria/webargs
+.. image:: https://badgen.net/travis/marshmallow-code/webargs
+    :target: https://travis-ci.org/marshmallow-code/webargs
     :alt: TravisCI build status
 
 .. image:: https://badgen.net/badge/marshmallow/2,3?list=1
@@ -66,10 +66,10 @@ Project Links
 - Docs: https://webargs.readthedocs.io/
 - Changelog: https://webargs.readthedocs.io/en/latest/changelog.html
 - PyPI: https://pypi.python.org/pypi/webargs
-- Issues: https://github.com/sloria/webargs/issues
+- Issues: https://github.com/marshmallow-code/webargs/issues
 
 
 License
 -------
 
-MIT licensed. See the `LICENSE <https://github.com/sloria/webargs/blob/dev/LICENSE>`_ file for more details.
+MIT licensed. See the `LICENSE <https://github.com/marshmallow-code/webargs/blob/dev/LICENSE>`_ file for more details.

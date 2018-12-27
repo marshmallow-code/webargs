@@ -69,7 +69,7 @@ setup(
     long_description=read("README.rst"),
     author="Steven Loria",
     author_email="sloria1@gmail.com",
-    url="https://github.com/sloria/webargs",
+    url="https://github.com/marshmallow-code/webargs",
     packages=find_packages(exclude=("test*", "examples")),
     package_dir={"webargs": "webargs"},
     install_requires=INSTALL_REQUIRES,
@@ -111,7 +111,7 @@ setup(
     ],
     test_suite="tests",
     project_urls={
-        "Issues": "https://github.com/sloria/webargs/issues",
+        "Issues": "https://github.com/marshmallow-code/webargs/issues",
         "Changelog": "https://webargs.readthedocs.io/en/latest/changelog.html",
     },
 )

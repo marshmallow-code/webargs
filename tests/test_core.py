@@ -131,7 +131,7 @@ def test_parse_required_arg_raises_validation_error(parser, web_request):
     assert exc.status_code == 422
 
 
-# https://github.com/sloria/webargs/issues/180#issuecomment-394869645
+# https://github.com/marshmallow-code/webargs/issues/180#issuecomment-394869645
 def test_overriding_default_status_code(web_request):
     class MockRequestParserThatReturns400s(MockRequestParser):
         DEFAULT_VALIDATION_STATUS = 400
@@ -178,7 +178,7 @@ def test_parse_required_list(parser, web_request):
     assert excinfo.value.messages["foo"][0] == "Missing data for required field."
 
 
-# Regression test for https://github.com/sloria/webargs/issues/107
+# Regression test for https://github.com/marshmallow-code/webargs/issues/107
 def test_parse_list_allow_none(parser, web_request):
     web_request.json = {"foo": None}
     args = {"foo": fields.List(fields.Field(allow_none=True), allow_none=True)}
@@ -448,7 +448,7 @@ def test_get_value_basic():
     assert get_value({"foo": 42}, "foo", False) == 42
     assert get_value({"foo": 42}, "bar", False) is missing
     assert get_value({"foos": ["a", "b"]}, "foos", True) == ["a", "b"]
-    # https://github.com/sloria/webargs/pull/30
+    # https://github.com/marshmallow-code/webargs/pull/30
     assert get_value({"foos": ["a", "b"]}, "bar", True) is missing
 
 
@@ -484,7 +484,7 @@ def test_parse_with_data_key(web_request):
     assert parsed == {"content_type": "application/json"}
 
 
-# https://github.com/sloria/webargs/issues/118
+# https://github.com/marshmallow-code/webargs/issues/118
 @pytest.mark.skipif(
     MARSHMALLOW_VERSION_INFO[0] >= 3, reason="Behaviour changed in marshmallow 3"
 )
@@ -796,7 +796,7 @@ class TestPassingSchema:
 
         assert viewfunc() == {"email": "foo@bar.com", "password": "bar", "page": 42}
 
-    # Regression test for https://github.com/sloria/webargs/issues/146
+    # Regression test for https://github.com/marshmallow-code/webargs/issues/146
     def test_parse_does_not_add_missing_values_to_schema_validator(
         self, web_request, parser
     ):
@@ -856,7 +856,7 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
     assert viewfunc() == {"username": "foo", "password": missing}
 
 
-# https://github.com/sloria/webargs/issues/252
+# https://github.com/marshmallow-code/webargs/issues/252
 def test_use_kwargs_force_all_false(web_request, parser):
     user_args = {"username": fields.Str(required=True), "password": fields.Str()}
     web_request.json = {"username": "foo"}
@@ -874,7 +874,7 @@ def test_use_kwargs_force_all_false(web_request, parser):
 
     web_request.json = {"username": "sloria"}
 
-    # https://github.com/sloria/webargs/pull/307#issuecomment-441139909
+    # https://github.com/marshmallow-code/webargs/pull/307#issuecomment-441139909
     @parser.use_kwargs(MySchema(partial=True), web_request, force_all=False)
     def viewfunc2(username, **kwargs):
         assert "password" not in kwargs
@@ -953,7 +953,7 @@ def test_delimited_list_load_list(web_request, parser):
     assert parsed["ids"] == [1, 2, 3]
 
 
-# Regresion test for https://github.com/sloria/webargs/issues/149
+# Regresion test for https://github.com/marshmallow-code/webargs/issues/149
 def test_delimited_list_passed_invalid_type(web_request, parser):
     web_request.json = {"ids": 1}
     schema_cls = argmap2schema({"ids": fields.DelimitedList(fields.Int())})
@@ -1064,7 +1064,7 @@ def test_argmap2schema():
         assert schema.opts.strict is True
 
 
-# Regression test for https://github.com/sloria/webargs/issues/101
+# Regression test for https://github.com/marshmallow-code/webargs/issues/101
 @pytest.mark.skipif(
     MARSHMALLOW_VERSION_INFO < (2, 7, 1), reason="will only work on marshmallow>=2.7.1"
 )

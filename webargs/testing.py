@@ -179,7 +179,7 @@ class CommonTestCase(object):
         res = testapp.post_json("/echo_nested_many", in_data)
         assert res.json == in_data
 
-    # Regression test for https://github.com/sloria/webargs/issues/120
+    # Regression test for https://github.com/marshmallow-code/webargs/issues/120
     def test_parse_nested_many_missing(self, testapp):
         in_data = {}
         res = testapp.post_json("/echo_nested_many", in_data)
