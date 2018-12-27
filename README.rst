@@ -10,6 +10,10 @@ webargs
     :target: https://travis-ci.org/marshmallow-code/webargs
     :alt: TravisCI build status
 
+.. image:: https://readthedocs.org/projects/webargs/badge/
+   :target: https://webargs.readthedocs.io/
+   :alt: Documentation
+
 .. image:: https://badgen.net/badge/marshmallow/2,3?list=1
     :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
     :alt: marshmallow 2/3 compatible
