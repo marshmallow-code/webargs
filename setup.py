@@ -111,7 +111,9 @@ setup(
     ],
     test_suite="tests",
     project_urls={
-        "Issues": "https://github.com/marshmallow-code/webargs/issues",
         "Changelog": "https://webargs.readthedocs.io/en/latest/changelog.html",
+        "Issues": "https://github.com/marshmallow-code/webargs/issues",
+        "Funding": "https://opencollective.com/marshmallow",
+        "Tidelift": "https://tidelift.com/subscription/pkg/pypi-webargs?utm_source=pypi-marshmallow&utm_medium=pypi",  # noqa
     },
 )
