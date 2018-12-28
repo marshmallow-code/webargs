@@ -40,6 +40,7 @@ source_suffix = ".rst"
 project = u"webargs"
 copyright = u"2014-{0:%Y}, Steven Loria and contributors".format(dt.datetime.utcnow())
 version = release = webargs.__version__
+templates_path = ["_templates"]
 exclude_patterns = ["_build"]
 
 # THEME
@@ -47,12 +48,35 @@ exclude_patterns = ["_build"]
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme = "sphinx_typlog_theme"
 html_theme_path = [sphinx_typlog_theme.get_path()]
+html_static_path = ["_static"]
 
 html_theme_options = {
+    "color": "#268bd2",
     "logo_name": "webargs",
     "description": "A friendly library for parsing HTTP request arguments.",
     "github_user": github_user,
     "github_repo": github_repo,
 }
 
-html_sidebars = {"**": ["logo.html", "github.html", "globaltoc.html", "searchbox.html"]}
+html_context = {
+    "tidelift_url": (
+        "https://tidelift.com/subscription/pkg/pypi-webargs"
+        "?utm_source=pypi-webargs&utm_medium=referral&utm_campaign=docs"
+    ),
+    "donate_url": "https://opencollective.com/marshmallow",
+}
+
+html_sidebars = {
+    "**": [
+        "logo.html",
+        "github.html",
+        "globaltoc.html",
+        "donate.html",
+        "searchbox.html",
+        "sponsors.html",
+    ]
+}
+
+
+def setup(app):
+    app.add_stylesheet("css/extra.css")
