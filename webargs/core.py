@@ -14,6 +14,7 @@ except ImportError:
     import json
 
 import marshmallow as ma
+from marshmallow import ValidationError
 from marshmallow.compat import iteritems
 from marshmallow.utils import missing, is_collection
 
@@ -21,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = [
-    "WebargsError",
     "ValidationError",
     "argmap2schema",
     "is_multiple",
@@ -63,25 +63,6 @@ DEFAULT_VALIDATION_STATUS = 422
 class RemovedInWebargs5Warning(DeprecationWarning):
     pass
 
-
-class WebargsError(Exception):
-    """Base class for all webargs-related errors."""
-
-    pass
-
-
-class ValidationError(WebargsError, ma.exceptions.ValidationError):
-    """Raised when validation fails on user input.
-
-    .. versionchanged:: 5.0.0
-        status_code and headers arguments are removed. This is
-        just a republish from marshmallow ValidationError.
-
-    .. versionchanged:: 4.2.0
-        status_code and headers arguments are deprecated. Pass
-        error_status_code and error_headers to `Parser.parse`,
-        `Parser.use_args`, and `Parser.use_kwargs` instead.
-    """
 
 def _callable_or_raise(obj):
     """Makes sure an object is callable if it is not ``None``. If not
@@ -339,19 +320,6 @@ class Parser(object):
     def _on_validation_error(
         self, error, req, schema, error_status_code, error_headers
     ):
-        if isinstance(error, ma.exceptions.ValidationError) and not isinstance(
-            error, ValidationError
-        ):
-            # Raise a webargs error instead
-            kwargs = {
-                'data': error.data,
-            }
-            if MARSHMALLOW_VERSION_INFO[0] < 3:
-                kwargs["fields"] = error.fields
-                kwargs["field_names"] = error.field_names
-            else:
-                kwargs["field_name"] = error.field_name
-            error = ValidationError(error.messages, **kwargs)
         if self.error_callback:
             if len(get_func_args(self.error_callback)) > 3:
                 self.error_callback(
