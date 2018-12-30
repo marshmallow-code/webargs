@@ -124,27 +124,8 @@ def test_parse(parse_json, web_request):
 def test_parse_required_arg_raises_validation_error(parser, web_request):
     web_request.json = {}
     args = {"foo": fields.Field(required=True)}
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(ValidationError, match="Missing data for required field."):
         parser.parse(args, web_request)
-    assert "Missing data for required field." in str(excinfo)
-    exc = excinfo.value
-    assert exc.status_code == 422
-
-
-# https://github.com/marshmallow-code/webargs/issues/180#issuecomment-394869645
-def test_overriding_default_status_code(web_request):
-    class MockRequestParserThatReturns400s(MockRequestParser):
-        DEFAULT_VALIDATION_STATUS = 400
-
-    parser = MockRequestParserThatReturns400s()
-
-    web_request.json = {}
-    args = {"foo": fields.Field(required=True)}
-    with pytest.raises(ValidationError) as excinfo:
-        parser.parse(args, web_request)
-    assert "Missing data for required field." in str(excinfo)
-    exc = excinfo.value
-    assert exc.status_code == 400
 
 
 def test_arg_not_required_excluded_in_parsed_output(parser, web_request):
@@ -1003,28 +984,6 @@ def test_validation_errors_in_validator_are_passed_to_handle_error(parser, web_r
     assert isinstance(exc, ValidationError)
     errors = exc.args[0]
     assert errors["name"] == ["Something went wrong."]
-
-
-class TestValidationError:
-    def test_status_code_is_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            err = ValidationError("foo", status_code=401)
-        assert err.status_code == 401
-
-    def test_headers_is_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            err = ValidationError("foo", headers={"X-Food-Header": "pizza"})
-        assert err.headers == {"X-Food-Header": "pizza"}
-
-    def test_str(self):
-        err = ValidationError("foo", status_code=403)
-        assert str(err) == "foo"
-
-    def test_repr(self):
-        err = ValidationError("foo", status_code=403)
-        assert repr(err) == (
-            "ValidationError({0!r}, " "status_code=403, headers=None)".format("foo")
-        )
 
 
 def test_parse_basic(web_request, parser):

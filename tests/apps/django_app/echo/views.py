@@ -27,7 +27,7 @@ def echo(request):
     try:
         args = parser.parse(hello_args, request)
     except ma.ValidationError as err:
-        return json_response(err.messages, status=err.status_code)
+        return json_response(err.messages, status=parser.DEFAULT_VALIDATION_STATUS)
     return json_response(args)
 
 
@@ -55,7 +55,7 @@ def echo_many_schema(request):
             parser.parse(hello_many_schema, request, locations=("json",))
         )
     except ma.ValidationError as err:
-        return json_response(err.messages, status=err.status_code)
+        return json_response(err.messages, status=parser.DEFAULT_VALIDATION_STATUS)
 
 
 @use_args({"value": fields.Int()})
@@ -76,7 +76,7 @@ def always_error(request):
     try:
         return parser.parse(argmap, request)
     except ma.ValidationError as err:
-        return json_response(err.messages, status=err.status_code)
+        return json_response(err.messages, status=parser.DEFAULT_VALIDATION_STATUS)
 
 
 def echo_headers(request):
@@ -112,7 +112,7 @@ class EchoCBV(View):
         try:
             args = parser.parse(hello_args, self.request)
         except ma.ValidationError as err:
-            return json_response(err.messages, status=err.status_code)
+            return json_response(err.messages, status=parser.DEFAULT_VALIDATION_STATUS)
         return json_response(args)
 
     post = get

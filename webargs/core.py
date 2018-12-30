@@ -73,38 +73,15 @@ class WebargsError(Exception):
 class ValidationError(WebargsError, ma.exceptions.ValidationError):
     """Raised when validation fails on user input.
 
+    .. versionchanged:: 5.0.0
+        status_code and headers arguments are removed. This is
+        just a republish from marshmallow ValidationError.
+
     .. versionchanged:: 4.2.0
         status_code and headers arguments are deprecated. Pass
         error_status_code and error_headers to `Parser.parse`,
         `Parser.use_args`, and `Parser.use_kwargs` instead.
     """
-
-    def __init__(self, message, status_code=None, headers=None, **kwargs):
-        if status_code is not None:
-            warnings.warn(
-                "The status_code argument to ValidationError is deprecated "
-                "and will be removed in 5.0.0. "
-                "Pass error_status_code to Parser.parse, Parser.use_args, "
-                "or Parser.use_kwargs instead.",
-                RemovedInWebargs5Warning,
-            )
-        self.status_code = status_code or DEFAULT_VALIDATION_STATUS
-        if headers is not None:
-            warnings.warn(
-                "The headers argument to ValidationError is deprecated "
-                "and will be removed in 5.0.0. "
-                "Pass error_headers to Parser.parse, Parser.use_args, "
-                "or Parser.use_kwargs instead.",
-                RemovedInWebargs5Warning,
-            )
-        self.headers = headers
-        ma.exceptions.ValidationError.__init__(self, message, **kwargs)
-
-    def __repr__(self):
-        return "ValidationError({0!r}, status_code={1}, headers={2})".format(
-            self.args[0], self.status_code, self.headers
-        )
-
 
 def _callable_or_raise(obj):
     """Makes sure an object is callable if it is not ``None``. If not
@@ -366,15 +343,14 @@ class Parser(object):
             error, ValidationError
         ):
             # Raise a webargs error instead
-            kwargs = getattr(error, "kwargs", {})
-            kwargs["data"] = error.data
+            kwargs = {
+                'data': error.data,
+            }
             if MARSHMALLOW_VERSION_INFO[0] < 3:
                 kwargs["fields"] = error.fields
                 kwargs["field_names"] = error.field_names
             else:
                 kwargs["field_name"] = error.field_name
-            if "status_code" not in kwargs:
-                kwargs["status_code"] = self.DEFAULT_VALIDATION_STATUS
             error = ValidationError(error.messages, **kwargs)
         if self.error_callback:
             if len(get_func_args(self.error_callback)) > 3:
