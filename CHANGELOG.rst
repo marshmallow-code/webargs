@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+4.3.0 (unreleased)
+******************
+
+* *Deprecation*: Add warning about missing arguments getting added
+  to parsed arguments dictionary (:issue:`342`). This behavior will be
+  removed in version 5.0.0.
+
 4.2.0 (2018-12-27)
 ******************
 
@@ -8,7 +15,7 @@ Features:
 
 * Add ``force_all`` argument to ``use_args`` and ``use_kwargs``
   (:issue:`252`, :issue:`307`). Thanks :user:`piroux` for reporting.
-* The ``status_code`` and ``headers`` arguments to ``ValidationError``
+* *Deprecation*: The ``status_code`` and ``headers`` arguments to ``ValidationError``
   are deprecated. Pass ``error_status_code`` and ``error_headers`` to
   `Parser.parse`, `Parser.use_args`, and `Parser.use_kwargs` instead.
   (:issue:`327`, :issue:`336`).
