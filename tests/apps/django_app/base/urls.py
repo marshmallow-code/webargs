@@ -18,7 +18,6 @@ urlpatterns = [
         views.echo_use_kwargs_with_path_param,
     ),
     url(r"^error$", views.always_error),
-    url(r"^error400$", views.error400),
     url(r"^echo_headers$", views.echo_headers),
     url(r"^echo_cookie$", views.echo_cookie),
     url(r"^echo_file$", views.echo_file),

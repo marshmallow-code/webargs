@@ -12,8 +12,6 @@ import json
 import pytest
 import webtest
 
-from webargs.core import MARSHMALLOW_VERSION_INFO
-
 
 class CommonTestCase(object):
     """Base test class that defines test methods for common functionality across all
@@ -126,14 +124,6 @@ class CommonTestCase(object):
     def test_user_validation_error_returns_422_response_by_default(self, testapp):
         res = testapp.post_json("/error", {"text": "foo"}, expect_errors=True)
         assert res.status_code == 422
-
-    @pytest.mark.skipif(
-        MARSHMALLOW_VERSION_INFO < (2, 7),
-        reason="status_code only works in marshmallow>=2.7",
-    )
-    def test_user_validation_error_with_status_code(self, testapp):
-        res = testapp.post_json("/error400", {"text": "foo"}, expect_errors=True)
-        assert res.status_code == 400
 
     def test_use_args_decorator(self, testapp):
         assert testapp.get("/echo_use_args?name=Fred").json == {"name": "Fred"}

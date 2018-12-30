@@ -3,7 +3,7 @@ from flask import Flask, jsonify as J, Response, request
 from flask.views import MethodView
 
 import marshmallow as ma
-from webargs import fields, ValidationError, missing
+from webargs import fields, missing
 from webargs.flaskparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -81,16 +81,7 @@ def echo_use_kwargs_with_path(name, value):
 @app.route("/error", methods=["GET", "POST"])
 def error():
     def always_fail(value):
-        raise ValidationError("something went wrong")
-
-    args = {"text": fields.Str(validate=always_fail)}
-    return J(parser.parse(args))
-
-
-@app.route("/error400", methods=["GET", "POST"])
-def error400():
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
+        raise ma.ValidationError("something went wrong")
 
     args = {"text": fields.Str(validate=always_fail)}
     return J(parser.parse(args))

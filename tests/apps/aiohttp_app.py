@@ -5,7 +5,7 @@ from aiohttp.web import json_response
 from aiohttp import web
 import marshmallow as ma
 
-from webargs import fields, ValidationError
+from webargs import fields
 from webargs.aiohttpparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -81,25 +81,7 @@ async def echo_use_args_multiple(request, query_parsed, json_parsed):
 
 async def always_error(request):
     def always_fail(value):
-        raise ValidationError("something went wrong")
-
-    args = {"text": fields.Str(validate=always_fail)}
-    parsed = await parser.parse(args, request)
-    return json_response(parsed)
-
-
-async def error400(request):
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
-
-    args = {"text": fields.Str(validate=always_fail)}
-    parsed = await parser.parse(args, request)
-    return json_response(parsed)
-
-
-async def error_invalid(request):
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=12345)
+        raise ma.ValidationError("something went wrong")
 
     args = {"text": fields.Str(validate=always_fail)}
     parsed = await parser.parse(args, request)
@@ -201,8 +183,6 @@ def create_app():
     )
     add_route(app, ["POST"], "/echo_use_args_multiple", echo_use_args_multiple)
     add_route(app, ["GET", "POST"], "/error", always_error)
-    add_route(app, ["GET", "POST"], "/error400", error400)
-    add_route(app, ["GET"], "/error_invalid", error_invalid)
     add_route(app, ["GET"], "/echo_headers", echo_headers)
     add_route(app, ["GET"], "/echo_cookie", echo_cookie)
     add_route(app, ["POST"], "/echo_nested", echo_nested)

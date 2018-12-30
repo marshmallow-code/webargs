@@ -2,7 +2,7 @@ import json
 from bottle import Bottle, HTTPResponse, debug, request, response, error
 
 import marshmallow as ma
-from webargs import fields, ValidationError
+from webargs import fields
 from webargs.bottleparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -76,16 +76,7 @@ def echo_use_kwargs_with_path_param(name, value):
 @app.route("/error", method=["GET", "POST"])
 def always_error():
     def always_fail(value):
-        raise ValidationError("something went wrong")
-
-    args = {"text": fields.Str(validate=always_fail)}
-    return parser.parse(args)
-
-
-@app.route("/error400", method=["GET", "POST"])
-def error400():
-    def always_fail(value):
-        raise ValidationError("something went wrong", status_code=400)
+        raise ma.ValidationError("something went wrong")
 
     args = {"text": fields.Str(validate=always_fail)}
     return parser.parse(args)

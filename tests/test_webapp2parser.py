@@ -7,8 +7,7 @@ except ImportError:  # PY2
 import json
 
 import pytest
-from marshmallow import fields
-from webargs import ValidationError
+from marshmallow import fields, ValidationError
 
 import webtest
 import webapp2

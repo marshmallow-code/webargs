@@ -142,7 +142,7 @@ class FalconParser(core.Parser):
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing."""
-        status = status_map.get(error_status_code or error.status_code)
+        status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
         if status is None:
             raise LookupError("Status code {0} not supported".format(error.status_code))
         raise HTTPError(status, errors=error.messages, headers=error_headers)
