@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-4.3.0 (unreleased)
+4.3.0 (2018-12-30)
 ******************
 
 * *Deprecation*: Add warning about missing arguments getting added
