@@ -173,11 +173,8 @@ def echo_use_kwargs_missing(username, password):
 
 # Return validation errors as JSON
 @app.errorhandler(422)
+@app.errorhandler(400)
 def handle_validation_error(err):
-    assert isinstance(err.data["schema"], ma.Schema)
-    return J({"errors": err.exc.messages}), err.code
-
-
-@app.errorhandler(json.JSONDecodeError)
-def handle_invalid_json(err):
-    return J(["Invalid JSON."]), 400
+    if err.code == 422:
+        assert isinstance(err.data["schema"], ma.Schema)
+    return J(err.data["messages"]), err.code

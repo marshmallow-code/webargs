@@ -103,7 +103,7 @@ class AIOHTTPParser(AsyncParser):
                 if e.doc == "":
                     return core.missing
                 else:
-                    raise e
+                    return self.handle_invalid_json_error(e, req)
             self._cache["json"] = json_data
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
@@ -152,6 +152,13 @@ class AIOHTTPParser(AsyncParser):
             body=json.dumps(error.messages).encode("utf-8"),
             headers=headers,
             content_type="application/json",
+        )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        error_class = exception_map.get(400)
+        messages = {"json": ["Invalid JSON body."]}
+        raise error_class(
+            body=json.dumps(messages).encode("utf-8"), content_type="application/json"
         )
 
 

@@ -59,7 +59,7 @@ class PyramidParser(core.Parser):
                 if e.doc == "":
                     return core.missing
                 else:
-                    raise
+                    return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
@@ -86,9 +86,24 @@ class PyramidParser(core.Parser):
         responds with a 400 error.
         """
         status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
-        raise exception_response(
-            status_code, detail=text_type(error), headers=error_headers
+        response = exception_response(
+            status_code,
+            detail=text_type(error),
+            headers=error_headers,
+            content_type="application/json",
         )
+        body = json.dumps(error.messages)
+        response.body = body.encode("utf-8") if isinstance(body, text_type) else body
+        raise response
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        messages = {"json": ["Invalid JSON body."]}
+        response = exception_response(
+            400, detail=text_type(messages), content_type="application/json"
+        )
+        body = json.dumps(messages)
+        response.body = body.encode("utf-8") if isinstance(body, text_type) else body
+        raise response
 
     def use_args(
         self,

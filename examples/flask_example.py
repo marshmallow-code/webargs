@@ -12,7 +12,6 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=1973-04-10 addend=63
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
-from webargs.core import json
 import datetime as dt
 
 from flask import Flask, jsonify
@@ -66,22 +65,12 @@ def dateadd(value, addend, unit):
 @app.errorhandler(422)
 @app.errorhandler(400)
 def handle_validation_error(err):
-    exc = getattr(err, "exc", None)
-    if exc:
-        headers = err.data["headers"]
-        messages = exc.messages
-    else:
-        headers = None
-        messages = ["Invalid request."]
+    headers = err.data.get("headers", None)
+    messages = err.data.get("messages", ["Invalid request."])
     if headers:
         return jsonify({"errors": messages}), err.code, headers
     else:
         return jsonify({"errors": messages}), err.code
-
-
-@app.errorhandler(json.JSONDecodeError)
-def handle_invalid_json(err):
-    return jsonify(["Invalid JSON."]), 400
 
 
 if __name__ == "__main__":

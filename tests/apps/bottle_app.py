@@ -115,18 +115,8 @@ def echo_nested_many():
     return parser.parse(args)
 
 
+@app.error(400)
 @app.error(422)
 def handle_422(err):
     response.content_type = "application/json"
-    return err.body
-
-
-@app.error(500)
-def handle_500(err):
-    if isinstance(err.exception, json.JSONDecodeError):
-        return HTTPResponse(
-            json.dumps(["Invalid JSON."]),
-            status=400,
-            headers={"Content-Type": "application/json"},
-        )
     return err.body

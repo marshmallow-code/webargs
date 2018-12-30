@@ -67,7 +67,7 @@ class FlaskParser(core.Parser):
                 if e.doc == "":
                     return core.missing
                 else:
-                    raise
+                    return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):
@@ -106,6 +106,9 @@ class FlaskParser(core.Parser):
             schema=schema,
             headers=error_headers,
         )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""

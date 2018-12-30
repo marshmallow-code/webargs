@@ -204,4 +204,4 @@ class CommonTestCase(object):
             expect_errors=True,
         )
         assert res.status_code == 400
-        assert res.json == ["Invalid JSON."]
+        assert res.json == {"json": ["Invalid JSON body."]}

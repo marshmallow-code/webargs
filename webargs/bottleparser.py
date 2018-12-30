@@ -46,7 +46,7 @@ class BottleParser(core.Parser):
                 if e.doc == "":
                     return core.missing
                 else:
-                    raise
+                    return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
@@ -73,6 +73,11 @@ class BottleParser(core.Parser):
             body=error.messages,
             headers=error_headers,
             exception=error,
+        )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        raise bottle.HTTPError(
+            status=400, body={"json": ["Invalid JSON body."]}, exception=error
         )
 
     def get_default_request(self):

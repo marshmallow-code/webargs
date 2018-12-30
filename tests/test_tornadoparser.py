@@ -337,8 +337,11 @@ class TestParse(object):
         request = make_request(
             body='{"foo": 42,}', headers={"Content-Type": "application/json"}
         )
-        with pytest.raises(json.JSONDecodeError):
+        with pytest.raises(tornado.web.HTTPError) as excinfo:
             parser.parse(attrs, request)
+        error = excinfo.value
+        assert error.status_code == 400
+        assert error.messages == {"json": ["Invalid JSON body."]}
 
     def test_it_should_parse_header_arguments(self):
         attrs = {"string": fields.Str(), "integer": fields.List(fields.Int())}

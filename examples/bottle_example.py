@@ -12,10 +12,9 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http POST :5001/dateadd value=1973-04-10 addend=63
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
-from webargs.core import json
 import datetime as dt
 
-from bottle import route, run, error, response, HTTPResponse
+from bottle import route, run, error, response
 from webargs import fields, validate
 from webargs.bottleparser import use_args, use_kwargs
 
@@ -59,20 +58,10 @@ def dateadd(value, addend, unit):
 
 
 # Return validation errors as JSON
+@error(400)
 @error(422)
 def error422(err):
     response.content_type = "application/json"
-    return err.body
-
-
-@error(500)
-def handle_500(err):
-    if isinstance(err.exception, json.JSONDecodeError):
-        return HTTPResponse(
-            json.dumps(["Invalid JSON."]),
-            status=400,
-            headers={"Content-Type": "application/json"},
-        )
     return err.body
 
 

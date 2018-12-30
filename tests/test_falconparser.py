@@ -15,3 +15,14 @@ class TestFalconParser(CommonTestCase):
 
     def test_use_args_hook(self, testapp):
         assert testapp.get("/echo_use_args_hook?name=Fred").json == {"name": "Fred"}
+
+    # https://github.com/sloria/webargs/issues/329
+    def test_invalid_json(self, testapp):
+        res = testapp.post(
+            "/echo",
+            '{"foo": "bar", }',
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+            expect_errors=True,
+        )
+        assert res.status_code == 400
+        assert res.json["errors"] == {"json": ["Invalid JSON body."]}

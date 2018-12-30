@@ -28,6 +28,8 @@ def echo(request):
         args = parser.parse(hello_args, request)
     except ma.ValidationError as err:
         return json_response(err.messages, status=parser.DEFAULT_VALIDATION_STATUS)
+    except json.JSONDecodeError:
+        return json_response({"json": ["Invalid JSON body."]}, status=400)
     return json_response(args)
 
 

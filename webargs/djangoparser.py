@@ -53,7 +53,7 @@ class DjangoParser(core.Parser):
                 if e.doc == "":
                     return core.missing
                 else:
-                    raise
+                    return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_cookies(self, req, name, field):
@@ -75,6 +75,9 @@ class DjangoParser(core.Parser):
             return args[0].request
         except AttributeError:  # first arg is request
             return args[0]
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        raise error
 
 
 parser = DjangoParser()
