@@ -112,7 +112,6 @@ class PyramidParser(core.Parser):
         locations=core.Parser.DEFAULT_LOCATIONS,
         as_kwargs=False,
         validate=None,
-        force_all=None,
         error_status_code=None,
         error_headers=None,
     ):
@@ -129,10 +128,6 @@ class PyramidParser(core.Parser):
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
-        :param bool force_all: If `True`, missing arguments will be included
-            in the parsed arguments dictionary with the ``missing`` value.
-            If `False`, missing values will be omitted. If `None`, fall back
-            to the value of ``as_kwargs``.
         :param int error_status_code: Status code passed to error handler functions when
             a `ValidationError` is raised.
         :param dict error_headers: Headers passed to error handler functions when a
@@ -145,8 +140,6 @@ class PyramidParser(core.Parser):
             argmap = core.argmap2schema(argmap)()
 
         def decorator(func):
-            force_all_ = force_all if force_all is not None else as_kwargs
-
             @functools.wraps(func)
             def wrapper(obj, *args, **kwargs):
                 # The first argument is either `self` or `request`
@@ -160,7 +153,6 @@ class PyramidParser(core.Parser):
                     req=request,
                     locations=locations,
                     validate=validate,
-                    force_all=force_all_,
                     error_status_code=error_status_code,
                     error_headers=error_headers,
                 )

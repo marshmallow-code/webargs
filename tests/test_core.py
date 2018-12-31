@@ -493,16 +493,6 @@ def test_parse_with_data_key_retains_field_name_in_error(web_request):
     assert excinfo.value.messages["Content-Type"] == ["Not a valid string."]
 
 
-def test_parse_with_force_all(web_request, parser):
-    web_request.json = {"foo": 42}
-
-    args = {"foo": fields.Int(), "bar": fields.Int(required=False)}
-
-    parsed = parser.parse(args, web_request, force_all=True)
-    assert parsed["foo"] == 42
-    assert parsed["bar"] is missing
-
-
 def test_parse_nested_with_data_key(web_request):
     parser = MockRequestParser()
     web_request.json = {"nested_arg": {"wrong": "OK"}}
@@ -827,41 +817,15 @@ def test_use_kwargs(web_request, parser):
 
 
 def test_use_kwargs_with_arg_missing(web_request, parser):
-    user_args = {"username": fields.Str(), "password": fields.Str()}
-    web_request.json = {"username": "foo"}
-
-    @parser.use_kwargs(user_args, web_request)
-    def viewfunc(username, password):
-        return {"username": username, "password": password}
-
-    assert viewfunc() == {"username": "foo", "password": missing}
-
-
-# https://github.com/marshmallow-code/webargs/issues/252
-def test_use_kwargs_force_all_false(web_request, parser):
     user_args = {"username": fields.Str(required=True), "password": fields.Str()}
     web_request.json = {"username": "foo"}
 
-    @parser.use_kwargs(user_args, web_request, force_all=False)
+    @parser.use_kwargs(user_args, web_request)
     def viewfunc(username, **kwargs):
         assert "password" not in kwargs
         return {"username": username}
 
     assert viewfunc() == {"username": "foo"}
-
-    class MySchema(Schema):
-        username = fields.Str(required=True)
-        password = fields.Str()
-
-    web_request.json = {"username": "sloria"}
-
-    # https://github.com/marshmallow-code/webargs/pull/307#issuecomment-441139909
-    @parser.use_kwargs(MySchema(partial=True), web_request, force_all=False)
-    def viewfunc2(username, **kwargs):
-        assert "password" not in kwargs
-        return {"username": username}
-
-    assert viewfunc2() == {"username": "sloria"}
 
 
 def test_delimited_list_default_delimiter(web_request, parser):

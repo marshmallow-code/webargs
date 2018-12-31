@@ -3,7 +3,7 @@ from flask import Flask, jsonify as J, Response, request
 from flask.views import MethodView
 
 import marshmallow as ma
-from webargs import fields, missing
+from webargs import fields
 from webargs.flaskparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
@@ -165,9 +165,9 @@ app.add_url_rule(
 
 
 @app.route("/echo_use_kwargs_missing", methods=["post"])
-@use_kwargs({"username": fields.Str(), "password": fields.Str()})
-def echo_use_kwargs_missing(username, password):
-    assert password is missing
+@use_kwargs({"username": fields.Str(required=True), "password": fields.Str()})
+def echo_use_kwargs_missing(username, **kwargs):
+    assert "password" not in kwargs
     return J({"username": username})
 
 
