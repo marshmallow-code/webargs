@@ -12,9 +12,9 @@ FRAMEWORKS = [
     "Django>=1.11.16",
     "bottle>=0.12.13",
     "tornado>=4.5.2",
-    "pyramid>=1.8.5",
+    "pyramid>=1.9.1",
     "webapp2>=3.0.0b1",
-    "falcon>=1.3.0",
+    "falcon>=1.4.0",
     'aiohttp>=3.0.0; python_version >= "3.5"',
 ]
 EXTRAS_REQUIRE = {
@@ -105,8 +105,6 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     ],
