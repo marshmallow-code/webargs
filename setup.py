@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = ["marshmallow>=2.15.2"]
 if sys.version_info[0] < 3:
-    INSTALL_REQUIRES.append("simplejson")
+    INSTALL_REQUIRES.append("simplejson>=2.1.0")
 
 FRAMEWORKS = [
     "Flask>=0.12.2",

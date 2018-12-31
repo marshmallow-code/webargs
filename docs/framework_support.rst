@@ -41,16 +41,13 @@ Here is an example error handler that returns validation messages to the client 
 
     from flask import jsonify
 
+
     # Return validation errors as JSON
     @app.errorhandler(422)
-    def handle_validation_error(err):
-        exc = getattr(err, "exc", None)
-        if exc:
-            headers = err.data["headers"]
-            messages = exc.messages
-        else:
-            headers = None
-            messages = ["Invalid request."]
+    @app.errorhandler(400)
+    def handle_error(err):
+        headers = err.data.get("headers", None)
+        messages = err.data.get("messages", ["Invalid request."])
         if headers:
             return jsonify({"errors": messages}), err.code, headers
         else:
@@ -131,7 +128,7 @@ The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Pa
 
     from django.http import JsonResponse
 
-    from webargs import fields, ValidationError
+    from webargs import fields, ValidationError, json
 
     argmap = {"name": fields.Str(required=True)}
 
@@ -141,6 +138,8 @@ The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Pa
             args = parser.parse(argmap, request)
         except ValidationError as err:
             return JsonResponse(err.messages, status=err.status_code)
+        except json.JSONDecodeError:
+            return JsonResponse({"json": ["Invalid JSON body."]}, status=400)
         return JsonResponse({"message": "Hello {name}".format(name=name)})
 
 Tornado
@@ -215,9 +214,12 @@ Here is how you could write the error messages to a JSON response.
             """Write errors as JSON."""
             self.set_header("Content-Type", "application/json")
             if "exc_info" in kwargs:
-                etype, value, traceback = kwargs["exc_info"]
-                if hasattr(value, "messages"):
-                    self.write({"errors": value.messages})
+                etype, exc, traceback = kwargs["exc_info"]
+                if hasattr(exc, "messages"):
+                    self.write({"errors": exc.messages})
+                    if getattr(exc, "headers", None):
+                        for name, val in exc.headers.items():
+                            self.set_header(name, val)
                     self.finish()
 
 Pyramid

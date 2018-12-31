@@ -117,6 +117,6 @@ def echo_nested_many():
 
 @app.error(400)
 @app.error(422)
-def handle_422(err):
+def handle_error(err):
     response.content_type = "application/json"
     return err.body
