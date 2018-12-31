@@ -10,6 +10,40 @@ Changelog
 
 Other changes:
 
+* *Backwards-incompatible*: `webargs.ValidationError` is removed.
+  Use `marshmallow.ValidationError` instead.
+
+
+.. code-block:: python
+
+    # <5.0.0
+    from webargs import ValidationError
+
+
+    def auth_validator(value):
+        # ...
+        raise ValidationError("Authentication failed", status_code=401)
+
+
+    @use_args({"auth": fields.Field(validate=auth_validator)})
+    def auth_view(args):
+        return jsonify(args)
+
+
+    # >=5.0.0
+    from marshmallow import ValidationError
+
+
+    def auth_validator(value):
+        # ...
+        raise ValidationError("Authentication failed")
+
+
+    @use_args({"auth": fields.Field(validate=auth_validator)}, error_status_code=401)
+    def auth_view(args):
+        return jsonify(args)
+
+
 * `simplejson <https://pypi.org/project/simplejson/>`_ is now a required
   dependency on Python 2 (:pr:`334`).
   This ensures consistency of behavior across Python 2 and 3.
