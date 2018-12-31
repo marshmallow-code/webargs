@@ -4,7 +4,7 @@ try:
     from urllib.parse import urlencode
 except ImportError:  # PY2
     from urllib import urlencode
-import json
+from webargs.core import json
 
 import pytest
 from marshmallow import fields, ValidationError
@@ -59,6 +59,14 @@ def test_parse_json():
         "/echo", POST=json.dumps(expected), headers={"content-type": "application/json"}
     )
     assert parser.parse(hello_args, req=request) == expected
+
+
+def test_parse_invalid_json():
+    request = webapp2.Request.blank(
+        "/echo", POST='{"foo": "bar", }', headers={"content-type": "application/json"}
+    )
+    with pytest.raises(json.JSONDecodeError):
+        parser.parse(hello_args, req=request)
 
 
 def test_parse_json_with_vendor_media_type():

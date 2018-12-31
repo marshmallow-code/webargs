@@ -2,9 +2,10 @@
 """Falcon request argument parsing module.
 """
 import falcon
+from falcon.util.uri import parse_query_string
 
 from webargs import core
-from falcon.util.uri import parse_query_string
+from webargs.core import json
 
 HTTP_422 = "422 Unprocessable Entity"
 
@@ -38,8 +39,11 @@ def parse_json_body(req):
         if body:
             try:
                 return core.parse_json(body)
-            except (TypeError, ValueError):
-                pass
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    raise
     return {}
 
 
@@ -112,7 +116,10 @@ class FalconParser(core.Parser):
         """
         json_data = self._cache.get("json_data")
         if json_data is None:
-            self._cache["json_data"] = json_data = parse_json_body(req)
+            try:
+                self._cache["json_data"] = json_data = parse_json_body(req)
+            except json.JSONDecodeError as e:
+                return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
@@ -146,6 +153,11 @@ class FalconParser(core.Parser):
         if status is None:
             raise LookupError("Status code {0} not supported".format(error.status_code))
         raise HTTPError(status, errors=error.messages, headers=error_headers)
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        status = status_map.get(400)
+        messages = {"json": ["Invalid JSON body."]}
+        raise HTTPError(status, errors=messages)
 
 
 parser = FalconParser()

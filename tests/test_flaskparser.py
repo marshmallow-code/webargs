@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import json
 import mock
 
 from werkzeug.exceptions import HTTPException
@@ -9,7 +8,7 @@ import pytest
 from flask import Flask
 from webargs import fields, ValidationError, missing
 from webargs.flaskparser import parser, abort
-from webargs.core import MARSHMALLOW_VERSION_INFO
+from webargs.core import MARSHMALLOW_VERSION_INFO, json
 
 from .apps.flask_app import app
 from webargs.testing import CommonTestCase
@@ -26,7 +25,7 @@ class TestFlaskParser(CommonTestCase):
     def test_parsing_invalid_view_arg(self, testapp):
         res = testapp.get("/echo_view_arg/foo", expect_errors=True)
         assert res.status_code == 422
-        assert res.json == {"errors": {"view_arg": ["Not a valid integer."]}}
+        assert res.json == {"view_arg": ["Not a valid integer."]}
 
     def test_use_args_with_view_args_parsing(self, testapp):
         res = testapp.get("/echo_view_arg_use_args/42")

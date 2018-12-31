@@ -7,7 +7,7 @@ import marshmallow as ma
 
 from webargs import fields
 from webargs.aiohttpparser import parser, use_args, use_kwargs
-from webargs.core import MARSHMALLOW_VERSION_INFO
+from webargs.core import MARSHMALLOW_VERSION_INFO, json
 
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
@@ -29,7 +29,13 @@ hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
 
 async def echo(request):
-    parsed = await parser.parse(hello_args, request)
+    try:
+        parsed = await parser.parse(hello_args, request)
+    except json.JSONDecodeError:
+        raise web.HTTPBadRequest(
+            body=json.dumps(["Invalid JSON."]).encode("utf-8"),
+            content_type="application/json",
+        )
     return json_response(parsed)
 
 

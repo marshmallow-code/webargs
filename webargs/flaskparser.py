@@ -23,6 +23,7 @@ import flask
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
+from webargs.core import json
 
 
 def abort(http_status_code, exc=None, **kwargs):
@@ -54,19 +55,19 @@ class FlaskParser(core.Parser):
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        # Pass force in order to handle vendor media types,
-        # e.g. applications/vnd.json+api
-        # this should be unnecessary in Flask 1.0
-        force = is_json_request(req)
-        # Fail silently so that the webargs parser can handle the error
-        if hasattr(req, "get_json"):
-            # Flask >= 0.10.x
-            json_data = req.get_json(force=force, silent=True)
-        else:
-            # Flask <= 0.9.x
-            json_data = req.json
+        json_data = self._cache.get("json")
         if json_data is None:
-            return core.missing
+            # We decode the json manually here instead of
+            # using req.get_json() so that we can handle
+            # JSONDecodeErrors consistently
+            data = req._get_data_for_json(cache=True)
+            try:
+                self._cache["json"] = json_data = core.parse_json(data)
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):
@@ -105,6 +106,9 @@ class FlaskParser(core.Parser):
             schema=schema,
             headers=error_headers,
         )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""

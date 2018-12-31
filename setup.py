@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import sys
 import re
 from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = ["marshmallow>=2.15.2"]
+if sys.version_info[0] < 3:
+    INSTALL_REQUIRES.append("simplejson>=2.1.0")
+
 FRAMEWORKS = [
     "Flask>=0.12.2",
     "Django>=1.11.16",
@@ -49,9 +53,6 @@ def find_version(fname):
     return version
 
 
-__version__ = find_version("webargs/__init__.py")
-
-
 def read(fname):
     with open(fname) as fp:
         content = fp.read()
@@ -60,7 +61,7 @@ def read(fname):
 
 setup(
     name="webargs",
-    version=__version__,
+    version=find_version("webargs/__init__.py"),
     description=(
         "A friendly library for parsing and validating HTTP request arguments, "
         "with built-in support for popular web frameworks, including "

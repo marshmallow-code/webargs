@@ -1,4 +1,7 @@
+from webargs.core import json
+
 from pyramid.config import Configurator
+from pyramid.httpexceptions import HTTPBadRequest
 import marshmallow as ma
 
 from webargs import fields
@@ -18,7 +21,13 @@ hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
 
 def echo(request):
-    return parser.parse(hello_args, request)
+    try:
+        return parser.parse(hello_args, request)
+    except json.JSONDecodeError:
+        error = HTTPBadRequest()
+        error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
+        error.content_type = "application/json"
+        raise error
 
 
 def echo_query(request):

@@ -169,9 +169,9 @@ def get_value(data, name, field, allow_many_nested=False):
     return val
 
 
-def parse_json(s):
+def parse_json(s, encoding="utf-8"):
     if isinstance(s, bytes):
-        s = s.decode("utf-8")
+        s = s.decode(encoding)
     return json.loads(s)
 
 

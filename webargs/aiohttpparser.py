@@ -23,7 +23,6 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
-import json
 import warnings
 
 import aiohttp
@@ -31,6 +30,7 @@ from aiohttp import web
 from aiohttp import web_exceptions
 
 from webargs import core
+from webargs.core import json
 from webargs.asyncparser import AsyncParser
 
 AIOHTTP_MAJOR_VERSION = int(aiohttp.__version__.split(".")[0])
@@ -98,12 +98,12 @@ class AIOHTTPParser(AsyncParser):
             if not (req.body_exists and is_json_request(req)):
                 return core.missing
             try:
-                json_data = await req.json()
+                json_data = await req.json(loads=json.loads)
             except json.JSONDecodeError as e:
                 if e.doc == "":
                     return core.missing
                 else:
-                    raise e
+                    return self.handle_invalid_json_error(e, req)
             self._cache["json"] = json_data
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
@@ -152,6 +152,13 @@ class AIOHTTPParser(AsyncParser):
             body=json.dumps(error.messages).encode("utf-8"),
             headers=headers,
             content_type="application/json",
+        )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        error_class = exception_map.get(400)
+        messages = {"json": ["Invalid JSON body."]}
+        raise error_class(
+            body=json.dumps(messages).encode("utf-8"), content_type="application/json"
         )
 
 

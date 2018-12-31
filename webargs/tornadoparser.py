@@ -19,6 +19,7 @@ from tornado.escape import _unicode
 
 from marshmallow.compat import basestring
 from webargs import core
+from webargs.core import json
 
 
 class HTTPError(tornado.web.HTTPError):
@@ -36,8 +37,13 @@ def parse_json_body(req):
     if content_type and core.is_json(content_type):
         try:
             return core.parse_json(req.body)
-        except (TypeError, ValueError):
+        except TypeError:
             pass
+        except json.JSONDecodeError as e:
+            if e.doc == "":
+                return core.missing
+            else:
+                raise
     return {}
 
 
@@ -84,7 +90,10 @@ class TornadoParser(core.Parser):
         """Pull a json value from the request."""
         json_data = self._cache.get("json")
         if json_data is None:
-            self._cache["json"] = json_data = parse_json_body(req)
+            try:
+                self._cache["json"] = json_data = parse_json_body(req)
+            except json.JSONDecodeError as e:
+                return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
@@ -129,6 +138,14 @@ class TornadoParser(core.Parser):
             reason=reason,
             messages=error.messages,
             headers=error_headers,
+        )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        raise HTTPError(
+            400,
+            log_message="Invalid JSON body.",
+            reason="Bad Request",
+            messages={"json": ["Invalid JSON body."]},
         )
 
     def get_request_from_view_args(self, view, args, kwargs):

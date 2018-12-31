@@ -64,14 +64,9 @@ def dateadd(value, addend, unit):
 # Return validation errors as JSON
 @app.errorhandler(422)
 @app.errorhandler(400)
-def handle_validation_error(err):
-    exc = getattr(err, "exc", None)
-    if exc:
-        headers = err.data["headers"]
-        messages = exc.messages
-    else:
-        headers = None
-        messages = ["Invalid request."]
+def handle_error(err):
+    headers = err.data.get("headers", None)
+    messages = err.data.get("messages", ["Invalid request."])
     if headers:
         return jsonify({"errors": messages}), err.code, headers
     else:

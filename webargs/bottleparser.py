@@ -20,6 +20,7 @@ Example: ::
 import bottle
 
 from webargs import core
+from webargs.core import json
 
 
 class BottleParser(core.Parser):
@@ -39,8 +40,13 @@ class BottleParser(core.Parser):
         if json_data is None:
             try:
                 self._cache["json"] = json_data = req.json
-            except (AttributeError, ValueError):
+            except AttributeError:
                 return core.missing
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
@@ -67,6 +73,11 @@ class BottleParser(core.Parser):
             body=error.messages,
             headers=error_headers,
             exception=error,
+        )
+
+    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+        raise bottle.HTTPError(
+            status=400, body={"json": ["Invalid JSON body."]}, exception=error
         )
 
     def get_default_request(self):

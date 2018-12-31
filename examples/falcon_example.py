@@ -18,10 +18,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 """
 import datetime as dt
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from webargs.core import json
 
 import falcon
 from webargs import fields, validate

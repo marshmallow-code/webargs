@@ -7,10 +7,10 @@ for testing parsers.
     Methods and functions in this module may change without
     warning and without a major version change.
 """
-import json
-
 import pytest
 import webtest
+
+from webargs.core import json
 
 
 class CommonTestCase(object):
@@ -184,3 +184,24 @@ class CommonTestCase(object):
             "/echo_file", {"myfile": webtest.Upload("README.rst", b"data")}
         )
         assert res.json == {"myfile": "data"}
+
+    # https://github.com/sloria/webargs/pull/297
+    def test_empty_json(self, testapp):
+        res = testapp.post(
+            "/echo",
+            "",
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+        )
+        assert res.status_code == 200
+        assert res.json == {"name": "World"}
+
+    # https://github.com/sloria/webargs/issues/329
+    def test_invalid_json(self, testapp):
+        res = testapp.post(
+            "/echo",
+            '{"foo": "bar", }',
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+            expect_errors=True,
+        )
+        assert res.status_code == 400
+        assert res.json == {"json": ["Invalid JSON body."]}

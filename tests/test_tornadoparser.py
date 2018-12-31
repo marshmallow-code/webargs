@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import json
+from webargs.core import json
 
 try:
     from urllib import urlencode  # python2
@@ -330,6 +330,18 @@ class TestParse(object):
 
         assert parsed["integer"] == [1, 2]
         assert parsed["string"] == value
+
+    def test_it_should_raise_when_json_is_invalid(self):
+        attrs = {"foo": fields.Str()}
+
+        request = make_request(
+            body='{"foo": 42,}', headers={"Content-Type": "application/json"}
+        )
+        with pytest.raises(tornado.web.HTTPError) as excinfo:
+            parser.parse(attrs, request)
+        error = excinfo.value
+        assert error.status_code == 400
+        assert error.messages == {"json": ["Invalid JSON body."]}
 
     def test_it_should_parse_header_arguments(self):
         attrs = {"string": fields.Str(), "integer": fields.List(fields.Int())}

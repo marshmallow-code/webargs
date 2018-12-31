@@ -27,10 +27,11 @@ Example: ::
         webapp2.Route(r'/hello_dict', MainPage, handler_method='get_kwargs'),
     ], debug=True)
 """
-from webargs import core
 import webapp2
-import webapp2_extras.json
 import webob.multidict
+
+from webargs import core
+from webargs.core import json
 
 
 class Webapp2Parser(core.Parser):
@@ -38,10 +39,15 @@ class Webapp2Parser(core.Parser):
 
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
-        try:
-            json_data = webapp2_extras.json.decode(req.body)
-        except ValueError:
-            return core.missing
+        json_data = self._cache.get("json")
+        if json_data is None:
+            try:
+                self._cache["json"] = json_data = core.parse_json(req.body)
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return core.missing
+                else:
+                    raise
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_querystring(self, req, name, field):

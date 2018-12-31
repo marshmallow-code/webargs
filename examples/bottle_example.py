@@ -58,8 +58,9 @@ def dateadd(value, addend, unit):
 
 
 # Return validation errors as JSON
+@error(400)
 @error(422)
-def error422(err):
+def handle_error(err):
     response.content_type = "application/json"
     return err.body
 
