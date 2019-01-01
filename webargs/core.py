@@ -31,30 +31,6 @@ __all__ = [
     "parse_json",
 ]
 
-
-# Copied from marshmallow.utils
-def _signature(func):
-    if hasattr(inspect, "signature"):
-        return list(inspect.signature(func).parameters.keys())
-    if hasattr(func, "__self__"):
-        # Remove bound arg to match inspect.signature()
-        return inspect.getargspec(func).args[1:]
-    # All args are unbound
-    return inspect.getargspec(func).args
-
-
-def get_func_args(func):
-    """Given a callable, return a tuple of argument names. Handles
-    `functools.partial` objects and class-based callables.
-    """
-    if isinstance(func, functools.partial):
-        return _signature(func.func)
-    if inspect.isfunction(func) or inspect.ismethod(func):
-        return _signature(func)
-    # Callable class
-    return _signature(func.__call__)
-
-
 MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)
 
 DEFAULT_VALIDATION_STATUS = 422
@@ -297,28 +273,8 @@ class Parser(object):
     def _on_validation_error(
         self, error, req, schema, error_status_code, error_headers
     ):
-        if self.error_callback:
-            if len(get_func_args(self.error_callback)) > 3:
-                self.error_callback(
-                    error, req, schema, error_status_code, error_headers
-                )
-            else:  # Backwards compat with webargs<=4.2.0
-                warnings.warn(
-                    "Error handler functions should include error_status_code and "
-                    "error_headers args, or include **kwargs in the signature",
-                    DeprecationWarning,
-                )
-                self.error_callback(error, req, schema)
-        else:
-            if len(get_func_args(self.handle_error)) > 3:
-                self.handle_error(error, req, schema, error_status_code, error_headers)
-            else:
-                warnings.warn(
-                    "handle_error methods should include error_status_code and "
-                    "error_headers args, or include **kwargs in the signature",
-                    DeprecationWarning,
-                )
-                self.handle_error(error, req, schema)
+        error_handler = self.error_callback or self.handle_error
+        error_handler(error, req, schema, error_status_code, error_headers)
 
     def _validate_arguments(self, data, validators):
         for validator in validators:
