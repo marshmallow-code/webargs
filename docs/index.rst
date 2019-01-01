@@ -86,6 +86,7 @@ User Guide
     quickstart
     advanced
     framework_support
+    ecosystem
 
 API Reference
 -------------
