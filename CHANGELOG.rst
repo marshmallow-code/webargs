@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-4.3.1 (unreleased)
+4.3.1 (2018-12-31)
 ******************
 
 * Add ``force_all`` param to ``PyramidParser.use_args``.
