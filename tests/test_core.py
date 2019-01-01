@@ -276,7 +276,7 @@ def test_custom_error_handler(parse_json, web_request):
     class CustomError(Exception):
         pass
 
-    def error_handler(error, req, schema):
+    def error_handler(error, req, schema, status_code, headers):
         assert isinstance(schema, Schema)
         raise CustomError(error)
 
@@ -296,7 +296,7 @@ def test_custom_error_handler_decorator(parse_json, web_request):
     parser = Parser()
 
     @parser.error_handler
-    def handle_error(error, req, schema):
+    def handle_error(error, req, schema, status_code, headers):
         assert isinstance(schema, Schema)
         raise CustomError(error)
 

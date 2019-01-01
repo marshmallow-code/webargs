@@ -170,7 +170,7 @@ Error Handling
 --------------
 
 Each parser has a default error handling method. To override the error handling callback, write a function that
-receives an error, the request, and the `marshmallow.Schema` instance.
+receives an error, the request, the `marshmallow.Schema` instance, status code, and headers.
 Then decorate that function with :func:`Parser.error_handler <webargs.core.Parser.error_handler>`.
 
 .. code-block:: python
