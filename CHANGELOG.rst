@@ -5,7 +5,7 @@ Changelog
 ******************
 
 * *Backwards-incompatible*: A 400 HTTPError is raised when an
-  invalid JSON payload is passed.  (:issue:`329`). 
+  invalid JSON payload is passed.  (:issue:`329`).
   Thanks :user:`zedrdave` for reporting.
 
 Other changes:
@@ -47,6 +47,12 @@ Other changes:
 * `simplejson <https://pypi.org/project/simplejson/>`_ is now a required
   dependency on Python 2 (:pr:`334`).
   This ensures consistency of behavior across Python 2 and 3.
+
+4.3.1 (2018-12-31)
+******************
+
+* Add ``force_all`` param to ``PyramidParser.use_args``.
+* Add warning about missing arguments to ``AsyncParser``.
 
 4.3.0 (2018-12-30)
 ******************
