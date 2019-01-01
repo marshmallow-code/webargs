@@ -29,7 +29,7 @@ def route(*args, response_formatter=jsonify, **kwargs):
                 if isinstance(value, fields.Field) and name != "return"
             }
             response_schema = annotations.get("return")
-            parsed = parser.parse(reqargs, request, force_all=True)
+            parsed = parser.parse(reqargs, request)
             kw.update(parsed)
             response_data = func(*a, **kw)
             if response_schema:
@@ -53,8 +53,8 @@ def add(x: fields.Float(required=True), y: fields.Float(required=True)):  # noqa
 
 
 class UserSchema(Schema):
-    id = fields.Int()
-    name = fields.Str()
+    id = fields.Int(required=True)
+    name = fields.Str(required=True)
     date_created = fields.DateTime(dump_only=True)
 
 
@@ -74,14 +74,9 @@ def user_detail(user_id, name: fields.Str(required=True)) -> UserSchema():  # no
 # Return validation errors as JSON
 @app.errorhandler(422)
 @app.errorhandler(400)
-def handle_validation_error(err):
-    exc = getattr(err, "exc", None)
-    if exc:
-        headers = err.data["headers"]
-        messages = exc.messages
-    else:
-        headers = None
-        messages = ["Invalid request."]
+def handle_error(err):
+    headers = err.data.get("headers", None)
+    messages = err.data.get("messages", ["Invalid request."])
     if headers:
         return jsonify({"errors": messages}), err.code, headers
     else:

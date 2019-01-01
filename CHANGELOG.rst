@@ -44,6 +44,30 @@ Other changes:
         return jsonify(args)
 
 
+* *Backwards-incompatible*: Missing arguments will no longer be filled
+  in when using ``@use_kwargs`` (:issue:`342,307,252`). Use ``**kwargs``
+  to account for non-required fields.
+
+.. code-block:: python
+
+    # <5.0.0
+    @use_kwargs(
+        {"first_name": fields.Str(required=True), "last_name": fields.Str(required=False)}
+    )
+    def myview(first_name, last_name):
+        # last_name is webargs.missing if it's missing from the request
+        return {"first_name": first_name}
+
+
+    # >=5.0.0
+    @use_kwargs(
+        {"first_name": fields.Str(required=True), "last_name": fields.Str(required=False)}
+    )
+    def myview(first_name, **kwargs):
+        # last_name will not be in kwargs if it's missing from the request
+        return {"first_name": first_name}
+
+
 * `simplejson <https://pypi.org/project/simplejson/>`_ is now a required
   dependency on Python 2 (:pr:`334`).
   This ensures consistency of behavior across Python 2 and 3.
