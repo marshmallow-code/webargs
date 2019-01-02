@@ -1,5 +1,4 @@
 -e '.[frameworks]'
 Sphinx==1.8.3
 sphinx-issues==1.2.0
-# TODO: Use PyPI release of sphinx-typlog-theme after latest changes are released
-git+https://github.com/typlog/sphinx-typlog-theme.git@45a71b3cd99c7550e5999042504d3b9c83b68791
+sphinx-typlog-theme==0.7
