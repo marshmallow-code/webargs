@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-4.4.0 (unreleased)
+4.4.0 (2019-01-03)
 ******************
 
 * *Deprecation*: ``argmap2schema`` is deprecated in favor of
