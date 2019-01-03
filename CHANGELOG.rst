@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+4.4.0 (unreleased)
+******************
+
+* *Deprecation*: ``argmap2schema`` is deprecated in favor of
+  ``dict2schema``.
+
 4.3.1 (2018-12-31)
 ******************
 

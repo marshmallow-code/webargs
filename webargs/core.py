@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "WebargsError",
     "ValidationError",
-    "argmap2schema",
+    "dict2schema",
     "is_multiple",
     "Parser",
     "get_value",
@@ -137,11 +137,11 @@ def fill_in_missing_args(ret, argmap):
     return ret
 
 
-def argmap2schema(argmap):
-    """Generate a `marshmallow.Schema` class given a dictionary of argument
-    names to `Fields <marshmallow.fields.Field>`.
+def dict2schema(dct):
+    """Generate a `marshmallow.Schema` class given a dictionary of
+    `Fields <marshmallow.fields.Field>`.
     """
-    attrs = argmap.copy()
+    attrs = dct.copy()
     if MARSHMALLOW_VERSION_INFO[0] < 3:
 
         class Meta(object):
@@ -149,6 +149,14 @@ def argmap2schema(argmap):
 
         attrs["Meta"] = Meta
     return type(str(""), (ma.Schema,), attrs)
+
+
+def argmap2schema(argmap):
+    warnings.warn(
+        "argmap2schema is deprecated. Use dict2schema instead.",
+        RemovedInWebargs5Warning,
+    )
+    return dict2schema(argmap)
 
 
 def is_multiple(field):
@@ -423,7 +431,7 @@ class Parser(object):
         elif callable(argmap):
             schema = argmap(req)
         else:
-            schema = argmap2schema(argmap)()
+            schema = dict2schema(argmap)()
         if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
             warnings.warn(
                 "It is highly recommended that you set strict=True on your schema "
@@ -555,7 +563,7 @@ class Parser(object):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, collections.Mapping):
-            argmap = argmap2schema(argmap)()
+            argmap = dict2schema(argmap)()
 
         def decorator(func):
             req_ = request_obj
