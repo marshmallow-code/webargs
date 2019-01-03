@@ -1,9 +1,10 @@
 Changelog
 ---------
 
-<<<<<<< HEAD
-5.0.0 (unreleased)
+5.0.0 (2019-01-03)
 ******************
+
+Features:
 
 * *Backwards-incompatible*: A 400 HTTPError is raised when an
   invalid JSON payload is passed.  (:issue:`329`).
