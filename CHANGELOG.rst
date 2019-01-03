@@ -5,7 +5,7 @@ Changelog
 ******************
 
 * *Deprecation*: ``argmap2schema`` is deprecated in favor of
-  ``dict2schema``.
+  ``dict2schema`` (:pr:`352`).
 
 4.3.1 (2018-12-31)
 ******************
