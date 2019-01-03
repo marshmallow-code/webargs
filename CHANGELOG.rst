@@ -72,6 +72,12 @@ Other changes:
   dependency on Python 2 (:pr:`334`).
   This ensures consistency of behavior across Python 2 and 3.
 
+4.4.0 (2019-01-03)
+******************
+
+* *Deprecation*: ``argmap2schema`` is deprecated in favor of
+  ``dict2schema`` (:pr:`352`).
+
 4.3.1 (2018-12-31)
 ******************
 

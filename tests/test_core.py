@@ -14,7 +14,7 @@ from webargs import fields, missing, ValidationError
 from webargs.core import (
     Parser,
     get_value,
-    argmap2schema,
+    dict2schema,
     is_json,
     get_mimetype,
     MARSHMALLOW_VERSION_INFO,
@@ -830,7 +830,7 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
 
 def test_delimited_list_default_delimiter(web_request, parser):
     web_request.json = {"ids": "1,2,3"}
-    schema_cls = argmap2schema({"ids": fields.DelimitedList(fields.Int())})
+    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
@@ -843,7 +843,7 @@ def test_delimited_list_default_delimiter(web_request, parser):
 
 def test_delimited_list_as_string(web_request, parser):
     web_request.json = {"ids": "1,2,3"}
-    schema_cls = argmap2schema(
+    schema_cls = dict2schema(
         {"ids": fields.DelimitedList(fields.Int(), as_string=True)}
     )
     schema = schema_cls()
@@ -858,7 +858,7 @@ def test_delimited_list_as_string(web_request, parser):
 
 def test_delimited_list_as_string_v2(web_request, parser):
     web_request.json = {"dates": "2018-11-01,2018-11-02"}
-    schema_cls = argmap2schema(
+    schema_cls = dict2schema(
         {
             "dates": fields.DelimitedList(
                 fields.DateTime(format="%Y-%m-%d"), as_string=True
@@ -880,9 +880,7 @@ def test_delimited_list_as_string_v2(web_request, parser):
 
 def test_delimited_list_custom_delimiter(web_request, parser):
     web_request.json = {"ids": "1|2|3"}
-    schema_cls = argmap2schema(
-        {"ids": fields.DelimitedList(fields.Int(), delimiter="|")}
-    )
+    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int(), delimiter="|")})
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
@@ -891,7 +889,7 @@ def test_delimited_list_custom_delimiter(web_request, parser):
 
 def test_delimited_list_load_list(web_request, parser):
     web_request.json = {"ids": [1, 2, 3]}
-    schema_cls = argmap2schema({"ids": fields.DelimitedList(fields.Int())})
+    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
@@ -901,7 +899,7 @@ def test_delimited_list_load_list(web_request, parser):
 # Regresion test for https://github.com/marshmallow-code/webargs/issues/149
 def test_delimited_list_passed_invalid_type(web_request, parser):
     web_request.json = {"ids": 1}
-    schema_cls = argmap2schema({"ids": fields.DelimitedList(fields.Int())})
+    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
     with pytest.raises(ValidationError) as excinfo:
@@ -964,7 +962,7 @@ def test_parse_raises_validation_error_if_data_invalid(web_request, parser):
         parser.parse(args, web_request)
 
 
-def test_argmap2schema():
+def test_dict2schema():
     data_key_kwargs = {
         "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "content-type"
     }
@@ -975,7 +973,7 @@ def test_argmap2schema():
         "content_type": fields.Str(**data_key_kwargs),
     }
 
-    schema_cls = argmap2schema(argmap)
+    schema_cls = dict2schema(argmap)
     assert issubclass(schema_cls, Schema)
 
     schema = schema_cls()
@@ -988,10 +986,7 @@ def test_argmap2schema():
 
 
 # Regression test for https://github.com/marshmallow-code/webargs/issues/101
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO < (2, 7, 1), reason="will only work on marshmallow>=2.7.1"
-)
-def test_argmap2schema_doesnt_add_to_class_registry():
+def test_dict2schema_doesnt_add_to_class_registry():
     old_n_entries = len(
         list(
             itertools.chain(
@@ -1000,8 +995,8 @@ def test_argmap2schema_doesnt_add_to_class_registry():
         )
     )
     argmap = {"id": fields.Field()}
-    argmap2schema(argmap)
-    argmap2schema(argmap)
+    dict2schema(argmap)
+    dict2schema(argmap)
     new_n_entries = len(
         list(
             itertools.chain(
@@ -1012,9 +1007,9 @@ def test_argmap2schema_doesnt_add_to_class_registry():
     assert new_n_entries == old_n_entries
 
 
-def test_argmap2schema_with_nesting():
+def test_dict2schema_with_nesting():
     argmap = {"nest": fields.Nested({"foo": fields.Field()})}
-    schema_cls = argmap2schema(argmap)
+    schema_cls = dict2schema(argmap)
     assert issubclass(schema_cls, Schema)
     schema = schema_cls()
     assert "nest" in schema.fields
