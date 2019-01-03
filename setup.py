@@ -63,7 +63,7 @@ setup(
     name="webargs",
     version=find_version("webargs/__init__.py"),
     description=(
-        "A friendly library for parsing and validating HTTP request arguments, "
+        "Declarative parsing and validation of HTTP request objects, "
         "with built-in support for popular web frameworks, including "
         "Flask, Django, Bottle, Tornado, Pyramid, webapp2, Falcon, and aiohttp."
     ),

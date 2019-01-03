@@ -7,7 +7,7 @@ from marshmallow import validate
 from webargs.core import dict2schema, ValidationError
 from webargs import fields
 
-__version__ = "4.4.0"
+__version__ = "4.4.1"
 __author__ = "Steven Loria"
 __license__ = "MIT"
 

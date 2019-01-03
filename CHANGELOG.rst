@@ -1,6 +1,7 @@
 Changelog
 ---------
 
+<<<<<<< HEAD
 5.0.0 (unreleased)
 ******************
 
@@ -73,6 +74,14 @@ Other changes:
 * `simplejson <https://pypi.org/project/simplejson/>`_ is now a required
   dependency on Python 2 (:pr:`334`).
   This ensures consistency of behavior across Python 2 and 3.
+
+4.4.1 (2018-01-03)
+******************
+
+Bug fixes:
+
+* Remove usages of ``argmap2schema`` from ``fields.Nested``,
+  ``AsyncParser``, and ``PyramidParser``.
 
 4.4.0 (2019-01-03)
 ******************
