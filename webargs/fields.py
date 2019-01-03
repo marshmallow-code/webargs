@@ -17,7 +17,7 @@ Note: `data_key` replaced `load_from` in marshmallow 3. When using marshmallow 2
 """
 import marshmallow as ma
 
-from webargs.core import argmap2schema
+from webargs.core import dict2schema
 
 __all__ = ["Nested", "DelimitedList"]
 # Expose all fields from marshmallow.fields.
@@ -35,7 +35,7 @@ class Nested(ma.fields.Nested):
 
     def __init__(self, nested, *args, **kwargs):
         if isinstance(nested, dict):
-            nested = argmap2schema(nested)
+            nested = dict2schema(nested)
         super(Nested, self).__init__(nested, *args, **kwargs)
 
 

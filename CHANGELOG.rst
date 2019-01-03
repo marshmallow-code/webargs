@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+4.4.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Remove usages of ``argmap2schema`` from ``fields.Nested``,
+  ``AsyncParser``, and ``PyramidParser``.
+
 4.4.0 (2019-01-03)
 ******************
 
