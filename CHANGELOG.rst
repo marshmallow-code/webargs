@@ -12,7 +12,7 @@ Features:
 
 Other changes:
 
-* Backwards-incompatible*: `webargs.argmap2schema` is removed. Use
+* *Backwards-incompatible*: `webargs.argmap2schema` is removed. Use
   `webargs.dict2schema` instead.
 * *Backwards-incompatible*: `webargs.ValidationError` is removed.
   Use `marshmallow.ValidationError` instead.

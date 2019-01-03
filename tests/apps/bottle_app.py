@@ -38,14 +38,16 @@ def echo_use_args(args):
     return args
 
 
-@app.route("/echo_use_kwargs", method=["GET", "POST"])
-@use_kwargs(hello_args)
+@app.route("/echo_use_kwargs", method=["GET", "POST"], apply=use_kwargs(hello_args))
 def echo_use_kwargs(name):
     return {"name": name}
 
 
-@app.route("/echo_use_args_validated", method=["GET", "POST"])
-@use_args({"value": fields.Int()}, validate=lambda args: args["value"] > 42)
+@app.route(
+    "/echo_use_args_validated",
+    method=["GET", "POST"],
+    apply=use_args({"value": fields.Int()}, validate=lambda args: args["value"] > 42),
+)
 def echo_use_args_validated(args):
     return args
 
@@ -61,14 +63,16 @@ def echo_many_schema():
     return HTTPResponse(body=json.dumps(arguments), content_type="application/json")
 
 
-@app.route("/echo_use_args_with_path_param/<name>")
-@use_args({"value": fields.Int()})
+@app.route(
+    "/echo_use_args_with_path_param/<name>", apply=use_args({"value": fields.Int()})
+)
 def echo_use_args_with_path_param(args, name):
     return args
 
 
-@app.route("/echo_use_kwargs_with_path_param/<name>")
-@use_kwargs({"value": fields.Int()})
+@app.route(
+    "/echo_use_kwargs_with_path_param/<name>", apply=use_kwargs({"value": fields.Int()})
+)
 def echo_use_kwargs_with_path_param(name, value):
     return {"value": value}
 
