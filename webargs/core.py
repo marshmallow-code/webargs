@@ -51,12 +51,14 @@ def dict2schema(dct):
     `Fields <marshmallow.fields.Field>`.
     """
     attrs = dct.copy()
-    if MARSHMALLOW_VERSION_INFO[0] < 3:
 
-        class Meta(object):
+    class Meta(object):
+        if MARSHMALLOW_VERSION_INFO[0] < 3:
             strict = True
+        else:
+            register = False
 
-        attrs["Meta"] = Meta
+    attrs["Meta"] = Meta
     return type(str(""), (ma.Schema,), attrs)
 
 
