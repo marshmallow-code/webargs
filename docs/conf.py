@@ -53,7 +53,7 @@ html_static_path = ["_static"]
 html_theme_options = {
     "color": "#268bd2",
     "logo_name": "webargs",
-    "description": "A friendly library for parsing HTTP request arguments.",
+    "description": "Declarative parsing and validation of HTTP request objects.",
     "github_user": github_user,
     "github_repo": github_repo,
 }
