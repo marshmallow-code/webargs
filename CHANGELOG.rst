@@ -7,6 +7,7 @@ Changelog
 Features:
 
 * Error handlers for `AsyncParser` classes may be coroutine functions.
+* Add type annotations to `AsyncParser` and `AIOHTTPParser`.
 
 5.0.0 (2019-01-03)
 ******************

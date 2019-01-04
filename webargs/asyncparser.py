@@ -1,14 +1,19 @@
-# -*- coding: utf-8 -*-
 """Asynchronous request parser. Compatible with Python>=3.5."""
 import asyncio
 import collections
 import functools
 import inspect
+import typing
 
+from marshmallow import Schema, ValidationError
+from marshmallow.fields import Field
 import marshmallow as ma
 from marshmallow.utils import missing
 
 from webargs import core
+
+ArgMap = typing.Mapping[str, Field]
+Validate = typing.Union[typing.Callable, typing.Iterable[typing.Callable]]
 
 
 class AsyncParser(core.Parser):
@@ -16,7 +21,9 @@ class AsyncParser(core.Parser):
     either coroutines or regular methods.
     """
 
-    async def _parse_request(self, schema, req, locations):
+    async def _parse_request(
+        self, schema: Schema, req, locations: typing.Iterable
+    ) -> typing.Mapping:
         if schema.many:
             assert (
                 "json" in locations
@@ -58,13 +65,13 @@ class AsyncParser(core.Parser):
     # TODO: Lots of duplication from core.Parser here. Rethink.
     async def parse(
         self,
-        argmap,
+        argmap: ArgMap,
         req=None,
-        locations=None,
-        validate=None,
-        error_status_code=None,
-        error_headers=None,
-    ):
+        locations: typing.Iterable = None,
+        validate: Validate = None,
+        error_status_code: typing.Union[int, None] = None,
+        error_headers: typing.Union[int, None] = None,
+    ) -> typing.Mapping:
         """Coroutine variant of `webargs.core.Parser`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
@@ -90,21 +97,26 @@ class AsyncParser(core.Parser):
         return data
 
     async def _on_validation_error(
-        self, error, req, schema, error_status_code, error_headers
-    ):
+        self,
+        error: ValidationError,
+        req,
+        schema: Schema,
+        error_status_code: typing.Union[int, None],
+        error_headers: typing.Union[int, None],
+    ) -> None:
         error_handler = self.error_callback or self.handle_error
         await error_handler(error, req, schema, error_status_code, error_headers)
 
     def use_args(
         self,
-        argmap,
+        argmap: ArgMap,
         req=None,
-        locations=None,
-        as_kwargs=False,
-        validate=None,
-        error_status_code=None,
-        error_headers=None,
-    ):
+        locations: typing.Iterable = None,
+        as_kwargs: bool = False,
+        validate: Validate = None,
+        error_status_code: typing.Union[int, None] = None,
+        error_headers: typing.Union[int, None] = None,
+    ) -> typing.Awaitable:
         """Decorator that injects parsed arguments into a view function or method.
 
         Receives the same arguments as `webargs.core.Parser.use_args`.
@@ -174,7 +186,7 @@ class AsyncParser(core.Parser):
 
         return decorator
 
-    def use_kwargs(self, *args, **kwargs):
+    def use_kwargs(self, *args, **kwargs) -> typing.Awaitable:
         """Decorator that injects parsed arguments into a view function or method.
 
         Receives the same arguments as `webargs.core.Parser.use_kwargs`.
@@ -182,7 +194,9 @@ class AsyncParser(core.Parser):
         """
         return super().use_kwargs(*args, **kwargs)
 
-    async def parse_arg(self, name, field, req, locations=None):
+    async def parse_arg(
+        self, name: str, field: Field, req, locations: typing.Iterable = None
+    ) -> typing.Any:
         location = field.metadata.get("location")
         if location:
             locations_to_check = self._validated_locations([location])
@@ -196,7 +210,9 @@ class AsyncParser(core.Parser):
                 return value
         return core.missing
 
-    async def _get_value(self, name, argobj, req, location):
+    async def _get_value(
+        self, name: str, argobj: Field, req, location: str
+    ) -> typing.Any:
         # Parsing function to call
         # May be a method name (str) or a function
         func = self.__location_map__.get(location)

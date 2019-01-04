@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """aiohttp request argument parsing module.
 
 Example: ::
@@ -23,11 +22,15 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
+import typing
 import warnings
 
 import aiohttp
 from aiohttp import web
+from aiohttp.web import Request
 from aiohttp import web_exceptions
+from marshmallow import Schema, ValidationError
+from marshmallow.fields import Field
 
 from webargs import core
 from webargs.core import json
@@ -41,7 +44,7 @@ if AIOHTTP_MAJOR_VERSION < 2:
     )
 
 
-def is_json_request(req):
+def is_json_request(req: Request) -> bool:
     content_type = req.content_type
     return core.is_json(content_type)
 
@@ -54,7 +57,7 @@ class HTTPUnprocessableEntity(web.HTTPClientError):
 # Adapted from werkzeug
 exception_map = {422: HTTPUnprocessableEntity}
 # Collect all exceptions from aiohttp.web_exceptions
-def _find_exceptions():
+def _find_exceptions() -> None:
     for name in web_exceptions.__all__:
         obj = getattr(web_exceptions, name)
         try:
@@ -80,18 +83,18 @@ class AIOHTTPParser(AsyncParser):
         match_info="parse_match_info", **core.Parser.__location_map__
     )
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req: Request, name: str, field: Field) -> typing.Any:
         """Pull a querystring value from the request."""
         return core.get_value(req.query, name, field)
 
-    async def parse_form(self, req, name, field):
+    async def parse_form(self, req: Request, name: str, field: Field) -> typing.Any:
         """Pull a form value from the request."""
         post_data = self._cache.get("post")
         if post_data is None:
             self._cache["post"] = await req.post()
         return core.get_value(self._cache["post"], name, field)
 
-    async def parse_json(self, req, name, field):
+    async def parse_json(self, req: Request, name: str, field: Field) -> typing.Any:
         """Pull a json value from the request."""
         json_data = self._cache.get("json")
         if json_data is None:
@@ -107,25 +110,27 @@ class AIOHTTPParser(AsyncParser):
             self._cache["json"] = json_data
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req: Request, name: str, field: Field) -> typing.Any:
         """Pull a value from the header data."""
         return core.get_value(req.headers, name, field)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req: Request, name: str, field: Field) -> typing.Any:
         """Pull a value from the cookiejar."""
         return core.get_value(req.cookies, name, field)
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req: Request, name: str, field: Field) -> None:
         raise NotImplementedError(
             "parse_files is not implemented. You may be able to use parse_form for "
             "parsing upload data."
         )
 
-    def parse_match_info(self, req, name, field):
+    def parse_match_info(self, req: Request, name: str, field: Field) -> typing.Any:
         """Pull a value from the request's ``match_info``."""
         return core.get_value(req.match_info, name, field)
 
-    def get_request_from_view_args(self, view, args, kwargs):
+    def get_request_from_view_args(
+        self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
+    ):
         """Get request object from a handler function or method. Used internally by
         ``use_args`` and ``use_kwargs``.
         """
@@ -140,7 +145,14 @@ class AIOHTTPParser(AsyncParser):
         assert isinstance(req, web.Request), "Request argument not found for handler"
         return req
 
-    def handle_error(self, error, req, schema, error_status_code, error_headers):
+    def handle_error(
+        self,
+        error: ValidationError,
+        req: Request,
+        schema: Schema,
+        error_status_code: typing.Union[int, None],
+        error_headers: typing.Union[int, None],
+    ) -> None:
         """Handle ValidationErrors and return a JSON response of error messages to the client."""
         error_class = exception_map.get(
             error_status_code or self.DEFAULT_VALIDATION_STATUS
@@ -154,7 +166,9 @@ class AIOHTTPParser(AsyncParser):
             content_type="application/json",
         )
 
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def handle_invalid_json_error(
+        self, error: json.JSONDecodeError, req: Request, *args, **kwargs
+    ) -> None:
         error_class = exception_map.get(400)
         messages = {"json": ["Invalid JSON body."]}
         raise error_class(
