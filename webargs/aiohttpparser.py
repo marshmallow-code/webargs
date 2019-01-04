@@ -23,9 +23,7 @@ Example: ::
     app.router.add_route('GET', '/', index)
 """
 import typing
-import warnings
 
-import aiohttp
 from aiohttp import web
 from aiohttp.web import Request
 from aiohttp import web_exceptions
@@ -35,13 +33,6 @@ from marshmallow.fields import Field
 from webargs import core
 from webargs.core import json
 from webargs.asyncparser import AsyncParser
-
-AIOHTTP_MAJOR_VERSION = int(aiohttp.__version__.split(".")[0])
-if AIOHTTP_MAJOR_VERSION < 2:
-    warnings.warn(
-        "Support for aiohttp<2.0.0 is deprecated and is removed in webargs 2.0.0",
-        DeprecationWarning,
-    )
 
 
 def is_json_request(req: Request) -> bool:
