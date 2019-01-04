@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+5.1.0 (unreleased)
+******************
+
+Features:
+
+* Error handlers for `AsyncParser` classes may be coroutine functions.
+
 5.0.0 (2019-01-03)
 ******************
 

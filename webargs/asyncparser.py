@@ -82,12 +82,18 @@ class AsyncParser(core.Parser):
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(
+            await self._on_validation_error(
                 error, req, schema, error_status_code, error_headers
             )
         finally:
             self.clear_cache()
         return data
+
+    async def _on_validation_error(
+        self, error, req, schema, error_status_code, error_headers
+    ):
+        error_handler = self.error_callback or self.handle_error
+        await error_handler(error, req, schema, error_status_code, error_headers)
 
     def use_args(
         self,
