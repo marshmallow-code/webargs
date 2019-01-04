@@ -1,9 +1,0 @@
-/* Styles for sponsors.html */
-.sponsor .logo img {
-  width: 48px;
-  vertical-align: middle;
-}
-.sponsor a.logo {
-  float: left;
-  border-bottom: none;
-}

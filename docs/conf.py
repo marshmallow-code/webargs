@@ -48,7 +48,6 @@ exclude_patterns = ["_build"]
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme = "sphinx_typlog_theme"
 html_theme_path = [sphinx_typlog_theme.get_path()]
-html_static_path = ["_static"]
 
 html_theme_options = {
     "color": "#268bd2",
@@ -76,7 +75,3 @@ html_sidebars = {
         "sponsors.html",
     ]
 }
-
-
-def setup(app):
-    app.add_stylesheet("css/extra.css")
