@@ -28,6 +28,12 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
         # When value is keyed on a variable-unsafe name
         # or you want to rename a key
         "content_type": fields.Str(load_from="Content-Type", location="headers"),
+        # OR, on marshmallow 3
+        # "content_type": fields.Str(data_key="Content-Type", location="headers"),
+        # File uploads
+        "profile_image": fields.Field(
+            location="files", validate=lambda f: f.mimetype in ["image/jpeg", "image/png"]
+        ),
     }
 
 .. note::
