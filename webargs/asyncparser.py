@@ -1,9 +1,9 @@
 """Asynchronous request parser. Compatible with Python>=3.5."""
 import asyncio
-import collections
 import functools
 import inspect
 import typing
+from collections.abc import Mapping
 
 from marshmallow import Schema, ValidationError
 from marshmallow.fields import Field
@@ -125,7 +125,7 @@ class AsyncParser(core.Parser):
         request_obj = req
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
-        if isinstance(argmap, collections.Mapping):
+        if isinstance(argmap, Mapping):
             argmap = core.dict2schema(argmap)()
 
         def decorator(func):
