@@ -9,6 +9,10 @@ Features:
 * Error handlers for `AsyncParser` classes may be coroutine functions.
 * Add type annotations to `AsyncParser` and `AIOHTTPParser`.
 
+Bug fixes:
+
+* Address warning on Python 3.7 about importing from ``collections.abc``.
+
 5.0.0 (2019-01-03)
 ******************
 
