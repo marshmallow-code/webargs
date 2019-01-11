@@ -60,7 +60,7 @@ class FlaskParser(core.Parser):
             # We decode the json manually here instead of
             # using req.get_json() so that we can handle
             # JSONDecodeErrors consistently
-            data = req._get_data_for_json(cache=True)
+            data = req.get_data(cache=True)
             try:
                 self._cache["json"] = json_data = core.parse_json(data)
             except json.JSONDecodeError as e:
