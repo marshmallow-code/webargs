@@ -11,6 +11,8 @@ Features:
 
 Bug fixes:
 
+* Fix compatibility with Flask<1.0 (:issue:`355`).
+  Thanks :user:`hoatle` for reporting.
 * Address warning on Python 3.7 about importing from ``collections.abc``.
 
 5.0.0 (2019-01-03)
