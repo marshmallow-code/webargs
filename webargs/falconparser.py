@@ -155,7 +155,7 @@ class FalconParser(core.Parser):
         raise HTTPError(status, errors=error.messages, headers=error_headers)
 
     def handle_invalid_json_error(self, error, req, *args, **kwargs):
-        status = status_map.get(400)
+        status = status_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise HTTPError(status, errors=messages)
 
