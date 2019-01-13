@@ -15,7 +15,7 @@ except ImportError:
 try:
     import simplejson as json
 except ImportError:
-    import json
+    import json  # type: ignore
 
 import marshmallow as ma
 from marshmallow import ValidationError
@@ -35,9 +35,9 @@ __all__ = [
     "parse_json",
 ]
 
-MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)
+MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)  # type: tuple
 
-DEFAULT_VALIDATION_STATUS = 422
+DEFAULT_VALIDATION_STATUS = 422  # type: int
 
 
 def _callable_or_raise(obj):
@@ -198,7 +198,7 @@ class Parser(object):
             raise ValueError(msg)
         return locations
 
-    def _get_value(self, name, argobj, req, location):
+    def _get_handler(self, location):
         # Parsing function to call
         # May be a method name (str) or a function
         func = self.__location_map__.get(location)
@@ -207,10 +207,13 @@ class Parser(object):
                 function = func
             else:
                 function = getattr(self, func)
-            value = function(req, name, argobj)
         else:
             raise ValueError('Invalid location: "{0}"'.format(location))
-        return value
+        return function
+
+    def _get_value(self, name, argobj, req, location):
+        function = self._get_handler(location)
+        return function(req, name, argobj)
 
     def parse_arg(self, name, field, req, locations=None):
         """Parse a single argument from a request.
@@ -347,7 +350,9 @@ class Parser(object):
         validators = _ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
         try:
-            parsed = self._parse_request(schema=schema, req=req, locations=locations)
+            parsed = self._parse_request(
+                schema=schema, req=req, locations=locations or self.locations
+            )
             result = schema.load(parsed)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)

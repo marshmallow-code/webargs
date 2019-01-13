@@ -121,7 +121,7 @@ class AIOHTTPParser(AsyncParser):
 
     def get_request_from_view_args(
         self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
-    ):
+    ) -> Request:
         """Get request object from a handler function or method. Used internally by
         ``use_args`` and ``use_kwargs``.
         """
@@ -141,9 +141,9 @@ class AIOHTTPParser(AsyncParser):
         error: ValidationError,
         req: Request,
         schema: Schema,
-        error_status_code: typing.Union[int, None],
-        error_headers: typing.Union[int, None],
-    ) -> None:
+        error_status_code: typing.Union[int, None] = None,
+        error_headers: typing.Union[int, None] = None,
+    ) -> typing.NoReturn:
         """Handle ValidationErrors and return a JSON response of error messages to the client."""
         error_class = exception_map.get(
             error_status_code or self.DEFAULT_VALIDATION_STATUS
@@ -159,8 +159,8 @@ class AIOHTTPParser(AsyncParser):
 
     def handle_invalid_json_error(
         self, error: json.JSONDecodeError, req: Request, *args, **kwargs
-    ) -> None:
-        error_class = exception_map.get(400)
+    ) -> typing.NoReturn:
+        error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise error_class(
             body=json.dumps(messages).encode("utf-8"), content_type="application/json"
@@ -168,5 +168,5 @@ class AIOHTTPParser(AsyncParser):
 
 
 parser = AIOHTTPParser()
-use_args = parser.use_args
-use_kwargs = parser.use_kwargs
+use_args = parser.use_args  # type: typing.Callable
+use_kwargs = parser.use_kwargs  # type: typing.Callable

@@ -3,7 +3,7 @@
 try:
     from urllib.parse import urlencode
 except ImportError:  # PY2
-    from urllib import urlencode
+    from urllib import urlencode  # type: ignore
 from webargs.core import json
 
 import pytest

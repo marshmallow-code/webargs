@@ -3,9 +3,9 @@
 from webargs.core import json
 
 try:
-    from urllib import urlencode  # python2
-except ImportError:
-    from urllib.parse import urlencode  # python3
+    from urllib.parse import urlencode
+except ImportError:  # PY2
+    from urllib import urlencode  # type: ignore
 
 import mock
 import pytest

@@ -12,7 +12,8 @@ from marshmallow.utils import missing
 
 from webargs import core
 
-ArgMap = typing.Mapping[str, Field]
+Request = typing.TypeVar("Request")
+ArgMap = typing.Union[Schema, typing.Mapping[str, Field]]
 Validate = typing.Union[typing.Callable, typing.Iterable[typing.Callable]]
 
 
@@ -22,8 +23,8 @@ class AsyncParser(core.Parser):
     """
 
     async def _parse_request(
-        self, schema: Schema, req, locations: typing.Iterable
-    ) -> typing.Mapping:
+        self, schema: Schema, req: Request, locations: typing.Iterable
+    ) -> typing.Union[dict, list]:
         if schema.many:
             assert (
                 "json" in locations
@@ -66,12 +67,12 @@ class AsyncParser(core.Parser):
     async def parse(
         self,
         argmap: ArgMap,
-        req=None,
+        req: Request = None,
         locations: typing.Iterable = None,
         validate: Validate = None,
         error_status_code: typing.Union[int, None] = None,
         error_headers: typing.Union[int, None] = None,
-    ) -> typing.Mapping:
+    ) -> typing.Union[typing.Mapping, None]:
         """Coroutine variant of `webargs.core.Parser`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
@@ -83,7 +84,7 @@ class AsyncParser(core.Parser):
         schema = self._get_schema(argmap, req)
         try:
             parsed = await self._parse_request(
-                schema=schema, req=req, locations=locations
+                schema=schema, req=req, locations=locations or self.locations
             )
             result = schema.load(parsed)
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
@@ -99,7 +100,7 @@ class AsyncParser(core.Parser):
     async def _on_validation_error(
         self,
         error: ValidationError,
-        req,
+        req: Request,
         schema: Schema,
         error_status_code: typing.Union[int, None],
         error_headers: typing.Union[int, None],
@@ -110,13 +111,13 @@ class AsyncParser(core.Parser):
     def use_args(
         self,
         argmap: ArgMap,
-        req=None,
+        req: typing.Optional[Request] = None,
         locations: typing.Iterable = None,
         as_kwargs: bool = False,
         validate: Validate = None,
-        error_status_code: typing.Union[int, None] = None,
-        error_headers: typing.Union[int, None] = None,
-    ) -> typing.Awaitable:
+        error_status_code: typing.Optional[int] = None,
+        error_headers: typing.Optional[int] = None,
+    ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
         Receives the same arguments as `webargs.core.Parser.use_args`.
@@ -128,7 +129,7 @@ class AsyncParser(core.Parser):
         if isinstance(argmap, Mapping):
             argmap = core.dict2schema(argmap)()
 
-        def decorator(func):
+        def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
 
             if inspect.iscoroutinefunction(func):
@@ -149,7 +150,7 @@ class AsyncParser(core.Parser):
                         error_headers=error_headers,
                     )
                     if as_kwargs:
-                        kwargs.update(parsed_args)
+                        kwargs.update(parsed_args or {})
                         return await func(*args, **kwargs)
                     else:
                         # Add parsed_args after other positional arguments
@@ -158,14 +159,14 @@ class AsyncParser(core.Parser):
 
             else:
 
-                @functools.wraps(func)
+                @functools.wraps(func)  # type: ignore
                 def wrapper(*args, **kwargs):
                     req_obj = req_
 
                     if not req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
-                    parsed_args = yield from self.parse(
+                    parsed_args = yield from self.parse(  # type: ignore
                         argmap,
                         req=req_obj,
                         locations=locations,
@@ -181,12 +182,11 @@ class AsyncParser(core.Parser):
                         new_args = args + (parsed_args,)
                         return func(*new_args, **kwargs)
 
-            wrapper.__wrapped__ = func
             return wrapper
 
         return decorator
 
-    def use_kwargs(self, *args, **kwargs) -> typing.Awaitable:
+    def use_kwargs(self, *args, **kwargs) -> typing.Callable:
         """Decorator that injects parsed arguments into a view function or method.
 
         Receives the same arguments as `webargs.core.Parser.use_kwargs`.
@@ -195,7 +195,7 @@ class AsyncParser(core.Parser):
         return super().use_kwargs(*args, **kwargs)
 
     async def parse_arg(
-        self, name: str, field: Field, req, locations: typing.Iterable = None
+        self, name: str, field: Field, req: Request, locations: typing.Iterable = None
     ) -> typing.Any:
         location = field.metadata.get("location")
         if location:
@@ -211,20 +211,11 @@ class AsyncParser(core.Parser):
         return core.missing
 
     async def _get_value(
-        self, name: str, argobj: Field, req, location: str
+        self, name: str, argobj: Field, req: Request, location: str
     ) -> typing.Any:
-        # Parsing function to call
-        # May be a method name (str) or a function
-        func = self.__location_map__.get(location)
-        if func:
-            if inspect.isfunction(func):
-                function = func
-            else:
-                function = getattr(self, func)
-            if asyncio.iscoroutinefunction(function):
-                value = await function(req, name, argobj)
-            else:
-                value = function(req, name, argobj)
+        function = self._get_handler(location)
+        if asyncio.iscoroutinefunction(function):
+            value = await function(req, name, argobj)
         else:
-            raise ValueError('Invalid location: "{0}"'.format(location))
+            value = function(req, name, argobj)
         return value
