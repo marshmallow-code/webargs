@@ -74,6 +74,7 @@ contributing to our Open Collective:
 
 .. image:: https://opencollective.com/marshmallow/donate/button.png
     :target: https://opencollective.com/marshmallow
+    :width: 200
     :alt: Donate to our collective
 
 Professional Support
