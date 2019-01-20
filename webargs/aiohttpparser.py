@@ -47,7 +47,8 @@ class HTTPUnprocessableEntity(web.HTTPClientError):
 # Mapping of status codes to exception classes
 # Adapted from werkzeug
 exception_map = {422: HTTPUnprocessableEntity}
-# Collect all exceptions from aiohttp.web_exceptions
+
+
 def _find_exceptions() -> None:
     for name in web_exceptions.__all__:
         obj = getattr(web_exceptions, name)
@@ -63,6 +64,7 @@ def _find_exceptions() -> None:
         exception_map[obj.status_code] = obj
 
 
+# Collect all exceptions from aiohttp.web_exceptions
 _find_exceptions()
 del _find_exceptions
 
@@ -144,7 +146,9 @@ class AIOHTTPParser(AsyncParser):
         error_status_code: typing.Union[int, None] = None,
         error_headers: typing.Union[int, None] = None,
     ) -> typing.NoReturn:
-        """Handle ValidationErrors and return a JSON response of error messages to the client."""
+        """Handle ValidationErrors and return a JSON response of error messages
+        to the client.
+        """
         error_class = exception_map.get(
             error_status_code or self.DEFAULT_VALIDATION_STATUS
         )

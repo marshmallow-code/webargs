@@ -29,9 +29,9 @@ class AsyncParser(core.Parser):
             assert (
                 "json" in locations
             ), "schema.many=True is only supported for JSON location"
-            # The ad hoc Nested field is more like a workaround or a helper, and it servers its
-            # purpose fine. However, if somebody has a desire to re-design the support of
-            # bulk-type arguments, go ahead.
+            # The ad hoc Nested field is more like a workaround or a helper,
+            # and it servers its purpose fine. However, if somebody has a desire
+            # to re-design the support of bulk-type arguments, go ahead.
             parsed = await self.parse_arg(
                 name="json",
                 field=ma.fields.Nested(schema, many=True),

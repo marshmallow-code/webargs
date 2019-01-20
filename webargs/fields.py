@@ -4,8 +4,8 @@
 Includes all fields from `marshmallow.fields` in addition to a custom
 `Nested` field and `DelimitedList`.
 
-All fields can optionally take a special `location` keyword argument, which tells webargs
-where to parse the request argument from. ::
+All fields can optionally take a special `location` keyword argument, which
+tells webargs where to parse the request argument from. ::
 
     args = {
         'active': fields.Bool(location='query')
@@ -13,7 +13,8 @@ where to parse the request argument from. ::
                                    location='headers')
     }
 
-Note: `data_key` replaced `load_from` in marshmallow 3. When using marshmallow 2, use `load_from`.
+Note: `data_key` replaced `load_from` in marshmallow 3.
+When using marshmallow 2, use `load_from`.
 """
 import marshmallow as ma
 

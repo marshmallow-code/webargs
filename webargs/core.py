@@ -75,7 +75,8 @@ def get_mimetype(content_type):
     return content_type.split(";")[0].strip() if content_type else None
 
 
-# Adapted from werkzeug: https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
+# Adapted from werkzeug:
+# https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
 def is_json(mimetype):
     """Indicates if this mimetype is JSON or not.  By default a request
     is considered to include JSON data if the mimetype is
@@ -227,8 +228,8 @@ class Parser(object):
         :param req: The request object to parse.
         :param tuple locations: The locations ('json', 'querystring', etc.) where
             to search for the value.
-        :return: The unvalidated argument value or `missing` if the value cannot be found
-            on the request.
+        :return: The unvalidated argument value or `missing` if the value cannot
+            be found on the request.
         """
         location = field.metadata.get("location")
         if location:
@@ -249,9 +250,9 @@ class Parser(object):
             assert (
                 "json" in locations
             ), "schema.many=True is only supported for JSON location"
-            # The ad hoc Nested field is more like a workaround or a helper, and it servers its
-            # purpose fine. However, if somebody has a desire to re-design the support of
-            # bulk-type arguments, go ahead.
+            # The ad hoc Nested field is more like a workaround or a helper,
+            # and it servers its purpose fine. However, if somebody has a desire
+            # to re-design the support of bulk-type arguments, go ahead.
             parsed = self.parse_arg(
                 name="json",
                 field=ma.fields.Nested(schema, many=True),
