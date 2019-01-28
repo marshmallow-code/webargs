@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+5.1.1 (2019-01-28)
+******************
+
+Bug fixes:
+
+* Fix installing ``simplejson`` on Python 2 by
+  distributing a Python 2-only wheel (:issue:`363`).
+
 5.1.0 (2019-01-11)
 ******************
 
