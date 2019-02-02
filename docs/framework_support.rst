@@ -137,7 +137,7 @@ The :class:`DjangoParser` does not override :meth:`handle_error <webargs.core.Pa
         try:
             args = parser.parse(argmap, request)
         except ValidationError as err:
-            return JsonResponse(err.messages, status=err.status_code)
+            return JsonResponse(err.messages, status=422)
         except json.JSONDecodeError:
             return JsonResponse({"json": ["Invalid JSON body."]}, status=400)
         return JsonResponse({"message": "Hello {name}".format(name=name)})
