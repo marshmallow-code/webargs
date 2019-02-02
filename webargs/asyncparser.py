@@ -116,7 +116,7 @@ class AsyncParser(core.Parser):
         as_kwargs: bool = False,
         validate: Validate = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[int] = None,
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
