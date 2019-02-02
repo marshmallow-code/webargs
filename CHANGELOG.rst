@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+5.1.2 (unreleased)
+******************
+
+Bug fixes:
+
+* Remove lingering usages of ``ValidationError.status_code``
+  (:issue:`365`). Thanks :user:`decaz` for reporting.
+* Fix incorrect type annotations for ``error_headers``.
+* Fix outdated docs (:issue:`367`). Thanks :user:`alexandersoto` for reporting.
+
 5.1.1.post0 (2019-01-30)
 ************************
 
