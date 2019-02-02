@@ -88,16 +88,17 @@ As an alternative to `Parser.parse`, you can decorate your view with :meth:`use_
 
 .. note::
 
-    When using `use_kwargs`, any missing values for non-required fields will take the special value `missing <marshmallow.missing>`.
+    When using `use_kwargs`, any missing values will be omitted from the arguments.
+    Use ``**kwargs`` to handle optional arguments.
 
     .. code-block:: python
 
         from webargs import fields, missing
 
 
-        @use_kwargs({"name": fields.Str(), "nickname": fields.Str(required=False)})
-        def myview(name, nickname):
-            if nickname is missing:
+        @use_kwargs({"name": fields.Str(required=True), "nickname": fields.Str(required=False)})
+        def myview(name, **kwargs):
+            if "nickname" not in kwargs:
                 # ...
                 pass
 
