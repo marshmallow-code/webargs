@@ -3,7 +3,7 @@ webargs
 *******
 
 .. image:: https://badgen.net/pypi/v/webargs
-    :target: https://badge.fury.io/py/webargs
+    :target: https://pypi.org/project/webargs/
     :alt: PyPI version
 
 .. image:: https://badgen.net/travis/marshmallow-code/webargs
