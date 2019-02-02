@@ -71,7 +71,7 @@ class AsyncParser(core.Parser):
         locations: typing.Iterable = None,
         validate: Validate = None,
         error_status_code: typing.Union[int, None] = None,
-        error_headers: typing.Union[int, None] = None,
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
     ) -> typing.Union[typing.Mapping, None]:
         """Coroutine variant of `webargs.core.Parser`.
 
@@ -103,7 +103,7 @@ class AsyncParser(core.Parser):
         req: Request,
         schema: Schema,
         error_status_code: typing.Union[int, None],
-        error_headers: typing.Union[int, None],
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
     ) -> None:
         error_handler = self.error_callback or self.handle_error
         await error_handler(error, req, schema, error_status_code, error_headers)
