@@ -145,7 +145,7 @@ class AIOHTTPParser(AsyncParser):
         schema: Schema,
         error_status_code: typing.Union[int, None] = None,
         error_headers: typing.Union[typing.Mapping[str, str], None] = None,
-    ) -> typing.NoReturn:
+    ) -> "typing.NoReturn":
         """Handle ValidationErrors and return a JSON response of error messages
         to the client.
         """
@@ -163,7 +163,7 @@ class AIOHTTPParser(AsyncParser):
 
     def handle_invalid_json_error(
         self, error: json.JSONDecodeError, req: Request, *args, **kwargs
-    ) -> typing.NoReturn:
+    ) -> "typing.NoReturn":
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise error_class(
