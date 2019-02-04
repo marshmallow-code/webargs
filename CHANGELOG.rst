@@ -1,13 +1,14 @@
 Changelog
 ---------
 
-5.1.2 (unreleased)
+5.1.2 (2019-02-03)
 ******************
 
 Bug fixes:
 
 * Remove lingering usages of ``ValidationError.status_code``
   (:issue:`365`). Thanks :user:`decaz` for reporting.
+* Avoid ``AttributeError`` on Python<3.5.4 (:issue:`366`).
 * Fix incorrect type annotations for ``error_headers``.
 * Fix outdated docs (:issue:`367`). Thanks :user:`alexandersoto` for reporting.
 
