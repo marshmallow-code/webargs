@@ -62,7 +62,7 @@ def read(fname):
 
 setup(
     name="webargs",
-    version=find_version("webargs/__init__.py"),
+    version=find_version("src/webargs/__init__.py"),
     description=(
         "Declarative parsing and validation of HTTP request objects, "
         "with built-in support for popular web frameworks, including "
@@ -72,8 +72,8 @@ setup(
     author="Steven Loria",
     author_email="sloria1@gmail.com",
     url="https://github.com/marshmallow-code/webargs",
-    packages=find_packages(exclude=("test*", "examples")),
-    package_dir={"webargs": "webargs"},
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     license="MIT",
