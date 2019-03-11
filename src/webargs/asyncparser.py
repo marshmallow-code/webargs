@@ -77,6 +77,7 @@ class AsyncParser(core.Parser):
 
         Receives the same arguments as `webargs.core.Parser.parse`.
         """
+        self.clear_cache()  # in case someone used `parse_*()`
         req = req if req is not None else self.get_default_request()
         assert req is not None, "Must pass req object"
         data = None
@@ -93,8 +94,6 @@ class AsyncParser(core.Parser):
             await self._on_validation_error(
                 error, req, schema, error_status_code, error_headers
             )
-        finally:
-            self.clear_cache()
         return data
 
     async def _on_validation_error(

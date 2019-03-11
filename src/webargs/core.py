@@ -5,6 +5,7 @@ import functools
 import inspect
 import logging
 import warnings
+from copy import copy
 from distutils.version import LooseVersion
 
 try:
@@ -317,6 +318,11 @@ class Parser(object):
             )
         return schema
 
+    def _clone(self):
+        clone = copy(self)
+        clone.clear_cache()
+        return clone
+
     def parse(
         self,
         argmap,
@@ -345,28 +351,34 @@ class Parser(object):
 
          :return: A dictionary of parsed arguments
         """
+        self.clear_cache()  # in case someone used `parse_*()`
         req = req if req is not None else self.get_default_request()
         assert req is not None, "Must pass req object"
         data = None
         validators = _ensure_list_of_callables(validate)
+        parser = self._clone()
         schema = self._get_schema(argmap, req)
         try:
-            parsed = self._parse_request(
+            parsed = parser._parse_request(
                 schema=schema, req=req, locations=locations or self.locations
             )
             result = schema.load(parsed)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
-            self._validate_arguments(data, validators)
+            parser._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(
+            parser._on_validation_error(
                 error, req, schema, error_status_code, error_headers
             )
-        finally:
-            self.clear_cache()
         return data
 
     def clear_cache(self):
-        """Invalidate the parser's cache."""
+        """Invalidate the parser's cache.
+
+        This is usually a no-op now since the Parser clone used for parsing a
+        request is discarded afterwards.  It can still be used when manually
+        calling ``parse_*`` methods which would populate the cache on the main
+        Parser instance.
+        """
         self._cache = {}
         return None
 
