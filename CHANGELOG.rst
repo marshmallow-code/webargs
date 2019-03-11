@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+5.1.3 (unreleased)
+******************
+
+Bug fixes:
+
+* Fix race condition between parallel requests when the cache is used
+  (:issue:`371`). Thanks :user:`ThiefMaster` for reporting and fixing.
+
 5.1.2 (2019-02-03)
 ******************
 

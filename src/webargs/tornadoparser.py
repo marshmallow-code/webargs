@@ -82,10 +82,6 @@ def get_value(d, name, field):
 class TornadoParser(core.Parser):
     """Tornado request argument parser."""
 
-    def __init__(self, *args, **kwargs):
-        super(TornadoParser, self).__init__(*args, **kwargs)
-        self.json = None
-
     def parse_json(self, req, name, field):
         """Pull a json value from the request."""
         json_data = self._cache.get("json")
