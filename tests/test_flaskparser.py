@@ -110,3 +110,39 @@ def test_abort_has_serializable_data():
     error = json.loads(serialized_error)
     assert isinstance(error, dict)
     assert error["message"] == "custom error message"
+
+
+def test_json_cache_race_condition():
+    import threading
+
+    app = Flask("testapp")
+    lock = threading.Lock()
+    lock.acquire()
+
+    class MyField(fields.Field):
+        def _deserialize(self, value, attr, data):
+            with lock:
+                return value
+
+    argmap = {"value": MyField()}
+    results = {}
+
+    def thread_fn(value):
+        with app.test_request_context(
+                "/foo",
+                method="post",
+                data=json.dumps({"value": value}),
+                content_type="application/json",
+        ):
+            results[value] = parser.parse(argmap)['value']
+
+    t1 = threading.Thread(target=thread_fn, args=(42,))
+    t2 = threading.Thread(target=thread_fn, args=(23,))
+    t1.start()
+    t2.start()
+    lock.release()
+    t1.join()
+    t2.join()
+    # ensure we didn't get contaminated by a parallel request
+    assert results[42] == 42
+    assert results[23] == 23
