@@ -33,20 +33,22 @@ class DjangoParser(core.Parser):
         the parser and returning the appropriate `HTTPResponse`.
     """
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         """Pull the querystring value from the request."""
         return core.get_value(req.GET, name, field)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req, name, field, cache=None):
         """Pull the form value from the request."""
         return core.get_value(req.POST, name, field)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         """Pull a json value from the request body."""
-        json_data = self._cache.get("json")
+        if cache is None:
+            cache = {}
+        json_data = cache.get("json")
         if json_data is None:
             try:
-                self._cache["json"] = json_data = core.parse_json(req.body)
+                cache["json"] = json_data = core.parse_json(req.body)
             except AttributeError:
                 return core.missing
             except json.JSONDecodeError as e:
@@ -56,16 +58,16 @@ class DjangoParser(core.Parser):
                     return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         """Pull the value from the cookiejar."""
         return core.get_value(req.COOKIES, name, field)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req, name, field, cache=None):
         raise NotImplementedError(
             "Header parsing not supported by {0}".format(self.__class__.__name__)
         )
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req, name, field, cache=None):
         """Pull a file from the request."""
         return core.get_value(req.FILES, name, field)
 

@@ -76,20 +76,24 @@ class AIOHTTPParser(AsyncParser):
         match_info="parse_match_info", **core.Parser.__location_map__
     )
 
-    def parse_querystring(self, req: Request, name: str, field: Field) -> typing.Any:
+    def parse_querystring(self, req: Request, name: str, field: Field, cache: dict = None) -> typing.Any:
         """Pull a querystring value from the request."""
         return core.get_value(req.query, name, field)
 
-    async def parse_form(self, req: Request, name: str, field: Field) -> typing.Any:
+    async def parse_form(self, req: Request, name: str, field: Field, cache: dict = None) -> typing.Any:
         """Pull a form value from the request."""
-        post_data = self._cache.get("post")
+        if cache is None:
+            cache = {}
+        post_data = cache.get("post")
         if post_data is None:
-            self._cache["post"] = await req.post()
-        return core.get_value(self._cache["post"], name, field)
+            cache["post"] = await req.post()
+        return core.get_value(cache["post"], name, field)
 
-    async def parse_json(self, req: Request, name: str, field: Field) -> typing.Any:
+    async def parse_json(self, req: Request, name: str, field: Field, cache: dict = None) -> typing.Any:
         """Pull a json value from the request."""
-        json_data = self._cache.get("json")
+        if cache is None:
+            cache = {}
+        json_data = cache.get("json")
         if json_data is None:
             if not (req.body_exists and is_json_request(req)):
                 return core.missing
@@ -100,24 +104,24 @@ class AIOHTTPParser(AsyncParser):
                     return core.missing
                 else:
                     return self.handle_invalid_json_error(e, req)
-            self._cache["json"] = json_data
+            cache["json"] = json_data
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_headers(self, req: Request, name: str, field: Field) -> typing.Any:
+    def parse_headers(self, req: Request, name: str, field: Field, cache: dict = None) -> typing.Any:
         """Pull a value from the header data."""
         return core.get_value(req.headers, name, field)
 
-    def parse_cookies(self, req: Request, name: str, field: Field) -> typing.Any:
+    def parse_cookies(self, req: Request, name: str, field: Field, cache: dict = None) -> typing.Any:
         """Pull a value from the cookiejar."""
         return core.get_value(req.cookies, name, field)
 
-    def parse_files(self, req: Request, name: str, field: Field) -> None:
+    def parse_files(self, req: Request, name: str, field: Field, cache: dict = None) -> None:
         raise NotImplementedError(
             "parse_files is not implemented. You may be able to use parse_form for "
             "parsing upload data."
         )
 
-    def parse_match_info(self, req: Request, name: str, field: Field) -> typing.Any:
+    def parse_match_info(self, req: Request, name: str, field: Field, cache: dict = None) -> typing.Any:
         """Pull a value from the request's ``match_info``."""
         return core.get_value(req.match_info, name, field)
 

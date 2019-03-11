@@ -49,20 +49,20 @@ class FlaskParser(core.Parser):
 
     __location_map__ = dict(view_args="parse_view_args", **core.Parser.__location_map__)
 
-    def parse_view_args(self, req, name, field):
+    def parse_view_args(self, req, name, field, cache=None):
         """Pull a value from the request's ``view_args``."""
         return core.get_value(req.view_args, name, field)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         """Pull a json value from the request."""
-        json_data = self._cache.get("json")
+        json_data = cache.get("json")
         if json_data is None:
             # We decode the json manually here instead of
             # using req.get_json() so that we can handle
             # JSONDecodeErrors consistently
             data = req.get_data(cache=True)
             try:
-                self._cache["json"] = json_data = core.parse_json(data)
+                cache["json"] = json_data = core.parse_json(data)
             except json.JSONDecodeError as e:
                 if e.doc == "":
                     return core.missing
@@ -70,11 +70,11 @@ class FlaskParser(core.Parser):
                     return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         """Pull a querystring value from the request."""
         return core.get_value(req.args, name, field)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req, name, field, cache=None):
         """Pull a form value from the request."""
         try:
             return core.get_value(req.form, name, field)
@@ -82,15 +82,15 @@ class FlaskParser(core.Parser):
             pass
         return core.missing
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req, name, field, cache=None):
         """Pull a value from the header data."""
         return core.get_value(req.headers, name, field)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         """Pull a value from the cookiejar."""
         return core.get_value(req.cookies, name, field)
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req, name, field, cache=None):
         """Pull a file from the request."""
         return core.get_value(req.files, name, field)
 

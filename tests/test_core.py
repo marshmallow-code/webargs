@@ -34,13 +34,13 @@ class MockHTTPError(Exception):
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         return get_value(req.query, name, field)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         return get_value(req.json, name, field)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         return get_value(req.cookies, name, field)
 
 
@@ -65,7 +65,7 @@ def test_parse_json_called_by_parse_arg(parse_json, web_request):
     field = fields.Field()
     p = Parser()
     p.parse_arg("foo", field, web_request)
-    parse_json.assert_called_with(web_request, "foo", field)
+    parse_json.assert_called_with(web_request, "foo", field, {})
 
 
 @mock.patch("webargs.core.Parser.parse_querystring")
@@ -310,7 +310,7 @@ def test_custom_location_handler(web_request):
     parser = Parser()
 
     @parser.location_handler("data")
-    def parse_data(req, name, arg):
+    def parse_data(req, name, arg, cache=None):
         return req.data.get(name, missing)
 
     result = parser.parse({"foo": fields.Int()}, web_request, locations=("data",))
@@ -322,7 +322,7 @@ def test_custom_location_handler_with_data_key(web_request):
     parser = Parser()
 
     @parser.location_handler("data")
-    def parse_data(req, name, arg):
+    def parse_data(req, name, arg, cache=None):
         return req.data.get(name, missing)
 
     data_key_kwarg = {
@@ -795,7 +795,7 @@ def test_use_args_with_custom_locations_in_parser(web_request, parser):
     parser.locations = ("custom",)
 
     @parser.location_handler("custom")
-    def parse_custom(req, name, arg):
+    def parse_custom(req, name, arg, cache=None):
         return "bar"
 
     @parser.use_args(custom_args, web_request)

@@ -91,47 +91,53 @@ class HTTPError(falcon.HTTPError):
 class FalconParser(core.Parser):
     """Falcon request argument parser."""
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         """Pull a querystring value from the request."""
         return core.get_value(req.params, name, field)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req, name, field, cache=None):
         """Pull a form value from the request.
 
         .. note::
 
             The request stream will be read and left at EOF.
         """
-        form = self._cache.get("form")
+        if cache is None:
+            cache = {}
+        form = cache.get("form")
         if form is None:
-            self._cache["form"] = form = parse_form_body(req)
+            cache["form"] = form = parse_form_body(req)
         return core.get_value(form, name, field)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         """Pull a JSON body value from the request.
 
         .. note::
 
             The request stream will be read and left at EOF.
         """
-        json_data = self._cache.get("json_data")
+        if cache is None:
+            cache = {}
+        json_data = cache.get("json_data")
         if json_data is None:
             try:
-                self._cache["json_data"] = json_data = parse_json_body(req)
+                cache["json_data"] = json_data = parse_json_body(req)
             except json.JSONDecodeError as e:
                 return self.handle_invalid_json_error(e, req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req, name, field, cache=None):
         """Pull a header value from the request."""
         # Use req.get_headers rather than req.headers for performance
         return req.get_header(name, required=False) or core.missing
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         """Pull a cookie value from the request."""
-        cookies = self._cache.get("cookies")
+        if cache is None:
+            cache = {}
+        cookies = cache.get("cookies")
         if cookies is None:
-            self._cache["cookies"] = cookies = req.cookies
+            cache["cookies"] = cookies = req.cookies
         return core.get_value(cookies, name, field)
 
     def get_request_from_view_args(self, view, args, kwargs):
@@ -142,7 +148,7 @@ class FalconParser(core.Parser):
         assert isinstance(req, falcon.Request), "Argument is not a falcon.Request"
         return req
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req, name, field, cache=None):
         raise NotImplementedError(
             "Parsing files not yet supported by {0}".format(self.__class__.__name__)
         )

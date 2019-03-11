@@ -41,20 +41,22 @@ class PyramidParser(core.Parser):
 
     __location_map__ = dict(matchdict="parse_matchdict", **core.Parser.__location_map__)
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         """Pull a querystring value from the request."""
         return core.get_value(req.GET, name, field)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req, name, field, cache=None):
         """Pull a form value from the request."""
         return core.get_value(req.POST, name, field)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         """Pull a json value from the request."""
-        json_data = self._cache.get("json")
+        if cache is None:
+            cache = {}
+        json_data = cache.get("json")
         if json_data is None:
             try:
-                self._cache["json"] = json_data = core.parse_json(req.body, req.charset)
+                cache["json"] = json_data = core.parse_json(req.body, req.charset)
             except json.JSONDecodeError as e:
                 if e.doc == "":
                     return core.missing
@@ -64,20 +66,20 @@ class PyramidParser(core.Parser):
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         """Pull the value from the cookiejar."""
         return core.get_value(req.cookies, name, field)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req, name, field, cache=None):
         """Pull a value from the header data."""
         return core.get_value(req.headers, name, field)
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req, name, field, cache=None):
         """Pull a file from the request."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
         return core.get_value(MultiDict(files), name, field)
 
-    def parse_matchdict(self, req, name, field):
+    def parse_matchdict(self, req, name, field, cache=None):
         """Pull a value from the request's `matchdict`."""
         return core.get_value(req.matchdict, name, field)
 

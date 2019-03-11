@@ -93,8 +93,6 @@ class AsyncParser(core.Parser):
             await self._on_validation_error(
                 error, req, schema, error_status_code, error_headers
             )
-        finally:
-            self.clear_cache()
         return data
 
     async def _on_validation_error(

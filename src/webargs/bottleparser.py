@@ -26,20 +26,22 @@ from webargs.core import json
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         """Pull a querystring value from the request."""
         return core.get_value(req.query, name, field)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req, name, field, cache=None):
         """Pull a form value from the request."""
         return core.get_value(req.forms, name, field)
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         """Pull a json value from the request."""
-        json_data = self._cache.get("json")
+        if cache is None:
+            cache = {}
+        json_data = cache.get("json")
         if json_data is None:
             try:
-                self._cache["json"] = json_data = req.json
+                cache["json"] = json_data = req.json
             except AttributeError:
                 return core.missing
             except json.JSONDecodeError as e:
@@ -51,15 +53,15 @@ class BottleParser(core.Parser):
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req, name, field, cache=None):
         """Pull a value from the header data."""
         return core.get_value(req.headers, name, field)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         """Pull a value from the cookiejar."""
         return req.get_cookie(name)
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req, name, field, cache=None):
         """Pull a file from the request."""
         return core.get_value(req.files, name, field)
 

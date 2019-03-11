@@ -181,8 +181,6 @@ class Parser(object):
     def __init__(self, locations=None, error_handler=None):
         self.locations = locations or self.DEFAULT_LOCATIONS
         self.error_callback = _callable_or_raise(error_handler)
-        #: A short-lived cache to store results from processing request bodies.
-        self._cache = {}
 
     def _validated_locations(self, locations):
         """Ensure that the given locations argument is valid.
@@ -212,11 +210,11 @@ class Parser(object):
             raise ValueError('Invalid location: "{0}"'.format(location))
         return function
 
-    def _get_value(self, name, argobj, req, location):
+    def _get_value(self, name, argobj, req, location, cache):
         function = self._get_handler(location)
-        return function(req, name, argobj)
+        return function(req, name, argobj, cache)
 
-    def parse_arg(self, name, field, req, locations=None):
+    def parse_arg(self, name, field, req, locations=None, cache=None):
         """Parse a single argument from a request.
 
         .. note::
@@ -228,9 +226,13 @@ class Parser(object):
         :param req: The request object to parse.
         :param tuple locations: The locations ('json', 'querystring', etc.) where
             to search for the value.
+        :param dict cache: A short-lived cache where parsed data can be stored to
+            avoid re-parsing while processing a single request.
         :return: The unvalidated argument value or `missing` if the value cannot
             be found on the request.
         """
+        if cache is None:
+            cache = {}
         location = field.metadata.get("location")
         if location:
             locations_to_check = self._validated_locations([location])
@@ -238,13 +240,13 @@ class Parser(object):
             locations_to_check = self._validated_locations(locations or self.locations)
 
         for location in locations_to_check:
-            value = self._get_value(name, field, req=req, location=location)
+            value = self._get_value(name, field, req=req, location=location, cache=cache)
             # Found the value; validate and return it
             if value is not missing:
                 return value
         return missing
 
-    def _parse_request(self, schema, req, locations):
+    def _parse_request(self, schema, req, locations, cache):
         """Return a parsed arguments dictionary for the current request."""
         if schema.many:
             assert (
@@ -258,6 +260,7 @@ class Parser(object):
                 field=ma.fields.Nested(schema, many=True),
                 req=req,
                 locations=locations,
+                cache=cache,
             )
             if parsed is missing:
                 parsed = []
@@ -266,16 +269,16 @@ class Parser(object):
             parsed = {}
             for argname, field_obj in iteritems(argdict):
                 if MARSHMALLOW_VERSION_INFO[0] < 3:
-                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
+                    parsed_value = self.parse_arg(argname, field_obj, req, locations, cache)
                     # If load_from is specified on the field, try to parse from that key
                     if parsed_value is missing and field_obj.load_from:
                         parsed_value = self.parse_arg(
-                            field_obj.load_from, field_obj, req, locations
+                            field_obj.load_from, field_obj, req, locations, cache
                         )
                         argname = field_obj.load_from
                 else:
                     argname = field_obj.data_key or argname
-                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
+                    parsed_value = self.parse_arg(argname, field_obj, req, locations, cache)
                 if parsed_value is not missing:
                     parsed[argname] = parsed_value
         return parsed
@@ -350,9 +353,11 @@ class Parser(object):
         data = None
         validators = _ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
+        cache = {}
         try:
             parsed = self._parse_request(
-                schema=schema, req=req, locations=locations or self.locations
+                schema=schema, req=req, locations=locations or self.locations,
+                cache=cache
             )
             result = schema.load(parsed)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
@@ -361,14 +366,7 @@ class Parser(object):
             self._on_validation_error(
                 error, req, schema, error_status_code, error_headers
             )
-        finally:
-            self.clear_cache()
         return data
-
-    def clear_cache(self):
-        """Invalidate the parser's cache."""
-        self._cache = {}
-        return None
 
     def get_default_request(self):
         """Optional override. Provides a hook for frameworks that use thread-local
@@ -530,37 +528,37 @@ class Parser(object):
 
     # Abstract Methods
 
-    def parse_json(self, req, name, arg):
+    def parse_json(self, req, name, arg, cache=None):
         """Pull a JSON value from a request object or return `missing` if the
         value cannot be found.
         """
         return missing
 
-    def parse_querystring(self, req, name, arg):
+    def parse_querystring(self, req, name, arg, cache=None):
         """Pull a value from the query string of a request object or return `missing` if
         the value cannot be found.
         """
         return missing
 
-    def parse_form(self, req, name, arg):
+    def parse_form(self, req, name, arg, cache=None):
         """Pull a value from the form data of a request object or return
         `missing` if the value cannot be found.
         """
         return missing
 
-    def parse_headers(self, req, name, arg):
+    def parse_headers(self, req, name, arg, cache=None):
         """Pull a value from the headers or return `missing` if the value
         cannot be found.
         """
         return missing
 
-    def parse_cookies(self, req, name, arg):
+    def parse_cookies(self, req, name, arg, cache=None):
         """Pull a cookie value from the request or return `missing` if the value
         cannot be found.
         """
         return missing
 
-    def parse_files(self, req, name, arg):
+    def parse_files(self, req, name, arg, cache=None):
         """Pull a file from the request or return `missing` if the value file
         cannot be found.
         """

@@ -38,9 +38,6 @@ def test_get_value_basic():
 
 
 class TestQueryArgs(object):
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = [(name, value)]
         field = fields.Field()
@@ -82,9 +79,6 @@ class TestQueryArgs(object):
 
 
 class TestFormArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = [(name, value)]
         field = fields.Field()
@@ -123,9 +117,6 @@ class TestFormArgs:
 
 
 class TestJSONArgs(object):
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = {name: value}
         field = fields.Field()
@@ -182,22 +173,21 @@ class TestJSONArgs(object):
         request = make_request(
             body=tornado.concurrent.Future, headers={"Content-Type": "application/json"}
         )
-        result = parser.parse_json(request, name, field)
-        assert parser._cache["json"] == {}
+        cache = {}
+        result = parser.parse_json(request, name, field, cache)
+        assert cache["json"] == {}
         assert result is missing
 
     def test_it_should_handle_value_error_on_parse_json(self):
         field = fields.Field()
         request = make_request("this is json not")
-        result = parser.parse_json(request, name, field)
-        assert parser._cache["json"] == {}
+        cache = {}
+        result = parser.parse_json(request, name, field, cache)
+        assert cache["json"] == {}
         assert result is missing
 
 
 class TestHeadersArgs(object):
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = {name: value}
         field = fields.Field()
@@ -235,9 +225,6 @@ class TestHeadersArgs(object):
 
 
 class TestFilesArgs(object):
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = [(name, value)]
         field = fields.Field()
@@ -283,9 +270,6 @@ class TestErrorHandler(object):
 
 
 class TestParse(object):
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_parse_query_arguments(self):
         attrs = {"string": fields.Field(), "integer": fields.List(fields.Int())}
 
@@ -297,17 +281,6 @@ class TestParse(object):
 
         assert parsed["integer"] == [1, 2]
         assert parsed["string"] == value
-
-    def test_parsing_clears_cache(self):
-        request = make_json_request({"string": "value", "integer": [1, 2]})
-        string_result = parser.parse_json(request, "string", fields.Str())
-        assert string_result == "value"
-        assert "json" in parser._cache
-        assert "string" in parser._cache["json"]
-        assert "integer" in parser._cache["json"]
-        attrs = {"string": fields.Str(), "integer": fields.List(fields.Int())}
-        parser.parse(attrs, request)
-        assert parser._cache == {}
 
     def test_it_should_parse_form_arguments(self):
         attrs = {"string": fields.Field(), "integer": fields.List(fields.Int())}
@@ -395,9 +368,6 @@ class TestParse(object):
 
 
 class TestUseArgs(object):
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_pass_parsed_as_first_argument(self):
         class Handler(object):
             request = make_json_request({"key": "value"})

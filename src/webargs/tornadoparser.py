@@ -86,31 +86,33 @@ class TornadoParser(core.Parser):
         super(TornadoParser, self).__init__(*args, **kwargs)
         self.json = None
 
-    def parse_json(self, req, name, field):
+    def parse_json(self, req, name, field, cache=None):
         """Pull a json value from the request."""
-        json_data = self._cache.get("json")
+        if cache is None:
+            cache = {}
+        json_data = cache.get("json")
         if json_data is None:
             try:
-                self._cache["json"] = json_data = parse_json_body(req)
+                cache["json"] = json_data = parse_json_body(req)
             except json.JSONDecodeError as e:
                 return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_querystring(self, req, name, field):
+    def parse_querystring(self, req, name, field, cache=None):
         """Pull a querystring value from the request."""
         return get_value(req.query_arguments, name, field)
 
-    def parse_form(self, req, name, field):
+    def parse_form(self, req, name, field, cache=None):
         """Pull a form value from the request."""
         return get_value(req.body_arguments, name, field)
 
-    def parse_headers(self, req, name, field):
+    def parse_headers(self, req, name, field, cache=None):
         """Pull a value from the header data."""
         return get_value(req.headers, name, field)
 
-    def parse_cookies(self, req, name, field):
+    def parse_cookies(self, req, name, field, cache=None):
         """Pull a value from the header data."""
         cookie = req.cookies.get(name)
 
@@ -119,7 +121,7 @@ class TornadoParser(core.Parser):
         else:
             return [] if core.is_multiple(field) else None
 
-    def parse_files(self, req, name, field):
+    def parse_files(self, req, name, field, cache=None):
         """Pull a file from the request."""
         return get_value(req.files, name, field)
 
