@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import mock
+import threading
 
 from werkzeug.exceptions import HTTPException
+import mock
 import pytest
 
 from flask import Flask
@@ -113,8 +114,6 @@ def test_abort_has_serializable_data():
 
 
 def test_json_cache_race_condition():
-    import threading
-
     app = Flask("testapp")
     lock = threading.Lock()
     lock.acquire()
