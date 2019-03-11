@@ -72,7 +72,7 @@ def test_abort_called_on_validation_error(mock_abort):
         content_type="application/json",
     ):
         parser.parse(argmap)
-    mock_abort.assert_called
+    mock_abort.assert_called()
     abort_args, abort_kwargs = mock_abort.call_args
     assert abort_args[0] == 422
     expected_msg = "Invalid value."

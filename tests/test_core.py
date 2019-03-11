@@ -245,7 +245,7 @@ def test_handle_error_called_when_parsing_raises_error(
     parse_json.side_effect = val_err
     p = Parser()
     p.parse({"foo": fields.Field()}, web_request, locations=("json",))
-    handle_error.assert_called
+    handle_error.assert_called()
     parse_json.side_effect = ValidationError("another exception")
     p.parse({"foo": fields.Field()}, web_request, locations=("json",))
     assert handle_error.call_count == 2
