@@ -126,7 +126,7 @@ class AsyncParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = core.dict2schema(argmap)()
+            argmap = core.dict2schema(argmap, self.schema_cls)()
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj

@@ -51,7 +51,7 @@ def _callable_or_raise(obj):
         return obj
 
 
-def dict2schema(dct):
+def dict2schema(dct, schema_cls=ma.Schema):
     """Generate a `marshmallow.Schema` class given a dictionary of
     `Fields <marshmallow.fields.Field>`.
     """
@@ -64,7 +64,7 @@ def dict2schema(dct):
             register = False
 
     attrs["Meta"] = Meta
-    return type(str(""), (ma.Schema,), attrs)
+    return type(str(""), (schema_cls,), attrs)
 
 
 def is_multiple(field):
@@ -164,6 +164,8 @@ class Parser(object):
 
     #: Default locations to check for data
     DEFAULT_LOCATIONS = ("querystring", "form", "json")
+    #: The marshmallow Schema class to use when creating new schemas
+    DEFAULT_SCHEMA_CLS = ma.Schema
     #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
@@ -180,9 +182,10 @@ class Parser(object):
         "files": "parse_files",
     }
 
-    def __init__(self, locations=None, error_handler=None):
+    def __init__(self, locations=None, error_handler=None, schema_cls=None):
         self.locations = locations or self.DEFAULT_LOCATIONS
         self.error_callback = _callable_or_raise(error_handler)
+        self.schema_cls = schema_cls or self.DEFAULT_SCHEMA_CLS
         #: A short-lived cache to store results from processing request bodies.
         self._cache = {}
 
@@ -310,7 +313,7 @@ class Parser(object):
         elif callable(argmap):
             schema = argmap(req)
         else:
-            schema = dict2schema(argmap)()
+            schema = dict2schema(argmap, self.schema_cls)()
         if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
             warnings.warn(
                 "It is highly recommended that you set strict=True on your schema "
@@ -440,7 +443,7 @@ class Parser(object):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = dict2schema(argmap)()
+            argmap = dict2schema(argmap, self.schema_cls)()
 
         def decorator(func):
             req_ = request_obj

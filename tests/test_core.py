@@ -5,7 +5,7 @@ import sys
 import datetime
 
 import pytest
-from marshmallow import Schema, post_load, class_registry, validates_schema
+from marshmallow import Schema, post_load, pre_load, class_registry, validates_schema
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 from django.utils.datastructures import MultiValueDict as DjMultiDict
 from bottle import MultiDict as BotMultiDict
@@ -1052,3 +1052,36 @@ def test_parse_with_error_status_code_and_headers(web_request):
     error = excinfo.value
     assert error.status_code == 418
     assert error.headers == {"X-Foo": "bar"}
+
+
+@mock.patch("webargs.core.Parser.parse_json")
+def test_custom_schema_cls(parse_json, web_request):
+    class CustomSchema(Schema):
+        @pre_load
+        def pre_load(self, data):
+            data["value"] += " world"
+            return data
+
+    parse_json.return_value = "hello"
+    argmap = {"value": fields.Str()}
+    p = Parser(schema_cls=CustomSchema)
+    ret = p.parse(argmap, web_request)
+    assert ret == {"value": "hello world"}
+
+
+@mock.patch("webargs.core.Parser.parse_json")
+def test_custom_default_schema_cls(parse_json, web_request):
+    class CustomSchema(Schema):
+        @pre_load
+        def pre_load(self, data):
+            data["value"] += " world"
+            return data
+
+    class CustomParser(Parser):
+        DEFAULT_SCHEMA_CLS = CustomSchema
+
+    parse_json.return_value = "hello"
+    argmap = {"value": fields.Str()}
+    p = CustomParser()
+    ret = p.parse(argmap, web_request)
+    assert ret == {"value": "hello world"}
