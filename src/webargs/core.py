@@ -162,6 +162,7 @@ class Parser(object):
     :param callable error_handler: Custom error handler function.
     """
 
+    #: Default locations to check for data
     DEFAULT_LOCATIONS = ("querystring", "form", "json")
     #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
