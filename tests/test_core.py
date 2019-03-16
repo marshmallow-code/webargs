@@ -1055,7 +1055,7 @@ def test_parse_with_error_status_code_and_headers(web_request):
 
 
 @mock.patch("webargs.core.Parser.parse_json")
-def test_custom_schema_cls(parse_json, web_request):
+def test_custom_schema_class(parse_json, web_request):
     class CustomSchema(Schema):
         @pre_load
         def pre_load(self, data):
@@ -1064,13 +1064,13 @@ def test_custom_schema_cls(parse_json, web_request):
 
     parse_json.return_value = "hello"
     argmap = {"value": fields.Str()}
-    p = Parser(schema_cls=CustomSchema)
+    p = Parser(schema_class=CustomSchema)
     ret = p.parse(argmap, web_request)
     assert ret == {"value": "hello world"}
 
 
 @mock.patch("webargs.core.Parser.parse_json")
-def test_custom_default_schema_cls(parse_json, web_request):
+def test_custom_default_schema_class(parse_json, web_request):
     class CustomSchema(Schema):
         @pre_load
         def pre_load(self, data):
@@ -1078,7 +1078,7 @@ def test_custom_default_schema_cls(parse_json, web_request):
             return data
 
     class CustomParser(Parser):
-        DEFAULT_SCHEMA_CLS = CustomSchema
+        DEFAULT_SCHEMA_CLASS = CustomSchema
 
     parse_json.return_value = "hello"
     argmap = {"value": fields.Str()}
