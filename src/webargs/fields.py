@@ -32,6 +32,10 @@ for each in (field_name for field_name in ma.fields.__all__ if field_name != "Ne
 class Nested(ma.fields.Nested):
     """Same as `marshmallow.fields.Nested`, except can be passed a dictionary as
     the first argument, which will be converted to a `marshmallow.Schema`.
+
+    Note: The schema class here will always be `marshmallow.Schema`, regardless
+    of whether a custom schema class is set on the parser. Pass an explicit schema
+    class if necessary.
     """
 
     def __init__(self, nested, *args, **kwargs):

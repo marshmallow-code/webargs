@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+5.2.0 (unreleased)
+******************
+
+Features:
+
+* Make the schema class used when generating a schema from a
+  dict overridable (:issue:`375`)
+
 5.1.3 (2019-03-11)
 ******************
 
