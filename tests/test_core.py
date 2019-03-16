@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
 import mock
-import sys
 import datetime
 
 import pytest
@@ -740,12 +739,6 @@ class TestPassingSchema:
 
         assert viewfunc() == {"email": "foo@bar.com", "password": "bar"}
 
-    # Must skip on older versions of python due to
-    # https://github.com/pytest-dev/pytest/issues/840
-    @pytest.mark.skipif(
-        sys.version_info < (3, 4),
-        reason="Skipping due to a bug in pytest's warning recording",
-    )
     @pytest.mark.skipif(
         MARSHMALLOW_VERSION_INFO[0] >= 3,
         reason='"strict" parameter is removed in marshmallow 3',
