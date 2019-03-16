@@ -1,21 +1,21 @@
 repos:
 - repo: https://github.com/ambv/black
-  rev: 18.9b0
+  rev: 19.3b0
   hooks:
   - id: black
     language_version: python3.6
 - repo: https://gitlab.com/pycqa/flake8
-  rev: 3.7.5
+  rev: 3.7.7
   hooks:
   - id: flake8
     additional_dependencies: ['flake8-bugbear==18.8.0; python_version >= "3.5"']
 - repo: https://github.com/asottile/blacken-docs
-  rev: v0.3.0
+  rev: v0.5.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==18.9b0]
+    additional_dependencies: [black==19.3b0]
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v0.660
+  rev: v0.670-1
   hooks:
   - id: mypy
     language_version: python3.6
