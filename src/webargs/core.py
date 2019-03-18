@@ -64,7 +64,7 @@ def dict2schema(dct, schema_class=ma.Schema):
             register = False
 
     attrs["Meta"] = Meta
-    return type(str(""), (schema_class,), attrs)
+    return type(str("WebargsDictSchema"), (schema_class,), attrs)
 
 
 def is_multiple(field):
