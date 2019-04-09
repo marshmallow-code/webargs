@@ -73,7 +73,9 @@ class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
     __location_map__ = dict(
-        match_info="parse_match_info", **core.Parser.__location_map__
+        match_info="parse_match_info",
+        path="parse_match_info",
+        **core.Parser.__location_map__
     )
 
     def parse_querystring(self, req: Request, name: str, field: Field) -> typing.Any:
