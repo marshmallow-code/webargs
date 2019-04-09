@@ -8,6 +8,7 @@ Features:
 
 * Add `"path"` location to ``AIOHTTPParser``, ``FlaskParser``, and
   ``PyramidParser`` (:pr:`379`). Thanks :user:`zhenhua32` for the PR.
+* Add ``webargs.__version_info__``.
 
 5.2.0 (2019-03-16)
 ******************
