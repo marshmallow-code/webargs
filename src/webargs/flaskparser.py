@@ -47,7 +47,11 @@ def is_json_request(req):
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
-    __location_map__ = dict(view_args="parse_view_args", **core.Parser.__location_map__)
+    __location_map__ = dict(
+        view_args="parse_view_args",
+        path="parse_view_args",
+        **core.Parser.__location_map__
+    )
 
     def parse_view_args(self, req, name, field):
         """Pull a value from the request's ``view_args``."""

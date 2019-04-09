@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+5.3.0 (unreleased)
+******************
+
+Features:
+
+* Add `"path"` location to ``AIOHTTPParser``, ``FlaskParser``, and
+  ``PyramidParser`` (:pr:`379`). Thanks :user:`zhenhua32` for the PR.
+
 5.2.0 (2019-03-16)
 ******************
 

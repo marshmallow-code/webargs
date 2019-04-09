@@ -39,7 +39,11 @@ from webargs.core import json
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
-    __location_map__ = dict(matchdict="parse_matchdict", **core.Parser.__location_map__)
+    __location_map__ = dict(
+        matchdict="parse_matchdict",
+        path="parse_matchdict",
+        **core.Parser.__location_map__
+    )
 
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
