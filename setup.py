@@ -22,7 +22,7 @@ EXTRAS_REQUIRE = {
     "tests": [
         "pytest",
         "mock",
-        "webtest==2.0.32",
+        "webtest==2.0.33",
         'webtest-aiohttp==2.0.0; python_version >= "3.5"',
         'pytest-aiohttp>=0.3.0; python_version >= "3.5"',
     ]
