@@ -14,7 +14,7 @@ FRAMEWORKS = [
     "tornado>=4.5.2",
     "pyramid>=1.9.1",
     "webapp2>=3.0.0b1",
-    "falcon>=1.4.0",
+    "falcon>=1.4.0,<2.0",
     'aiohttp>=3.0.0; python_version >= "3.5"',
 ]
 EXTRAS_REQUIRE = {
