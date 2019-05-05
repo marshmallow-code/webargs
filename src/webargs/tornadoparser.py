@@ -17,8 +17,8 @@ Example: ::
 import tornado.web
 from tornado.escape import _unicode
 
-from marshmallow.compat import basestring
 from webargs import core
+from webargs.compat import basestring
 from webargs.core import json
 
 
