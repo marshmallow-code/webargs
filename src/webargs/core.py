@@ -9,19 +9,15 @@ from copy import copy
 from distutils.version import LooseVersion
 
 try:
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Mapping
-
-try:
     import simplejson as json
 except ImportError:
     import json  # type: ignore
 
 import marshmallow as ma
 from marshmallow import ValidationError
-from marshmallow.compat import iteritems
 from marshmallow.utils import missing, is_collection
+
+from webargs.compat import Mapping, iteritems
 
 logger = logging.getLogger(__name__)
 

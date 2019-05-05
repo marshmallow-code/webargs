@@ -31,9 +31,9 @@ import functools
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
-from marshmallow.compat import text_type
 from webargs import core
 from webargs.core import json
+from webargs.compat import text_type
 
 
 class PyramidParser(core.Parser):

@@ -10,7 +10,6 @@ jobs:
   - { python: '3.6', env: TOXENV=lint }
 
   - { python: '2.7', env: TOXENV=py27-marshmallow2 }
-  - { python: '2.7', env: TOXENV=py27-marshmallow3 }
 
   - { python: '3.5', env: TOXENV=py35-marshmallow2 }
   - { python: '3.5', env: TOXENV=py35-marshmallow3 }
