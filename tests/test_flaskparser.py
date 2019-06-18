@@ -119,7 +119,7 @@ def test_json_cache_race_condition():
     lock.acquire()
 
     class MyField(fields.Field):
-        def _deserialize(self, value, attr, data):
+        def _deserialize(self, value, attr, data, **kwargs):
             with lock:
                 return value
 

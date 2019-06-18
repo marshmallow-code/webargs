@@ -66,7 +66,7 @@ class DelimitedList(ma.fields.List):
             return self.delimiter.join(format(each) for each in ret)
         return ret
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         try:
             ret = (
                 value
@@ -75,4 +75,4 @@ class DelimitedList(ma.fields.List):
             )
         except AttributeError:
             self.fail("invalid")
-        return super(DelimitedList, self)._deserialize(ret, attr, data)
+        return super(DelimitedList, self)._deserialize(ret, attr, data, **kwargs)
