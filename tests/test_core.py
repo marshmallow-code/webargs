@@ -647,7 +647,7 @@ def test_use_args_callable(web_request, parser):
                 strict = True
 
         @post_load
-        def request_data(self, item):
+        def request_data(self, item, **kwargs):
             item["data"] = self.context["request"].data
             return item
 
@@ -773,7 +773,7 @@ class TestPassingSchema:
                     strict = True
 
             @validates_schema(pass_original=True)
-            def validate_schema(self, data, original_data):
+            def validate_schema(self, data, original_data, **kwargs):
                 assert "location" not in original_data
                 return True
 
@@ -1051,7 +1051,7 @@ def test_parse_with_error_status_code_and_headers(web_request):
 def test_custom_schema_class(parse_json, web_request):
     class CustomSchema(Schema):
         @pre_load
-        def pre_load(self, data):
+        def pre_load(self, data, **kwargs):
             data["value"] += " world"
             return data
 
@@ -1066,7 +1066,7 @@ def test_custom_schema_class(parse_json, web_request):
 def test_custom_default_schema_class(parse_json, web_request):
     class CustomSchema(Schema):
         @pre_load
-        def pre_load(self, data):
+        def pre_load(self, data, **kwargs):
             data["value"] += " world"
             return data
 

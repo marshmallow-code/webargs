@@ -93,7 +93,7 @@ class UserSchema(Schema):
         strict = True
 
     @post_dump(pass_many=True)
-    def wrap_with_envelope(self, data, many):
+    def wrap_with_envelope(self, data, many, **kwargs):
         return {"data": data}
 
 
