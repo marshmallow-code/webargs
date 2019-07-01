@@ -35,11 +35,13 @@ jobs:
   parameters:
     python: "3.7"
     distributions: "sdist bdist_wheel"
+    name_postfix: "_py3"
     dependsOn:
       - tox_linux
 - template: job--pypi-release.yml@sloria
   parameters:
     python: "2.7"
     distributions: "bdist_wheel"
+    name_postfix: "_py2"
     dependsOn:
       - tox_linux
