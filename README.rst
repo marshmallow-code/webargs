@@ -6,9 +6,9 @@ webargs
     :target: https://pypi.org/project/webargs/
     :alt: PyPI version
 
-.. image:: https://badgen.net/travis/marshmallow-code/webargs
-    :target: https://travis-ci.org/marshmallow-code/webargs
-    :alt: TravisCI build status
+.. image:: https://dev.azure.com/sloria/sloria/_apis/build/status/marshmallow-code.webargs?branchName=dev
+    :target: https://dev.azure.com/sloria/sloria/_build/latest?definitionId=6&branchName=dev
+    :alt: Build status
 
 .. image:: https://readthedocs.org/projects/webargs/badge/
    :target: https://webargs.readthedocs.io/

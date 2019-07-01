@@ -1,0 +1,47 @@
+trigger:
+  branches:
+    include: [dev]
+  tags:
+    include: ['*']
+
+resources:
+  repositories:
+    - repository: sloria
+      type: github
+      endpoint: github
+      name: sloria/azure-pipeline-templates
+      ref: refs/heads/sloria
+
+jobs:
+- template: job--python-tox.yml@sloria
+  parameters:
+    toxenvs:
+      - lint
+      - py27-marshmallow2
+
+      - py35-marshmallow2
+      - py35-marshmallow3
+
+      - py36-marshmallow2
+      - py36-marshmallow3
+
+      - py37-marshmallow2
+      - py37-marshmallow3
+
+      - docs
+    os: linux
+# Build separate wheels for python 2 and 3
+- template: job--pypi-release.yml@sloria
+  parameters:
+    python: "3.7"
+    distributions: "sdist bdist_wheel"
+    name_postfix: "_py3"
+    dependsOn:
+      - tox_linux
+- template: job--pypi-release.yml@sloria
+  parameters:
+    python: "2.7"
+    distributions: "bdist_wheel"
+    name_postfix: "_py2"
+    dependsOn:
+      - tox_linux

@@ -47,7 +47,7 @@ the `GitHub wiki <https://github.com/marshmallow-code/webargs/wiki/Ecosystem>`_ 
 Setting Up for Local Development
 ********************************
 
-1. Fork webargs_ on GitHub. 
+1. Fork webargs_ on GitHub.
 
 ::
 
@@ -63,7 +63,7 @@ Setting Up for Local Development
     # After activating your virtualenv
     $ pip install -e '.[dev]'
 
-3. (Optional, but recommended) Install the pre-commit hooks, which will format and lint your git staged files. 
+3. (Optional, but recommended) Install the pre-commit hooks, which will format and lint your git staged files.
 
 ::
 
@@ -113,7 +113,8 @@ Pull Requests
 - If the pull request adds functionality, it is tested and the docs are updated.
 - You've added yourself to ``AUTHORS.rst``.
 
-4. Submit a pull request to ``marshmallow-code:dev`` or the appropriate maintenance branch. The `Travis CI <https://travis-ci.org/marshmallow-code/webargs>`_ build must be passing before your pull request is merged.
+4. Submit a pull request to ``marshmallow-code:dev`` or the appropriate maintenance branch.
+The `CI <https://dev.azure.com/sloria/sloria/_build/latest?definitionId=6&branchName=dev>`_ build must be passing before your pull request is merged.
 
 Running Tests
 *************
