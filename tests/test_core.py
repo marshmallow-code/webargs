@@ -222,17 +222,15 @@ def test_value_error_raised_if_parse_arg_called_with_invalid_location(web_reques
     p = Parser()
     with pytest.raises(ValueError) as excinfo:
         p.parse_arg("foo", field, web_request, locations=("invalidlocation", "headers"))
-    assert "Invalid locations arguments: {0}".format(["invalidlocation"]) in str(
-        excinfo
-    )
+    msg = "Invalid locations arguments: {0}".format(["invalidlocation"])
+    assert msg in str(excinfo.value)
 
 
 def test_value_error_raised_if_invalid_location_on_field(web_request, parser):
     with pytest.raises(ValueError) as excinfo:
         parser.parse({"foo": fields.Field(location="invalidlocation")}, web_request)
-    assert "Invalid locations arguments: {0}".format(["invalidlocation"]) in str(
-        excinfo
-    )
+    msg = "Invalid locations arguments: {0}".format(["invalidlocation"])
+    assert msg in str(excinfo.value)
 
 
 @mock.patch("webargs.core.Parser.handle_error")
@@ -361,14 +359,12 @@ def test_full_input_validation_with_multiple_validators(web_request, parser):
     args = {"a": fields.Int(), "b": fields.Int()}
     web_request.json = {"a": 2, "b": 1}
     validators = [validate1, validate2]
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(ValidationError, match="b must be > a"):
         parser.parse(args, web_request, locations=("json",), validate=validators)
-    assert "b must be > a" in str(excinfo)
 
     web_request.json = {"a": 1, "b": 2}
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(ValidationError, match="a must be > b"):
         parser.parse(args, web_request, locations=("json",), validate=validators)
-    assert "a must be > b" in str(excinfo)
 
 
 def test_required_with_custom_error(web_request):
@@ -912,9 +908,9 @@ def test_missing_list_argument_not_in_parsed_result(web_request, parser):
 def test_type_conversion_with_multiple_required(web_request, parser):
     web_request.json = {}
     args = {"ids": fields.List(fields.Int(), required=True)}
-    with pytest.raises(ValidationError) as excinfo:
+    msg = "Missing data for required field."
+    with pytest.raises(ValidationError, match=msg):
         parser.parse(args, web_request)
-    assert "Missing data for required field." in str(excinfo)
 
 
 def test_arg_location_param(web_request, parser):

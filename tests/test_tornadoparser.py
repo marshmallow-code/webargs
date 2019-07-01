@@ -371,16 +371,16 @@ class TestParse(object):
 
         request = make_json_request({})
 
-        with pytest.raises(tornado.web.HTTPError) as excinfo:
+        msg = "Missing data for required field."
+        with pytest.raises(tornado.web.HTTPError, match=msg):
             parser.parse(args, request)
-        assert "Missing data for required field." in str(excinfo)
 
     def test_it_should_parse_multiple_arg_required(self):
         args = {"foo": fields.List(fields.Int(), required=True)}
         request = make_json_request({})
-        with pytest.raises(tornado.web.HTTPError) as excinfo:
+        msg = "Missing data for required field."
+        with pytest.raises(tornado.web.HTTPError, match=msg):
             parser.parse(args, request)
-        assert "Missing data for required field." in str(excinfo)
 
 
 class TestUseArgs(object):
