@@ -31,10 +31,14 @@ EXTRAS_REQUIRE = {
         'mypy==0.711; python_version >= "3.5"',
         "flake8==3.7.7",
         'flake8-bugbear==19.3.0; python_version >= "3.5"',
-        "pre-commit==1.17.0",
+        "pre-commit~=1.17",
     ],
+    "docs": ["Sphinx==2.1.2", "sphinx-issues==1.2.0", "sphinx-typlog-theme==0.7.3"]
+    + FRAMEWORKS,
 }
-EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
+EXTRAS_REQUIRE["dev"] = (
+    EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + EXTRAS_REQUIRE["docs"] + ["tox"]
+)
 
 
 def find_version(fname):

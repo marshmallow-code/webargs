@@ -1,4 +1,0 @@
--e '.[frameworks]'
-Sphinx==2.1.2
-sphinx-issues==1.2.0
-sphinx-typlog-theme==0.7.3
