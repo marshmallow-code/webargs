@@ -36,9 +36,7 @@ EXTRAS_REQUIRE = {
     "docs": ["Sphinx==2.1.2", "sphinx-issues==1.2.0", "sphinx-typlog-theme==0.7.3"]
     + FRAMEWORKS,
 }
-EXTRAS_REQUIRE["dev"] = (
-    EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + EXTRAS_REQUIRE["docs"] + ["tox"]
-)
+EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
 
 
 def find_version(fname):
