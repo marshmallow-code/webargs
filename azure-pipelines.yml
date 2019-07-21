@@ -1,8 +1,17 @@
 trigger:
   branches:
-    include: [dev]
+    include: [dev, test-me-*]
   tags:
     include: ['*']
+
+# Run builds nightly to catch incompatibilities with new marshmallow releases
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+      - master
+  always: "true"
 
 resources:
   repositories:
@@ -27,6 +36,8 @@ jobs:
 
       - py37-marshmallow2
       - py37-marshmallow3
+
+      - py37-marshmallowdev
 
       - docs
     os: linux
