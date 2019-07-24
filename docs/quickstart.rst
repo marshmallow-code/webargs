@@ -195,6 +195,27 @@ Then decorate that function with :func:`Parser.error_handler <webargs.core.Parse
     def handle_error(error, req, schema, status_code, headers):
         raise CustomError(error.messages)
 
+Parsing Lists in Query Strings
+------------------------------
+
+Use `fields.DelimitedList <webargs.fields.DelimitedList>` to parse comma-separated
+lists in query parameters, e.g. ``/?permissions=read,write``
+
+.. code-block:: python
+
+    from webargs import fields
+
+    args = {"permissions": fields.DelimitedList(fields.Str())}
+
+If you expect repeated query parameters, e.g. ``/?repo=webargs&repo=marshmallow``, use
+`fields.List <marshmallow.fields.List>` instead.
+
+.. code-block:: python
+
+    from webargs import fields
+
+    args = {"repo": fields.List(fields.Str())}
+
 Nesting Fields
 --------------
 
