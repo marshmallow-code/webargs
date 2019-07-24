@@ -5,12 +5,13 @@ Includes all fields from `marshmallow.fields` in addition to a custom
 `Nested` field and `DelimitedList`.
 
 All fields can optionally take a special `location` keyword argument, which
-tells webargs where to parse the request argument from. ::
+tells webargs where to parse the request argument from.
+
+.. code-block:: python
 
     args = {
-        'active': fields.Bool(location='query')
-        'content_type': fields.Str(data_key='Content-Type',
-                                   location='headers')
+        "active": fields.Bool(location='query'),
+        "content_type": fields.Str(data_key="Content-Type", location="headers"),
     }
 
 Note: `data_key` replaced `load_from` in marshmallow 3.
@@ -33,9 +34,11 @@ class Nested(ma.fields.Nested):
     """Same as `marshmallow.fields.Nested`, except can be passed a dictionary as
     the first argument, which will be converted to a `marshmallow.Schema`.
 
-    Note: The schema class here will always be `marshmallow.Schema`, regardless
-    of whether a custom schema class is set on the parser. Pass an explicit schema
-    class if necessary.
+    .. note::
+
+        The schema class here will always be `marshmallow.Schema`, regardless
+        of whether a custom schema class is set on the parser. Pass an explicit schema
+        class if necessary.
     """
 
     def __init__(self, nested, *args, **kwargs):

@@ -147,15 +147,25 @@ The validator may return either a `boolean` or raise a :exc:`ValidationError <we
             raise ValidationError("User does not exist")
 
 
-    argmap = {"id": fields.Int(validate=must_exist_in_db)}
+    args = {"id": fields.Int(validate=must_exist_in_db)}
 
 .. note::
 
-    If a validator returns ``None``, validation will pass. A validator must return ``False`` or raise a `ValidationError <webargs.core.ValidationError>` for validation to fail.
+    If a validator returns ``None``, validation will pass. A validator must return ``False`` or raise a `ValidationError <webargs.core.ValidationError>`
+    for validation to fail.
 
-.. note::
 
-    You may pass a list of validators to the ``validate`` parameter.
+There are a number of built-in validators from `marshmallow.validate <marshmallow.validate>`
+(re-exported as `webargs.validate`).
+
+.. code-block:: python
+
+    from webargs import fields, validate
+
+    args = {
+        "name": fields.Str(required=True, validate=[validate.Length(min=1, max=9999)]),
+        "age": fields.Int(validate=[validate.Range(min=1, max=999)]),
+    }
 
 The full arguments dictionary can also be validated by passing ``validate`` to :meth:`Parser.parse <webargs.core.Parser.parse>`, :meth:`Parser.use_args <webargs.core.Parser.use_args>`, :meth:`Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
 
