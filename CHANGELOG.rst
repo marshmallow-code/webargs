@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+5.4.0 (unreleased)
+******************
+
+Changes:
+
+* Use explicit type check for `fields.DelimitedList` when deciding to
+  parse value with `getlist()` (`#406 (comment) <https://github.com/marshmallow-code/webargs/issues/406#issuecomment-514446228>`_ ).
+
+Support:
+
+* Add "Parsing Lists in Query Strings" section to docs (:issue:`406`).
+
 5.3.2 (2019-06-19)
 ******************
 

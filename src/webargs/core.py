@@ -65,7 +65,11 @@ def dict2schema(dct, schema_class=ma.Schema):
 
 def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
-    return isinstance(field, ma.fields.List) and not hasattr(field, "delimiter")
+    from webargs import fields  # prevent circular import
+
+    return isinstance(field, ma.fields.List) and not isinstance(
+        field, fields.DelimitedList
+    )
 
 
 def get_mimetype(content_type):
