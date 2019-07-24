@@ -4,6 +4,15 @@ trigger:
   tags:
     include: ['*']
 
+# Run builds nightly to catch incompatibilities with new marshmallow releases
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+      - dev
+  always: "true"
+
 resources:
   repositories:
     - repository: sloria
