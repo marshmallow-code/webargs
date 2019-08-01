@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa
 import sys
+from distutils.version import LooseVersion
 
+import marshmallow as ma
+
+MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)  # type: tuple
 PY2 = int(sys.version_info[0]) == 2
 
 if PY2:

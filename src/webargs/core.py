@@ -6,7 +6,6 @@ import inspect
 import logging
 import warnings
 from copy import copy
-from distutils.version import LooseVersion
 
 try:
     import simplejson as json
@@ -17,7 +16,9 @@ import marshmallow as ma
 from marshmallow import ValidationError
 from marshmallow.utils import missing, is_collection
 
-from webargs.compat import Mapping, iteritems
+from webargs.compat import Mapping, iteritems, MARSHMALLOW_VERSION_INFO
+from webargs.dict2schema import dict2schema
+from webargs.fields import DelimitedList
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,6 @@ __all__ = [
     "parse_json",
 ]
 
-MARSHMALLOW_VERSION_INFO = tuple(LooseVersion(ma.__version__).version)  # type: tuple
 
 DEFAULT_VALIDATION_STATUS = 422  # type: int
 
@@ -47,29 +47,9 @@ def _callable_or_raise(obj):
         return obj
 
 
-def dict2schema(dct, schema_class=ma.Schema):
-    """Generate a `marshmallow.Schema` class given a dictionary of
-    `Fields <marshmallow.fields.Field>`.
-    """
-    attrs = dct.copy()
-
-    class Meta(object):
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-            strict = True
-        else:
-            register = False
-
-    attrs["Meta"] = Meta
-    return type(str(""), (schema_class,), attrs)
-
-
 def is_multiple(field):
     """Return whether or not `field` handles repeated/multi-value arguments."""
-    from webargs import fields  # prevent circular import
-
-    return isinstance(field, ma.fields.List) and not isinstance(
-        field, fields.DelimitedList
-    )
+    return isinstance(field, ma.fields.List) and not isinstance(field, DelimitedList)
 
 
 def get_mimetype(content_type):

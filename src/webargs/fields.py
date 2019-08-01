@@ -19,7 +19,7 @@ When using marshmallow 2, use `load_from`.
 """
 import marshmallow as ma
 
-from webargs.core import dict2schema
+from webargs.dict2schema import dict2schema
 
 __all__ = ["Nested", "DelimitedList"]
 # Expose all fields from marshmallow.fields.
