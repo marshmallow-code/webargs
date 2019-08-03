@@ -33,6 +33,13 @@ class MockHTTPError(Exception):
 class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
+    def get_args_by_location(self, req, locations):
+        return {
+            "json": req.json.keys(),
+            "querystring": req.query.keys(),
+            "cookies": req.cookies.keys(),
+        }
+
     def parse_querystring(self, req, name, field):
         return get_value(req.query, name, field)
 
@@ -47,8 +54,12 @@ class MockRequestParser(Parser):
 def web_request():
     req = mock.Mock()
     req.query = {}
+    req.json = {}
+    req.cookies = {}
     yield req
     req.query = {}
+    req.json = {}
+    req.cookies = {}
 
 
 @pytest.fixture
@@ -942,6 +953,24 @@ def test_parse_basic(web_request, parser):
     args = {"foo": fields.Int()}
     result = parser.parse(args, web_request)
     assert result == {"foo": 42}
+
+
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3,
+    reason="Support for unknown=... was added in marshmallow 3",
+)
+def test_parse_with_unknown_raises_schema(web_request, parser, monkeypatch):
+    from marshmallow import RAISE
+
+    class RaisingSchema(Schema):
+        foo = fields.Int()
+
+    raising_schema = RaisingSchema(unknown=RAISE)
+
+    web_request.json = {"foo": "42", "bar": "baz"}
+    monkeypatch.setattr(parser, "pass_all_args", True)
+    with pytest.raises(ValidationError):
+        parser.parse(raising_schema, web_request)
 
 
 def test_parse_raises_validation_error_if_data_invalid(web_request, parser):

@@ -140,6 +140,8 @@ class Parser(object):
 
     :param tuple locations: Default locations to parse.
     :param callable error_handler: Custom error handler function.
+    :param bool pass_all_args: Pass all arguments to the schema, so that the
+                               schema's `unknown` behavior is used (default is False)
     """
 
     #: Default locations to check for data
@@ -162,10 +164,17 @@ class Parser(object):
         "files": "parse_files",
     }
 
-    def __init__(self, locations=None, error_handler=None, schema_class=None):
+    def __init__(
+        self, pass_all_args=False, locations=None, error_handler=None, schema_class=None
+    ):
         self.locations = locations or self.DEFAULT_LOCATIONS
         self.error_callback = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
+        # TODO: pass_all_args is for compatibility, remove in a future webargs
+        # version and make it the only behavior (?)
+        self.pass_all_args = pass_all_args
+        if pass_all_args and MARSHMALLOW_VERSION_INFO[0] < 3:
+            raise ValueError("Parser.pass_all_args requires marshmallow v3")
         #: A short-lived cache to store results from processing request bodies.
         self._cache = {}
 
@@ -229,6 +238,32 @@ class Parser(object):
                 return value
         return missing
 
+    def _parse_specified_args(self, schema, req, locations, argdict=None):
+        """
+        Given a schema, request, locations to parse from, collect the fields
+        specified in the schema into an argument dict mapping argnames to
+        values.
+        If given an argdict to use, use that in place of the schema's field set
+        """
+        if argdict is None:
+            argdict = schema.fields
+        parsed = {}
+        for argname, field_obj in iteritems(argdict):
+            if MARSHMALLOW_VERSION_INFO[0] < 3:
+                parsed_value = self.parse_arg(argname, field_obj, req, locations)
+                # If load_from is specified on the field, try to parse from that key
+                if parsed_value is missing and field_obj.load_from:
+                    parsed_value = self.parse_arg(
+                        field_obj.load_from, field_obj, req, locations
+                    )
+                    argname = field_obj.load_from
+            else:
+                argname = field_obj.data_key or argname
+                parsed_value = self.parse_arg(argname, field_obj, req, locations)
+            if parsed_value is not missing:
+                parsed[argname] = parsed_value
+        return parsed
+
     def _parse_request(self, schema, req, locations):
         """Return a parsed arguments dictionary for the current request."""
         if schema.many:
@@ -247,22 +282,23 @@ class Parser(object):
             if parsed is missing:
                 parsed = []
         else:
-            argdict = schema.fields
-            parsed = {}
-            for argname, field_obj in iteritems(argdict):
-                if MARSHMALLOW_VERSION_INFO[0] < 3:
-                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
-                    # If load_from is specified on the field, try to parse from that key
-                    if parsed_value is missing and field_obj.load_from:
-                        parsed_value = self.parse_arg(
-                            field_obj.load_from, field_obj, req, locations
+            parsed = self._parse_specified_args(schema, req, locations)
+            if self.pass_all_args:
+                # in this case, start with known args above, then collect all of the
+                # unknown ones here
+                for location, argnames in iteritems(
+                    self.get_args_by_location(req, locations)
+                ):
+                    to_add = {}
+                    for argname in argnames:
+                        if argname not in parsed:  # else, it's already known
+                            to_add[argname] = ma.fields.Raw()
+                    parsed.update(
+                        self._parse_specified_args(
+                            schema, req, (location,), argdict=to_add
                         )
-                        argname = field_obj.load_from
-                else:
-                    argname = field_obj.data_key or argname
-                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
-                if parsed_value is not missing:
-                    parsed[argname] = parsed_value
+                    )
+
         return parsed
 
     def _on_validation_error(
@@ -306,6 +342,13 @@ class Parser(object):
         clone = copy(self)
         clone.clear_cache()
         return clone
+
+    def get_args_by_location(self, req, locations):
+        """
+        Get a complete mapping of locations to iterables of args
+        Pulled from the given request and limited to the given set of locations
+        """
+        return {}
 
     def parse(
         self,
