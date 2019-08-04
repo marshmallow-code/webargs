@@ -36,6 +36,11 @@ __all__ = [
 
 DEFAULT_VALIDATION_STATUS = 422  # type: int
 
+if MARSHMALLOW_VERSION_INFO[0] < 3:
+    PARSER_UNKNOWN_DEFAULT = None
+else:
+    PARSER_UNKNOWN_DEFAULT = ma.EXCLUDE
+
 
 def _callable_or_raise(obj):
     """Makes sure an object is callable if it is not ``None``. If not
@@ -140,8 +145,10 @@ class Parser(object):
 
     :param tuple locations: Default locations to parse.
     :param callable error_handler: Custom error handler function.
-    :param bool pass_all_args: Pass all arguments to the schema, so that the
-                               schema's `unknown` behavior is used (default is False)
+    :param bool unknown: Value for the "unknown" argument to use in the
+        schema's ``load`` method on marshmallow v3 and later. Pass ``None``
+        to use the schema default. Has no effect on marhsmallow v2.
+        (defaults to EXCLUDE)
     """
 
     #: Default locations to check for data
@@ -165,16 +172,16 @@ class Parser(object):
     }
 
     def __init__(
-        self, pass_all_args=False, locations=None, error_handler=None, schema_class=None
+        self,
+        unknown=PARSER_UNKNOWN_DEFAULT,
+        locations=None,
+        error_handler=None,
+        schema_class=None,
     ):
         self.locations = locations or self.DEFAULT_LOCATIONS
         self.error_callback = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
-        # TODO: pass_all_args is for compatibility, remove in a future webargs
-        # version and make it the only behavior (?)
-        self.pass_all_args = pass_all_args
-        if pass_all_args and MARSHMALLOW_VERSION_INFO[0] < 3:
-            raise ValueError("Parser.pass_all_args requires marshmallow v3")
+        self.unknown = unknown
         #: A short-lived cache to store results from processing request bodies.
         self._cache = {}
 
@@ -282,22 +289,21 @@ class Parser(object):
             if parsed is missing:
                 parsed = []
         else:
+            # start with known args
             parsed = self._parse_specified_args(schema, req, locations)
-            if self.pass_all_args:
-                # in this case, start with known args above, then collect all of the
-                # unknown ones here
-                for location, argnames in iteritems(
-                    self.get_args_by_location(req, locations)
-                ):
-                    to_add = {}
-                    for argname in argnames:
-                        if argname not in parsed:  # else, it's already known
-                            to_add[argname] = ma.fields.Raw()
-                    parsed.update(
-                        self._parse_specified_args(
-                            schema, req, (location,), argdict=to_add
-                        )
-                    )
+            # then collect all of the unknown ones
+            for location, argnames in iteritems(
+                self.get_args_by_location(req, locations)
+            ):
+                if argnames is missing:
+                    continue
+                to_add = {}
+                for argname in argnames:
+                    if argname not in parsed:  # else, it's already known
+                        to_add[argname] = ma.fields.Raw()
+                parsed.update(
+                    self._parse_specified_args(schema, req, (location,), argdict=to_add)
+                )
 
         return parsed
 
@@ -347,6 +353,9 @@ class Parser(object):
         """
         Get a complete mapping of locations to iterables of args
         Pulled from the given request and limited to the given set of locations
+
+        May return a location name mapped to "missing", so results must be
+        checked
         """
         return {}
 
@@ -389,7 +398,10 @@ class Parser(object):
             parsed = parser._parse_request(
                 schema=schema, req=req, locations=locations or self.locations
             )
-            result = schema.load(parsed)
+            if self.unknown is not None:
+                result = schema.load(parsed, unknown=self.unknown)
+            else:
+                result = schema.load(parsed)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             parser._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:

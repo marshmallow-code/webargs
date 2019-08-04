@@ -959,18 +959,36 @@ def test_parse_basic(web_request, parser):
     MARSHMALLOW_VERSION_INFO[0] < 3,
     reason="Support for unknown=... was added in marshmallow 3",
 )
-def test_parse_with_unknown_raises_schema(web_request, parser, monkeypatch):
+def test_parse_with_unknown_raise_set_by_schema(web_request, parser, monkeypatch):
     from marshmallow import RAISE
 
-    class RaisingSchema(Schema):
+    class MySchema(Schema):
         foo = fields.Int()
 
-    raising_schema = RaisingSchema(unknown=RAISE)
+    raising_schema = MySchema(unknown=RAISE)
 
     web_request.json = {"foo": "42", "bar": "baz"}
-    monkeypatch.setattr(parser, "pass_all_args", True)
+    monkeypatch.setattr(parser, "unknown", None)
     with pytest.raises(ValidationError):
         parser.parse(raising_schema, web_request)
+
+
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3,
+    reason="Support for unknown=... was added in marshmallow 3",
+)
+def test_parse_with_unknown_raise_set_by_parser(web_request, parser, monkeypatch):
+    from marshmallow import RAISE
+
+    class MySchema(Schema):
+        foo = fields.Int()
+
+    schema = MySchema()
+
+    web_request.json = {"foo": "42", "bar": "baz"}
+    monkeypatch.setattr(parser, "unknown", RAISE)
+    with pytest.raises(ValidationError):
+        parser.parse(schema, web_request)
 
 
 def test_parse_raises_validation_error_if_data_invalid(web_request, parser):
