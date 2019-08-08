@@ -78,19 +78,13 @@ class AIOHTTPParser(AsyncParser):
         **core.Parser.__location_map__
     )
 
-    def parse_querystring(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a querystring value from the request."""
-        return core.get_value(req.query, name, field)
-
-    async def parse_form(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a form value from the request."""
+    async def _load_post_data(self, req: Request) -> typing.Any:
         post_data = self._cache.get("post")
         if post_data is None:
-            self._cache["post"] = await req.post()
-        return core.get_value(self._cache["post"], name, field)
+            self._cache["post"] = post_data = await req.post()
+        return post_data
 
-    async def parse_json(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a json value from the request."""
+    async def _load_json_data(self, req: Request) -> typing.Any:
         json_data = self._cache.get("json")
         if json_data is None:
             if not (req.body_exists and is_json_request(req)):
@@ -103,6 +97,58 @@ class AIOHTTPParser(AsyncParser):
                 else:
                     return self.handle_invalid_json_error(e, req)
             self._cache["json"] = json_data
+        return json_data
+
+    async def get_args_by_location(
+        self, req: Request, locations: typing.Iterable[str]
+    ) -> typing.Dict[str, typing.Iterable[str]]:
+        result = {}
+        if "json" in locations:
+            try:
+                data = await self._load_json_data(req)
+            except exception_map[400]:  # json decode failure
+                data = core.missing
+            if isinstance(data, dict):
+                data = data.keys()
+            # this is slightly unintuitive, but if we parse JSON which is
+            # not a dict, we don't know any arg names
+            else:
+                data = core.missing
+            result["json"] = data
+        if "querystring" in locations:
+            result["querystring"] = req.query.keys()
+        if "query" in locations:
+            result["query"] = req.query.keys()
+        if "match_info" in locations:
+            result["match_info"] = req.match_info.keys()
+        if "path" in locations:
+            result["path"] = req.match_info.keys()
+        if "form" in locations:
+            result["form"] = (await self._load_post_data(req)).keys()
+        if "headers" in locations:
+            result["headers"] = req.headers.keys()
+        if "cookies" in locations:
+            result["cookies"] = req.cookies.keys()
+        if "files" in locations:
+            raise NotImplementedError(
+                "parsing 'files' is not implemented for AiioHTTP. "
+                "You may be able to use 'form' for parsing upload data."
+            )
+
+        return result
+
+    def parse_querystring(self, req: Request, name: str, field: Field) -> typing.Any:
+        """Pull a querystring value from the request."""
+        return core.get_value(req.query, name, field)
+
+    async def parse_form(self, req: Request, name: str, field: Field) -> typing.Any:
+        """Pull a form value from the request."""
+        post_data = await self._load_post_data(req)
+        return core.get_value(post_data, name, field)
+
+    async def parse_json(self, req: Request, name: str, field: Field) -> typing.Any:
+        """Pull a json value from the request."""
+        json_data = await self._load_json_data(req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req: Request, name: str, field: Field) -> typing.Any:

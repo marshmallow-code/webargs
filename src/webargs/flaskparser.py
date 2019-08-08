@@ -73,15 +73,19 @@ class FlaskParser(core.Parser):
         result = {}
         if "view_args" in locations:
             result["view_args"] = req.view_args.keys()
+        if "path" in locations:
+            result["path"] = req.view_args.keys()
         if "json" in locations:
-            data = self._load_json_data(req)
-            if data is not core.missing:
-                if isinstance(data, dict):
-                    data = data.keys()
-                # this is slightly unintuitive, but if we parse JSON which is
-                # not a dict, we don't know any arg names
-                else:
-                    data = core.missing
+            try:
+                data = self._load_json_data(req)
+            except HTTPException:
+                data = core.missing
+            if isinstance(data, dict):
+                data = data.keys()
+            # this is slightly unintuitive, but if we parse JSON which is
+            # not a dict, we don't know any arg names
+            else:
+                data = core.missing
             result["json"] = data
         if "querystring" in locations:
             result["querystring"] = req.args.keys()

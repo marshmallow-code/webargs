@@ -22,6 +22,34 @@ class AsyncParser(core.Parser):
     either coroutines or regular methods.
     """
 
+    async def _parse_specified_args(self, schema, req, locations, argdict=None):
+        """
+        Copied mostly from core.Parser
+
+        Given a schema, request, locations to parse from, collect the fields
+        specified in the schema into an argument dict mapping argnames to
+        values.
+        If given an argdict to use, use that in place of the schema's field set
+        """
+        if argdict is None:
+            argdict = schema.fields
+        parsed = {}
+        for argname, field_obj in argdict.items():
+            if core.MARSHMALLOW_VERSION_INFO[0] < 3:
+                parsed_value = await self.parse_arg(argname, field_obj, req, locations)
+                # If load_from is specified on the field, try to parse from that key
+                if parsed_value is missing and field_obj.load_from:
+                    parsed_value = await self.parse_arg(
+                        field_obj.load_from, field_obj, req, locations
+                    )
+                    argname = field_obj.load_from
+            else:
+                argname = field_obj.data_key or argname
+                parsed_value = await self.parse_arg(argname, field_obj, req, locations)
+            if parsed_value is not missing:
+                parsed[argname] = parsed_value
+        return parsed
+
     async def _parse_request(
         self, schema: Schema, req: Request, locations: typing.Iterable
     ) -> typing.Union[dict, list]:
@@ -41,26 +69,23 @@ class AsyncParser(core.Parser):
             if parsed is missing:
                 parsed = []
         else:
-            argdict = schema.fields
-            parsed = {}
-            for argname, field_obj in argdict.items():
-                if core.MARSHMALLOW_VERSION_INFO[0] < 3:
-                    parsed_value = await self.parse_arg(
-                        argname, field_obj, req, locations
+            # start with known args
+            parsed = await self._parse_specified_args(schema, req, locations)
+            # then collect all of the unknown ones
+            for location, argnames in (
+                await self.get_args_by_location(req, locations)
+            ).items():
+                if argnames is missing:
+                    continue
+                to_add = {}
+                for argname in argnames:
+                    if argname not in parsed:  # else, it's already known
+                        to_add[argname] = ma.fields.Raw()
+                parsed.update(
+                    await self._parse_specified_args(
+                        schema, req, (location,), argdict=to_add
                     )
-                    # If load_from is specified on the field, try to parse from that key
-                    if parsed_value is missing and field_obj.load_from:
-                        parsed_value = await self.parse_arg(
-                            field_obj.load_from, field_obj, req, locations
-                        )
-                        argname = field_obj.load_from
-                else:
-                    argname = field_obj.data_key or argname
-                    parsed_value = await self.parse_arg(
-                        argname, field_obj, req, locations
-                    )
-                if parsed_value is not missing:
-                    parsed[argname] = parsed_value
+                )
         return parsed
 
     # TODO: Lots of duplication from core.Parser here. Rethink.
@@ -87,7 +112,10 @@ class AsyncParser(core.Parser):
             parsed = await self._parse_request(
                 schema=schema, req=req, locations=locations or self.locations
             )
-            result = schema.load(parsed)
+            if self.unknown is not None:
+                result = schema.load(parsed, unknown=self.unknown)
+            else:
+                result = schema.load(parsed)
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:

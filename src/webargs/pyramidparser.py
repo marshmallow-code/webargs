@@ -29,7 +29,7 @@ import collections
 import functools
 
 from webob.multidict import MultiDict
-from pyramid.httpexceptions import exception_response
+from pyramid.httpexceptions import exception_response, HTTPException
 
 from webargs import core
 from webargs.core import json
@@ -45,16 +45,10 @@ class PyramidParser(core.Parser):
         **core.Parser.__location_map__
     )
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+    def _load_files_mdict(self, req):
+        return MultiDict((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return core.get_value(req.POST, name, field)
-
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
+    def _load_json_data(self, req):
         json_data = self._cache.get("json")
         if json_data is None:
             try:
@@ -66,6 +60,51 @@ class PyramidParser(core.Parser):
                     return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
+        return json_data
+
+    def get_args_by_location(self, req, locations):
+        result = {}
+        if "matchdict" in locations:
+            result["matchdict"] = req.matchdict.keys()
+        if "path" in locations:
+            result["path"] = req.matchdict.keys()
+        if "json" in locations:
+            try:
+                data = self._load_json_data(req)
+            except HTTPException:
+                data = core.missing
+            if isinstance(data, dict):
+                data = data.keys()
+            # this is slightly unintuitive, but if we parse JSON which is
+            # not a dict, we don't know any arg names
+            else:
+                data = core.missing
+            result["json"] = data
+        if "querystring" in locations:
+            result["querystring"] = req.GET.keys()
+        if "query" in locations:
+            result["query"] = req.GET.keys()
+        if "form" in locations:
+            result["form"] = req.POST.keys()
+        if "headers" in locations:
+            result["headers"] = req.headers.keys()
+        if "cookies" in locations:
+            result["cookies"] = req.cookies.keys()
+        if "files" in locations:
+            result["files"] = self._load_files_mdict(req).keys()
+        return result
+
+    def parse_querystring(self, req, name, field):
+        """Pull a querystring value from the request."""
+        return core.get_value(req.GET, name, field)
+
+    def parse_form(self, req, name, field):
+        """Pull a form value from the request."""
+        return core.get_value(req.POST, name, field)
+
+    def parse_json(self, req, name, field):
+        """Pull a json value from the request."""
+        json_data = self._load_json_data(req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_cookies(self, req, name, field):
@@ -78,8 +117,7 @@ class PyramidParser(core.Parser):
 
     def parse_files(self, req, name, field):
         """Pull a file from the request."""
-        files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
-        return core.get_value(MultiDict(files), name, field)
+        return core.get_value(self._load_files_mdict(req), name, field)
 
     def parse_matchdict(self, req, name, field):
         """Pull a value from the request's `matchdict`."""

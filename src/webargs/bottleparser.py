@@ -26,16 +26,7 @@ from webargs.core import json
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.query, name, field)
-
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return core.get_value(req.forms, name, field)
-
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
+    def _load_json_data(self, req):
         json_data = self._cache.get("json")
         if json_data is None:
             try:
@@ -49,6 +40,47 @@ class BottleParser(core.Parser):
                     return self.handle_invalid_json_error(e, req)
             if json_data is None:
                 return core.missing
+        return json_data
+
+    def get_args_by_location(self, req, locations):
+        result = {}
+        if "json" in locations:
+            try:
+                data = self._load_json_data(req)
+            except bottle.HTTPError:
+                data = core.missing
+            if isinstance(data, dict):
+                data = data.keys()
+            # this is slightly unintuitive, but if we parse JSON which is
+            # not a dict, we don't know any arg names
+            else:
+                data = core.missing
+            result["json"] = data
+        if "querystring" in locations:
+            result["querystring"] = req.query.keys()
+        if "query" in locations:
+            result["query"] = req.query.keys()
+        if "form" in locations:
+            result["form"] = req.forms.keys()
+        if "headers" in locations:
+            result["headers"] = req.headers.keys()
+        if "cookies" in locations:
+            result["cookies"] = req.cookies.keys()
+        if "files" in locations:
+            result["files"] = req.files.keys()
+        return result
+
+    def parse_querystring(self, req, name, field):
+        """Pull a querystring value from the request."""
+        return core.get_value(req.query, name, field)
+
+    def parse_form(self, req, name, field):
+        """Pull a form value from the request."""
+        return core.get_value(req.forms, name, field)
+
+    def parse_json(self, req, name, field):
+        """Pull a json value from the request."""
+        json_data = self._load_json_data(req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):

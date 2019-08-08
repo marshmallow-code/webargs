@@ -91,6 +91,57 @@ class HTTPError(falcon.HTTPError):
 class FalconParser(core.Parser):
     """Falcon request argument parser."""
 
+    def _load_form_data(self, req):
+        form = self._cache.get("form")
+        if form is None:
+            self._cache["form"] = form = parse_form_body(req)
+        return form
+
+    def _load_json_data(self, req):
+        json_data = self._cache.get("json_data")
+        if json_data is None:
+            try:
+                self._cache["json_data"] = json_data = parse_json_body(req)
+            except json.JSONDecodeError as e:
+                return self.handle_invalid_json_error(e, req)
+        return json_data
+
+    def _load_cookie_data(self, req):
+        cookies = self._cache.get("cookies")
+        if cookies is None:
+            self._cache["cookies"] = cookies = req.cookies
+        return cookies
+
+    def get_args_by_location(self, req, locations):
+        result = {}
+        if "json" in locations:
+            try:
+                data = self._load_json_data(req)
+            except HTTPError:
+                data = core.missing
+            if isinstance(data, dict):
+                data = data.keys()
+            # this is slightly unintuitive, but if we parse JSON which is
+            # not a dict, we don't know any arg names
+            else:
+                data = core.missing
+            result["json"] = data
+        if "querystring" in locations:
+            result["querystring"] = req.params.keys()
+        if "query" in locations:
+            result["query"] = req.params.keys()
+        if "form" in locations:
+            result["form"] = self._load_form_data(req).keys()
+        if "headers" in locations:
+            result["headers"] = req.headers.keys()
+        if "cookies" in locations:
+            result["cookies"] = self._load_cookie_data(req).keys()
+        if "files" in locations:
+            raise NotImplementedError(
+                "Parsing files not yet supported by {0}".format(self.__class__.__name__)
+            )
+        return result
+
     def parse_querystring(self, req, name, field):
         """Pull a querystring value from the request."""
         return core.get_value(req.params, name, field)
@@ -102,9 +153,7 @@ class FalconParser(core.Parser):
 
             The request stream will be read and left at EOF.
         """
-        form = self._cache.get("form")
-        if form is None:
-            self._cache["form"] = form = parse_form_body(req)
+        form = self._load_form_data(req)
         return core.get_value(form, name, field)
 
     def parse_json(self, req, name, field):
@@ -114,12 +163,7 @@ class FalconParser(core.Parser):
 
             The request stream will be read and left at EOF.
         """
-        json_data = self._cache.get("json_data")
-        if json_data is None:
-            try:
-                self._cache["json_data"] = json_data = parse_json_body(req)
-            except json.JSONDecodeError as e:
-                return self.handle_invalid_json_error(e, req)
+        json_data = self._load_json_data(req)
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
     def parse_headers(self, req, name, field):
