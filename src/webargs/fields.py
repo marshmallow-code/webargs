@@ -23,10 +23,7 @@ import marshmallow as ma
 from marshmallow.fields import *  # noqa: F40
 from webargs.dict2schema import dict2schema
 
-__all__ = ["Nested", "DelimitedList"]
-
-for each in ma.fields.__all__:
-    __all__.append(each)
+__all__ = ["Nested", "DelimitedList"] + ma.fields.__all__
 
 
 class Nested(ma.fields.Nested):
