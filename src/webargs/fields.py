@@ -19,15 +19,14 @@ When using marshmallow 2, use `load_from`.
 """
 import marshmallow as ma
 
+# Expose all fields from marshmallow.fields.
+from marshmallow.fields import *  # noqa: F40
 from webargs.dict2schema import dict2schema
 
 __all__ = ["Nested", "DelimitedList"]
-# Expose all fields from marshmallow.fields.
-# We do this instead of 'from marshmallow.fields import *' because webargs
-# has its own subclass of Nested
-for each in (field_name for field_name in ma.fields.__all__ if field_name != "Nested"):
+
+for each in ma.fields.__all__:
     __all__.append(each)
-    globals()[each] = getattr(ma.fields, each)
 
 
 class Nested(ma.fields.Nested):
