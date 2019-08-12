@@ -30,7 +30,7 @@ EXTRAS_REQUIRE = {
     "lint": [
         'mypy==0.720; python_version >= "3.5"',
         "flake8==3.7.8",
-        'flake8-bugbear==19.3.0; python_version >= "3.5"',
+        'flake8-bugbear==19.8.0; python_version >= "3.5"',
         "pre-commit~=1.17",
     ],
     "docs": ["Sphinx==2.1.2", "sphinx-issues==1.2.0", "sphinx-typlog-theme==0.7.3"]
