@@ -46,8 +46,9 @@ When you need more flexibility in defining input schemas, you can pass a marshma
         last_name = fields.Str(missing="")
         date_registered = fields.DateTime(dump_only=True)
 
-        class Meta:
-            strict = True
+        # NOTE: Uncomment below two lines if you're using marshmallow 2
+        # class Meta:
+        #    strict = True
 
 
     @use_args(UserSchema())
@@ -103,9 +104,6 @@ Consider the following use cases:
         last_name = fields.Str(missing="")
         date_registered = fields.DateTime(dump_only=True)
 
-        class Meta:
-            strict = True
-
 
     def make_user_schema(request):
         # Filter based on 'fields' query parameter
@@ -144,14 +142,8 @@ We can reduce boilerplate and improve [re]usability with a simple helper functio
             only = request.args.get("fields", None)
             # Respect partial updates for PATCH requests
             partial = request.method == "PATCH"
-            # Add current request to the schema's context
-            # and ensure we're always using strict mode
             return schema_cls(
-                only=only,
-                partial=partial,
-                strict=True,
-                context={"request": request},
-                **schema_kwargs
+                only=only, partial=partial, context={"request": request}, **schema_kwargs
             )
 
         return use_args(factory, **kwargs)
@@ -280,9 +272,6 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
         )
         path = fields.Str(required=True)
         value = fields.Str(required=True)
-
-        class Meta:
-            strict = True
 
 
     @app.route("/profile/", methods=["patch"])

@@ -89,9 +89,6 @@ class UserSchema(Schema):
     first_name = fields.Str()
     last_name = fields.Str()
 
-    class Meta:
-        strict = True
-
     @post_dump(pass_many=True)
     def wrap_with_envelope(self, data, many, **kwargs):
         return {"data": data}
