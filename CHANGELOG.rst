@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+5.5.0 (unreleased)
+******************
+
+Support:
+
+* Various docs updates (:pr:`414`).
+
+Refactoring:
+
+* Don't mutate ``globals()`` in ``webargs.fields`` (:pr:`411`).
+* Use marshmallow 3's ``Schema.from_dict`` if available (:pr:`415`).
+
 5.4.0 (2019-07-23)
 ******************
 
