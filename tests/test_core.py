@@ -972,8 +972,6 @@ def test_dict2schema():
     assert schema.fields["id"].required
     if MARSHMALLOW_VERSION_INFO[0] < 3:
         assert schema.opts.strict is True
-    else:
-        assert schema.opts.register is False
 
 
 # Regression test for https://github.com/marshmallow-code/webargs/issues/101
