@@ -26,7 +26,7 @@ To add your own custom location handler, write a function that receives a reques
         return "displaying {} posts".format(args["per_page"])
 
 
-Marshmallow Integration
+marshmallow Integration
 -----------------------
 
 When you need more flexibility in defining input schemas, you can pass a marshmallow `Schema <marshmallow.Schema>` instead of a dictionary to `Parser.parse <webargs.core.Parser.parse>`, `Parser.use_args <webargs.core.Parser.use_args>`, and `Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
@@ -88,8 +88,11 @@ Consider the following use cases:
 
 .. code-block:: python
 
+    from flask import Flask
     from marshmallow import Schema, fields
     from webargs.flaskparser import use_args
+
+    app = Flask(__name__)
 
 
     class UserSchema(Schema):
@@ -106,7 +109,8 @@ Consider the following use cases:
 
     def make_user_schema(request):
         # Filter based on 'fields' query parameter
-        only = request.args.get("fields", None)
+        fields = request.args.get("fields", None)
+        only = fields.split(",") if fields else None
         # Respect partial updates for PATCH requests
         partial = request.method == "PATCH"
         # Add current request to the schema's context
@@ -114,10 +118,12 @@ Consider the following use cases:
 
 
     # Pass the factory to .parse, .use_args, or .use_kwargs
+    @app.route("/profile/", methods=["GET", "POST", "PATCH"])
     @use_args(make_user_schema)
     def profile_view(args):
-        username = args["username"]
+        username = args.get("username")
         # ...
+
 
 
 Reducing Boilerplate
