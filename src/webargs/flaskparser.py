@@ -24,6 +24,7 @@ from werkzeug.exceptions import HTTPException
 
 from webargs import core
 from webargs.core import json
+from webargs.multidictproxy import MultiDictProxy
 
 
 def abort(http_status_code, exc=None, **kwargs):
@@ -48,17 +49,23 @@ class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
     __location_map__ = dict(
-        view_args="parse_view_args",
-        path="parse_view_args",
+        view_args="load_view_args",
+        path="load_view_args",
         **core.Parser.__location_map__
     )
 
-    def parse_view_args(self, req, name, field):
-        """Pull a value from the request's ``view_args``."""
-        return core.get_value(req.view_args, name, field)
+    def load_view_args(self, req, schema):
+        """Read the request's ``view_args`` or ``missing`` if there are none."""
+        return req.view_args or core.missing
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
+    def load_json(self, req, schema):
+        """Read a json payload from the request.
+
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req):
+            return core.missing
+
         json_data = self._cache.get("json")
         if json_data is None:
             # We decode the json manually here instead of
@@ -72,31 +79,36 @@ class FlaskParser(core.Parser):
                     return core.missing
                 else:
                     return self.handle_invalid_json_error(e, req)
-        return core.get_value(json_data, name, field, allow_many_nested=True)
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.args, name, field)
+        return json_data
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        try:
-            return core.get_value(req.form, name, field)
-        except AttributeError:
-            pass
-        return core.missing
+    def load_querystring(self, req, schema):
+        """Read query params from the request.
 
-    def parse_headers(self, req, name, field):
-        """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+        Is a multidict."""
+        return MultiDictProxy(req.args, schema)
 
-    def parse_cookies(self, req, name, field):
-        """Pull a value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+    def load_form(self, req, schema):
+        """Read form values from the request.
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
-        return core.get_value(req.files, name, field)
+        Is a multidict."""
+        return MultiDictProxy(req.form, schema)
+
+    def load_headers(self, req, schema):
+        """Read headers from the request.
+
+        Is a multidict."""
+        return MultiDictProxy(req.headers, schema)
+
+    def load_cookies(self, req, schema):
+        """Read cookies from the request."""
+        return req.cookies
+
+    def load_files(self, req, schema):
+        """Read files from the request.
+
+        Is a multidict."""
+        return MultiDictProxy(req.files, schema)
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current HTTP request and

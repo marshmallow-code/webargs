@@ -16,7 +16,7 @@ Refactoring:
 
 * *Backwards-incompatible*: Schema fields may not specify a location any
   longer, and `Parser.use_args` and `Parser.use_kwargs` now accept `location`
-  (singular) instead of `locations` plural. Instead of using a single field or
+  (singular) instead of `locations` (plural). Instead of using a single field or
   schema with multiple `locations`, users are recommended to make multiple
   calls to `use_args` or `use_kwargs` with a distinct schema per location. For
   example, code should be rewritten like this:
@@ -24,26 +24,28 @@ Refactoring:
 .. code-block:: python
 
     # under webargs v5
-    class CompoundSchema:
-        q1 = ma.fields.Int(location="query")
-        q2 = ma.fields.Int(location="query")
-        h1 = ma.fields.Int(location="headers")
-
-    @parser.use_args(CompoundSchema(), locations=("query", "headers"))
+    @parser.use_args(
+        {
+            "q1": ma.fields.Int(location="query"),
+            "q2": ma.fields.Int(location="query"),
+            "h1": ma.fields.Int(location="headers"),
+        },
+        locations=("query", "headers"),
+    )
     def foo(q1, q2, h1):
         ...
+
 
     # should be split up like so under webargs v6
-    class QueryParamSchema:
-        q1 = ma.fields.Int()
-        q2 = ma.fields.Int()
-    class HeaderSchema:
-        h1 = ma.fields.Int()
-
-    @parser.use_args(QueryParamSchema(), location="query")
-    @parser.use_args(HeaderSchema(), location="headers")
+    @parser.use_args({"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query")
+    @parser.use_args({"h1": ma.fields.Int()}, location="headers")
     def foo(q1, q2, h1):
         ...
+
+* The `location_handler` decorator has been removed and replaced with
+  `location_loader`. `location_loader` serves the same purpose (letting you
+  write custom hooks for loading data) but its expected method signature is
+  different. See the docs on `location_loader` for proper usage.
 
 5.5.2 (2019-10-06)
 ******************

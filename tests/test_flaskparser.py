@@ -7,7 +7,7 @@ import mock
 import pytest
 
 from flask import Flask
-from webargs import fields, ValidationError, missing
+from webargs import fields, ValidationError, missing, dict2schema
 from webargs.flaskparser import parser, abort
 from webargs.core import MARSHMALLOW_VERSION_INFO, json
 
@@ -33,23 +33,31 @@ class TestFlaskParser(CommonTestCase):
         assert res.json == {"view_arg": 42}
 
     def test_use_args_on_a_method_view(self, testapp):
-        res = testapp.post("/echo_method_view_use_args", {"val": 42})
+        res = testapp.post_json("/echo_method_view_use_args", {"val": 42})
         assert res.json == {"val": 42}
 
     def test_use_kwargs_on_a_method_view(self, testapp):
-        res = testapp.post("/echo_method_view_use_kwargs", {"val": 42})
+        res = testapp.post_json("/echo_method_view_use_kwargs", {"val": 42})
         assert res.json == {"val": 42}
 
     def test_use_kwargs_with_missing_data(self, testapp):
-        res = testapp.post("/echo_use_kwargs_missing", {"username": "foo"})
+        res = testapp.post_json("/echo_use_kwargs_missing", {"username": "foo"})
         assert res.json == {"username": "foo"}
 
     # regression test for https://github.com/marshmallow-code/webargs/issues/145
     def test_nested_many_with_data_key(self, testapp):
-        res = testapp.post_json("/echo_nested_many_data_key", {"x_field": [{"id": 42}]})
-        # https://github.com/marshmallow-code/marshmallow/pull/714
+        post_with_raw_fieldname_args = (
+            "/echo_nested_many_data_key",
+            {"x_field": [{"id": 42}]},
+        )
+        # under marhsmallow2 this is allowed and works
         if MARSHMALLOW_VERSION_INFO[0] < 3:
+            res = testapp.post_json(*post_with_raw_fieldname_args)
             assert res.json == {"x_field": [{"id": 42}]}
+        # but under marshmallow3 , only data_key is checked, field name is ignored
+        else:
+            res = testapp.post_json(*post_with_raw_fieldname_args, expect_errors=True)
+            assert res.status_code == 422
 
         res = testapp.post_json("/echo_nested_many_data_key", {"X-Field": [{"id": 24}]})
         assert res.json == {"x_field": [{"id": 24}]}
@@ -81,10 +89,13 @@ def test_abort_called_on_validation_error(mock_abort):
     assert type(abort_kwargs["exc"]) == ValidationError
 
 
-def test_parse_form_returns_missing_if_no_form():
+@pytest.mark.parametrize("mimetype", [None, "application/json"])
+def test_load_json_returns_missing_if_no_data(mimetype):
     req = mock.Mock()
-    req.form.get.side_effect = AttributeError("no form")
-    assert parser.parse_form(req, "foo", fields.Field()) is missing
+    req.mimetype = mimetype
+    req.get_data.return_value = ""
+    schema = dict2schema({"foo": fields.Field()})()
+    assert parser.load_json(req, schema) is missing
 
 
 def test_abort_with_message():

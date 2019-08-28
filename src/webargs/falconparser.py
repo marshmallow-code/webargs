@@ -6,6 +6,7 @@ from falcon.util.uri import parse_query_string
 
 from webargs import core
 from webargs.core import json
+from webargs.multidictproxy import MultiDictProxy
 
 HTTP_422 = "422 Unprocessable Entity"
 
@@ -69,7 +70,8 @@ def parse_form_body(req):
             return parse_query_string(
                 body, keep_blank_qs_values=req.options.keep_blank_qs_values
             )
-    return {}
+
+    return core.missing
 
 
 class HTTPError(falcon.HTTPError):
@@ -95,7 +97,7 @@ class FalconParser(core.Parser):
         """Pull a querystring value from the request."""
         return core.get_value(req.params, name, field)
 
-    def parse_form(self, req, name, field):
+    def location_load_form(self, req, schema):
         """Pull a form value from the request.
 
         .. note::
@@ -105,7 +107,9 @@ class FalconParser(core.Parser):
         form = self._cache.get("form")
         if form is None:
             self._cache["form"] = form = parse_form_body(req)
-        return core.get_value(form, name, field)
+        if form is core.missing:
+            return form
+        return MultiDictProxy(form, schema)
 
     def parse_json(self, req, name, field):
         """Pull a JSON body value from the request.

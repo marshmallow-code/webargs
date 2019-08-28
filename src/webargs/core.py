@@ -14,9 +14,9 @@ except ImportError:
 
 import marshmallow as ma
 from marshmallow import ValidationError
-from marshmallow.utils import missing, is_collection
+from marshmallow.utils import missing
 
-from webargs.compat import Mapping, iteritems, MARSHMALLOW_VERSION_INFO
+from webargs.compat import Mapping, MARSHMALLOW_VERSION_INFO
 from webargs.dict2schema import dict2schema
 from webargs.fields import DelimitedList
 
@@ -28,7 +28,6 @@ __all__ = [
     "dict2schema",
     "is_multiple",
     "Parser",
-    "get_value",
     "missing",
     "parse_json",
 ]
@@ -74,42 +73,6 @@ def is_json(mimetype):
     return False
 
 
-def get_value(data, name, field, allow_many_nested=False):
-    """Get a value from a dictionary. Handles ``MultiDict`` types when
-    ``field`` handles repeated/multi-value arguments.
-    If the value is not found, return `missing`.
-
-    :param object data: Mapping (e.g. `dict`) or list-like instance to
-        pull the value from.
-    :param str name: Name of the key.
-    :param bool allow_many_nested: Whether to allow a list of nested objects
-        (it is valid only for JSON format, so it is set to True in ``parse_json``
-        methods).
-    """
-    missing_value = missing
-    if allow_many_nested and isinstance(field, ma.fields.Nested) and field.many:
-        if is_collection(data):
-            return data
-
-    if not hasattr(data, "get"):
-        return missing_value
-
-    multiple = is_multiple(field)
-    val = data.get(name, missing_value)
-    if multiple and val is not missing:
-        if hasattr(data, "getlist"):
-            return data.getlist(name)
-        elif hasattr(data, "getall"):
-            return data.getall(name)
-        elif isinstance(val, (list, tuple)):
-            return val
-        if val is None:
-            return None
-        else:
-            return [val]
-    return val
-
-
 def parse_json(s, encoding="utf-8"):
     if isinstance(s, bytes):
         try:
@@ -142,15 +105,16 @@ class Parser(object):
     """Base parser class that provides high-level implementation for parsing
     a request.
 
-    Descendant classes must provide lower-level implementations for parsing
-    different locations, e.g. ``parse_json``, ``parse_querystring``, etc.
+    Descendant classes must provide lower-level implementations for reading
+    data from  different locations, e.g. ``load_json``, ``load_querystring``,
+    etc.
 
-    :param tuple locations: Default locations to parse.
+    :param str location: Default location to use for data
     :param callable error_handler: Custom error handler function.
     """
 
-    #: Default locations to check for data
-    DEFAULT_LOCATIONS = ("querystring", "form", "json")
+    #: Default location to check for data
+    DEFAULT_LOCATION = "json"
     #: The marshmallow Schema class to use when creating new schemas
     DEFAULT_SCHEMA_CLASS = ma.Schema
     #: Default status code to return for validation errors
@@ -160,38 +124,32 @@ class Parser(object):
 
     #: Maps location => method name
     __location_map__ = {
-        "json": "parse_json",
-        "querystring": "parse_querystring",
-        "query": "parse_querystring",
-        "form": "parse_form",
-        "headers": "parse_headers",
-        "cookies": "parse_cookies",
-        "files": "parse_files",
+        "json": "load_json",
+        "querystring": "load_querystring",
+        "query": "load_querystring",
+        "form": "load_form",
+        "headers": "load_headers",
+        "cookies": "load_cookies",
+        "files": "load_files",
     }
 
-    def __init__(self, locations=None, error_handler=None, schema_class=None):
-        self.locations = locations or self.DEFAULT_LOCATIONS
+    def __init__(self, location=None, error_handler=None, schema_class=None):
+        self.location = location or self.DEFAULT_LOCATION
         self.error_callback = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
         #: A short-lived cache to store results from processing request bodies.
         self._cache = {}
 
-    def _validated_locations(self, locations):
-        """Ensure that the given locations argument is valid.
+    def _get_loader(self, location):
+        """Get the loader function for the given location.
 
-        :raises: ValueError if a given locations includes an invalid location.
+        :raises: ValueError if a given location is invalid.
         """
-        # The set difference between the given locations and the available locations
-        # will be the set of invalid locations
         valid_locations = set(self.__location_map__.keys())
-        given = set(locations)
-        invalid_locations = given - valid_locations
-        if len(invalid_locations):
-            msg = "Invalid locations arguments: {0}".format(list(invalid_locations))
+        if location not in valid_locations:
+            msg = "Invalid location argument: {0}".format(location)
             raise ValueError(msg)
-        return locations
 
-    def _get_handler(self, location):
         # Parsing function to call
         # May be a method name (str) or a function
         func = self.__location_map__.get(location)
@@ -204,73 +162,20 @@ class Parser(object):
             raise ValueError('Invalid location: "{0}"'.format(location))
         return function
 
-    def _get_value(self, name, argobj, req, location):
-        function = self._get_handler(location)
-        return function(req, name, argobj)
+    def _load_location_data(self, schema, req, location):
+        """Return a dictionary-like object for the location on the given request.
 
-    def parse_arg(self, name, field, req, locations=None):
-        """Parse a single argument from a request.
-
-        .. note::
-            This method does not perform validation on the argument.
-
-        :param str name: The name of the value.
-        :param marshmallow.fields.Field field: The marshmallow `Field` for the request
-            parameter.
-        :param req: The request object to parse.
-        :param tuple locations: The locations ('json', 'querystring', etc.) where
-            to search for the value.
-        :return: The unvalidated argument value or `missing` if the value cannot
-            be found on the request.
+        Needs to have the schema in hand in order to correctly handle loading
+        lists from multidict objects and `many=True` schemas.
         """
-        location = field.metadata.get("location")
-        if location:
-            locations_to_check = self._validated_locations([location])
-        else:
-            locations_to_check = self._validated_locations(locations or self.locations)
-
-        for location in locations_to_check:
-            value = self._get_value(name, field, req=req, location=location)
-            # Found the value; validate and return it
-            if value is not missing:
-                return value
-        return missing
-
-    def _parse_request(self, schema, req, locations):
-        """Return a parsed arguments dictionary for the current request."""
-        if schema.many:
-            assert (
-                "json" in locations
-            ), "schema.many=True is only supported for JSON location"
-            # The ad hoc Nested field is more like a workaround or a helper,
-            # and it servers its purpose fine. However, if somebody has a desire
-            # to re-design the support of bulk-type arguments, go ahead.
-            parsed = self.parse_arg(
-                name="json",
-                field=ma.fields.Nested(schema, many=True),
-                req=req,
-                locations=locations,
-            )
-            if parsed is missing:
-                parsed = []
-        else:
-            argdict = schema.fields
-            parsed = {}
-            for argname, field_obj in iteritems(argdict):
-                if MARSHMALLOW_VERSION_INFO[0] < 3:
-                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
-                    # If load_from is specified on the field, try to parse from that key
-                    if parsed_value is missing and field_obj.load_from:
-                        parsed_value = self.parse_arg(
-                            field_obj.load_from, field_obj, req, locations
-                        )
-                        argname = field_obj.load_from
-                else:
-                    argname = field_obj.data_key or argname
-                    parsed_value = self.parse_arg(argname, field_obj, req, locations)
-                if parsed_value is not missing:
-                    parsed[argname] = parsed_value
-        return parsed
+        loader_func = self._get_loader(location)
+        data = loader_func(req, schema)
+        # when the desired location is empty (no data), provide an empty
+        # dict as the default so that optional arguments in a location
+        # (e.g. optional JSON body) work smoothly
+        if data is missing:
+            data = {}
+        return data
 
     def _on_validation_error(
         self, error, req, schema, error_status_code, error_headers
@@ -310,6 +215,10 @@ class Parser(object):
         return schema
 
     def _clone(self):
+        """Clone the current parser in order to ensure that it has a fresh and
+        independent cache. This is used whenever `Parser.parse` is called, so
+        that these methods always have separate caches.
+        """
         clone = copy(self)
         clone.clear_cache()
         return clone
@@ -318,7 +227,7 @@ class Parser(object):
         self,
         argmap,
         req=None,
-        locations=None,
+        location=None,
         validate=None,
         error_status_code=None,
         error_headers=None,
@@ -329,9 +238,9 @@ class Parser(object):
             of argname -> `marshmallow.fields.Field` pairs, or a callable
             which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse.
-        :param tuple locations: Where on the request to search for values.
-            Can include one or more of ``('json', 'querystring', 'form',
-            'headers', 'cookies', 'files')``.
+        :param str location: Where on the request to load values.
+            Can be one of ``('json', 'querystring', 'form', 'headers', 'cookies',
+            'files')``.
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
@@ -342,18 +251,18 @@ class Parser(object):
 
          :return: A dictionary of parsed arguments
         """
-        self.clear_cache()  # in case someone used `parse_*()`
         req = req if req is not None else self.get_default_request()
-        assert req is not None, "Must pass req object"
+        if req is None:
+            raise ValueError("Must pass req object")
         data = None
         validators = _ensure_list_of_callables(validate)
         parser = self._clone()
         schema = self._get_schema(argmap, req)
         try:
-            parsed = parser._parse_request(
-                schema=schema, req=req, locations=locations or self.locations
+            location_data = parser._load_location_data(
+                schema=schema, req=req, location=location or self.location
             )
-            result = schema.load(parsed)
+            result = schema.load(location_data)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             parser._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
@@ -397,7 +306,7 @@ class Parser(object):
         self,
         argmap,
         req=None,
-        locations=None,
+        location=None,
         as_kwargs=False,
         validate=None,
         error_status_code=None,
@@ -408,14 +317,14 @@ class Parser(object):
         Example usage with Flask: ::
 
             @app.route('/echo', methods=['get', 'post'])
-            @parser.use_args({'name': fields.Str()})
+            @parser.use_args({'name': fields.Str()}, location="querystring")
             def greet(args):
                 return 'Hello ' + args['name']
 
         :param argmap: Either a `marshmallow.Schema`, a `dict`
             of argname -> `marshmallow.fields.Field` pairs, or a callable
             which accepts a request and returns a `marshmallow.Schema`.
-        :param tuple locations: Where on the request to search for values.
+        :param str locations: Where on the request to load values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -425,7 +334,7 @@ class Parser(object):
         :param dict error_headers: Headers passed to error handler functions when a
             a `ValidationError` is raised.
         """
-        locations = locations or self.locations
+        location = location or self.location
         request_obj = req
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
@@ -441,11 +350,12 @@ class Parser(object):
 
                 if not req_obj:
                     req_obj = self.get_request_from_view_args(func, args, kwargs)
+
                 # NOTE: At this point, argmap may be a Schema, or a callable
                 parsed_args = self.parse(
                     argmap,
                     req=req_obj,
-                    locations=locations,
+                    location=location,
                     validate=validate,
                     error_status_code=error_status_code,
                     error_headers=error_headers,
@@ -481,19 +391,23 @@ class Parser(object):
         kwargs["as_kwargs"] = True
         return self.use_args(*args, **kwargs)
 
-    def location_handler(self, name):
-        """Decorator that registers a function for parsing a request location.
-        The wrapped function receives a request, the name of the argument, and
-        the corresponding `Field <marshmallow.fields.Field>` object.
+    def location_loader(self, name):
+        """Decorator that registers a function for loading a request location.
+        The wrapped function receives a schema and a request.
+
+        The schema will usually not be relevant, but it's important in some
+        cases -- most notably in order to correctly load multidict values into
+        list fields. Without the schema, there would be no way to know whether
+        to simply `.get()` or `.getall()` from a multidict for a given value.
 
         Example: ::
 
             from webargs import core
             parser = core.Parser()
 
-            @parser.location_handler("name")
-            def parse_data(request, name, field):
-                return request.data.get(name)
+            @parser.location_loader("name")
+            def load_data(request, schema):
+                return request.data
 
         :param str name: The name of the location to register.
         """
@@ -533,39 +447,38 @@ class Parser(object):
 
     # Abstract Methods
 
-    def parse_json(self, req, name, arg):
-        """Pull a JSON value from a request object or return `missing` if the
-        value cannot be found.
+    def load_json(self, req, schema):
+        """Load JSON from a request object or return `missing` if no value can
+        be found.
         """
         return missing
 
-    def parse_querystring(self, req, name, arg):
-        """Pull a value from the query string of a request object or return `missing` if
-        the value cannot be found.
+    def load_querystring(self, req, schema):
+        """Load the query string of a request object or return `missing` if no
+        value can be found.
         """
         return missing
 
-    def parse_form(self, req, name, arg):
-        """Pull a value from the form data of a request object or return
-        `missing` if the value cannot be found.
+    def load_form(self, req, schema):
+        """Load the form data of a request object or return `missing` if no
+        value can be found.
         """
         return missing
 
-    def parse_headers(self, req, name, arg):
-        """Pull a value from the headers or return `missing` if the value
-        cannot be found.
+    def load_headers(self, req, schema):
+        """Load the headers or return `missing` if no value can be found.
         """
         return missing
 
-    def parse_cookies(self, req, name, arg):
-        """Pull a cookie value from the request or return `missing` if the value
-        cannot be found.
+    def load_cookies(self, req, schema):
+        """Load the cookies from the request or return `missing` if no value
+        can be found.
         """
         return missing
 
-    def parse_files(self, req, name, arg):
-        """Pull a file from the request or return `missing` if the value file
-        cannot be found.
+    def load_files(self, req, schema):
+        """Load files from the request or return `missing` if no values can be
+        found.
         """
         return missing
 

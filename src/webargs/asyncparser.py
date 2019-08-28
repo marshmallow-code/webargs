@@ -96,6 +96,25 @@ class AsyncParser(core.Parser):
             )
         return data
 
+    async def _load_location_data(self, schema, req, location):
+        """Return a dictionary-like object for the location on the given request.
+
+        Needs to have the schema in hand in order to correctly handle loading
+        lists from multidict objects and `many=True` schemas.
+        """
+        loader_func = self._get_loader(location)
+        if asyncio.iscoroutinefunction(loader_func):
+            data = await loader_func(req, schema)
+        else:
+            data = loader_func(req, schema)
+
+        # when the desired location is empty (no data), provide an empty
+        # dict as the default so that optional arguments in a location
+        # (e.g. optional JSON body) work smoothly
+        if data is core.missing:
+            data = {}
+        return data
+
     async def _on_validation_error(
         self,
         error: ValidationError,
