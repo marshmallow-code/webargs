@@ -50,7 +50,7 @@ class TestFlaskParser(CommonTestCase):
             "/echo_nested_many_data_key",
             {"x_field": [{"id": 42}]},
         )
-        # under marhsmallow2 this is allowed and works
+        # under marshmallow 2 this is allowed and works
         if MARSHMALLOW_VERSION_INFO[0] < 3:
             res = testapp.post_json(*post_with_raw_fieldname_args)
             assert res.json == {"x_field": [{"id": 42}]}

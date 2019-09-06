@@ -104,10 +104,8 @@ def test_parse(parser, web_request):
     MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=EXCLUDE added in marshmallow3"
 )
 def test_parse_with_excluding_schema(parser, web_request):
-    """
-    This is new in webargs 6.x ; it's the way you can "get back" the behavior
-    of webargs 5.x in which extra args are ignored
-    """
+    # This is new in webargs 6.x ; it's the way you can "get back" the behavior
+    # of webargs 5.x in which extra args are ignored
     from marshmallow import EXCLUDE
 
     web_request.json = {"username": 42, "password": 42, "fjords": 42}

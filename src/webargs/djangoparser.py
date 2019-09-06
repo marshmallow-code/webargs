@@ -19,7 +19,7 @@ Example usage: ::
             return HttpResponse('Hello ' + args['name'])
 """
 from webargs import core
-from webargs.core import json
+from webargs.multidictproxy import MultiDictProxy
 
 
 class DjangoParser(core.Parser):
@@ -33,41 +33,30 @@ class DjangoParser(core.Parser):
         the parser and returning the appropriate `HTTPResponse`.
     """
 
-    def parse_querystring(self, req, name, field):
-        """Pull the querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+    def _raw_load_json(self, req):
+        """Read a json payload from the request for the core parser's load_json"""
+        return core.parse_json(req.body)
 
-    def parse_form(self, req, name, field):
-        """Pull the form value from the request."""
-        return core.get_value(req.POST, name, field)
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.GET, schema)
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request body."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            try:
-                self._cache["json"] = json_data = core.parse_json(req.body)
-            except AttributeError:
-                return core.missing
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    return self.handle_invalid_json_error(e, req)
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.POST, schema)
 
-    def parse_cookies(self, req, name, field):
-        """Pull the value from the cookiejar."""
-        return core.get_value(req.COOKIES, name, field)
+    def load_cookies(self, req, schema):
+        """Return cookies from the request."""
+        return req.COOKIES
 
-    def parse_headers(self, req, name, field):
+    def load_headers(self, req, schema):
         raise NotImplementedError(
             "Header parsing not supported by {0}".format(self.__class__.__name__)
         )
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
-        return core.get_value(req.FILES, name, field)
+    def load_files(self, req, schema):
+        """Return files from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.FILES, schema)
 
     def get_request_from_view_args(self, view, args, kwargs):
         # The first argument is either `self` or `request`
@@ -75,9 +64,6 @@ class DjangoParser(core.Parser):
             return args[0].request
         except AttributeError:  # first arg is request
             return args[0]
-
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
-        raise error
 
 
 parser = DjangoParser()

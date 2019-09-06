@@ -135,7 +135,7 @@ class CommonTestCase(object):
     # https://github.com/marshmallow-code/webargs/issues/427
     def test_parse_json_with_nonutf8_chars(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             b"\xfe",
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
@@ -145,7 +145,7 @@ class CommonTestCase(object):
         assert res.json == {"json": ["Invalid JSON body."]}
 
     def test_validation_error_returns_422_response(self, testapp):
-        res = testapp.post("/echo_json", {"name": "b"}, expect_errors=True)
+        res = testapp.post_json("/echo_json", {"name": "b"}, expect_errors=True)
         assert res.status_code == 422
 
     def test_user_validation_error_returns_422_response_by_default(self, testapp):

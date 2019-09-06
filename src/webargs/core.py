@@ -445,11 +445,57 @@ class Parser(object):
         self.error_callback = func
         return func
 
-    # Abstract Methods
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+        """Internal hook for overriding treatment of JSONDecodeErrors.
+
+        Invoked by default `load_json` implementation.
+
+        External parsers can just implement their own behavior for load_json ,
+        so this is not part of the public parser API.
+        """
+        raise error
 
     def load_json(self, req, schema):
         """Load JSON from a request object or return `missing` if no value can
         be found.
+        """
+        # NOTE: althought this implementation is real/concrete and used by
+        # several of the parsers in webargs, it relies on the internal hooks
+        # `_handle_invalid_json_error` and `_raw_load_json`
+        # these methods are not part of the public API and are used to simplify
+        # code sharing amongst the built-in webargs parsers
+        json_data = self._cache.get("json")
+        if json_data is None:
+            try:
+                json_data = self._raw_load_json(req)
+                if json_data is missing:
+                    return missing
+                self._cache["json"] = json_data
+            except json.JSONDecodeError as e:
+                if e.doc == "":
+                    return missing
+                else:
+                    return self._handle_invalid_json_error(e, req)
+            except UnicodeDecodeError as e:
+                return self._handle_invalid_json_error(e, req)
+
+        return json_data
+
+    # Abstract Methods
+
+    def _raw_load_json(self, req):
+        """Internal hook method for implementing load_json()
+
+        Get a request body for feeding in to `load_json`, and parse it either
+        using core.parse_json() or similar utilities which raise
+        JSONDecodeErrors.
+        Ensure consistent behavior when encountering decoding errors.
+
+        The default implementation here simply returns `missing`, and the default
+        implementation of `load_json` above will pass that value through.
+        However, by implementing a "mostly concrete" version of load_json with
+        this as a hook for getting data, we consolidate the logic for handling
+        those JSONDecodeErrors.
         """
         return missing
 

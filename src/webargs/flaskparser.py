@@ -23,7 +23,6 @@ import flask
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
-from webargs.core import json
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -54,60 +53,41 @@ class FlaskParser(core.Parser):
         **core.Parser.__location_map__
     )
 
-    def load_view_args(self, req, schema):
-        """Read the request's ``view_args`` or ``missing`` if there are none."""
-        return req.view_args or core.missing
-
-    def load_json(self, req, schema):
-        """Read a json payload from the request.
+    def _raw_load_json(self, req):
+        """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req):
             return core.missing
 
-        json_data = self._cache.get("json")
-        if json_data is None:
-            # We decode the json manually here instead of
-            # using req.get_json() so that we can handle
-            # JSONDecodeErrors consistently
-            data = req.get_data(cache=True)
-            try:
-                self._cache["json"] = json_data = core.parse_json(data)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    return self.handle_invalid_json_error(e, req)
+        return core.parse_json(req.get_data(cache=True))
 
-        return json_data
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
+
+    def load_view_args(self, req, schema):
+        """Return the request's ``view_args`` or ``missing`` if there are none."""
+        return req.view_args or core.missing
 
     def load_querystring(self, req, schema):
-        """Read query params from the request.
-
-        Is a multidict."""
+        """Return query params from the request as a MultiDictProxy."""
         return MultiDictProxy(req.args, schema)
 
     def load_form(self, req, schema):
-        """Read form values from the request.
-
-        Is a multidict."""
+        """Return form values from the request as a MultiDictProxy."""
         return MultiDictProxy(req.form, schema)
 
     def load_headers(self, req, schema):
-        """Read headers from the request.
-
-        Is a multidict."""
+        """Return headers from the request as a MultiDictProxy."""
         return MultiDictProxy(req.headers, schema)
 
     def load_cookies(self, req, schema):
-        """Read cookies from the request."""
+        """Return cookies from the request."""
         return req.cookies
 
     def load_files(self, req, schema):
-        """Read files from the request.
-
-        Is a multidict."""
+        """Return files from the request as a MultiDictProxy."""
         return MultiDictProxy(req.files, schema)
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
@@ -122,9 +102,6 @@ class FlaskParser(core.Parser):
             schema=schema,
             headers=error_headers,
         )
-
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
-        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""

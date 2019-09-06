@@ -23,12 +23,12 @@ class TestDjangoParser(CommonTestCase):
 
     def test_parsing_in_class_based_view(self, testapp):
         assert testapp.get("/echo_cbv?name=Fred").json == {"name": "Fred"}
-        assert testapp.post("/echo_cbv", {"name": "Fred"}).json == {"name": "Fred"}
+        assert testapp.post_json("/echo_cbv", {"name": "Fred"}).json == {"name": "Fred"}
 
     def test_use_args_in_class_based_view(self, testapp):
         res = testapp.get("/echo_use_args_cbv?name=Fred")
         assert res.json == {"name": "Fred"}
-        res = testapp.post("/echo_use_args_cbv", {"name": "Fred"})
+        res = testapp.post_json("/echo_use_args_cbv", {"name": "Fred"})
         assert res.json == {"name": "Fred"}
 
     def test_use_args_in_class_based_view_with_path_param(self, testapp):

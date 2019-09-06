@@ -2,12 +2,17 @@ from django.conf.urls import url
 
 from tests.apps.django_app.echo import views
 
+
 urlpatterns = [
     url(r"^echo$", views.echo),
-    url(r"^echo_query$", views.echo_query),
+    url(r"^echo_form$", views.echo_form),
+    url(r"^echo_json$", views.echo_json),
     url(r"^echo_use_args$", views.echo_use_args),
+    url(r"^echo_use_args_validated$", views.echo_use_args_validated),
     url(r"^echo_use_kwargs$", views.echo_use_kwargs),
     url(r"^echo_multi$", views.echo_multi),
+    url(r"^echo_multi_form$", views.echo_multi_form),
+    url(r"^echo_multi_json$", views.echo_multi_json),
     url(r"^echo_many_schema$", views.echo_many_schema),
     url(
         r"^echo_use_args_with_path_param/(?P<name>\w+)$",
