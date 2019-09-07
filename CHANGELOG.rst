@@ -1,12 +1,12 @@
 Changelog
 ---------
 
-5.5.0 (unreleased)
+5.5.0 (2019-09-07)
 ******************
 
 Support:
 
-* Various docs updates (:pr:`414`).
+* Various docs updates (:pr:`414`, :pr:`421`).
 
 Refactoring:
 
