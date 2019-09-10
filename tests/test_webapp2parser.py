@@ -7,11 +7,13 @@ except ImportError:  # PY2
 from webargs.core import json
 
 import pytest
+import marshmallow as ma
 from marshmallow import fields, ValidationError
 
 import webtest
 import webapp2
 from webargs.webapp2parser import parser
+from webargs.core import MARSHMALLOW_VERSION_INFO
 
 hello_args = {"name": fields.Str(missing="World")}
 
@@ -25,32 +27,43 @@ hello_validate = {
 }
 
 
+class HelloSchema(ma.Schema):
+    name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
+
+
+# variant which ignores unknown fields
+exclude_kwargs = (
+    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
+)
+hello_exclude_schema = HelloSchema(**exclude_kwargs)
+
+
 def test_parse_querystring_args():
     request = webapp2.Request.blank("/echo?name=Fred")
-    assert parser.parse(hello_args, req=request) == {"name": "Fred"}
+    assert parser.parse(hello_args, req=request, location="query") == {"name": "Fred"}
 
 
 def test_parse_querystring_multiple():
     expected = {"name": ["steve", "Loria"]}
     request = webapp2.Request.blank("/echomulti?name=steve&name=Loria")
-    assert parser.parse(hello_multiple, req=request) == expected
+    assert parser.parse(hello_multiple, req=request, location="query") == expected
 
 
 def test_parse_form():
     expected = {"name": "Joe"}
     request = webapp2.Request.blank("/echo", POST=expected)
-    assert parser.parse(hello_args, req=request) == expected
+    assert parser.parse(hello_args, req=request, location="form") == expected
 
 
 def test_parse_form_multiple():
     expected = {"name": ["steve", "Loria"]}
     request = webapp2.Request.blank("/echo", POST=urlencode(expected, doseq=True))
-    assert parser.parse(hello_multiple, req=request) == expected
+    assert parser.parse(hello_multiple, req=request, location="form") == expected
 
 
 def test_parsing_form_default():
     request = webapp2.Request.blank("/echo", POST="")
-    assert parser.parse(hello_args, req=request) == {"name": "World"}
+    assert parser.parse(hello_args, req=request, location="form") == {"name": "World"}
 
 
 def test_parse_json():
@@ -95,13 +108,15 @@ def test_parsing_cookies():
     request = webapp2.Request.blank(
         "/", headers={"Cookie": response.headers["Set-Cookie"]}
     )
-    assert parser.parse(hello_args, req=request, locations=("cookies",)) == expected
+    assert parser.parse(hello_args, req=request, location="cookies") == expected
 
 
 def test_parsing_headers():
     expected = {"name": "Fred"}
     request = webapp2.Request.blank("/", headers=expected)
-    assert parser.parse(hello_args, req=request, locations=("headers",)) == expected
+    assert (
+        parser.parse(hello_exclude_schema, req=request, location="headers") == expected
+    )
 
 
 def test_parse_files():
@@ -110,7 +125,7 @@ def test_parse_files():
     """
 
     class Handler(webapp2.RequestHandler):
-        @parser.use_args({"myfile": fields.List(fields.Field())}, locations=("files",))
+        @parser.use_args({"myfile": fields.List(fields.Field())}, location="files")
         def post(self, args):
             self.response.content_type = "application/json"
 
@@ -130,13 +145,13 @@ def test_parse_files():
 def test_exception_on_validation_error():
     request = webapp2.Request.blank("/", POST={"num": "3"})
     with pytest.raises(ValidationError):
-        parser.parse(hello_validate, req=request)
+        parser.parse(hello_validate, req=request, location="form")
 
 
 def test_validation_error_with_message():
     request = webapp2.Request.blank("/", POST={"num": "3"})
     with pytest.raises(ValidationError) as exc:
-        parser.parse(hello_validate, req=request)
+        parser.parse(hello_validate, req=request, location="form")
         assert "Houston, we've had a problem." in exc.value
 
 
@@ -148,4 +163,4 @@ def test_default_app_request():
     request = webapp2.Request.blank("/echo", POST=expected)
     app = webapp2.WSGIApplication([])
     app.set_globals(app, request)
-    assert parser.parse(hello_args) == expected
+    assert parser.parse(hello_args, location="form") == expected

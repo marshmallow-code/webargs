@@ -19,7 +19,7 @@ class TestFalconParser(CommonTestCase):
     # https://github.com/marshmallow-code/webargs/issues/427
     def test_parse_json_with_nonutf8_chars(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             b"\xfe",
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
@@ -31,10 +31,15 @@ class TestFalconParser(CommonTestCase):
     # https://github.com/sloria/webargs/issues/329
     def test_invalid_json(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             '{"foo": "bar", }',
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
         )
         assert res.status_code == 400
         assert res.json["errors"] == {"json": ["Invalid JSON body."]}
+
+    # Falcon converts headers to all-caps
+    def test_parsing_headers(self, testapp):
+        res = testapp.get("/echo_headers", headers={"name": "Fred"})
+        assert res.json == {"NAME": "Fred"}

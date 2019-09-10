@@ -459,7 +459,7 @@ class Parser(object):
         """Load JSON from a request object or return `missing` if no value can
         be found.
         """
-        # NOTE: althought this implementation is real/concrete and used by
+        # NOTE: although this implementation is real/concrete and used by
         # several of the parsers in webargs, it relies on the internal hooks
         # `_handle_invalid_json_error` and `_raw_load_json`
         # these methods are not part of the public API and are used to simplify

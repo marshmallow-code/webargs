@@ -5,7 +5,6 @@ import falcon
 from falcon.util.uri import parse_query_string
 
 from webargs import core
-from webargs.core import json
 from webargs.multidictproxy import MultiDictProxy
 
 HTTP_422 = "422 Unprocessable Entity"
@@ -29,23 +28,6 @@ del _find_exceptions
 def is_json_request(req):
     content_type = req.get_header("Content-Type")
     return content_type and core.is_json(content_type)
-
-
-def parse_json_body(req):
-    if req.content_length in (None, 0):
-        # Nothing to do
-        return {}
-    if is_json_request(req):
-        body = req.stream.read()
-        if body:
-            try:
-                return core.parse_json(body)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    raise
-    return {}
 
 
 # NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
@@ -93,12 +75,20 @@ class HTTPError(falcon.HTTPError):
 class FalconParser(core.Parser):
     """Falcon request argument parser."""
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.params, name, field)
+    # Note on the use of MultiDictProxy throughout:
+    # Falcon parses query strings and form values into ordinary dicts, but with
+    # the values listified where appropriate
+    # it is still therefore necessary in these cases to wrap them in
+    # MultiDictProxy because we need to use the schema to determine when single
+    # values should be wrapped in lists due to the type of the destination
+    # field
 
-    def location_load_form(self, req, schema):
-        """Pull a form value from the request.
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.params, schema)
+
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy
 
         .. note::
 
@@ -111,42 +101,42 @@ class FalconParser(core.Parser):
             return form
         return MultiDictProxy(form, schema)
 
-    def parse_json(self, req, name, field):
-        """Pull a JSON body value from the request.
+    def _raw_load_json(self, req):
+        """Return a json payload from the request for the core parser's load_json
 
-        .. note::
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req) or req.content_length in (None, 0):
+            return core.missing
+        body = req.stream.read()
+        if body:
+            return core.parse_json(body)
+        else:
+            return core.missing
 
-            The request stream will be read and left at EOF.
-        """
-        json_data = self._cache.get("json_data")
-        if json_data is None:
-            try:
-                self._cache["json_data"] = json_data = parse_json_body(req)
-            except json.JSONDecodeError as e:
-                return self.handle_invalid_json_error(e, req)
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+    def load_headers(self, req, schema):
+        """Return headers from the request."""
+        # Falcon only exposes headers as a dict (not multidict)
+        return req.headers
 
-    def parse_headers(self, req, name, field):
-        """Pull a header value from the request."""
-        # Use req.get_headers rather than req.headers for performance
-        return req.get_header(name, required=False) or core.missing
-
-    def parse_cookies(self, req, name, field):
-        """Pull a cookie value from the request."""
-        cookies = self._cache.get("cookies")
-        if cookies is None:
-            self._cache["cookies"] = cookies = req.cookies
-        return core.get_value(cookies, name, field)
+    def load_cookies(self, req, schema):
+        """Return cookies from the request."""
+        # Cookies are expressed in Falcon as a dict, but the possibility of
+        # multiple values for a cookie is preserved internally -- if desired in
+        # the future, webargs could add a MultiDict type for Cookies here built
+        # from (req, schema), but Falcon does not provide one out of the box
+        return req.cookies
 
     def get_request_from_view_args(self, view, args, kwargs):
         """Get request from a resource method's arguments. Assumes that
         request is the second argument.
         """
         req = args[1]
-        assert isinstance(req, falcon.Request), "Argument is not a falcon.Request"
+        if not isinstance(req, falcon.Request):
+            raise TypeError("Argument is not a falcon.Request")
         return req
 
-    def parse_files(self, req, name, field):
+    def load_files(self, req, schema):
         raise NotImplementedError(
             "Parsing files not yet supported by {0}".format(self.__class__.__name__)
         )
@@ -158,7 +148,7 @@ class FalconParser(core.Parser):
             raise LookupError("Status code {0} not supported".format(error_status_code))
         raise HTTPError(status, errors=error.messages, headers=error_headers)
 
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
         status = status_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise HTTPError(status, errors=messages)
