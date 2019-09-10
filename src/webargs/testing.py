@@ -70,10 +70,10 @@ class CommonTestCase(object):
         )
         assert res.json == {"name": "Steve"}
 
-    def test_parse_json_ignores_extra_data(self, testapp):
-        assert testapp.post_json("/echo_json", {"extra": "data"}).json == {
-            "name": "World"
-        }
+    def test_parse_ignore_extra_data(self, testapp):
+        assert testapp.post_json(
+            "/echo_ignoring_extra_data", {"extra": "data"}
+        ).json == {"name": "World"}
 
     def test_parse_json_empty(self, testapp):
         assert testapp.post_json("/echo_json", {}).json == {"name": "World"}

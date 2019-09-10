@@ -23,6 +23,7 @@ import flask
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
+from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -95,6 +96,16 @@ class FlaskParser(core.Parser):
         responds with a 422 error.
         """
         status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        # on marshmallow 2, a many schema receiving a non-list value will
+        # produce this specific error back -- reformat it to match the
+        # marshmallow 3 message so that Flask can properly encode it
+        messages = error.messages
+        if (
+            MARSHMALLOW_VERSION_INFO[0] < 3
+            and schema.many
+            and messages == {0: {}, "_schema": ["Invalid input type."]}
+        ):
+            messages.pop(0)
         abort(
             status_code,
             exc=error,

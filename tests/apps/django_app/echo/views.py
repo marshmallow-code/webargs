@@ -3,26 +3,27 @@ from django.http import HttpResponse
 from django.views.generic import View
 
 import marshmallow as ma
-from webargs import fields, dict2schema
+from webargs import fields
 from webargs.djangoparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
-if MARSHMALLOW_VERSION_INFO[0] < 3:
-    schema_kwargs = {"strict": True}
-else:
-    schema_kwargs = {"unknown": ma.EXCLUDE}
 
-hello_args = dict2schema(
-    {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
-)(**schema_kwargs)
-hello_multiple = dict2schema({"name": fields.List(fields.Str())})(**schema_kwargs)
+hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
+hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
 
 
-hello_many_schema = HelloSchema(many=True, **schema_kwargs)
+strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
+hello_many_schema = HelloSchema(many=True, **strict_kwargs)
+
+# variant which ignores unknown fields
+exclude_kwargs = (
+    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
+)
+hello_exclude_schema = HelloSchema(**exclude_kwargs)
 
 
 def json_response(data, **kwargs):
@@ -68,6 +69,11 @@ def echo_use_args(request, args):
 )
 def echo_use_args_validated(args):
     return json_response(args)
+
+
+@handle_view_errors
+def echo_ignoring_extra_data(request):
+    return json_response(parser.parse(hello_exclude_schema, request))
 
 
 @handle_view_errors
@@ -119,7 +125,9 @@ def always_error(request):
 
 @handle_view_errors
 def echo_headers(request):
-    return json_response(parser.parse(hello_args, request, location="headers"))
+    return json_response(
+        parser.parse(hello_exclude_schema, request, location="headers")
+    )
 
 
 @handle_view_errors

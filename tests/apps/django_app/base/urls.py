@@ -9,6 +9,7 @@ urlpatterns = [
     url(r"^echo_json$", views.echo_json),
     url(r"^echo_use_args$", views.echo_use_args),
     url(r"^echo_use_args_validated$", views.echo_use_args_validated),
+    url(r"^echo_ignoring_extra_data$", views.echo_ignoring_extra_data),
     url(r"^echo_use_kwargs$", views.echo_use_kwargs),
     url(r"^echo_multi$", views.echo_multi),
     url(r"^echo_multi_form$", views.echo_multi_form),

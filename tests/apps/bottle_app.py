@@ -2,27 +2,27 @@ from webargs.core import json
 from bottle import Bottle, HTTPResponse, debug, request, response
 
 import marshmallow as ma
-from webargs import fields, dict2schema
+from webargs import fields
 from webargs.bottleparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
-if MARSHMALLOW_VERSION_INFO[0] < 3:
-    schema_kwargs = {"strict": True}
-else:
-    schema_kwargs = {"unknown": ma.EXCLUDE}
 
-
-hello_args = dict2schema(
-    {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
-)(**schema_kwargs)
-hello_multiple = dict2schema({"name": fields.List(fields.Str())})(**schema_kwargs)
+hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
+hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
 
 
-hello_many_schema = HelloSchema(many=True, **schema_kwargs)
+strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
+hello_many_schema = HelloSchema(many=True, **strict_kwargs)
+
+# variant which ignores unknown fields
+exclude_kwargs = (
+    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
+)
+hello_exclude_schema = HelloSchema(**exclude_kwargs)
 
 
 app = Bottle()
@@ -61,6 +61,11 @@ def echo_use_args(args):
 )
 def echo_use_args_validated(args):
     return args
+
+
+@app.route("/echo_ignoring_extra_data", method=["POST"])
+def echo_json_ignore_extra_data():
+    return parser.parse(hello_exclude_schema)
 
 
 @app.route(
@@ -118,7 +123,9 @@ def always_error():
 
 @app.route("/echo_headers")
 def echo_headers():
-    return parser.parse(hello_args, request, location="headers")
+    # the "exclude schema" must be used in this case because WSGI headers may
+    # be populated with many fields not sent by the caller
+    return parser.parse(hello_exclude_schema, request, location="headers")
 
 
 @app.route("/echo_cookie")
