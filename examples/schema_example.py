@@ -9,12 +9,12 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ pip install httpie
     $ http GET :5001/users/
     $ http GET :5001/users/42
-    $ http POST :5001/users/ usename=brian first_name=Brian last_name=May
+    $ http POST :5001/users/ username=brian first_name=Brian last_name=May
     $ http PATCH :5001/users/42 username=freddie
     $ http GET :5001/users/ limit==1
 """
 import functools
-from flask import Flask, request, jsonify
+from flask import Flask, request
 import random
 
 from marshmallow import Schema, fields, post_dump
@@ -22,7 +22,7 @@ from webargs.flaskparser import parser, use_kwargs
 
 app = Flask(__name__)
 
-##### Fake database and models #####
+##### Fake database and model #####
 
 
 class Model:
@@ -59,7 +59,7 @@ db = {"users": {}}
 ##### use_schema #####
 
 
-def use_schema(schema, list_view=False, locations=None):
+def use_schema(schema_cls, list_view=False, locations=None):
     """View decorator for using a marshmallow schema to
         (1) parse a request's input and
         (2) serializing the view's output to a JSON response.
@@ -68,12 +68,13 @@ def use_schema(schema, list_view=False, locations=None):
     def decorator(func):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
+            partial = request.method != "POST"
+            schema = schema_cls(partial=partial)
             use_args_wrapper = parser.use_args(schema, locations=locations)
             # Function wrapped with use_args
             func_with_args = use_args_wrapper(func)
             ret = func_with_args(*args, **kwargs)
-            # Serialize and jsonify the return value
-            return jsonify(schema.dump(ret, many=list_view).data)
+            return schema.dump(ret, many=list_view)
 
         return wrapped
 
@@ -85,7 +86,7 @@ def use_schema(schema, list_view=False, locations=None):
 
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
-    username = fields.Str()
+    username = fields.Str(required=True)
     first_name = fields.Str()
     last_name = fields.Str()
 
@@ -98,11 +99,11 @@ class UserSchema(Schema):
 
 
 @app.route("/users/<int:user_id>", methods=["GET", "PATCH"])
-@use_schema(UserSchema())
+@use_schema(UserSchema)
 def user_detail(reqargs, user_id):
     user = db["users"].get(user_id)
     if not user:
-        return jsonify({"message": "User not found"}), 404
+        return {"message": "User not found"}, 404
     if request.method == "PATCH" and reqargs:
         user.update(**reqargs)
     return user
@@ -111,7 +112,7 @@ def user_detail(reqargs, user_id):
 # You can add additional arguments with use_kwargs
 @app.route("/users/", methods=["GET", "POST"])
 @use_kwargs({"limit": fields.Int(missing=10, location="query")})
-@use_schema(UserSchema(), list_view=True)
+@use_schema(UserSchema, list_view=True)
 def user_list(reqargs, limit):
     users = db["users"].values()
     if request.method == "POST":
@@ -131,9 +132,9 @@ def handle_validation_error(err):
         headers = None
         messages = ["Invalid request."]
     if headers:
-        return jsonify({"errors": messages}), err.code, headers
+        return {"errors": messages}, err.code, headers
     else:
-        return jsonify({"errors": messages}), err.code
+        return {"errors": messages}, err.code
 
 
 if __name__ == "__main__":
