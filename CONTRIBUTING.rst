@@ -19,21 +19,8 @@ Questions, Feature Requests, Bug Reports, and Feedback…
 Contributing Code
 -----------------
 
-In General
-++++++++++
-
-- `PEP 8`_, when sensible.
-- Test ruthlessly. Write docs for new features.
-- Even more important than Test-Driven Development--*Human-Driven Development*.
-
-.. _`PEP 8`: http://www.python.org/dev/peps/pep-0008/
-
-In Particular
-+++++++++++++
-
-
 Integration with a Another Web Framework…
-*****************************************
++++++++++++++++++++++++++++++++++++++++++
 
 …should be released as a separate package.
 
@@ -45,7 +32,7 @@ framework integration as a separate package and add it to the
 the `GitHub wiki <https://github.com/marshmallow-code/webargs/wiki/Ecosystem>`_ .
 
 Setting Up for Local Development
-********************************
+++++++++++++++++++++++++++++++++
 
 1. Fork webargs_ on GitHub.
 
@@ -72,10 +59,11 @@ Setting Up for Local Development
 
 .. note::
 
-    webargs uses `black <https://github.com/ambv/black>`_ for code formatting, which is only compatible with Python>=3.6. Therefore, the ``pre-commit install`` command will only work if you have the ``python3.6`` interpreter installed.
+    webargs uses `black <https://github.com/ambv/black>`_ for code formatting, which is only compatible with Python>=3.6.
+    Therefore, the pre-commit hooks require a minimum Python version of 3.6.
 
 Git Branch Structure
-********************
+++++++++++++++++++++
 
 Webargs abides by the following branching model:
 
@@ -89,7 +77,7 @@ Webargs abides by the following branching model:
 **Always make a new branch for your work**, no matter how small. Also, **do not put unrelated changes in the same branch or pull request**. This makes it more difficult to merge your changes.
 
 Pull Requests
-**************
+++++++++++++++
 
 1. Create a new local branch.
 
@@ -117,7 +105,7 @@ Pull Requests
 The `CI <https://dev.azure.com/sloria/sloria/_build/latest?definitionId=6&branchName=dev>`_ build must be passing before your pull request is merged.
 
 Running Tests
-*************
++++++++++++++
 
 To run all tests: ::
 
@@ -127,12 +115,12 @@ To run syntax checks: ::
 
     $ tox -e lint
 
-(Optional) To run tests on Python 2.7, 3.5, 3.6, and 3.7 virtual environments (must have each interpreter installed): ::
+(Optional) To run tests in all supported Python versions in their own virtual environments (must have each interpreter installed): ::
 
     $ tox
 
 Documentation
-*************
++++++++++++++
 
 Contributions to the documentation are welcome. Documentation is written in `reStructured Text`_ (rST). A quick rST reference can be found `here <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_. Builds are powered by Sphinx_.
 
@@ -143,7 +131,7 @@ To build the docs in "watch" mode: ::
 Changes in the `docs/` directory will automatically trigger a rebuild.
 
 Contributing Examples
-*********************
++++++++++++++++++++++
 
 Have a usage example you'd like to share? Feel free to add it to the `examples <https://github.com/marshmallow-code/webargs/tree/dev/examples>`_ directory and send a pull request.
 
