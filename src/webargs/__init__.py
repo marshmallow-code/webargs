@@ -9,6 +9,6 @@ from webargs.core import ValidationError
 from webargs.dict2schema import dict2schema
 from webargs import fields
 
-__version__ = "5.5.0"
+__version__ = "5.5.1"
 __version_info__ = tuple(LooseVersion(__version__).version)
 __all__ = ("dict2schema", "ValidationError", "fields", "missing", "validate")
