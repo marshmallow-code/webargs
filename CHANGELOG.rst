@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+5.5.1 (unreleased)
+******************
+
+Bug fixes:
+
+* Remove usage of deprecated ``Field.fail`` when using marshmallow 3.
+
 5.5.0 (2019-09-07)
 ******************
 
