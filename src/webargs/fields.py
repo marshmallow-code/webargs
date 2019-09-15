@@ -21,6 +21,7 @@ import marshmallow as ma
 
 # Expose all fields from marshmallow.fields.
 from marshmallow.fields import *  # noqa: F40
+from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.dict2schema import dict2schema
 
 __all__ = ["DelimitedList"] + ma.fields.__all__
@@ -73,5 +74,8 @@ class DelimitedList(ma.fields.List):
                 else value.split(self.delimiter)
             )
         except AttributeError:
-            self.fail("invalid")
+            if MARSHMALLOW_VERSION_INFO[0] < 3:
+                self.fail("invalid")
+            else:
+                raise self.make_error("invalid")
         return super(DelimitedList, self)._deserialize(ret, attr, data, **kwargs)
