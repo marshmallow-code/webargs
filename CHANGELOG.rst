@@ -12,6 +12,12 @@ Features:
   on schemas may be used to alter this. For example,
   `unknown=marshmallow.EXCLUDE` will produce behavior similar to webargs v5
 
+Bug fixes:
+
+* *Backwards-incompatible*: all parsers now require the Content-Type to be set
+  correctly when processing JSON request bodies. This impacts ``DjangoParser``,
+  ``FalconParser``, ``FlaskParser``, and ``PyramidParser``
+
 Refactoring:
 
 * *Backwards-incompatible*: Schema fields may not specify a location any

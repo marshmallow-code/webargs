@@ -22,9 +22,9 @@ When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decor
 
 
     @app.route("/user/<int:uid>")
-    @use_args({"per_page": fields.Int()})
+    @use_args({"per_page": fields.Int()}, location="query")
     def user_detail(args, uid):
-        return ("The user page for user {uid}, " "showing {per_page} posts.").format(
+        return ("The user page for user {uid}, showing {per_page} posts.").format(
             uid=uid, per_page=args["per_page"]
         )
 
@@ -64,7 +64,7 @@ The `FlaskParser` supports parsing values from a request's ``view_args``.
 
 
     @app.route("/greeting/<name>/")
-    @use_args({"name": fields.Str(location="view_args")})
+    @use_args({"name": fields.Str()}, location="view_args")
     def greeting(args, **kwargs):
         return "Hello {}".format(args["name"])
 
@@ -95,7 +95,7 @@ When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` dec
   }
 
 
-  @use_args(account_args)
+  @use_args(account_args, location="form")
   def login_user(request, args):
       if request.method == "POST":
           login(args["username"], args["password"])
@@ -114,7 +114,7 @@ When using the :meth:`use_args <webargs.djangoparser.DjangoParser.use_args>` dec
 
 
     class BlogPostView(View):
-        @use_args(blog_args)
+        @use_args(blog_args, location="query")
         def get(self, request, args):
             blog_post = Post.objects.get(title__iexact=args["title"], author=args["author"])
             return render_to_response("post_template.html", {"post": blog_post})
@@ -239,7 +239,7 @@ When using the :meth:`use_args <webargs.pyramidparser.PyramidParser.use_args>` d
     from webargs.pyramidparser import use_args
 
 
-    @use_args({"uid": fields.Str(), "per_page": fields.Int()})
+    @use_args({"uid": fields.Str(), "per_page": fields.Int()}, location="query")
     def user_detail(request, args):
         uid = args["uid"]
         return Response(
@@ -261,7 +261,7 @@ The `PyramidParser` supports parsing values from a request's matchdict.
     from webargs.pyramidparser import use_args
 
 
-    @use_args({"mymatch": fields.Int()}, locations=("matchdict",))
+    @use_args({"mymatch": fields.Int()}, location="matchdict")
     def matched(request, args):
         return Response("The value for mymatch is {}".format(args["mymatch"]))
 
@@ -317,7 +317,7 @@ You can easily implement hooks by using `parser.parse <webargs.falconparser.Falc
         return hook
 
 
-    @falcon.before(add_args({"page": fields.Int(location="query")}))
+    @falcon.before(add_args({"page": fields.Int()}, location="query"))
     class AuthorResource:
         def on_get(self, req, resp):
             args = req.context["args"]
@@ -414,7 +414,7 @@ The `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser>` supports parsing value
     from webargs.aiohttpparser import use_args
 
 
-    @parser.use_args({"slug": fields.Str(location="match_info")})
+    @parser.use_args({"slug": fields.Str()}, location="match_info")
     def article_detail(request, args):
         return web.Response(body="Slug: {}".format(args["slug"]).encode("utf-8"))
 

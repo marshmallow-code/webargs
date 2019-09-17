@@ -23,17 +23,11 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
         "nickname": fields.List(fields.Str()),
         # Delimited list, e.g. "/?languages=python,javascript"
         "languages": fields.DelimitedList(fields.Str()),
-        # When you know where an argument should be parsed from
-        "active": fields.Bool(location="query"),
         # When value is keyed on a variable-unsafe name
         # or you want to rename a key
-        "content_type": fields.Str(load_from="Content-Type", location="headers"),
+        "user_type": fields.Str(load_from="user-type"),
         # OR, on marshmallow 3
-        # "content_type": fields.Str(data_key="Content-Type", location="headers"),
-        # File uploads
-        "profile_image": fields.Field(
-            location="files", validate=lambda f: f.mimetype in ["image/jpeg", "image/png"]
-        ),
+        # "content_type": fields.Str(data_key="user-type"),
     }
 
 .. note::
@@ -105,12 +99,12 @@ As an alternative to `Parser.parse`, you can decorate your view with :meth:`use_
 Request "Locations"
 -------------------
 
-By default, webargs will search for arguments from the URL query string (e.g. ``"/?name=foo"``), form data, and JSON data (in that order). You can explicitly specify which locations to search, like so:
+By default, webargs will search for arguments from the request body as JSON. You can specify a different location from which to load data like so:
 
 .. code-block:: python
 
     @app.route("/register")
-    @use_args(user_args, locations=("json", "form"))
+    @use_args(user_args, location="form")
     def register(args):
         return "registration page"
 
@@ -243,7 +237,7 @@ Nesting Fields
 
 .. note::
 
-    By default, webargs only parses nested fields using the ``json`` request location. You can, however, :ref:`implement your own parser <custom-parsers>` to add nested field functionality to the other locations.
+    Of the default supported locations in webargs, only the ``json`` request location supports nested datastructures. You can, however, :ref:`implement your own data loader <custom-loaders>` to add nested field functionality to the other locations.
 
 Next Steps
 ----------
