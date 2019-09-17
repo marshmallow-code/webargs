@@ -101,12 +101,12 @@ def test_parse(parser, web_request):
 
 
 @pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=EXCLUDE added in marshmallow3"
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=... added in marshmallow3"
 )
-def test_parse_with_excluding_schema(parser, web_request):
+def test_parse_with_unknown_behavior_specified(parser, web_request):
     # This is new in webargs 6.x ; it's the way you can "get back" the behavior
     # of webargs 5.x in which extra args are ignored
-    from marshmallow import EXCLUDE
+    from marshmallow import EXCLUDE, INCLUDE, RAISE
 
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
 
@@ -114,12 +114,18 @@ def test_parse_with_excluding_schema(parser, web_request):
         username = fields.Field()
         password = fields.Field()
 
-    ret = parser.parse(CustomSchema(unknown=EXCLUDE), web_request)
-    assert {"username": 42, "password": 42} == ret
-
-    # but without unknown=EXCLUDE, it blows up
+    # with no unknown setting or unknown=RAISE, it blows up
     with pytest.raises(ValidationError, match="Unknown field."):
         parser.parse(CustomSchema(), web_request)
+    with pytest.raises(ValidationError, match="Unknown field."):
+        parser.parse(CustomSchema(unknown=RAISE), web_request)
+
+    # with unknown=EXCLUDE the data is omitted
+    ret = parser.parse(CustomSchema(unknown=EXCLUDE), web_request)
+    assert {"username": 42, "password": 42} == ret
+    # with unknown=INCLUDE it is added even though it isn't part of the schema
+    ret = parser.parse(CustomSchema(unknown=INCLUDE), web_request)
+    assert {"username": 42, "password": 42, "fjords": 42} == ret
 
 
 def test_parse_required_arg_raises_validation_error(parser, web_request):
