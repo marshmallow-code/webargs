@@ -112,7 +112,14 @@ def get_value(data, name, field, allow_many_nested=False):
 
 def parse_json(s, encoding="utf-8"):
     if isinstance(s, bytes):
-        s = s.decode(encoding)
+        try:
+            s = s.decode(encoding)
+        except UnicodeDecodeError as e:
+            raise json.JSONDecodeError(
+                "Bytes decoding error : {}".format(e.reason),
+                doc=str(e.object),
+                pos=e.start,
+            )
     return json.loads(s)
 
 

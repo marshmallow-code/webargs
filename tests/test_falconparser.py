@@ -16,6 +16,18 @@ class TestFalconParser(CommonTestCase):
     def test_use_args_hook(self, testapp):
         assert testapp.get("/echo_use_args_hook?name=Fred").json == {"name": "Fred"}
 
+    # https://github.com/marshmallow-code/webargs/issues/427
+    def test_parse_json_with_nonutf8_chars(self, testapp):
+        res = testapp.post(
+            "/echo",
+            b"\xfe",
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+            expect_errors=True,
+        )
+
+        assert res.status_code == 400
+        assert res.json["errors"] == {"json": ["Invalid JSON body."]}
+
     # https://github.com/sloria/webargs/issues/329
     def test_invalid_json(self, testapp):
         res = testapp.post(

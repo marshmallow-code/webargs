@@ -47,6 +47,9 @@ class BottleParser(core.Parser):
                     return core.missing
                 else:
                     return self.handle_invalid_json_error(e, req)
+            except UnicodeDecodeError as e:
+                return self.handle_invalid_json_error(e, req)
+
             if json_data is None:
                 return core.missing
         return core.get_value(json_data, name, field, allow_many_nested=True)
