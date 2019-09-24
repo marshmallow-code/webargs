@@ -37,6 +37,10 @@ from webargs.compat import text_type
 from webargs.multidictproxy import MultiDictProxy
 
 
+def is_json_request(req):
+    return core.is_json(req.headers.get("content-type"))
+
+
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
@@ -47,8 +51,13 @@ class PyramidParser(core.Parser):
     )
 
     def _raw_load_json(self, req):
-        """Return a json payload from the request for the core parser's
-        load_json"""
+        """Return a json payload from the request for the core parser's load_json
+
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req):
+            return core.missing
+
         return core.parse_json(req.body, req.charset)
 
     def load_querystring(self, req, schema):

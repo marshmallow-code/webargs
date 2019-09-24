@@ -22,6 +22,10 @@ from webargs import core
 from webargs.multidictproxy import MultiDictProxy
 
 
+def is_json_request(req):
+    return core.is_json(req.content_type)
+
+
 class DjangoParser(core.Parser):
     """Django request argument parser.
 
@@ -34,7 +38,13 @@ class DjangoParser(core.Parser):
     """
 
     def _raw_load_json(self, req):
-        """Read a json payload from the request for the core parser's load_json"""
+        """Read a json payload from the request for the core parser's load_json
+
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req):
+            return core.missing
+
         return core.parse_json(req.body)
 
     def load_querystring(self, req, schema):

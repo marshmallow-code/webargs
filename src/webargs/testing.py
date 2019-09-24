@@ -48,6 +48,9 @@ class CommonTestCase(object):
             "name": "Fred"
         }
 
+    def test_parse_json_missing(self, testapp):
+        assert testapp.post("/echo_json", "").json == {"name": "World"}
+
     def test_parse_querystring_default(self, testapp):
         assert testapp.get("/echo").json == {"name": "World"}
 
