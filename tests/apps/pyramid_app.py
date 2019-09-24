@@ -44,6 +44,16 @@ def echo_json(request):
         raise error
 
 
+def echo_json_or_form(request):
+    try:
+        return parser.parse(hello_args, request, location="json_or_form")
+    except json.JSONDecodeError:
+        error = HTTPBadRequest()
+        error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
+        error.content_type = "application/json"
+        raise error
+
+
 def echo_json_ignore_extra_data(request):
     try:
         return parser.parse(hello_exclude_schema, request)
@@ -163,6 +173,7 @@ def create_app():
     add_route(config, "/echo", echo)
     add_route(config, "/echo_form", echo_form)
     add_route(config, "/echo_json", echo_json)
+    add_route(config, "/echo_json_or_form", echo_json_or_form)
     add_route(config, "/echo_query", echo_query)
     add_route(config, "/echo_ignoring_extra_data", echo_json_ignore_extra_data)
     add_route(config, "/echo_use_args", echo_use_args)

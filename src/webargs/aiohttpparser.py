@@ -89,6 +89,14 @@ class AIOHTTPParser(AsyncParser):
             self._cache["post"] = await req.post()
         return MultiDictProxy(self._cache["post"], schema)
 
+    async def load_json_or_form(
+        self, req: Request, schema: Schema
+    ) -> typing.Union[typing.Dict, MultiDictProxy]:
+        data = await self.load_json(req, schema)
+        if data is not core.missing:
+            return data
+        return await self.load_form(req, schema)
+
     async def load_json(self, req: Request, schema: Schema) -> typing.Dict:
         """Return a parsed json payload from the request."""
         json_data = self._cache.get("json")

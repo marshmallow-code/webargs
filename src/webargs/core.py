@@ -131,6 +131,7 @@ class Parser(object):
         "headers": "load_headers",
         "cookies": "load_cookies",
         "files": "load_files",
+        "json_or_form": "load_json_or_form",
     }
 
     def __init__(self, location=None, error_handler=None, schema_class=None):
@@ -480,6 +481,18 @@ class Parser(object):
                 return self._handle_invalid_json_error(e, req)
 
         return json_data
+
+    def load_json_or_form(self, req, schema):
+        """Load data from a request, accepting either JSON or form-encoded
+        data.
+
+        The data will first be loaded as JSON, and, if that fails, it will be
+        loaded as a form post.
+        """
+        data = self.load_json(req, schema)
+        if data is not missing:
+            return data
+        return self.load_form(req, schema)
 
     # Abstract Methods
 

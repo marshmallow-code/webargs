@@ -58,6 +58,11 @@ def echo_json(request):
 
 
 @handle_view_errors
+def echo_json_or_form(request):
+    return json_response(parser.parse(hello_args, request, location="json_or_form"))
+
+
+@handle_view_errors
 @use_args(hello_args, location="query")
 def echo_use_args(request, args):
     return json_response(args)

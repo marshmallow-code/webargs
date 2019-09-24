@@ -55,6 +55,17 @@ async def echo_json(request):
     return json_response(parsed)
 
 
+async def echo_json_or_form(request):
+    try:
+        parsed = await parser.parse(hello_args, request, location="json_or_form")
+    except json.JSONDecodeError:
+        raise web.HTTPBadRequest(
+            body=json.dumps(["Invalid JSON."]).encode("utf-8"),
+            content_type="application/json",
+        )
+    return json_response(parsed)
+
+
 @use_args(hello_args, location="query")
 async def echo_use_args(request, args):
     return json_response(args)
@@ -200,6 +211,7 @@ def create_app():
     add_route(app, ["GET"], "/echo", echo)
     add_route(app, ["POST"], "/echo_form", echo_form)
     add_route(app, ["POST"], "/echo_json", echo_json)
+    add_route(app, ["POST"], "/echo_json_or_form", echo_json_or_form)
     add_route(app, ["GET"], "/echo_use_args", echo_use_args)
     add_route(app, ["GET"], "/echo_use_kwargs", echo_use_kwargs)
     add_route(app, ["POST"], "/echo_use_args_validated", echo_use_args_validated)

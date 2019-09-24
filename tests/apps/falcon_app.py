@@ -40,6 +40,12 @@ class EchoJSON(object):
         resp.body = json.dumps(parsed)
 
 
+class EchoJSONOrForm(object):
+    def on_post(self, req, resp):
+        parsed = parser.parse(hello_args, req, location="json_or_form")
+        resp.body = json.dumps(parsed)
+
+
 class EchoUseArgs(object):
     @use_args(hello_args, location="query")
     def on_get(self, req, resp, args):
@@ -160,6 +166,7 @@ def create_app():
     app.add_route("/echo", Echo())
     app.add_route("/echo_form", EchoForm())
     app.add_route("/echo_json", EchoJSON())
+    app.add_route("/echo_json_or_form", EchoJSONOrForm())
     app.add_route("/echo_use_args", EchoUseArgs())
     app.add_route("/echo_use_kwargs", EchoUseKwargs())
     app.add_route("/echo_use_args_validated", EchoUseArgsValidated())
