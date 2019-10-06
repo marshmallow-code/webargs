@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+5.5.2 (unreleased)
+******************
+
+Bug fixes:
+
+* Handle ``UnicodeDecodeError`` when parsing JSON payloads (:issue:`427`).
+  Thanks :user:`lindycoder` for the catch and patch.
+
 5.5.1 (2019-09-15)
 ******************
 
