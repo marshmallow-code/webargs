@@ -102,6 +102,9 @@ class AIOHTTPParser(AsyncParser):
                     return core.missing
                 else:
                     return self.handle_invalid_json_error(e, req)
+            except UnicodeDecodeError as e:
+                return self.handle_invalid_json_error(e, req)
+
             self._cache["json"] = json_data
         return core.get_value(json_data, name, field, allow_many_nested=True)
 
@@ -164,7 +167,11 @@ class AIOHTTPParser(AsyncParser):
         )
 
     def handle_invalid_json_error(
-        self, error: json.JSONDecodeError, req: Request, *args, **kwargs
+        self,
+        error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
+        req: Request,
+        *args,
+        **kwargs
     ) -> "typing.NoReturn":
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}

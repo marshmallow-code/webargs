@@ -40,3 +40,4 @@ Contributors (chronological)
 * Xiaoyu Lee <https://github.com/lee3164>
 * Jonathan Angelo <https://github.com/jangelo>
 * @zhenhua32 <https://github.com/zhenhua32>
+* Martin Roy <https://github.com/lindycoder>
