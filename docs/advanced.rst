@@ -77,6 +77,29 @@ When you need more flexibility in defining input schemas, you can pass a marshma
     Any `Schema <marshmallow.Schema>` passed to `use_kwargs <webargs.core.Parser.use_kwargs>` MUST deserialize to a dictionary of data. Keep this in mind when writing `post_load <marshmallow.decorators.post_load>` methods.
 
 
+marshmallow-dataclass Integration
+-----------------------
+
+Marshmallow dataclass can be used to provide schemas built from python3 dataclasses. However, these schemas will deserialize content into a dataclass and NOT a dictionary, meaning that `use_args <webargs.core.Parser.use_args>` must be used with a Schema or "Schema factory" instead of use_kwargs.
+
+
+.. code-block:: python
+
+    from marshmallow_dataclass import dataclass
+    from webargs.flaskparser import use_args
+
+
+    @dataclass
+    class Greeting:
+        name: str
+        prefix: str = "Hello"
+
+
+    @use_args(Greeting.Schema)
+    def profile_posts(greeting: Greeting):
+        return f"{greeting.prefix} {greeting.name}"
+
+
 Schema Factories
 ----------------
 
