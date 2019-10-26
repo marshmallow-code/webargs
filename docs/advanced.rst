@@ -73,31 +73,36 @@ When you need more flexibility in defining input schemas, you can pass a marshma
 .. warning::
     If you're using marshmallow 2, you should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
 
-.. warning::
-    Any `Schema <marshmallow.Schema>` passed to `use_kwargs <webargs.core.Parser.use_kwargs>` MUST deserialize to a dictionary of data. Keep this in mind when writing `post_load <marshmallow.decorators.post_load>` methods.
 
+When not to use `use_kwargs`
+----------------------------
 
-marshmallow-dataclass Integration
------------------------
-
-Marshmallow dataclass can be used to provide schemas built from python3 dataclasses. However, these schemas will deserialize content into a dataclass and NOT a dictionary, meaning that `use_args <webargs.core.Parser.use_args>` must be used with a Schema or "Schema factory" instead of use_kwargs.
-
+Any Schema passed to use_kwargs MUST deserialize to a dictionary of data. If you are relying on schemas that provide `post_load <marshmallow.decorators.post_load>` methods that end up transforming the result, then you should instead rely on use_args.
 
 .. code-block:: python
 
-    from marshmallow_dataclass import dataclass
+    from marshmallow import Schema, fields, post_load
     from webargs.flaskparser import use_args
 
+    class Rectangle:
+    def __init__(self, length, width):
+        self.length = length
+        self.width = width
 
-    @dataclass
-    class Greeting:
-        name: str
-        prefix: str = "Hello"
+    class RectangleSchema(Schema):
+        __model__ = Rectangle
+        length = fields.Float()
+        width = fields.Float()
 
+        @post_load
+        def make_object(self, data, **kwargs):
+            return self.__model__(**data)
 
-    @use_args(Greeting.Schema)
-    def profile_posts(greeting: Greeting):
-        return f"{greeting.prefix} {greeting.name}"
+    @use_args(RectangleSchema)
+    def post(self, rect: Rectangle):
+        return f"Area: {rect.length * rect.width}"
+
+For example, `marshmallow-dataclass <https://github.com/lovasoa/marshmallow_dataclass>`_ and `marshmallow-sqlalchemy <https://github.com/marshmallow-code/marshmallow-sqlalchemy>`_ can help generate schemas to be used with webargs. However, these schemas will deserialize content into a objects and models that can't be treated as dictionaries.
 
 
 Schema Factories
