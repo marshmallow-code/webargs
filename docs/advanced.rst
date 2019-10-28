@@ -74,10 +74,13 @@ When you need more flexibility in defining input schemas, you can pass a marshma
     If you're using marshmallow 2, you should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
 
 
-When not to use `use_kwargs`
-----------------------------
+When to avoid `use_kwargs`
+--------------------------
 
-Any Schema passed to use_kwargs MUST deserialize to a dictionary of data. If you are relying on schemas that provide `post_load <marshmallow.decorators.post_load>` methods that end up transforming the result, then you should instead rely on use_args.
+Any  `Schema <marshmallow.Schema>` passed to `use_kwargs <webargs.core.Parser.use_kwargs>` MUST deserialize to a dictionary of data.
+If your schema has a `post_load <marshmallow.decorators.post_load>` method 
+that returns a non-dictionary,
+you should use `use_args <webargs.core.Parser.use_args>` instead.
 
 .. code-block:: python
 
@@ -85,24 +88,24 @@ Any Schema passed to use_kwargs MUST deserialize to a dictionary of data. If you
     from webargs.flaskparser import use_args
 
     class Rectangle:
-    def __init__(self, length, width):
-        self.length = length
-        self.width = width
+        def __init__(self, length, width):
+            self.length = length
+            self.width = width
 
     class RectangleSchema(Schema):
-        __model__ = Rectangle
         length = fields.Float()
         width = fields.Float()
 
         @post_load
         def make_object(self, data, **kwargs):
-            return self.__model__(**data)
+            return Rectangle(**data)
 
     @use_args(RectangleSchema)
     def post(self, rect: Rectangle):
         return f"Area: {rect.length * rect.width}"
 
-For example, `marshmallow-dataclass <https://github.com/lovasoa/marshmallow_dataclass>`_ and `marshmallow-sqlalchemy <https://github.com/marshmallow-code/marshmallow-sqlalchemy>`_ can help generate schemas to be used with webargs. However, these schemas will deserialize content into a objects and models that can't be treated as dictionaries.
+Packages such as  `marshmallow-sqlalchemy <https://github.com/marshmallow-code/marshmallow-sqlalchemy>`_ and `marshmallow-dataclass <https://github.com/lovasoa/marshmallow_dataclass>`_ generate schemas that deserialize to non-dictionary objects.
+Therefore, `use_args <webargs.core.Parser.use_args>` should be used with those schemas.
 
 
 Schema Factories
