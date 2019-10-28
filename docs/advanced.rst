@@ -87,10 +87,12 @@ you should use `use_args <webargs.core.Parser.use_args>` instead.
     from marshmallow import Schema, fields, post_load
     from webargs.flaskparser import use_args
 
+
     class Rectangle:
         def __init__(self, length, width):
             self.length = length
             self.width = width
+
 
     class RectangleSchema(Schema):
         length = fields.Float()
@@ -99,6 +101,7 @@ you should use `use_args <webargs.core.Parser.use_args>` instead.
         @post_load
         def make_object(self, data, **kwargs):
             return Rectangle(**data)
+
 
     @use_args(RectangleSchema)
     def post(self, rect: Rectangle):
