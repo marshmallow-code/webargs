@@ -31,7 +31,7 @@ EXTRAS_REQUIRE = {
         'mypy==0.740; python_version >= "3.5"',
         "flake8==3.7.9",
         'flake8-bugbear==19.8.0; python_version >= "3.5"',
-        "pre-commit~=1.17",
+        "pre-commit~=1.20",
     ],
     "docs": ["Sphinx==2.2.1", "sphinx-issues==1.2.0", "sphinx-typlog-theme==0.8.0"]
     + FRAMEWORKS,
