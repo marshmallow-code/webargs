@@ -240,8 +240,9 @@ class Parser(object):
             which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse.
         :param str location: Where on the request to load values.
-            Can be one of ``('json', 'querystring', 'form', 'headers', 'cookies',
-            'files')``.
+            Can be any of the values in :py:attr:`~__location_map__`. By
+            default, that means one of ``('json', 'query', 'querystring',
+            'form', 'headers', 'cookies', 'files', 'json_or_form')``.
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
