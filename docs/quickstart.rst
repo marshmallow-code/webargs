@@ -27,7 +27,7 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
         # or you want to rename a key
         "user_type": fields.Str(load_from="user-type"),
         # OR, on marshmallow 3
-        # "content_type": fields.Str(data_key="user-type"),
+        # "user_type": fields.Str(data_key="user-type"),
     }
 
 .. note::

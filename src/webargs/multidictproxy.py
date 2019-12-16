@@ -29,18 +29,17 @@ class MultiDictProxy(Mapping):
 
     def __getitem__(self, key):
         val = self.data.get(key, missing)
-        if val is not missing and key in self.multiple_keys:
-            if hasattr(self.data, "getlist"):
-                return self.data.getlist(key)
-            elif hasattr(self.data, "getall"):
-                return self.data.getall(key)
-            elif isinstance(val, (list, tuple)):
-                return val
-            if val is None:
-                return None
-            else:
-                return [val]
-        return val
+        if val is missing or key not in self.multiple_keys:
+            return val
+        if hasattr(self.data, "getlist"):
+            return self.data.getlist(key)
+        elif hasattr(self.data, "getall"):
+            return self.data.getall(key)
+        elif isinstance(val, (list, tuple)):
+            return val
+        if val is None:
+            return None
+        return [val]
 
     def __delitem__(self, key):
         del self.data[key]

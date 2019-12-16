@@ -121,6 +121,14 @@ class CommonTestCase(object):
         expected = {"name": ["steve", "Loria"]}
         assert testapp.get("/echo_multi?name=steve&name=Loria").json == expected
 
+    # test that passing a single value parses correctly
+    # on parsers like falconparser, where there is no native MultiDict type,
+    # this verifies the usage of MultiDictProxy to ensure that single values
+    # are "listified"
+    def test_parse_querystring_multiple_single_value(self, testapp):
+        expected = {"name": ["steve"]}
+        assert testapp.get("/echo_multi?name=steve").json == expected
+
     def test_parse_form_multiple(self, testapp):
         expected = {"name": ["steve", "Loria"]}
         assert (
