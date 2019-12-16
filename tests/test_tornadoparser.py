@@ -161,7 +161,7 @@ class TestJSONArgs(object):
     def test_it_should_handle_value_error_on_parse_json(self):
         request = make_request("this is json not")
         result = parser.load_json(request, author_schema)
-        assert parser._cache.get("json", {}) == {}
+        assert parser._cache.get("json") == missing
         assert result is missing
 
 

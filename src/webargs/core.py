@@ -465,22 +465,19 @@ class Parser(object):
         # `_handle_invalid_json_error` and `_raw_load_json`
         # these methods are not part of the public API and are used to simplify
         # code sharing amongst the built-in webargs parsers
-        json_data = self._cache.get("json")
-        if json_data is None:
+        if "json" not in self._cache:
             try:
                 json_data = self._raw_load_json(req)
-                if json_data is missing:
-                    return missing
-                self._cache["json"] = json_data
             except json.JSONDecodeError as e:
                 if e.doc == "":
-                    return missing
+                    json_data = missing
                 else:
                     return self._handle_invalid_json_error(e, req)
             except UnicodeDecodeError as e:
                 return self._handle_invalid_json_error(e, req)
+            self._cache["json"] = json_data
 
-        return json_data
+        return self._cache["json"]
 
     def load_json_or_form(self, req, schema):
         """Load data from a request, accepting either JSON or form-encoded
