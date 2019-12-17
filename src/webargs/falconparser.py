@@ -67,7 +67,7 @@ def parse_form_body(req):
 
         if body:
             return parse_query_string(
-                body, keep_blank_qs_values=req.options.keep_blank_qs_values
+                body, keep_blank=req.options.keep_blank_qs_values
             )
     return {}
 
