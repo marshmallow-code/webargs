@@ -13,6 +13,9 @@ HTTP_422 = "422 Unprocessable Entity"
 status_map = {422: HTTP_422}
 
 
+FALCON_VERSION = falcon.__version__[0]
+
+
 # Collect all exceptions from falcon.status_codes
 def _find_exceptions():
     for name in filter(lambda n: n.startswith("HTTP"), dir(falcon.status_codes)):
@@ -65,9 +68,15 @@ def parse_form_body(req):
                 "will be ignored."
             )
 
+        if FALCON_VERSION == "1":
+            key = "keep_blank_qs_values"
+        elif FALCON_VERSION == "2":
+            key = "keep_blank"
+        kwargs = {key: req.options.keep_blank_qs_values}
+
         if body:
             return parse_query_string(
-                body, keep_blank=req.options.keep_blank_qs_values
+                body, **kwargs
             )
     return {}
 
