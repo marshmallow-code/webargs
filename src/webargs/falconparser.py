@@ -15,7 +15,7 @@ HTTP_422 = "422 Unprocessable Entity"
 status_map = {422: HTTP_422}
 
 
-FALCON_VERSION = tuple(LooseVersion(falcon.__version__).version)
+FALCON_VERSION_INFO = tuple(LooseVersion(falcon.__version__).version)
 
 
 # Collect all exceptions from falcon.status_codes
