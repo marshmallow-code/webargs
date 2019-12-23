@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
+from distutils.version import LooseVersion
+
 import falcon
 from falcon.util.uri import parse_query_string
 
@@ -13,7 +15,7 @@ HTTP_422 = "422 Unprocessable Entity"
 status_map = {422: HTTP_422}
 
 
-FALCON_VERSION = falcon.__version__[0]
+FALCON_VERSION = tuple(LooseVersion(falcon.__version__).version)
 
 
 # Collect all exceptions from falcon.status_codes
@@ -68,16 +70,14 @@ def parse_form_body(req):
                 "will be ignored."
             )
 
-        if FALCON_VERSION == "1":
+        if FALCON_VERSION_INFO[0] < 2:
             key = "keep_blank_qs_values"
-        elif FALCON_VERSION == "2":
+        else:
             key = "keep_blank"
         kwargs = {key: req.options.keep_blank_qs_values}
 
         if body:
-            return parse_query_string(
-                body, **kwargs
-            )
+            return parse_query_string(body, **kwargs)
     return {}
 
 
