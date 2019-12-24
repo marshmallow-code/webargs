@@ -70,13 +70,12 @@ def parse_form_body(req):
                 "will be ignored."
             )
 
-        if FALCON_VERSION_INFO[0] < 2:
-            key = "keep_blank_qs_values"
-        else:
-            key = "keep_blank"
-        kwargs = {key: req.options.keep_blank_qs_values}
-
         if body:
+            if FALCON_VERSION_INFO[0] < 2:
+                key = "keep_blank_qs_values"
+            else:
+                key = "keep_blank"
+            kwargs = {key: req.options.keep_blank_qs_values}
             return parse_query_string(body, **kwargs)
     return {}
 
