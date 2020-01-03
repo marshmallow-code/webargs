@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Pyramid request argument parsing.
 
 Example usage: ::
@@ -46,7 +45,7 @@ class PyramidParser(core.Parser):
     __location_map__ = dict(
         matchdict="load_matchdict",
         path="load_matchdict",
-        **core.Parser.__location_map__
+        **core.Parser.__location_map__,
     )
 
     def _raw_load_json(self, req):

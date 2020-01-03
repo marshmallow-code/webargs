@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Flask request argument parsing module.
 
 Example: ::
@@ -51,7 +50,7 @@ class FlaskParser(core.Parser):
     __location_map__ = dict(
         view_args="load_view_args",
         path="load_view_args",
-        **core.Parser.__location_map__
+        **core.Parser.__location_map__,
     )
 
     def _raw_load_json(self, req):

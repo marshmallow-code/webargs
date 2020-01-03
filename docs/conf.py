@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime as dt
 import sys
 import os
@@ -37,8 +36,8 @@ language = "en"
 
 html_domain_indices = False
 source_suffix = ".rst"
-project = u"webargs"
-copyright = u"2014-{0:%Y}, Steven Loria and contributors".format(dt.datetime.utcnow())
+project = "webargs"
+copyright = "2014-{:%Y}, Steven Loria and contributors".format(dt.datetime.utcnow())
 version = release = webargs.__version__
 templates_path = ["_templates"]
 exclude_patterns = ["_build"]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import itertools
 import mock
 import datetime
@@ -27,7 +26,7 @@ class MockHTTPError(Exception):
     def __init__(self, status_code, headers):
         self.status_code = status_code
         self.headers = headers
-        super(MockHTTPError, self).__init__(self, "HTTP Error occurred")
+        super().__init__(self, "HTTP Error occurred")
 
 
 class MockRequestParser(Parser):
@@ -215,7 +214,7 @@ def test_arg_with_default_and_location(parser, web_request):
         "p": fields.Int(
             missing=1,
             validate=lambda p: p > 0,
-            error=u"La page demandée n'existe pas",
+            error="La page demandée n'existe pas",
             location="querystring",
         )
     }
@@ -391,7 +390,7 @@ def test_full_input_validator_receives_nonascii_input(web_request):
     def validate(val):
         return False
 
-    text = u"øœ∑∆∑"
+    text = "øœ∑∆∑"
     web_request.json = {"text": text}
     parser = MockRequestParser()
     args = {"text": fields.Str()}

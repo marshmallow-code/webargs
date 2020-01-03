@@ -22,43 +22,43 @@ exclude_kwargs = (
 hello_exclude_schema = HelloSchema(**exclude_kwargs)
 
 
-class Echo(object):
+class Echo:
     def on_get(self, req, resp):
         parsed = parser.parse(hello_args, req, location="query")
         resp.body = json.dumps(parsed)
 
 
-class EchoForm(object):
+class EchoForm:
     def on_post(self, req, resp):
         parsed = parser.parse(hello_args, req, location="form")
         resp.body = json.dumps(parsed)
 
 
-class EchoJSON(object):
+class EchoJSON:
     def on_post(self, req, resp):
         parsed = parser.parse(hello_args, req)
         resp.body = json.dumps(parsed)
 
 
-class EchoJSONOrForm(object):
+class EchoJSONOrForm:
     def on_post(self, req, resp):
         parsed = parser.parse(hello_args, req, location="json_or_form")
         resp.body = json.dumps(parsed)
 
 
-class EchoUseArgs(object):
+class EchoUseArgs:
     @use_args(hello_args, location="query")
     def on_get(self, req, resp, args):
         resp.body = json.dumps(args)
 
 
-class EchoUseKwargs(object):
+class EchoUseKwargs:
     @use_kwargs(hello_args, location="query")
     def on_get(self, req, resp, name):
         resp.body = json.dumps({"name": name})
 
 
-class EchoUseArgsValidated(object):
+class EchoUseArgsValidated:
     @use_args(
         {"value": fields.Int()},
         validate=lambda args: args["value"] > 42,
@@ -68,44 +68,44 @@ class EchoUseArgsValidated(object):
         resp.body = json.dumps(args)
 
 
-class EchoJSONIgnoreExtraData(object):
+class EchoJSONIgnoreExtraData:
     def on_post(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_exclude_schema, req))
 
 
-class EchoMulti(object):
+class EchoMulti:
     def on_get(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_multiple, req, location="query"))
 
 
-class EchoMultiForm(object):
+class EchoMultiForm:
     def on_post(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_multiple, req, location="form"))
 
 
-class EchoMultiJSON(object):
+class EchoMultiJSON:
     def on_post(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_multiple, req))
 
 
-class EchoManySchema(object):
+class EchoManySchema:
     def on_post(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_many_schema, req))
 
 
-class EchoUseArgsWithPathParam(object):
+class EchoUseArgsWithPathParam:
     @use_args({"value": fields.Int()}, location="query")
     def on_get(self, req, resp, args, name):
         resp.body = json.dumps(args)
 
 
-class EchoUseKwargsWithPathParam(object):
+class EchoUseKwargsWithPathParam:
     @use_kwargs({"value": fields.Int()}, location="query")
     def on_get(self, req, resp, value, name):
         resp.body = json.dumps({"value": value})
 
 
-class AlwaysError(object):
+class AlwaysError:
     def on_get(self, req, resp):
         def always_fail(value):
             raise ma.ValidationError("something went wrong")
@@ -116,7 +116,7 @@ class AlwaysError(object):
     on_post = on_get
 
 
-class EchoHeaders(object):
+class EchoHeaders:
     def on_get(self, req, resp):
         class HeaderSchema(ma.Schema):
             NAME = fields.Str(missing="World")
@@ -126,18 +126,18 @@ class EchoHeaders(object):
         )
 
 
-class EchoCookie(object):
+class EchoCookie:
     def on_get(self, req, resp):
         resp.body = json.dumps(parser.parse(hello_args, req, location="cookies"))
 
 
-class EchoNested(object):
+class EchoNested:
     def on_post(self, req, resp):
         args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
         resp.body = json.dumps(parser.parse(args, req))
 
 
-class EchoNestedMany(object):
+class EchoNestedMany:
     def on_post(self, req, resp):
         args = {
             "users": fields.Nested(
@@ -156,7 +156,7 @@ def use_args_hook(args, context_key="args", **kwargs):
 
 
 @falcon.before(use_args_hook(hello_args, location="query"))
-class EchoUseArgsHook(object):
+class EchoUseArgsHook:
     def on_get(self, req, resp):
         resp.body = json.dumps(req.context["args"])
 

@@ -151,7 +151,7 @@ def echo_matchdict(request):
     return parser.parse({"mymatch": fields.Int()}, request, location="matchdict")
 
 
-class EchoCallable(object):
+class EchoCallable:
     def __init__(self, request):
         self.request = request
 

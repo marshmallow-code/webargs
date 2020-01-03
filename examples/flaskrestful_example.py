@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """A simple number and datetime addition JSON API.
 Run the app:
 

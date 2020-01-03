@@ -75,7 +75,7 @@ class AIOHTTPParser(AsyncParser):
     __location_map__ = dict(
         match_info="load_match_info",
         path="load_match_info",
-        **core.Parser.__location_map__
+        **core.Parser.__location_map__,
     )
 
     def load_querystring(self, req: Request, schema: Schema) -> MultiDictProxy:
@@ -167,7 +167,7 @@ class AIOHTTPParser(AsyncParser):
             error_status_code or self.DEFAULT_VALIDATION_STATUS
         )
         if not error_class:
-            raise LookupError("No exception for {0}".format(error_status_code))
+            raise LookupError("No exception for {}".format(error_status_code))
         headers = error_headers
         raise error_class(
             body=json.dumps(error.messages).encode("utf-8"),

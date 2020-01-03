@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Bottle request argument parsing module.
 
 Example: ::

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tornado request argument parsing module.
 
 Example: ::
@@ -28,7 +27,7 @@ class HTTPError(tornado.web.HTTPError):
     def __init__(self, *args, **kwargs):
         self.messages = kwargs.pop("messages", {})
         self.headers = kwargs.pop("headers", None)
-        super(HTTPError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 def is_json_request(req):
@@ -60,7 +59,7 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
                 return value
         # based on tornado.web.RequestHandler.decode_argument
         except UnicodeDecodeError:
-            raise HTTPError(400, "Invalid unicode in %s: %r" % (key, value[:40]))
+            raise HTTPError(400, "Invalid unicode in {}: {!r}".format(key, value[:40]))
 
 
 class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):

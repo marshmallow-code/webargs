@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Utilities for testing. Includes a base test class
 for testing parsers.
 
@@ -13,7 +12,7 @@ import webtest
 from webargs.core import json
 
 
-class CommonTestCase(object):
+class CommonTestCase:
     """Base test class that defines test methods for common functionality across all
     parsers. Subclasses must define `create_app`, which returns a WSGI-like app.
     """
@@ -149,7 +148,7 @@ class CommonTestCase(object):
         assert res.status_code == 422
 
     def test_parse_json_with_nonascii_chars(self, testapp):
-        text = u"øˆƒ£ºº∆ƒˆ∆"
+        text = "øˆƒ£ºº∆ƒˆ∆"
         assert testapp.post_json("/echo_json", {"name": text}).json == {"name": text}
 
     # https://github.com/marshmallow-code/webargs/issues/427
