@@ -1,5 +1,4 @@
 import itertools
-from unittest import mock
 import datetime
 
 import pytest
@@ -17,6 +16,13 @@ from webargs.core import (
     MARSHMALLOW_VERSION_INFO,
 )
 from webargs.multidictproxy import MultiDictProxy
+
+try:
+    # Python 3.5
+    import mock
+except ImportError:
+    # Python 3.6+
+    from unittest import mock
 
 
 strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}

@@ -15,6 +15,7 @@ EXTRAS_REQUIRE = {
     "frameworks": FRAMEWORKS,
     "tests": [
         "pytest",
+        'mock; python_version == "3.5"',
         "webtest==2.0.33",
         "webtest-aiohttp==2.0.0",
         "pytest-aiohttp>=0.3.0",
