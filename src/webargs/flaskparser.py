@@ -23,7 +23,8 @@ import flask
 from werkzeug.exceptions import HTTPException
 
 from webargs import core
-from webargs.core import json
+from webargs.compat import MARSHMALLOW_VERSION_INFO
+from webargs.multidictproxy import MultiDictProxy
 
 
 def abort(http_status_code, exc=None, **kwargs):
@@ -48,61 +49,63 @@ class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
     __location_map__ = dict(
-        view_args="parse_view_args",
-        path="parse_view_args",
+        view_args="load_view_args",
+        path="load_view_args",
         **core.Parser.__location_map__
     )
 
-    def parse_view_args(self, req, name, field):
-        """Pull a value from the request's ``view_args``."""
-        return core.get_value(req.view_args, name, field)
+    def _raw_load_json(self, req):
+        """Return a json payload from the request for the core parser's load_json
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            # We decode the json manually here instead of
-            # using req.get_json() so that we can handle
-            # JSONDecodeErrors consistently
-            data = req.get_data(cache=True)
-            try:
-                self._cache["json"] = json_data = core.parse_json(data)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    return self.handle_invalid_json_error(e, req)
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req):
+            return core.missing
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.args, name, field)
+        return core.parse_json(req.get_data(cache=True))
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        try:
-            return core.get_value(req.form, name, field)
-        except AttributeError:
-            pass
-        return core.missing
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
-    def parse_headers(self, req, name, field):
-        """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+    def load_view_args(self, req, schema):
+        """Return the request's ``view_args`` or ``missing`` if there are none."""
+        return req.view_args or core.missing
 
-    def parse_cookies(self, req, name, field):
-        """Pull a value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.args, schema)
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
-        return core.get_value(req.files, name, field)
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.form, schema)
+
+    def load_headers(self, req, schema):
+        """Return headers from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.headers, schema)
+
+    def load_cookies(self, req, schema):
+        """Return cookies from the request."""
+        return req.cookies
+
+    def load_files(self, req, schema):
+        """Return files from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.files, schema)
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
         status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        # on marshmallow 2, a many schema receiving a non-list value will
+        # produce this specific error back -- reformat it to match the
+        # marshmallow 3 message so that Flask can properly encode it
+        messages = error.messages
+        if (
+            MARSHMALLOW_VERSION_INFO[0] < 3
+            and schema.many
+            and messages == {0: {}, "_schema": ["Invalid input type."]}
+        ):
+            messages.pop(0)
         abort(
             status_code,
             exc=error,
@@ -110,9 +113,6 @@ class FlaskParser(core.Parser):
             schema=schema,
             headers=error_headers,
         )
-
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
-        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
     def get_default_request(self):
         """Override to use Flask's thread-local request objec by default"""

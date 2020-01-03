@@ -31,45 +31,37 @@ import webapp2
 import webob.multidict
 
 from webargs import core
-from webargs.core import json
+from webargs.multidictproxy import MultiDictProxy
 
 
 class Webapp2Parser(core.Parser):
     """webapp2 request argument parser."""
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            try:
-                self._cache["json"] = json_data = core.parse_json(req.body)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    raise
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+    def _raw_load_json(self, req):
+        """Return a json payload from the request for the core parser's
+        load_json"""
+        return core.parse_json(req.body)
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.GET, schema)
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return core.get_value(req.POST, name, field)
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.POST, schema)
 
-    def parse_cookies(self, req, name, field):
-        """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+    def load_cookies(self, req, schema):
+        """Return cookies from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.cookies, schema)
 
-    def parse_headers(self, req, name, field):
-        """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+    def load_headers(self, req, schema):
+        """Return headers from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.headers, schema)
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
+    def load_files(self, req, schema):
+        """Return files from the request as a MultiDictProxy."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
-        return core.get_value(webob.multidict.MultiDict(files), name, field)
+        return MultiDictProxy(webob.multidict.MultiDict(files), schema)
 
     def get_default_request(self):
         return webapp2.get_request()

@@ -23,57 +23,90 @@ class HelloSchema(ma.Schema):
 strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
 hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
+# variant which ignores unknown fields
+exclude_kwargs = (
+    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
+)
+hello_exclude_schema = HelloSchema(**exclude_kwargs)
+
 app = Flask(__name__)
 app.config.from_object(TestAppConfig)
 
 
-@app.route("/echo", methods=["GET", "POST"])
+@app.route("/echo", methods=["GET"])
 def echo():
+    return J(parser.parse(hello_args, location="query"))
+
+
+@app.route("/echo_form", methods=["POST"])
+def echo_form():
+    return J(parser.parse(hello_args, location="form"))
+
+
+@app.route("/echo_json", methods=["POST"])
+def echo_json():
     return J(parser.parse(hello_args))
 
 
-@app.route("/echo_query")
-def echo_query():
-    return J(parser.parse(hello_args, request, locations=("query",)))
+@app.route("/echo_json_or_form", methods=["POST"])
+def echo_json_or_form():
+    return J(parser.parse(hello_args, location="json_or_form"))
 
 
-@app.route("/echo_use_args", methods=["GET", "POST"])
-@use_args(hello_args)
+@app.route("/echo_use_args", methods=["GET"])
+@use_args(hello_args, location="query")
 def echo_use_args(args):
     return J(args)
 
 
-@app.route("/echo_use_args_validated", methods=["GET", "POST"])
-@use_args({"value": fields.Int()}, validate=lambda args: args["value"] > 42)
+@app.route("/echo_use_args_validated", methods=["POST"])
+@use_args(
+    {"value": fields.Int()}, validate=lambda args: args["value"] > 42, location="form"
+)
 def echo_use_args_validated(args):
     return J(args)
 
 
-@app.route("/echo_use_kwargs", methods=["GET", "POST"])
-@use_kwargs(hello_args)
+@app.route("/echo_ignoring_extra_data", methods=["POST"])
+def echo_json_ignore_extra_data():
+    return J(parser.parse(hello_exclude_schema))
+
+
+@app.route("/echo_use_kwargs", methods=["GET"])
+@use_kwargs(hello_args, location="query")
 def echo_use_kwargs(name):
     return J({"name": name})
 
 
-@app.route("/echo_multi", methods=["GET", "POST"])
+@app.route("/echo_multi", methods=["GET"])
 def multi():
+    return J(parser.parse(hello_multiple, location="query"))
+
+
+@app.route("/echo_multi_form", methods=["POST"])
+def multi_form():
+    return J(parser.parse(hello_multiple, location="form"))
+
+
+@app.route("/echo_multi_json", methods=["POST"])
+def multi_json():
     return J(parser.parse(hello_multiple))
 
 
 @app.route("/echo_many_schema", methods=["GET", "POST"])
 def many_nested():
-    arguments = parser.parse(hello_many_schema, locations=("json",))
+    arguments = parser.parse(hello_many_schema)
     return Response(json.dumps(arguments), content_type="application/json")
 
 
 @app.route("/echo_use_args_with_path_param/<name>")
-@use_args({"value": fields.Int()})
+@use_args({"value": fields.Int()}, location="query")
 def echo_use_args_with_path(args, name):
     return J(args)
 
 
 @app.route("/echo_use_kwargs_with_path_param/<name>")
-@use_kwargs({"value": fields.Int()})
+@use_kwargs({"value": fields.Int()}, location="query")
 def echo_use_kwargs_with_path(name, value):
     return J({"value": value})
 
@@ -89,18 +122,20 @@ def error():
 
 @app.route("/echo_headers")
 def echo_headers():
-    return J(parser.parse(hello_args, locations=("headers",)))
+    # the "exclude schema" must be used in this case because WSGI headers may
+    # be populated with many fields not sent by the caller
+    return J(parser.parse(hello_exclude_schema, location="headers"))
 
 
 @app.route("/echo_cookie")
 def echo_cookie():
-    return J(parser.parse(hello_args, request, locations=("cookies",)))
+    return J(parser.parse(hello_args, request, location="cookies"))
 
 
 @app.route("/echo_file", methods=["POST"])
 def echo_file():
     args = {"myfile": fields.Field()}
-    result = parser.parse(args, locations=("files",))
+    result = parser.parse(args, location="files")
     fp = result["myfile"]
     content = fp.read().decode("utf8")
     return J({"myfile": content})
@@ -108,11 +143,11 @@ def echo_file():
 
 @app.route("/echo_view_arg/<view_arg>")
 def echo_view_arg(view_arg):
-    return J(parser.parse({"view_arg": fields.Int()}, locations=("view_args",)))
+    return J(parser.parse({"view_arg": fields.Int()}, location="view_args"))
 
 
 @app.route("/echo_view_arg_use_args/<view_arg>")
-@use_args({"view_arg": fields.Int(location="view_args")})
+@use_args({"view_arg": fields.Int()}, location="view_args")
 def echo_view_arg_with_use_args(args, **kwargs):
     return J(args)
 

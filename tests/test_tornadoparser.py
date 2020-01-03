@@ -1,40 +1,52 @@
 # -*- coding: utf-8 -*-
 
-from webargs.core import json
+import marshmallow as ma
+import mock
+import pytest
+import tornado.concurrent
+import tornado.http1connection
+import tornado.httpserver
+import tornado.httputil
+import tornado.ioloop
+import tornado.web
+from tornado.testing import AsyncHTTPTestCase
+from webargs import fields, missing
+from webargs.core import MARSHMALLOW_VERSION_INFO, json, parse_json
+from webargs.tornadoparser import (
+    WebArgsTornadoMultiDictProxy,
+    parser,
+    use_args,
+    use_kwargs,
+)
 
 try:
     from urllib.parse import urlencode
 except ImportError:  # PY2
     from urllib import urlencode  # type: ignore
 
-import mock
-import pytest
-
-import marshmallow as ma
-
-import tornado.web
-import tornado.httputil
-import tornado.httpserver
-import tornado.http1connection
-import tornado.concurrent
-import tornado.ioloop
-from tornado.testing import AsyncHTTPTestCase
-
-from webargs import fields, missing
-from webargs.tornadoparser import parser, use_args, use_kwargs, get_value
-from webargs.core import parse_json
 
 name = "name"
 value = "value"
 
 
-def test_get_value_basic():
-    field, multifield = fields.Field(), fields.List(fields.Str())
-    assert get_value({"foo": 42}, "foo", field) == 42
-    assert get_value({"foo": 42}, "bar", field) is missing
-    assert get_value({"foos": ["a", "b"]}, "foos", multifield) == ["a", "b"]
-    # https://github.com/marshmallow-code/webargs/pull/30
-    assert get_value({"foos": ["a", "b"]}, "bar", multifield) is missing
+class AuthorSchema(ma.Schema):
+    name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
+    works = fields.List(fields.Str())
+
+
+strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
+author_schema = AuthorSchema(**strict_kwargs)
+
+
+def test_tornado_multidictproxy():
+    for dictval, fieldname, expected in (
+        ({"name": "Sophocles"}, "name", "Sophocles"),
+        ({"name": "Sophocles"}, "works", missing),
+        ({"works": ["Antigone", "Oedipus Rex"]}, "works", ["Antigone", "Oedipus Rex"]),
+        ({"works": ["Antigone", "Oedipus at Colonus"]}, "name", missing),
+    ):
+        proxy = WebArgsTornadoMultiDictProxy(dictval, author_schema)
+        assert proxy.get(fieldname) == expected
 
 
 class TestQueryArgs(object):
@@ -42,43 +54,23 @@ class TestQueryArgs(object):
         parser.clear_cache()
 
     def test_it_should_get_single_values(self):
-        query = [(name, value)]
-        field = fields.Field()
+        query = [("name", "Aeschylus")]
         request = make_get_request(query)
-
-        result = parser.parse_querystring(request, name, field)
-
-        assert result == value
+        result = parser.load_querystring(request, author_schema)
+        assert result["name"] == "Aeschylus"
 
     def test_it_should_get_multiple_values(self):
-        query = [(name, value), (name, value)]
-        field = fields.List(fields.Field())
+        query = [("works", "Agamemnon"), ("works", "Nereids")]
         request = make_get_request(query)
-
-        result = parser.parse_querystring(request, name, field)
-
-        assert result == [value, value]
+        result = parser.load_querystring(request, author_schema)
+        assert result["works"] == ["Agamemnon", "Nereids"]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
-        field = fields.Field()
-        field2 = fields.List(fields.Int())
         request = make_get_request(query)
-
-        result = parser.parse_querystring(request, name, field)
-        result2 = parser.parse_querystring(request, name, field2)
-
-        assert result is missing
-        assert result2 is missing
-
-    def test_it_should_return_empty_list_if_multiple_and_not_present(self):
-        query = []
-        field = fields.List(fields.Field())
-        request = make_get_request(query)
-
-        result = parser.parse_querystring(request, name, field)
-
-        assert result is missing
+        result = parser.load_querystring(request, author_schema)
+        assert result["name"] is missing
+        assert result["works"] is missing
 
 
 class TestFormArgs:
@@ -86,40 +78,23 @@ class TestFormArgs:
         parser.clear_cache()
 
     def test_it_should_get_single_values(self):
-        query = [(name, value)]
-        field = fields.Field()
+        query = [("name", "Aristophanes")]
         request = make_form_request(query)
-
-        result = parser.parse_form(request, name, field)
-
-        assert result == value
+        result = parser.load_form(request, author_schema)
+        assert result["name"] == "Aristophanes"
 
     def test_it_should_get_multiple_values(self):
-        query = [(name, value), (name, value)]
-        field = fields.List(fields.Field())
+        query = [("works", "The Wasps"), ("works", "The Frogs")]
         request = make_form_request(query)
-
-        result = parser.parse_form(request, name, field)
-
-        assert result == [value, value]
+        result = parser.load_form(request, author_schema)
+        assert result["works"] == ["The Wasps", "The Frogs"]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
-        field = fields.Field()
         request = make_form_request(query)
-
-        result = parser.parse_form(request, name, field)
-
-        assert result is missing
-
-    def test_it_should_return_empty_list_if_multiple_and_not_present(self):
-        query = []
-        field = fields.List(fields.Field())
-        request = make_form_request(query)
-
-        result = parser.parse_form(request, name, field)
-
-        assert result is missing
+        result = parser.load_form(request, author_schema)
+        assert result["name"] is missing
+        assert result["works"] is missing
 
 
 class TestJSONArgs(object):
@@ -127,70 +102,66 @@ class TestJSONArgs(object):
         parser.clear_cache()
 
     def test_it_should_get_single_values(self):
-        query = {name: value}
-        field = fields.Field()
+        query = {"name": "Euripides"}
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
-
-        assert result == value
+        result = parser.load_json(request, author_schema)
+        assert result["name"] == "Euripides"
 
     def test_parsing_request_with_vendor_content_type(self):
-        query = {name: value}
-        field = fields.Field()
+        query = {"name": "Euripides"}
         request = make_json_request(
             query, content_type="application/vnd.api+json; charset=UTF-8"
         )
-        result = parser.parse_json(request, name, field)
-
-        assert result == value
+        result = parser.load_json(request, author_schema)
+        assert result["name"] == "Euripides"
 
     def test_it_should_get_multiple_values(self):
-        query = {name: [value, value]}
-        field = fields.List(fields.Field())
+        query = {"works": ["Medea", "Electra"]}
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
-
-        assert result == [value, value]
+        result = parser.load_json(request, author_schema)
+        assert result["works"] == ["Medea", "Electra"]
 
     def test_it_should_get_multiple_nested_values(self):
-        query = {name: [{"id": 1, "name": "foo"}, {"id": 2, "name": "bar"}]}
-        field = fields.List(
-            fields.Nested({"id": fields.Field(), "name": fields.Field()})
-        )
-        request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
-        assert result == [{"id": 1, "name": "foo"}, {"id": 2, "name": "bar"}]
+        class CustomSchema(ma.Schema):
+            works = fields.List(
+                fields.Nested({"author": fields.Str(), "workname": fields.Str()})
+            )
 
-    def test_it_should_return_missing_if_not_present(self):
+        custom_schema = CustomSchema(**strict_kwargs)
+
+        query = {
+            "works": [
+                {"author": "Euripides", "workname": "Hecuba"},
+                {"author": "Aristophanes", "workname": "The Birds"},
+            ]
+        }
+        request = make_json_request(query)
+        result = parser.load_json(request, custom_schema)
+        assert result["works"] == [
+            {"author": "Euripides", "workname": "Hecuba"},
+            {"author": "Aristophanes", "workname": "The Birds"},
+        ]
+
+    def test_it_should_not_include_fieldnames_if_not_present(self):
         query = {}
-        field = fields.Field()
         request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
+        result = parser.load_json(request, author_schema)
+        assert result == {}
 
-        assert result is missing
-
-    def test_it_should_return_empty_list_if_multiple_and_not_present(self):
-        query = {}
-        field = fields.List(fields.Field())
-        request = make_json_request(query)
-        result = parser.parse_json(request, name, field)
-
-        assert result is missing
-
-    def test_it_should_handle_type_error_on_parse_json(self):
-        field = fields.Field()
+    def test_it_should_handle_type_error_on_load_json(self):
+        # but this is different from the test above where the payload was valid
+        # and empty -- missing vs {}
         request = make_request(
-            body=tornado.concurrent.Future, headers={"Content-Type": "application/json"}
+            body=tornado.concurrent.Future(),
+            headers={"Content-Type": "application/json"},
         )
-        result = parser.parse_json(request, name, field)
-        assert parser._cache["json"] == {}
+        result = parser.load_json(request, author_schema)
         assert result is missing
 
     def test_it_should_handle_value_error_on_parse_json(self):
-        field = fields.Field()
         request = make_request("this is json not")
-        result = parser.parse_json(request, name, field)
-        assert parser._cache["json"] == {}
+        result = parser.load_json(request, author_schema)
+        assert parser._cache.get("json") == missing
         assert result is missing
 
 
@@ -199,39 +170,22 @@ class TestHeadersArgs(object):
         parser.clear_cache()
 
     def test_it_should_get_single_values(self):
-        query = {name: value}
-        field = fields.Field()
+        query = {"name": "Euphorion"}
         request = make_request(headers=query)
-
-        result = parser.parse_headers(request, name, field)
-
-        assert result == value
+        result = parser.load_headers(request, author_schema)
+        assert result["name"] == "Euphorion"
 
     def test_it_should_get_multiple_values(self):
-        query = {name: [value, value]}
-        field = fields.List(fields.Field())
+        query = {"works": ["Prometheus Bound", "Prometheus Unbound"]}
         request = make_request(headers=query)
-
-        result = parser.parse_headers(request, name, field)
-
-        assert result == [value, value]
+        result = parser.load_headers(request, author_schema)
+        assert result["works"] == ["Prometheus Bound", "Prometheus Unbound"]
 
     def test_it_should_return_missing_if_not_present(self):
-        field = fields.Field(multiple=False)
         request = make_request()
-
-        result = parser.parse_headers(request, name, field)
-
-        assert result is missing
-
-    def test_it_should_return_empty_list_if_multiple_and_not_present(self):
-        query = {}
-        field = fields.List(fields.Field())
-        request = make_request(headers=query)
-
-        result = parser.parse_headers(request, name, field)
-
-        assert result is missing
+        result = parser.load_headers(request, author_schema)
+        assert result["name"] is missing
+        assert result["works"] is missing
 
 
 class TestFilesArgs(object):
@@ -239,40 +193,23 @@ class TestFilesArgs(object):
         parser.clear_cache()
 
     def test_it_should_get_single_values(self):
-        query = [(name, value)]
-        field = fields.Field()
+        query = [("name", "Sappho")]
         request = make_files_request(query)
-
-        result = parser.parse_files(request, name, field)
-
-        assert result == value
+        result = parser.load_files(request, author_schema)
+        assert result["name"] == "Sappho"
 
     def test_it_should_get_multiple_values(self):
-        query = [(name, value), (name, value)]
-        field = fields.List(fields.Field())
+        query = [("works", "Sappho 31"), ("works", "Ode to Aphrodite")]
         request = make_files_request(query)
-
-        result = parser.parse_files(request, name, field)
-
-        assert result == [value, value]
+        result = parser.load_files(request, author_schema)
+        assert result["works"] == ["Sappho 31", "Ode to Aphrodite"]
 
     def test_it_should_return_missing_if_not_present(self):
         query = []
-        field = fields.Field()
         request = make_files_request(query)
-
-        result = parser.parse_files(request, name, field)
-
-        assert result is missing
-
-    def test_it_should_return_empty_list_if_multiple_and_not_present(self):
-        query = []
-        field = fields.List(fields.Field())
-        request = make_files_request(query)
-
-        result = parser.parse_files(request, name, field)
-
-        assert result is missing
+        result = parser.load_files(request, author_schema)
+        assert result["name"] is missing
+        assert result["works"] is missing
 
 
 class TestErrorHandler(object):
@@ -293,7 +230,7 @@ class TestParse(object):
             [("string", "value"), ("integer", "1"), ("integer", "2")]
         )
 
-        parsed = parser.parse(attrs, request)
+        parsed = parser.parse(attrs, request, location="query")
 
         assert parsed["integer"] == [1, 2]
         assert parsed["string"] == value
@@ -305,7 +242,7 @@ class TestParse(object):
             [("string", "value"), ("integer", "1"), ("integer", "2")]
         )
 
-        parsed = parser.parse(attrs, request)
+        parsed = parser.parse(attrs, request, location="form")
 
         assert parsed["integer"] == [1, 2]
         assert parsed["string"] == value
@@ -337,7 +274,7 @@ class TestParse(object):
 
         request = make_request(headers={"string": "value", "integer": ["1", "2"]})
 
-        parsed = parser.parse(attrs, request, locations=["headers"])
+        parsed = parser.parse(attrs, request, location="headers")
 
         assert parsed["string"] == value
         assert parsed["integer"] == [1, 2]
@@ -349,7 +286,7 @@ class TestParse(object):
             [("string", "value"), ("integer", "1"), ("integer", "2")]
         )
 
-        parsed = parser.parse(attrs, request, locations=["cookies"])
+        parsed = parser.parse(attrs, request, location="cookies")
 
         assert parsed["string"] == value
         assert parsed["integer"] == [2]
@@ -361,7 +298,7 @@ class TestParse(object):
             [("string", "value"), ("integer", "1"), ("integer", "2")]
         )
 
-        parsed = parser.parse(attrs, request, locations=["files"])
+        parsed = parser.parse(attrs, request, location="files")
 
         assert parsed["string"] == value
         assert parsed["integer"] == [1, 2]
@@ -509,9 +446,21 @@ def make_request(uri=None, body=None, headers=None, files=None):
 class EchoHandler(tornado.web.RequestHandler):
     ARGS = {"name": fields.Str()}
 
-    @use_args(ARGS)
+    @use_args(ARGS, location="query")
     def get(self, args):
         self.write(args)
+
+
+class EchoFormHandler(tornado.web.RequestHandler):
+    ARGS = {"name": fields.Str()}
+
+    @use_args(ARGS, location="form")
+    def post(self, args):
+        self.write(args)
+
+
+class EchoJSONHandler(tornado.web.RequestHandler):
+    ARGS = {"name": fields.Str()}
 
     @use_args(ARGS)
     def post(self, args):
@@ -521,13 +470,18 @@ class EchoHandler(tornado.web.RequestHandler):
 class EchoWithParamHandler(tornado.web.RequestHandler):
     ARGS = {"name": fields.Str()}
 
-    @use_args(ARGS)
+    @use_args(ARGS, location="query")
     def get(self, id, args):
         self.write(args)
 
 
 echo_app = tornado.web.Application(
-    [(r"/echo", EchoHandler), (r"/echo_with_param/(\d+)", EchoWithParamHandler)]
+    [
+        (r"/echo", EchoHandler),
+        (r"/echo_form", EchoFormHandler),
+        (r"/echo_json", EchoJSONHandler),
+        (r"/echo_with_param/(\d+)", EchoWithParamHandler),
+    ]
 )
 
 
@@ -537,7 +491,7 @@ class TestApp(AsyncHTTPTestCase):
 
     def test_post(self):
         res = self.fetch(
-            "/echo",
+            "/echo_json",
             method="POST",
             headers={"Content-Type": "application/json"},
             body=json.dumps({"name": "Steve"}),
@@ -545,7 +499,7 @@ class TestApp(AsyncHTTPTestCase):
         json_body = parse_json(res.body)
         assert json_body["name"] == "Steve"
         res = self.fetch(
-            "/echo",
+            "/echo_json",
             method="POST",
             headers={"Content-Type": "application/json"},
             body=json.dumps({}),
@@ -577,7 +531,7 @@ class ValidateHandler(tornado.web.RequestHandler):
     def post(self, args):
         self.write(args)
 
-    @use_kwargs(ARGS)
+    @use_kwargs(ARGS, location="query")
     def get(self, name):
         self.write({"status": "success"})
 

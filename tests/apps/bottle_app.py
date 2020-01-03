@@ -6,6 +6,7 @@ from webargs import fields
 from webargs.bottleparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO
 
+
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
 
@@ -17,61 +18,100 @@ class HelloSchema(ma.Schema):
 strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
 hello_many_schema = HelloSchema(many=True, **strict_kwargs)
 
+# variant which ignores unknown fields
+exclude_kwargs = (
+    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
+)
+hello_exclude_schema = HelloSchema(**exclude_kwargs)
+
 
 app = Bottle()
 debug(True)
 
 
-@app.route("/echo", method=["GET", "POST"])
+@app.route("/echo", method=["GET"])
 def echo():
-    return parser.parse(hello_args, request)
+    return parser.parse(hello_args, request, location="query")
 
 
-@app.route("/echo_query")
-def echo_query():
-    return parser.parse(hello_args, request, locations=("query",))
+@app.route("/echo_form", method=["POST"])
+def echo_form():
+    return parser.parse(hello_args, location="form")
 
 
-@app.route("/echo_use_args", method=["GET", "POST"])
-@use_args(hello_args)
+@app.route("/echo_json", method=["POST"])
+def echo_json():
+    return parser.parse(hello_args)
+
+
+@app.route("/echo_json_or_form", method=["POST"])
+def echo_json_or_form():
+    return parser.parse(hello_args, location="json_or_form")
+
+
+@app.route("/echo_use_args", method=["GET"])
+@use_args(hello_args, location="query")
 def echo_use_args(args):
     return args
 
 
-@app.route("/echo_use_kwargs", method=["GET", "POST"], apply=use_kwargs(hello_args))
-def echo_use_kwargs(name):
-    return {"name": name}
-
-
 @app.route(
     "/echo_use_args_validated",
-    method=["GET", "POST"],
-    apply=use_args({"value": fields.Int()}, validate=lambda args: args["value"] > 42),
+    method=["POST"],
+    apply=use_args(
+        {"value": fields.Int()},
+        validate=lambda args: args["value"] > 42,
+        location="form",
+    ),
 )
 def echo_use_args_validated(args):
     return args
 
 
-@app.route("/echo_multi", method=["GET", "POST"])
+@app.route("/echo_ignoring_extra_data", method=["POST"])
+def echo_json_ignore_extra_data():
+    return parser.parse(hello_exclude_schema)
+
+
+@app.route(
+    "/echo_use_kwargs", method=["GET"], apply=use_kwargs(hello_args, location="query")
+)
+def echo_use_kwargs(name):
+    return {"name": name}
+
+
+@app.route("/echo_multi", method=["GET"])
 def echo_multi():
-    return parser.parse(hello_multiple, request)
+    return parser.parse(hello_multiple, request, location="query")
 
 
-@app.route("/echo_many_schema", method=["GET", "POST"])
+@app.route("/echo_multi_form", method=["POST"])
+def multi_form():
+    return parser.parse(hello_multiple, location="form")
+
+
+@app.route("/echo_multi_json", method=["POST"])
+def multi_json():
+    return parser.parse(hello_multiple)
+
+
+@app.route("/echo_many_schema", method=["POST"])
 def echo_many_schema():
-    arguments = parser.parse(hello_many_schema, request, locations=("json",))
+    arguments = parser.parse(hello_many_schema, request)
     return HTTPResponse(body=json.dumps(arguments), content_type="application/json")
 
 
 @app.route(
-    "/echo_use_args_with_path_param/<name>", apply=use_args({"value": fields.Int()})
+    "/echo_use_args_with_path_param/<name>",
+    apply=use_args({"value": fields.Int()}, location="query"),
 )
 def echo_use_args_with_path_param(args, name):
     return args
 
 
 @app.route(
-    "/echo_use_kwargs_with_path_param/<name>", apply=use_kwargs({"value": fields.Int()})
+    "/echo_use_kwargs_with_path_param/<name>",
+    apply=use_kwargs({"value": fields.Int()}, location="query"),
 )
 def echo_use_kwargs_with_path_param(name, value):
     return {"value": value}
@@ -88,18 +128,20 @@ def always_error():
 
 @app.route("/echo_headers")
 def echo_headers():
-    return parser.parse(hello_args, request, locations=("headers",))
+    # the "exclude schema" must be used in this case because WSGI headers may
+    # be populated with many fields not sent by the caller
+    return parser.parse(hello_exclude_schema, request, location="headers")
 
 
 @app.route("/echo_cookie")
 def echo_cookie():
-    return parser.parse(hello_args, request, locations=("cookies",))
+    return parser.parse(hello_args, request, location="cookies")
 
 
 @app.route("/echo_file", method=["POST"])
 def echo_file():
     args = {"myfile": fields.Field()}
-    result = parser.parse(args, locations=("files",))
+    result = parser.parse(args, location="files")
     myfile = result["myfile"]
     content = myfile.file.read().decode("utf8")
     return {"myfile": content}

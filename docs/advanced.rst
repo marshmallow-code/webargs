@@ -6,7 +6,7 @@ This section includes guides for advanced usage patterns.
 Custom Location Handlers
 ------------------------
 
-To add your own custom location handler, write a function that receives a request, an argument name, and a :class:`Field <marshmallow.fields.Field>`, then decorate that function with :func:`Parser.location_handler <webargs.core.Parser.location_handler>`.
+To add your own custom location handler, write a function that receives a request, and a :class:`Schema <marshmallow.Schema>`, then decorate that function with :func:`Parser.location_loader <webargs.core.Parser.location_loader>`.
 
 
 .. code-block:: python
@@ -15,16 +15,77 @@ To add your own custom location handler, write a function that receives a reques
     from webargs.flaskparser import parser
 
 
-    @parser.location_handler("data")
-    def parse_data(request, name, field):
-        return request.data.get(name)
+    @parser.location_loader("data")
+    def load_data(request, schema):
+        return request.data
 
 
     # Now 'data' can be specified as a location
-    @parser.use_args({"per_page": fields.Int()}, locations=("data",))
+    @parser.use_args({"per_page": fields.Int()}, location="data")
     def posts(args):
         return "displaying {} posts".format(args["per_page"])
 
+
+.. NOTE::
+
+    The schema is passed so that it can be used to wrap multidict types and
+    unpack List fields correctly. If you are writing a loader for a multidict
+    type, consider looking at
+    :class:`MultiDictProxy <webargs.multidictproxy.MultiDictProxy>` for an
+    example of how to do this.
+
+"meta" Locations
+~~~~~~~~~~~~~~~~
+
+You can define your own locations which mix data from several existing
+locations.
+
+The `json_or_form` location does this -- first trying to load data as JSON and
+then falling back to a form body -- and its implementation is quite simple:
+
+
+.. code-block:: python
+
+    def load_json_or_form(self, req, schema):
+        """Load data from a request, accepting either JSON or form-encoded
+        data.
+
+        The data will first be loaded as JSON, and, if that fails, it will be
+        loaded as a form post.
+        """
+        data = self.load_json(req, schema)
+        if data is not missing:
+            return data
+        return self.load_form(req, schema)
+
+
+You can imagine your own locations with custom behaviors like this.
+For example, to mix query parameters and form body data, you might write the
+following:
+
+.. code-block:: python
+
+   from webargs import fields
+   from webargs.multidictproxy import MultiDictProxy
+   from webargs.flaskparser import parser
+
+
+   @parser.location_loader("query_and_form")
+   def load_data(request, schema):
+       # relies on the Flask (werkzeug) MultiDict type's implementation of
+       # these methods, but when you're extending webargs, you may know things
+       # about your framework of choice
+       newdata = request.args.copy()
+       newdata.update(request.form)
+       return MultiDictProxy(newdata, schema)
+
+
+   # Now 'query_and_form' means you can send these values in either location,
+   # and they will be *mixed* together into a new dict to pass to your schema
+   @parser.use_args({"favorite_food": fields.String()}, location="query_and_form")
+   def set_favorite_food(args):
+       ...  # do stuff
+       return "your favorite food is now set to {}".format(args["favorite_food"])
 
 marshmallow Integration
 -----------------------
@@ -64,7 +125,7 @@ When you need more flexibility in defining input schemas, you can pass a marshma
 
 
     # You can add additional parameters
-    @use_kwargs({"posts_per_page": fields.Int(missing=10, location="query")})
+    @use_kwargs({"posts_per_page": fields.Int(missing=10)}, location="query")
     @use_args(UserSchema())
     def profile_posts(args, posts_per_page):
         username = args["username"]
@@ -211,12 +272,12 @@ Using the :class:`Method <marshmallow.fields.Method>` and :class:`Function <mars
         cube = args["cube"]
         # ...
 
-.. _custom-parsers:
+.. _custom-loaders:
 
 Custom Parsers
 --------------
 
-To add your own parser, extend :class:`Parser <webargs.core.Parser>` and implement the `parse_*` method(s) you need to override. For example, here is a custom Flask parser that handles nested query string arguments.
+To add your own parser, extend :class:`Parser <webargs.core.Parser>` and implement the `load_*` method(s) you need to override. For example, here is a custom Flask parser that handles nested query string arguments.
 
 
 .. code-block:: python
@@ -245,8 +306,8 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
             }
         """
 
-        def parse_querystring(self, req, name, field):
-            return core.get_value(_structure_dict(req.args), name, field)
+        def load_querystring(self, req, schema):
+            return _structure_dict(req.args)
 
 
     def _structure_dict(dict_):
@@ -309,7 +370,7 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
 
 
     @app.route("/profile/", methods=["patch"])
-    @use_args(PatchSchema(many=True), locations=("json",))
+    @use_args(PatchSchema(many=True))
     def patch_blog(args):
         """Implements JSON Patch for the user profile
 
@@ -324,48 +385,14 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
 Mixing Locations
 ----------------
 
-Arguments for different locations can be specified by passing ``location`` to each field individually:
+Arguments for different locations can be specified by passing ``location`` to each `use_args <webargs.core.Parser.use_args>` call:
 
 .. code-block:: python
 
+    # "json" is the default, used explicitly below
     @app.route("/stacked", methods=["POST"])
-    @use_args(
-        {
-            "page": fields.Int(location="query"),
-            "q": fields.Str(location="query"),
-            "name": fields.Str(location="json"),
-        }
-    )
-    def viewfunc(args):
-        page = args["page"]
-        # ...
-
-Alternatively, you can pass multiple locations to `use_args <webargs.core.Parser.use_args>`:
-
-.. code-block:: python
-
-    @app.route("/stacked", methods=["POST"])
-    @use_args(
-        {"page": fields.Int(), "q": fields.Str(), "name": fields.Str()},
-        locations=("query", "json"),
-    )
-    def viewfunc(args):
-        page = args["page"]
-        # ...
-
-However, this allows ``page`` and ``q`` to be passed in the request body and ``name`` to be passed as a query parameter.
-
-To restrict the arguments to single locations without having to pass ``location`` to every field, you can call the `use_args <webargs.core.Parser.use_args>` multiple times:
-
-.. code-block:: python
-
-    query_args = {"page": fields.Int(), "q": fields.Int()}
-    json_args = {"name": fields.Str()}
-
-
-    @app.route("/stacked", methods=["POST"])
-    @use_args(query_args, locations=("query",))
-    @use_args(json_args, locations=("json",))
+    @use_args({"page": fields.Int(), "q": fields.Str()}, location="query")
+    @use_args({"name": fields.Str()}, location="json")
     def viewfunc(query_parsed, json_parsed):
         page = query_parsed["page"]
         name = json_parsed["name"]
@@ -377,12 +404,12 @@ To reduce boilerplate, you could create shortcuts, like so:
 
     import functools
 
-    query = functools.partial(use_args, locations=("query",))
-    body = functools.partial(use_args, locations=("json",))
+    query = functools.partial(use_args, location="query")
+    body = functools.partial(use_args, location="json")
 
 
-    @query(query_args)
-    @body(json_args)
+    @query({"page": fields.Int(), "q": fields.Int()})
+    @body({"name": fields.Str()})
     def viewfunc(query_parsed, json_parsed):
         page = query_parsed["page"]
         name = json_parsed["name"]

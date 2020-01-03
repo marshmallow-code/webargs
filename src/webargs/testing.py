@@ -40,24 +40,35 @@ class CommonTestCase(object):
     def test_parse_querystring_args(self, testapp):
         assert testapp.get("/echo?name=Fred").json == {"name": "Fred"}
 
-    def test_parse_querystring_with_query_location_specified(self, testapp):
-        assert testapp.get("/echo_query?name=Steve").json == {"name": "Steve"}
-
     def test_parse_form(self, testapp):
-        assert testapp.post("/echo", {"name": "Joe"}).json == {"name": "Joe"}
+        assert testapp.post("/echo_form", {"name": "Joe"}).json == {"name": "Joe"}
 
     def test_parse_json(self, testapp):
-        assert testapp.post_json("/echo", {"name": "Fred"}).json == {"name": "Fred"}
+        assert testapp.post_json("/echo_json", {"name": "Fred"}).json == {
+            "name": "Fred"
+        }
+
+    def test_parse_json_missing(self, testapp):
+        assert testapp.post("/echo_json", "").json == {"name": "World"}
+
+    def test_parse_json_or_form(self, testapp):
+        assert testapp.post_json("/echo_json_or_form", {"name": "Fred"}).json == {
+            "name": "Fred"
+        }
+        assert testapp.post("/echo_json_or_form", {"name": "Joe"}).json == {
+            "name": "Joe"
+        }
+        assert testapp.post("/echo_json_or_form", "").json == {"name": "World"}
 
     def test_parse_querystring_default(self, testapp):
         assert testapp.get("/echo").json == {"name": "World"}
 
     def test_parse_json_default(self, testapp):
-        assert testapp.post_json("/echo", {}).json == {"name": "World"}
+        assert testapp.post_json("/echo_json", {}).json == {"name": "World"}
 
     def test_parse_json_with_charset(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             json.dumps({"name": "Steve"}),
             content_type="application/json;charset=UTF-8",
         )
@@ -65,23 +76,27 @@ class CommonTestCase(object):
 
     def test_parse_json_with_vendor_media_type(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             json.dumps({"name": "Steve"}),
             content_type="application/vnd.api+json;charset=UTF-8",
         )
         assert res.json == {"name": "Steve"}
 
-    def test_parse_json_ignores_extra_data(self, testapp):
-        assert testapp.post_json("/echo", {"extra": "data"}).json == {"name": "World"}
+    def test_parse_ignore_extra_data(self, testapp):
+        assert testapp.post_json(
+            "/echo_ignoring_extra_data", {"extra": "data"}
+        ).json == {"name": "World"}
 
-    def test_parse_json_blank(self, testapp):
-        assert testapp.post_json("/echo", None).json == {"name": "World"}
+    def test_parse_json_empty(self, testapp):
+        assert testapp.post_json("/echo_json", {}).json == {"name": "World"}
 
-    def test_parse_json_ignore_unexpected_int(self, testapp):
-        assert testapp.post_json("/echo", 1).json == {"name": "World"}
+    def test_parse_json_error_unexpected_int(self, testapp):
+        res = testapp.post_json("/echo_json", 1, expect_errors=True)
+        assert res.status_code == 422
 
-    def test_parse_json_ignore_unexpected_list(self, testapp):
-        assert testapp.post_json("/echo", [{"extra": "data"}]).json == {"name": "World"}
+    def test_parse_json_error_unexpected_list(self, testapp):
+        res = testapp.post_json("/echo_json", [{"extra": "data"}], expect_errors=True)
+        assert res.status_code == 422
 
     def test_parse_json_many_schema_invalid_input(self, testapp):
         res = testapp.post_json(
@@ -93,34 +108,54 @@ class CommonTestCase(object):
         res = testapp.post_json("/echo_many_schema", [{"name": "Steve"}]).json
         assert res == [{"name": "Steve"}]
 
-    def test_parse_json_many_schema_ignore_malformed_data(self, testapp):
-        assert testapp.post_json("/echo_many_schema", {"extra": "data"}).json == []
+    def test_parse_json_many_schema_error_malformed_data(self, testapp):
+        res = testapp.post_json(
+            "/echo_many_schema", {"extra": "data"}, expect_errors=True
+        )
+        assert res.status_code == 422
 
     def test_parsing_form_default(self, testapp):
-        assert testapp.post("/echo", {}).json == {"name": "World"}
+        assert testapp.post("/echo_form", {}).json == {"name": "World"}
 
     def test_parse_querystring_multiple(self, testapp):
         expected = {"name": ["steve", "Loria"]}
         assert testapp.get("/echo_multi?name=steve&name=Loria").json == expected
 
+    # test that passing a single value parses correctly
+    # on parsers like falconparser, where there is no native MultiDict type,
+    # this verifies the usage of MultiDictProxy to ensure that single values
+    # are "listified"
+    def test_parse_querystring_multiple_single_value(self, testapp):
+        expected = {"name": ["steve"]}
+        assert testapp.get("/echo_multi?name=steve").json == expected
+
     def test_parse_form_multiple(self, testapp):
         expected = {"name": ["steve", "Loria"]}
         assert (
-            testapp.post("/echo_multi", {"name": ["steve", "Loria"]}).json == expected
+            testapp.post("/echo_multi_form", {"name": ["steve", "Loria"]}).json
+            == expected
         )
 
     def test_parse_json_list(self, testapp):
         expected = {"name": ["Steve"]}
-        assert testapp.post_json("/echo_multi", {"name": "Steve"}).json == expected
+        assert (
+            testapp.post_json("/echo_multi_json", {"name": ["Steve"]}).json == expected
+        )
+
+    def test_parse_json_list_error_malformed_data(self, testapp):
+        res = testapp.post_json(
+            "/echo_multi_json", {"name": "Steve"}, expect_errors=True
+        )
+        assert res.status_code == 422
 
     def test_parse_json_with_nonascii_chars(self, testapp):
         text = u"øˆƒ£ºº∆ƒˆ∆"
-        assert testapp.post_json("/echo", {"name": text}).json == {"name": text}
+        assert testapp.post_json("/echo_json", {"name": text}).json == {"name": text}
 
     # https://github.com/marshmallow-code/webargs/issues/427
     def test_parse_json_with_nonutf8_chars(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             b"\xfe",
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
@@ -130,7 +165,7 @@ class CommonTestCase(object):
         assert res.json == {"json": ["Invalid JSON body."]}
 
     def test_validation_error_returns_422_response(self, testapp):
-        res = testapp.post("/echo", {"name": "b"}, expect_errors=True)
+        res = testapp.post_json("/echo_json", {"name": "b"}, expect_errors=True)
         assert res.status_code == 422
 
     def test_user_validation_error_returns_422_response_by_default(self, testapp):
@@ -187,10 +222,6 @@ class CommonTestCase(object):
         res = testapp.post_json("/echo_nested_many", in_data)
         assert res.json == {}
 
-    def test_parse_json_if_no_json(self, testapp):
-        res = testapp.post("/echo")
-        assert res.json == {"name": "World"}
-
     def test_parse_files(self, testapp):
         res = testapp.post(
             "/echo_file", {"myfile": webtest.Upload("README.rst", b"data")}
@@ -199,8 +230,14 @@ class CommonTestCase(object):
 
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json(self, testapp):
+        res = testapp.post("/echo_json")
+        assert res.status_code == 200
+        assert res.json == {"name": "World"}
+
+    # https://github.com/sloria/webargs/pull/297
+    def test_empty_json_with_headers(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             "",
             headers={"Accept": "application/json", "Content-Type": "application/json"},
         )
@@ -210,7 +247,7 @@ class CommonTestCase(object):
     # https://github.com/sloria/webargs/issues/329
     def test_invalid_json(self, testapp):
         res = testapp.post(
-            "/echo",
+            "/echo_json",
             '{"foo": "bar", }',
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,

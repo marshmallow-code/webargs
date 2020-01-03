@@ -11,16 +11,16 @@ hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3
 
 
 async def echo_parse(request):
-    parsed = await parser.parse(hello_args, request)
+    parsed = await parser.parse(hello_args, request, location="query")
     return json_response(parsed)
 
 
-@use_args(hello_args)
+@use_args(hello_args, location="query")
 async def echo_use_args(request, args):
     return json_response(args)
 
 
-@use_kwargs(hello_args)
+@use_kwargs(hello_args, location="query")
 async def echo_use_kwargs(request, name):
     return json_response({"name": name})
 

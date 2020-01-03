@@ -15,11 +15,12 @@ Example: ::
             self.write(response)
 """
 import tornado.web
+import tornado.concurrent
 from tornado.escape import _unicode
 
 from webargs import core
 from webargs.compat import basestring
-from webargs.core import json
+from webargs.multidictproxy import MultiDictProxy
 
 
 class HTTPError(tornado.web.HTTPError):
@@ -31,93 +32,92 @@ class HTTPError(tornado.web.HTTPError):
         super(HTTPError, self).__init__(*args, **kwargs)
 
 
-def parse_json_body(req):
-    """Return the decoded JSON body from the request."""
+def is_json_request(req):
     content_type = req.headers.get("Content-Type")
-    if content_type and core.is_json(content_type):
+    return content_type is not None and core.is_json(content_type)
+
+
+class WebArgsTornadoMultiDictProxy(MultiDictProxy):
+    """
+    Override class for Tornado multidicts, handles argument decoding
+    requirements.
+    """
+
+    def __getitem__(self, key):
         try:
-            return core.parse_json(req.body)
-        except TypeError:
-            pass
-        except json.JSONDecodeError as e:
-            if e.doc == "":
+            value = self.data.get(key, core.missing)
+            if value is core.missing:
                 return core.missing
+            elif key in self.multiple_keys:
+                return [_unicode(v) if isinstance(v, basestring) else v for v in value]
+            elif value and isinstance(value, (list, tuple)):
+                value = value[0]
+
+            if isinstance(value, basestring):
+                return _unicode(value)
             else:
-                raise
-    return {}
+                return value
+        # based on tornado.web.RequestHandler.decode_argument
+        except UnicodeDecodeError:
+            raise HTTPError(400, "Invalid unicode in %s: %r" % (key, value[:40]))
 
 
-# From tornado.web.RequestHandler.decode_argument
-def decode_argument(value, name=None):
-    """Decodes an argument from the request.
+class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
     """
-    try:
-        return _unicode(value)
-    except UnicodeDecodeError:
-        raise HTTPError(400, "Invalid unicode in %s: %r" % (name or "url", value[:40]))
-
-
-def get_value(d, name, field):
-    """Handle gets from 'multidicts' made of lists
-
-    It handles cases: ``{"key": [value]}`` and ``{"key": value}``
+    And a special override for cookies because they come back as objects with a
+    `value` attribute we need to extract.
+    Also, does not use the `_unicode` decoding step
     """
-    multiple = core.is_multiple(field)
-    value = d.get(name, core.missing)
-    if value is core.missing:
-        return core.missing
-    if multiple and value is not core.missing:
-        return [
-            decode_argument(v, name) if isinstance(v, basestring) else v for v in value
-        ]
-    ret = value
-    if value and isinstance(value, (list, tuple)):
-        ret = value[0]
-    if isinstance(ret, basestring):
-        return decode_argument(ret, name)
-    else:
-        return ret
+
+    def __getitem__(self, key):
+        cookie = self.data.get(key, core.missing)
+        if cookie is core.missing:
+            return core.missing
+        elif key in self.multiple_keys:
+            return [cookie.value]
+        else:
+            return cookie.value
 
 
 class TornadoParser(core.Parser):
     """Tornado request argument parser."""
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            try:
-                self._cache["json"] = json_data = parse_json_body(req)
-            except json.JSONDecodeError as e:
-                return self.handle_invalid_json_error(e, req)
-            if json_data is None:
-                return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+    def _raw_load_json(self, req):
+        """Return a json payload from the request for the core parser's load_json
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return get_value(req.query_arguments, name, field)
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req):
+            return core.missing
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return get_value(req.body_arguments, name, field)
+        # request.body may be a concurrent.Future on streaming requests
+        # this would cause a TypeError if we try to parse it
+        if isinstance(req.body, tornado.concurrent.Future):
+            return core.missing
 
-    def parse_headers(self, req, name, field):
-        """Pull a value from the header data."""
-        return get_value(req.headers, name, field)
+        return core.parse_json(req.body)
 
-    def parse_cookies(self, req, name, field):
-        """Pull a value from the header data."""
-        cookie = req.cookies.get(name)
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return WebArgsTornadoMultiDictProxy(req.query_arguments, schema)
 
-        if cookie is not None:
-            return [cookie.value] if core.is_multiple(field) else cookie.value
-        else:
-            return [] if core.is_multiple(field) else None
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy."""
+        return WebArgsTornadoMultiDictProxy(req.body_arguments, schema)
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
-        return get_value(req.files, name, field)
+    def load_headers(self, req, schema):
+        """Return headers from the request as a MultiDictProxy."""
+        return WebArgsTornadoMultiDictProxy(req.headers, schema)
+
+    def load_cookies(self, req, schema):
+        """Return cookies from the request as a MultiDictProxy."""
+        # use the specialized subclass specifically for handling Tornado
+        # cookies
+        return WebArgsTornadoCookiesMultiDictProxy(req.cookies, schema)
+
+    def load_files(self, req, schema):
+        """Return files from the request as a MultiDictProxy."""
+        return WebArgsTornadoMultiDictProxy(req.files, schema)
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
@@ -136,7 +136,7 @@ class TornadoParser(core.Parser):
             headers=error_headers,
         )
 
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
         raise HTTPError(
             400,
             log_message="Invalid JSON body.",

@@ -28,11 +28,11 @@ from aiohttp import web
 from aiohttp.web import Request
 from aiohttp import web_exceptions
 from marshmallow import Schema, ValidationError
-from marshmallow.fields import Field
 
 from webargs import core
 from webargs.core import json
 from webargs.asyncparser import AsyncParser
+from webargs.multidictproxy import MultiDictProxy
 
 
 def is_json_request(req: Request) -> bool:
@@ -73,24 +73,32 @@ class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
     __location_map__ = dict(
-        match_info="parse_match_info",
-        path="parse_match_info",
+        match_info="load_match_info",
+        path="load_match_info",
         **core.Parser.__location_map__
     )
 
-    def parse_querystring(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a querystring value from the request."""
-        return core.get_value(req.query, name, field)
+    def load_querystring(self, req: Request, schema: Schema) -> MultiDictProxy:
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.query, schema)
 
-    async def parse_form(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a form value from the request."""
+    async def load_form(self, req: Request, schema: Schema) -> MultiDictProxy:
+        """Return form values from the request as a MultiDictProxy."""
         post_data = self._cache.get("post")
         if post_data is None:
             self._cache["post"] = await req.post()
-        return core.get_value(self._cache["post"], name, field)
+        return MultiDictProxy(self._cache["post"], schema)
 
-    async def parse_json(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a json value from the request."""
+    async def load_json_or_form(
+        self, req: Request, schema: Schema
+    ) -> typing.Union[typing.Dict, MultiDictProxy]:
+        data = await self.load_json(req, schema)
+        if data is not core.missing:
+            return data
+        return await self.load_form(req, schema)
+
+    async def load_json(self, req: Request, schema: Schema) -> typing.Dict:
+        """Return a parsed json payload from the request."""
         json_data = self._cache.get("json")
         if json_data is None:
             if not (req.body_exists and is_json_request(req)):
@@ -101,30 +109,30 @@ class AIOHTTPParser(AsyncParser):
                 if e.doc == "":
                     return core.missing
                 else:
-                    return self.handle_invalid_json_error(e, req)
+                    return self._handle_invalid_json_error(e, req)
             except UnicodeDecodeError as e:
-                return self.handle_invalid_json_error(e, req)
+                return self._handle_invalid_json_error(e, req)
 
             self._cache["json"] = json_data
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+        return json_data
 
-    def parse_headers(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+    def load_headers(self, req: Request, schema: Schema) -> MultiDictProxy:
+        """Return headers from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.headers, schema)
 
-    def parse_cookies(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+    def load_cookies(self, req: Request, schema: Schema) -> MultiDictProxy:
+        """Return cookies from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.cookies, schema)
 
-    def parse_files(self, req: Request, name: str, field: Field) -> None:
+    def load_files(self, req: Request, schema: Schema) -> "typing.NoReturn":
         raise NotImplementedError(
-            "parse_files is not implemented. You may be able to use parse_form for "
+            "load_files is not implemented. You may be able to use load_form for "
             "parsing upload data."
         )
 
-    def parse_match_info(self, req: Request, name: str, field: Field) -> typing.Any:
-        """Pull a value from the request's ``match_info``."""
-        return core.get_value(req.match_info, name, field)
+    def load_match_info(self, req: Request, schema: Schema) -> typing.Mapping:
+        """Load the request's ``match_info``."""
+        return req.match_info
 
     def get_request_from_view_args(
         self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
@@ -140,7 +148,8 @@ class AIOHTTPParser(AsyncParser):
             elif isinstance(arg, web.View):
                 req = arg.request
                 break
-        assert isinstance(req, web.Request), "Request argument not found for handler"
+        if not isinstance(req, web.Request):
+            raise ValueError("Request argument not found for handler")
         return req
 
     def handle_error(
@@ -166,7 +175,7 @@ class AIOHTTPParser(AsyncParser):
             content_type="application/json",
         )
 
-    def handle_invalid_json_error(
+    def _handle_invalid_json_error(
         self,
         error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
         req: Request,

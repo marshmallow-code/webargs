@@ -17,7 +17,7 @@ webargs is a Python library for parsing and validating HTTP request objects, wit
 
 
     @app.route("/")
-    @use_args({"name": fields.Str(required=True)})
+    @use_args({"name": fields.Str(required=True)}, location="query")
     def index(args):
         return "Hello " + args["name"]
 
@@ -28,13 +28,15 @@ webargs is a Python library for parsing and validating HTTP request objects, wit
     # curl http://localhost:5000/\?name\='World'
     # Hello World
 
-Webargs will automatically parse:
+By default Webargs will automatically parse JSON request bodies. But it also
+has support for:
 
 **Query Parameters**
 ::
+  $ curl http://localhost:5000/\?name\='Freddie'
+  Hello Freddie
 
-    $ curl http://localhost:5000/\?name\='Freddie'
-    Hello Freddie
+  # pass location="query" to use_args
 
 **Form Data**
 ::
@@ -42,11 +44,15 @@ Webargs will automatically parse:
   $ curl -d 'name=Brian' http://localhost:5000/
   Hello Brian
 
+  # pass location="form" to use_args
+
 **JSON Data**
 ::
 
   $ curl -X POST -H "Content-Type: application/json" -d '{"name":"Roger"}' http://localhost:5000/
   Hello Roger
+
+  # pass location="json" (or omit location) to use_args
 
 and, optionally:
 

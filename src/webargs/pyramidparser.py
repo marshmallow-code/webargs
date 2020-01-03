@@ -34,56 +34,56 @@ from pyramid.httpexceptions import exception_response
 from webargs import core
 from webargs.core import json
 from webargs.compat import text_type
+from webargs.multidictproxy import MultiDictProxy
+
+
+def is_json_request(req):
+    return core.is_json(req.headers.get("content-type"))
 
 
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
     __location_map__ = dict(
-        matchdict="parse_matchdict",
-        path="parse_matchdict",
+        matchdict="load_matchdict",
+        path="load_matchdict",
         **core.Parser.__location_map__
     )
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.GET, name, field)
+    def _raw_load_json(self, req):
+        """Return a json payload from the request for the core parser's load_json
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return core.get_value(req.POST, name, field)
+        Checks the input mimetype and may return 'missing' if the mimetype is
+        non-json, even if the request body is parseable as json."""
+        if not is_json_request(req):
+            return core.missing
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            try:
-                self._cache["json"] = json_data = core.parse_json(req.body, req.charset)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    return self.handle_invalid_json_error(e, req)
-            if json_data is None:
-                return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+        return core.parse_json(req.body, req.charset)
 
-    def parse_cookies(self, req, name, field):
-        """Pull the value from the cookiejar."""
-        return core.get_value(req.cookies, name, field)
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.GET, schema)
 
-    def parse_headers(self, req, name, field):
-        """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.POST, schema)
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
+    def load_cookies(self, req, schema):
+        """Return cookies from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.cookies, schema)
+
+    def load_headers(self, req, schema):
+        """Return headers from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.headers, schema)
+
+    def load_files(self, req, schema):
+        """Return files from the request as a MultiDictProxy."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
-        return core.get_value(MultiDict(files), name, field)
+        return MultiDictProxy(MultiDict(files), schema)
 
-    def parse_matchdict(self, req, name, field):
-        """Pull a value from the request's `matchdict`."""
-        return core.get_value(req.matchdict, name, field)
+    def load_matchdict(self, req, schema):
+        """Return the request's ``matchdict`` as a MultiDictProxy."""
+        return MultiDictProxy(req.matchdict, schema)
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current HTTP request and
@@ -100,7 +100,7 @@ class PyramidParser(core.Parser):
         response.body = body.encode("utf-8") if isinstance(body, text_type) else body
         raise response
 
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
         messages = {"json": ["Invalid JSON body."]}
         response = exception_response(
             400, detail=text_type(messages), content_type="application/json"
@@ -113,7 +113,7 @@ class PyramidParser(core.Parser):
         self,
         argmap,
         req=None,
-        locations=core.Parser.DEFAULT_LOCATIONS,
+        location=core.Parser.DEFAULT_LOCATION,
         as_kwargs=False,
         validate=None,
         error_status_code=None,
@@ -127,7 +127,7 @@ class PyramidParser(core.Parser):
             of argname -> `marshmallow.fields.Field` pairs, or a callable
             which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse. Pulled off of the view by default.
-        :param tuple locations: Where on the request to search for values.
+        :param str location: Where on the request to load values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -137,7 +137,7 @@ class PyramidParser(core.Parser):
         :param dict error_headers: Headers passed to error handler functions when a
             a `ValidationError` is raised.
         """
-        locations = locations or self.locations
+        location = location or self.location
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, collections.Mapping):
@@ -155,7 +155,7 @@ class PyramidParser(core.Parser):
                 parsed_args = self.parse(
                     argmap,
                     req=request,
-                    locations=locations,
+                    location=location,
                     validate=validate,
                     error_status_code=error_status_code,
                     error_headers=error_headers,

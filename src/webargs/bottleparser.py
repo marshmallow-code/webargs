@@ -20,51 +20,54 @@ Example: ::
 import bottle
 
 from webargs import core
-from webargs.core import json
+from webargs.multidictproxy import MultiDictProxy
 
 
 class BottleParser(core.Parser):
     """Bottle.py request argument parser."""
 
-    def parse_querystring(self, req, name, field):
-        """Pull a querystring value from the request."""
-        return core.get_value(req.query, name, field)
+    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+        raise bottle.HTTPError(
+            status=400, body={"json": ["Invalid JSON body."]}, exception=error
+        )
 
-    def parse_form(self, req, name, field):
-        """Pull a form value from the request."""
-        return core.get_value(req.forms, name, field)
+    def _raw_load_json(self, req):
+        """Read a json payload from the request."""
+        try:
+            data = req.json
+        except AttributeError:
+            return core.missing
 
-    def parse_json(self, req, name, field):
-        """Pull a json value from the request."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            try:
-                self._cache["json"] = json_data = req.json
-            except AttributeError:
-                return core.missing
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    return self.handle_invalid_json_error(e, req)
-            except UnicodeDecodeError as e:
-                return self.handle_invalid_json_error(e, req)
+        # unfortunately, bottle does not distinguish between an emtpy body, "",
+        # and a body containing the valid JSON value null, "null"
+        # so these can't be properly disambiguated
+        # as our best-effort solution, treat None as missing and ignore the
+        # (admittedly unusual) "null" case
+        # see: https://github.com/bottlepy/bottle/issues/1160
+        if data is None:
+            return core.missing
+        else:
+            return data
 
-            if json_data is None:
-                return core.missing
-        return core.get_value(json_data, name, field, allow_many_nested=True)
+    def load_querystring(self, req, schema):
+        """Return query params from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.query, schema)
 
-    def parse_headers(self, req, name, field):
-        """Pull a value from the header data."""
-        return core.get_value(req.headers, name, field)
+    def load_form(self, req, schema):
+        """Return form values from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.forms, schema)
 
-    def parse_cookies(self, req, name, field):
-        """Pull a value from the cookiejar."""
-        return req.get_cookie(name)
+    def load_headers(self, req, schema):
+        """Return headers from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.headers, schema)
 
-    def parse_files(self, req, name, field):
-        """Pull a file from the request."""
-        return core.get_value(req.files, name, field)
+    def load_cookies(self, req, schema):
+        """Return cookies from the request."""
+        return req.cookies
+
+    def load_files(self, req, schema):
+        """Return files from the request as a MultiDictProxy."""
+        return MultiDictProxy(req.files, schema)
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current request with a
@@ -76,11 +79,6 @@ class BottleParser(core.Parser):
             body=error.messages,
             headers=error_headers,
             exception=error,
-        )
-
-    def handle_invalid_json_error(self, error, req, *args, **kwargs):
-        raise bottle.HTTPError(
-            status=400, body={"json": ["Invalid JSON body."]}, exception=error
         )
 
     def get_default_request(self):
