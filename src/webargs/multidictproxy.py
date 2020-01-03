@@ -1,5 +1,7 @@
-from webargs.compat import MARSHMALLOW_VERSION_INFO, Mapping
+from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.core import missing, is_multiple
+
+from collections.abc import Mapping
 
 
 class MultiDictProxy(Mapping):

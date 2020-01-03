@@ -6,6 +6,7 @@ import inspect
 import logging
 import warnings
 from copy import copy
+from collections.abc import Mapping
 
 try:
     import simplejson as json
@@ -16,7 +17,7 @@ import marshmallow as ma
 from marshmallow import ValidationError
 from marshmallow.utils import missing
 
-from webargs.compat import Mapping, MARSHMALLOW_VERSION_INFO
+from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.dict2schema import dict2schema
 from webargs.fields import DelimitedList
 

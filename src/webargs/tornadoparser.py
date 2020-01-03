@@ -19,7 +19,6 @@ import tornado.concurrent
 from tornado.escape import _unicode
 
 from webargs import core
-from webargs.compat import basestring
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -49,11 +48,13 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
             if value is core.missing:
                 return core.missing
             elif key in self.multiple_keys:
-                return [_unicode(v) if isinstance(v, basestring) else v for v in value]
+                return [
+                    _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
+                ]
             elif value and isinstance(value, (list, tuple)):
                 value = value[0]
 
-            if isinstance(value, basestring):
+            if isinstance(value, (str, bytes)):
                 return _unicode(value)
             else:
                 return value
