@@ -91,6 +91,7 @@ setup(
         "api",
         "marshmallow",
     ),
+    python_requires=">=3.5",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
