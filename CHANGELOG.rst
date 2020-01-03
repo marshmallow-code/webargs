@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-6.0.0b1 (unreleased)
+6.0.0b1 (2020-01-06)
 ********************
 
 Features:
@@ -10,7 +10,7 @@ Features:
   only data specified by fields. As a result, schemas with validators which
   examine the full input data may change in behavior. The `unknown` parameter
   on schemas may be used to alter this. For example,
-  `unknown=marshmallow.EXCLUDE` will produce behavior similar to webargs v5
+  `unknown=marshmallow.EXCLUDE` will produce a behavior similar to webargs v5.
 
 Bug fixes:
 
