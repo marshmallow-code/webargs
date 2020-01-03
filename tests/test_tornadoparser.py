@@ -1,5 +1,5 @@
 import marshmallow as ma
-import mock
+from unittest import mock
 import pytest
 import tornado.concurrent
 import tornado.http1connection
@@ -17,10 +17,7 @@ from webargs.tornadoparser import (
     use_kwargs,
 )
 
-try:
-    from urllib.parse import urlencode
-except ImportError:  # PY2
-    from urllib import urlencode  # type: ignore
+from urllib.parse import urlencode
 
 
 name = "name"

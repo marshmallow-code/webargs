@@ -1,7 +1,7 @@
 import threading
 
 from werkzeug.exceptions import HTTPException
-import mock
+from unittest import mock
 import pytest
 
 from flask import Flask

@@ -1,8 +1,5 @@
 """Tests for the webapp2 parser"""
-try:
-    from urllib.parse import urlencode
-except ImportError:  # PY2
-    from urllib import urlencode  # type: ignore
+from urllib.parse import urlencode
 from webargs.core import json
 
 import pytest
