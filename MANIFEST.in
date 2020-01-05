@@ -1,2 +1,4 @@
+graft tests
 include LICENSE
 include *.rst
+include tox.ini
