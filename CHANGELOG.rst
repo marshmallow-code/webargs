@@ -1,8 +1,8 @@
 Changelog
 ---------
 
-6.0.0 (unreleased)
-******************
+6.0.0b1 (unreleased)
+********************
 
 Features:
 
@@ -29,7 +29,7 @@ Refactoring:
 
 .. code-block:: python
 
-    # under webargs v5
+    # webargs 5.x and older
     @parser.use_args(
         {
             "q1": ma.fields.Int(location="query"),
@@ -42,7 +42,7 @@ Refactoring:
         ...
 
 
-    # should be split up like so under webargs v6
+    # webargs 6.x
     @parser.use_args({"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query")
     @parser.use_args({"h1": ma.fields.Int()}, location="headers")
     def foo(q1, q2, h1):
@@ -52,6 +52,8 @@ Refactoring:
   `location_loader`. `location_loader` serves the same purpose (letting you
   write custom hooks for loading data) but its expected method signature is
   different. See the docs on `location_loader` for proper usage.
+
+Thanks :user:`sirosen` for the PR!
 
 5.5.2 (2019-10-06)
 ******************
