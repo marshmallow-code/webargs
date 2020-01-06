@@ -41,3 +41,5 @@ Contributors (chronological)
 * Jonathan Angelo <https://github.com/jangelo>
 * @zhenhua32 <https://github.com/zhenhua32>
 * Martin Roy <https://github.com/lindycoder>
+* Kubilay Kocak <https://github.com/koobs>
+* Stephen Rosen <https://github.com/sirosen>
