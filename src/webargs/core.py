@@ -4,11 +4,7 @@ import logging
 import warnings
 from copy import copy
 from collections.abc import Mapping
-
-try:
-    import simplejson as json
-except ImportError:
-    import json  # type: ignore
+import json
 
 import marshmallow as ma
 from marshmallow import ValidationError
