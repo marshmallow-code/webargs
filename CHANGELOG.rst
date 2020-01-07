@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+6.0.0b2 (2020-01-07)
+********************
+
+Other changes:
+
+* *Backwards-incompatible*: Drop support for Python 2 (:issue:`440`).
+  Thanks :user:`hugovk` for the PR.
+
 6.0.0b1 (2020-01-06)
 ********************
 
@@ -14,7 +22,7 @@ Features:
 
 Bug fixes:
 
-* *Backwards-incompatible*: all parsers now require the Content-Type to be set
+* *Backwards-incompatible*: All parsers now require the Content-Type to be set
   correctly when processing JSON request bodies. This impacts ``DjangoParser``,
   ``FalconParser``, ``FlaskParser``, and ``PyramidParser``
 
