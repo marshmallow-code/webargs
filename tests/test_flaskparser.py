@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import threading
 
 from werkzeug.exceptions import HTTPException
-import mock
 import pytest
 
 from flask import Flask
@@ -13,6 +10,13 @@ from webargs.core import MARSHMALLOW_VERSION_INFO, json
 
 from .apps.flask_app import app
 from webargs.testing import CommonTestCase
+
+try:
+    # Python 3.5
+    import mock
+except ImportError:
+    # Python 3.6+
+    from unittest import mock
 
 
 class TestFlaskParser(CommonTestCase):

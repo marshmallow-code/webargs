@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 import marshmallow as ma
-import mock
 import pytest
 import tornado.concurrent
 import tornado.http1connection
@@ -19,10 +16,14 @@ from webargs.tornadoparser import (
     use_kwargs,
 )
 
+from urllib.parse import urlencode
+
 try:
-    from urllib.parse import urlencode
-except ImportError:  # PY2
-    from urllib import urlencode  # type: ignore
+    # Python 3.5
+    import mock
+except ImportError:
+    # Python 3.6+
+    from unittest import mock
 
 
 name = "name"
@@ -49,7 +50,7 @@ def test_tornado_multidictproxy():
         assert proxy.get(fieldname) == expected
 
 
-class TestQueryArgs(object):
+class TestQueryArgs:
     def setup_method(self, method):
         parser.clear_cache()
 
@@ -97,7 +98,7 @@ class TestFormArgs:
         assert result["works"] is missing
 
 
-class TestJSONArgs(object):
+class TestJSONArgs:
     def setup_method(self, method):
         parser.clear_cache()
 
@@ -165,7 +166,7 @@ class TestJSONArgs(object):
         assert result is missing
 
 
-class TestHeadersArgs(object):
+class TestHeadersArgs:
     def setup_method(self, method):
         parser.clear_cache()
 
@@ -188,7 +189,7 @@ class TestHeadersArgs(object):
         assert result["works"] is missing
 
 
-class TestFilesArgs(object):
+class TestFilesArgs:
     def setup_method(self, method):
         parser.clear_cache()
 
@@ -212,14 +213,14 @@ class TestFilesArgs(object):
         assert result["works"] is missing
 
 
-class TestErrorHandler(object):
+class TestErrorHandler:
     def test_it_should_raise_httperror_on_failed_validation(self):
         args = {"foo": fields.Field(validate=lambda x: False)}
         with pytest.raises(tornado.web.HTTPError):
             parser.parse(args, make_json_request({"foo": 42}))
 
 
-class TestParse(object):
+class TestParse:
     def setup_method(self, method):
         parser.clear_cache()
 
@@ -320,12 +321,12 @@ class TestParse(object):
             parser.parse(args, request)
 
 
-class TestUseArgs(object):
+class TestUseArgs:
     def setup_method(self, method):
         parser.clear_cache()
 
     def test_it_should_pass_parsed_as_first_argument(self):
-        class Handler(object):
+        class Handler:
             request = make_json_request({"key": "value"})
 
             @use_args({"key": fields.Field()})
@@ -340,7 +341,7 @@ class TestUseArgs(object):
         assert result is True
 
     def test_it_should_pass_parsed_as_kwargs_arguments(self):
-        class Handler(object):
+        class Handler:
             request = make_json_request({"key": "value"})
 
             @use_kwargs({"key": fields.Field()})
@@ -355,7 +356,7 @@ class TestUseArgs(object):
         assert result is True
 
     def test_it_should_be_validate_arguments_when_validator_is_passed(self):
-        class Handler(object):
+        class Handler:
             request = make_json_request({"foo": 41})
 
             @use_kwargs({"foo": fields.Int()}, validate=lambda args: args["foo"] > 42)
@@ -413,8 +414,8 @@ def make_files_request(args):
 
 
 def make_request(uri=None, body=None, headers=None, files=None):
-    uri = uri if uri is not None else u""
-    body = body if body is not None else u""
+    uri = uri if uri is not None else ""
+    body = body if body is not None else ""
     method = "POST" if body else "GET"
     # Need to make a mock connection right now because Tornado 4.0 requires a
     # remote_ip in the context attribute. 4.1 addresses this, and this
@@ -423,7 +424,7 @@ def make_request(uri=None, body=None, headers=None, files=None):
     mock_connection = mock.Mock(spec=tornado.http1connection.HTTP1Connection)
     mock_connection.context = mock.Mock()
     mock_connection.remote_ip = None
-    content_type = headers.get("Content-Type", u"") if headers else u""
+    content_type = headers.get("Content-Type", "") if headers else ""
     request = tornado.httputil.HTTPServerRequest(
         method=method,
         uri=uri,

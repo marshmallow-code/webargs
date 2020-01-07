@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Pyramid request argument parsing.
 
 Example usage: ::
@@ -33,7 +32,6 @@ from pyramid.httpexceptions import exception_response
 
 from webargs import core
 from webargs.core import json
-from webargs.compat import text_type
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -47,7 +45,7 @@ class PyramidParser(core.Parser):
     __location_map__ = dict(
         matchdict="load_matchdict",
         path="load_matchdict",
-        **core.Parser.__location_map__
+        **core.Parser.__location_map__,
     )
 
     def _raw_load_json(self, req):
@@ -92,21 +90,21 @@ class PyramidParser(core.Parser):
         status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
         response = exception_response(
             status_code,
-            detail=text_type(error),
+            detail=str(error),
             headers=error_headers,
             content_type="application/json",
         )
         body = json.dumps(error.messages)
-        response.body = body.encode("utf-8") if isinstance(body, text_type) else body
+        response.body = body.encode("utf-8") if isinstance(body, str) else body
         raise response
 
     def _handle_invalid_json_error(self, error, req, *args, **kwargs):
         messages = {"json": ["Invalid JSON body."]}
         response = exception_response(
-            400, detail=text_type(messages), content_type="application/json"
+            400, detail=str(messages), content_type="application/json"
         )
         body = json.dumps(messages)
-        response.body = body.encode("utf-8") if isinstance(body, text_type) else body
+        response.body = body.encode("utf-8") if isinstance(body, str) else body
         raise response
 
     def use_args(

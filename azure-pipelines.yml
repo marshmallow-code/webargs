@@ -26,7 +26,6 @@ jobs:
   parameters:
     toxenvs:
       - lint
-      - py27-marshmallow2
 
       - py35-marshmallow2
       - py35-marshmallow3
@@ -41,18 +40,11 @@ jobs:
 
       - docs
     os: linux
-# Build separate wheels for python 2 and 3
+# Build wheels
 - template: job--pypi-release.yml@sloria
   parameters:
     python: "3.7"
     distributions: "sdist bdist_wheel"
     name_postfix: "_py3"
-    dependsOn:
-      - tox_linux
-- template: job--pypi-release.yml@sloria
-  parameters:
-    python: "2.7"
-    distributions: "bdist_wheel"
-    name_postfix: "_py2"
     dependsOn:
       - tox_linux

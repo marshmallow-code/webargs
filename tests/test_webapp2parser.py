@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
 """Tests for the webapp2 parser"""
-try:
-    from urllib.parse import urlencode
-except ImportError:  # PY2
-    from urllib import urlencode  # type: ignore
+from urllib.parse import urlencode
 from webargs.core import json
 
 import pytest
@@ -132,7 +128,7 @@ def test_parse_files():
             def _value(f):
                 return f.getvalue().decode("utf-8")
 
-            data = dict((i.filename, _value(i.file)) for i in args["myfile"])
+            data = {i.filename: _value(i.file) for i in args["myfile"]}
             self.response.write(json.dumps(data))
 
     app = webapp2.WSGIApplication([("/", Handler)])

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Field classes.
 
 Includes all fields from `marshmallow.fields` in addition to a custom
@@ -41,7 +40,7 @@ class Nested(ma.fields.Nested):
     def __init__(self, nested, *args, **kwargs):
         if isinstance(nested, dict):
             nested = dict2schema(nested)
-        super(Nested, self).__init__(nested, *args, **kwargs)
+        super().__init__(nested, *args, **kwargs)
 
 
 class DelimitedList(ma.fields.List):
@@ -58,10 +57,10 @@ class DelimitedList(ma.fields.List):
     def __init__(self, cls_or_instance, delimiter=None, as_string=False, **kwargs):
         self.delimiter = delimiter or self.delimiter
         self.as_string = as_string
-        super(DelimitedList, self).__init__(cls_or_instance, **kwargs)
+        super().__init__(cls_or_instance, **kwargs)
 
     def _serialize(self, value, attr, obj):
-        ret = super(DelimitedList, self)._serialize(value, attr, obj)
+        ret = super()._serialize(value, attr, obj)
         if self.as_string:
             return self.delimiter.join(format(each) for each in ret)
         return ret
@@ -78,4 +77,4 @@ class DelimitedList(ma.fields.List):
                 self.fail("invalid")
             else:
                 raise self.make_error("invalid")
-        return super(DelimitedList, self)._deserialize(ret, attr, data, **kwargs)
+        return super()._deserialize(ret, attr, data, **kwargs)

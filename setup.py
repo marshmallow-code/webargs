@@ -1,11 +1,5 @@
-# -*- coding: utf-8 -*-
-import sys
 import re
 from setuptools import setup, find_packages
-
-INSTALL_REQUIRES = ["marshmallow>=2.15.2"]
-if sys.version_info[0] < 3:
-    INSTALL_REQUIRES.append("simplejson>=2.1.0")
 
 FRAMEWORKS = [
     "Flask>=0.12.2",
@@ -15,22 +9,22 @@ FRAMEWORKS = [
     "pyramid>=1.9.1",
     "webapp2>=3.0.0b1",
     "falcon>=1.4.0,<2.0",
-    'aiohttp>=3.0.0; python_version >= "3.5"',
+    "aiohttp>=3.0.0",
 ]
 EXTRAS_REQUIRE = {
     "frameworks": FRAMEWORKS,
     "tests": [
         "pytest",
-        "mock",
+        'mock; python_version == "3.5"',
         "webtest==2.0.33",
-        'webtest-aiohttp==2.0.0; python_version >= "3.5"',
-        'pytest-aiohttp>=0.3.0; python_version >= "3.5"',
+        "webtest-aiohttp==2.0.0",
+        "pytest-aiohttp>=0.3.0",
     ]
     + FRAMEWORKS,
     "lint": [
-        'mypy==0.761; python_version >= "3.5"',
+        "mypy==0.761",
         "flake8==3.7.9",
-        'flake8-bugbear==20.1.2; python_version >= "3.5"',
+        "flake8-bugbear==20.1.2",
         "pre-commit~=1.20",
     ],
     "docs": ["Sphinx==2.3.1", "sphinx-issues==1.2.0", "sphinx-typlog-theme==0.8.0"]
@@ -76,7 +70,7 @@ setup(
     url="https://github.com/marshmallow-code/webargs",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    install_requires=INSTALL_REQUIRES,
+    install_requires=["marshmallow>=2.15.2"],
     extras_require=EXTRAS_REQUIRE,
     license="MIT",
     zip_safe=False,
@@ -97,17 +91,17 @@ setup(
         "api",
         "marshmallow",
     ),
+    python_requires=">=3.5",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3 :: Only",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     ],

@@ -1,22 +1,16 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import functools
 import inspect
 import logging
 import warnings
 from copy import copy
-
-try:
-    import simplejson as json
-except ImportError:
-    import json  # type: ignore
+from collections.abc import Mapping
+import json
 
 import marshmallow as ma
 from marshmallow import ValidationError
 from marshmallow.utils import missing
 
-from webargs.compat import Mapping, MARSHMALLOW_VERSION_INFO
+from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.dict2schema import dict2schema
 from webargs.fields import DelimitedList
 
@@ -41,7 +35,7 @@ def _callable_or_raise(obj):
     callable, a ValueError is raised.
     """
     if obj and not callable(obj):
-        raise ValueError("{0!r} is not callable.".format(obj))
+        raise ValueError("{!r} is not callable.".format(obj))
     else:
         return obj
 
@@ -93,15 +87,13 @@ def _ensure_list_of_callables(obj):
         elif callable(obj):
             validators = [obj]
         else:
-            raise ValueError(
-                "{0!r} is not a callable or list of callables.".format(obj)
-            )
+            raise ValueError("{!r} is not a callable or list of callables.".format(obj))
     else:
         validators = []
     return validators
 
 
-class Parser(object):
+class Parser:
     """Base parser class that provides high-level implementation for parsing
     a request.
 
@@ -148,7 +140,7 @@ class Parser(object):
         """
         valid_locations = set(self.__location_map__.keys())
         if location not in valid_locations:
-            msg = "Invalid location argument: {0}".format(location)
+            msg = "Invalid location argument: {}".format(location)
             raise ValueError(msg)
 
         # Parsing function to call
@@ -160,7 +152,7 @@ class Parser(object):
             else:
                 function = getattr(self, func)
         else:
-            raise ValueError('Invalid location: "{0}"'.format(location))
+            raise ValueError('Invalid location: "{}"'.format(location))
         return function
 
     def _load_location_data(self, schema, req, location):

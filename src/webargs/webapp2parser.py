@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Webapp2 request argument parsing module.
 
 Example: ::

@@ -27,7 +27,7 @@ from webargs.falconparser import use_args, use_kwargs, parser
 ### Middleware and hooks ###
 
 
-class JSONTranslator(object):
+class JSONTranslator:
     def process_response(self, req, resp, resource):
         if "result" not in req.context:
             return
@@ -44,7 +44,7 @@ def add_args(argmap, **kwargs):
 ### Resources ###
 
 
-class HelloResource(object):
+class HelloResource:
     """A welcome page."""
 
     hello_args = {"name": fields.Str(missing="Friend", location="query")}
@@ -54,7 +54,7 @@ class HelloResource(object):
         req.context["result"] = {"message": "Welcome, {}!".format(args["name"])}
 
 
-class AdderResource(object):
+class AdderResource:
     """An addition endpoint."""
 
     adder_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
@@ -64,7 +64,7 @@ class AdderResource(object):
         req.context["result"] = {"result": x + y}
 
 
-class DateAddResource(object):
+class DateAddResource:
     """A datetime adder endpoint."""
 
     dateadd_args = {

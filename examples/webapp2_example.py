@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """A Hello, World! example using Webapp2 in a Google App Engine environment
 
 Run the app:

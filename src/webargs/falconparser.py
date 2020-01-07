@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Falcon request argument parsing module.
 """
 import falcon
@@ -62,11 +61,11 @@ class HTTPError(falcon.HTTPError):
 
     def __init__(self, status, errors, *args, **kwargs):
         self.errors = errors
-        super(HTTPError, self).__init__(status, *args, **kwargs)
+        super().__init__(status, *args, **kwargs)
 
     def to_dict(self, *args, **kwargs):
         """Override `falcon.HTTPError` to include error messages in responses."""
-        ret = super(HTTPError, self).to_dict(*args, **kwargs)
+        ret = super().to_dict(*args, **kwargs)
         if self.errors is not None:
             ret["errors"] = self.errors
         return ret
@@ -138,14 +137,14 @@ class FalconParser(core.Parser):
 
     def load_files(self, req, schema):
         raise NotImplementedError(
-            "Parsing files not yet supported by {0}".format(self.__class__.__name__)
+            "Parsing files not yet supported by {}".format(self.__class__.__name__)
         )
 
     def handle_error(self, error, req, schema, error_status_code, error_headers):
         """Handles errors during parsing."""
         status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
         if status is None:
-            raise LookupError("Status code {0} not supported".format(error_status_code))
+            raise LookupError("Status code {} not supported".format(error_status_code))
         raise HTTPError(status, errors=error.messages, headers=error_headers)
 
     def _handle_invalid_json_error(self, error, req, *args, **kwargs):

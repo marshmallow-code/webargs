@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tornado request argument parsing module.
 
 Example: ::
@@ -19,7 +18,6 @@ import tornado.concurrent
 from tornado.escape import _unicode
 
 from webargs import core
-from webargs.compat import basestring
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -29,7 +27,7 @@ class HTTPError(tornado.web.HTTPError):
     def __init__(self, *args, **kwargs):
         self.messages = kwargs.pop("messages", {})
         self.headers = kwargs.pop("headers", None)
-        super(HTTPError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 def is_json_request(req):
@@ -49,17 +47,19 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
             if value is core.missing:
                 return core.missing
             elif key in self.multiple_keys:
-                return [_unicode(v) if isinstance(v, basestring) else v for v in value]
+                return [
+                    _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
+                ]
             elif value and isinstance(value, (list, tuple)):
                 value = value[0]
 
-            if isinstance(value, basestring):
+            if isinstance(value, (str, bytes)):
                 return _unicode(value)
             else:
                 return value
         # based on tornado.web.RequestHandler.decode_argument
         except UnicodeDecodeError:
-            raise HTTPError(400, "Invalid unicode in %s: %r" % (key, value[:40]))
+            raise HTTPError(400, "Invalid unicode in {}: {!r}".format(key, value[:40]))
 
 
 class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):

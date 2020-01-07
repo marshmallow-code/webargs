@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Django request argument parsing.
 
 Example usage: ::
@@ -61,7 +60,7 @@ class DjangoParser(core.Parser):
 
     def load_headers(self, req, schema):
         raise NotImplementedError(
-            "Header parsing not supported by {0}".format(self.__class__.__name__)
+            "Header parsing not supported by {}".format(self.__class__.__name__)
         )
 
     def load_files(self, req, schema):
