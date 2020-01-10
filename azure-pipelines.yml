@@ -30,13 +30,14 @@ jobs:
       - py35-marshmallow2
       - py35-marshmallow3
 
-      - py36-marshmallow2
       - py36-marshmallow3
 
-      - py37-marshmallow2
       - py37-marshmallow3
 
-      - py37-marshmallowdev
+      - py38-marshmallow2
+      - py38-marshmallow3
+
+      - py38-marshmallowdev
 
       - docs
     os: linux
@@ -45,6 +46,5 @@ jobs:
   parameters:
     python: "3.7"
     distributions: "sdist bdist_wheel"
-    name_postfix: "_py3"
     dependsOn:
       - tox_linux
