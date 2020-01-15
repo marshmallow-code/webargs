@@ -9,7 +9,7 @@ tells webargs where to parse the request argument from.
 .. code-block:: python
 
     args = {
-        "active": fields.Bool(location='query'),
+        "active": fields.Bool(location="query"),
         "content_type": fields.Str(data_key="Content-Type", location="headers"),
     }
 
