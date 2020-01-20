@@ -310,7 +310,7 @@ You can easily implement hooks by using `parser.parse <webargs.falconparser.Falc
 
 
     def add_args(argmap, **kwargs):
-        def hook(req, resp, params):
+        def hook(req, resp, resource, params):
             parsed_args = parser.parse(argmap, req=req, **kwargs)
             req.context["args"] = parsed_args
 
