@@ -148,7 +148,7 @@ class EchoNestedMany:
 
 
 def use_args_hook(args, context_key="args", **kwargs):
-    def hook(req, resp, params):
+    def hook(req, resp, resource, params):
         parsed_args = parser.parse(args, req=req, **kwargs)
         req.context[context_key] = parsed_args
 

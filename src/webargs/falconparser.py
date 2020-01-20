@@ -35,7 +35,7 @@ def parse_form_body(req):
         req.content_type is not None
         and "application/x-www-form-urlencoded" in req.content_type
     ):
-        body = req.stream.read()
+        body = req.stream.read(req.content_length or 0)
         try:
             body = body.decode("ascii")
         except UnicodeDecodeError:
@@ -48,9 +48,7 @@ def parse_form_body(req):
             )
 
         if body:
-            return parse_query_string(
-                body, keep_blank_qs_values=req.options.keep_blank_qs_values
-            )
+            return parse_query_string(body, keep_blank=req.options.keep_blank_qs_values)
 
     return core.missing
 

@@ -43,3 +43,5 @@ Contributors (chronological)
 * Martin Roy <https://github.com/lindycoder>
 * Kubilay Kocak <https://github.com/koobs>
 * Stephen Rosen <https://github.com/sirosen>
+* @dodumosu <https://github.com/dodumosu>
+* Nate Dellinger <https://github.com/Nateyo>
