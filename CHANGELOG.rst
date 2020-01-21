@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+6.0.0b3 (2020-01-21)
+********************
+
+Features:
+
+* *Backwards-incompatible*: Support Falon 2.0. Drop support for Falcon 1.x
+  (:pr:`459`). Thanks :user:`dodumosu` and :user:`Nateyo` for the PR.
+
 6.0.0b2 (2020-01-07)
 ********************
 
