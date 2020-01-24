@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+6.0.0b6 (Unreleased)
+********************
+
+Refactoring:
+
+* Remove the cache attached to webargs parsers. Due to changes between webargs
+  v5 and v6, the cache is no longer considered useful.
+
 6.0.0b5 (2020-01-30)
 ********************
 

@@ -35,7 +35,6 @@ class AsyncParser(core.Parser):
 
         Receives the same arguments as `webargs.core.Parser.parse`.
         """
-        self.clear_cache()  # in case someone used `location_load_*()`
         req = req if req is not None else self.get_default_request()
         if req is None:
             raise ValueError("Must pass req object")

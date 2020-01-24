@@ -84,10 +84,8 @@ class AIOHTTPParser(AsyncParser):
 
     async def load_form(self, req: Request, schema: Schema) -> MultiDictProxy:
         """Return form values from the request as a MultiDictProxy."""
-        post_data = self._cache.get("post")
-        if post_data is None:
-            self._cache["post"] = await req.post()
-        return MultiDictProxy(self._cache["post"], schema)
+        post_data = await req.post()
+        return MultiDictProxy(post_data, schema)
 
     async def load_json_or_form(
         self, req: Request, schema: Schema
@@ -99,22 +97,17 @@ class AIOHTTPParser(AsyncParser):
 
     async def load_json(self, req: Request, schema: Schema) -> typing.Dict:
         """Return a parsed json payload from the request."""
-        json_data = self._cache.get("json")
-        if json_data is None:
-            if not (req.body_exists and is_json_request(req)):
+        if not (req.body_exists and is_json_request(req)):
+            return core.missing
+        try:
+            return await req.json(loads=json.loads)
+        except json.JSONDecodeError as e:
+            if e.doc == "":
                 return core.missing
-            try:
-                json_data = await req.json(loads=json.loads)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    return core.missing
-                else:
-                    return self._handle_invalid_json_error(e, req)
-            except UnicodeDecodeError as e:
+            else:
                 return self._handle_invalid_json_error(e, req)
-
-            self._cache["json"] = json_data
-        return json_data
+        except UnicodeDecodeError as e:
+            return self._handle_invalid_json_error(e, req)
 
     def load_headers(self, req: Request, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""

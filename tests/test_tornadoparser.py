@@ -51,9 +51,6 @@ def test_tornado_multidictproxy():
 
 
 class TestQueryArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = [("name", "Aeschylus")]
         request = make_get_request(query)
@@ -75,9 +72,6 @@ class TestQueryArgs:
 
 
 class TestFormArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = [("name", "Aristophanes")]
         request = make_form_request(query)
@@ -99,9 +93,6 @@ class TestFormArgs:
 
 
 class TestJSONArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = {"name": "Euripides"}
         request = make_json_request(query)
@@ -162,14 +153,10 @@ class TestJSONArgs:
     def test_it_should_handle_value_error_on_parse_json(self):
         request = make_request("this is json not")
         result = parser.load_json(request, author_schema)
-        assert parser._cache.get("json") == missing
         assert result is missing
 
 
 class TestHeadersArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = {"name": "Euphorion"}
         request = make_request(headers=query)
@@ -190,9 +177,6 @@ class TestHeadersArgs:
 
 
 class TestFilesArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_get_single_values(self):
         query = [("name", "Sappho")]
         request = make_files_request(query)
@@ -221,9 +205,6 @@ class TestErrorHandler:
 
 
 class TestParse:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_parse_query_arguments(self):
         attrs = {"string": fields.Field(), "integer": fields.List(fields.Int())}
 
@@ -322,9 +303,6 @@ class TestParse:
 
 
 class TestUseArgs:
-    def setup_method(self, method):
-        parser.clear_cache()
-
     def test_it_should_pass_parsed_as_first_argument(self):
         class Handler:
             request = make_json_request({"key": "value"})
