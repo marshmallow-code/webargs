@@ -37,6 +37,14 @@ def echo_query(request):
     return json_response(parser.parse(hello_args, request, locations=("query",)))
 
 
+def echo_json(request):
+    return json_response(parser.parse(hello_args, request, locations=("json",)))
+
+
+def echo_form(request):
+    return json_response(parser.parse(hello_args, request, locations=("form",)))
+
+
 @use_args(hello_args)
 def echo_use_args(request, args):
     return json_response(args)

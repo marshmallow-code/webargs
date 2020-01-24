@@ -217,3 +217,18 @@ class CommonTestCase(object):
         )
         assert res.status_code == 400
         assert res.json == {"json": ["Invalid JSON body."]}
+
+    @pytest.mark.parametrize(
+        ("path", "payload", "content_type"),
+        [
+            (
+                "/echo_json",
+                json.dumps({"name": "foo"}),
+                "application/x-www-form-urlencoded",
+            ),
+            ("/echo_form", {"name": "foo"}, "application/json"),
+        ],
+    )
+    def test_content_type_mismatch(self, testapp, path, payload, content_type):
+        res = testapp.post(path, payload, headers={"Content-Type": content_type})
+        assert res.json == {"name": "World"}

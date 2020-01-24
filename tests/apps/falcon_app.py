@@ -37,6 +37,18 @@ class EchoQuery(object):
         resp.body = json.dumps(parsed)
 
 
+class EchoJSON(object):
+    def on_post(self, req, resp):
+        parsed = parser.parse(hello_args, req, locations=("json",))
+        resp.body = json.dumps(parsed)
+
+
+class EchoForm(object):
+    def on_post(self, req, resp):
+        parsed = parser.parse(hello_args, req, locations=("form",))
+        resp.body = json.dumps(parsed)
+
+
 class EchoUseArgs(object):
     @use_args(hello_args)
     def on_get(self, req, resp, args):
@@ -144,6 +156,8 @@ def create_app():
     app = falcon.API()
     app.add_route("/echo", Echo())
     app.add_route("/echo_query", EchoQuery())
+    app.add_route("/echo_json", EchoJSON())
+    app.add_route("/echo_form", EchoForm())
     app.add_route("/echo_use_args", EchoUseArgs())
     app.add_route("/echo_use_kwargs", EchoUseKwargs())
     app.add_route("/echo_use_args_validated", EchoUseArgsValidated())

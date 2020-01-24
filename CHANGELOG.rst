@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+5.5.3 (unreleased)
+******************
+
+Bug fixes:
+
+* :cve:`CVE-2020-7965`: Don't attempt to parse JSON if the request's Content-Type is mismatched.
+
 5.5.2 (2019-10-06)
 ******************
 

@@ -61,6 +61,9 @@ class FlaskParser(core.Parser):
         """Pull a json value from the request."""
         json_data = self._cache.get("json")
         if json_data is None:
+            if not is_json_request(req):
+                return core.missing
+
             # We decode the json manually here instead of
             # using req.get_json() so that we can handle
             # JSONDecodeErrors consistently

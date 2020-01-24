@@ -61,6 +61,15 @@ def test_parse_json():
     assert parser.parse(hello_args, req=request) == expected
 
 
+def test_parse_json_content_type_mismatch():
+    request = webapp2.Request.blank(
+        "/echo_json",
+        POST=json.dumps({"name": "foo"}),
+        headers={"content-type": "application/x-www-form-urlencoded"},
+    )
+    assert parser.parse(hello_args, req=request) == {"name": "World"}
+
+
 def test_parse_invalid_json():
     request = webapp2.Request.blank(
         "/echo", POST='{"foo": "bar", }', headers={"content-type": "application/json"}

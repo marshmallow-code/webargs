@@ -34,6 +34,14 @@ def echo_query(request):
     return parser.parse(hello_args, request, locations=("query",))
 
 
+def echo_json(request):
+    return parser.parse(hello_args, request, locations=("json",))
+
+
+def echo_form(request):
+    return parser.parse(hello_args, request, locations=("form",))
+
+
 @use_args(hello_args)
 def echo_use_args(request, args):
     return args
@@ -128,6 +136,8 @@ def create_app():
 
     add_route(config, "/echo", echo)
     add_route(config, "/echo_query", echo_query)
+    add_route(config, "/echo_json", echo_json)
+    add_route(config, "/echo_form", echo_form)
     add_route(config, "/echo_use_args", echo_use_args)
     add_route(config, "/echo_use_args_validated", echo_use_args_validated)
     add_route(config, "/echo_use_kwargs", echo_use_kwargs)

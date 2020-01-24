@@ -44,6 +44,16 @@ async def echo_query(request):
     return json_response(parsed)
 
 
+async def echo_json(request):
+    parsed = await parser.parse(hello_args, request, locations=("json",))
+    return json_response(parsed)
+
+
+async def echo_form(request):
+    parsed = await parser.parse(hello_args, request, locations=("form",))
+    return json_response(parsed)
+
+
 @use_args(hello_args)
 async def echo_use_args(request, args):
     return json_response(args)
@@ -170,6 +180,8 @@ def create_app():
 
     add_route(app, ["GET", "POST"], "/echo", echo)
     add_route(app, ["GET"], "/echo_query", echo_query)
+    add_route(app, ["POST"], "/echo_json", echo_json)
+    add_route(app, ["POST"], "/echo_form", echo_form)
     add_route(app, ["GET", "POST"], "/echo_use_args", echo_use_args)
     add_route(app, ["GET", "POST"], "/echo_use_kwargs", echo_use_kwargs)
     add_route(app, ["GET", "POST"], "/echo_use_args_validated", echo_use_args_validated)

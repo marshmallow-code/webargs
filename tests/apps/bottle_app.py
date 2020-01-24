@@ -32,6 +32,16 @@ def echo_query():
     return parser.parse(hello_args, request, locations=("query",))
 
 
+@app.route("/echo_json", method=["POST"])
+def echo_json():
+    return parser.parse(hello_args, request, locations=("json",))
+
+
+@app.route("/echo_form", method=["POST"])
+def echo_form():
+    return parser.parse(hello_args, request, locations=("form",))
+
+
 @app.route("/echo_use_args", method=["GET", "POST"])
 @use_args(hello_args)
 def echo_use_args(args):

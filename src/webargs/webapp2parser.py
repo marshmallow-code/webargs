@@ -41,6 +41,9 @@ class Webapp2Parser(core.Parser):
         """Pull a json value from the request."""
         json_data = self._cache.get("json")
         if json_data is None:
+            if not core.is_json(req.content_type):
+                return core.missing
+
             try:
                 self._cache["json"] = json_data = core.parse_json(req.body)
             except json.JSONDecodeError as e:

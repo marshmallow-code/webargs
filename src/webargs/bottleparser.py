@@ -32,6 +32,11 @@ class BottleParser(core.Parser):
 
     def parse_form(self, req, name, field):
         """Pull a form value from the request."""
+        # For consistency with other parsers' behavior, don't attempt to
+        #  parse if content-type is mismatched.
+        #  TODO: Make this check more specific
+        if core.is_json(req.content_type):
+            return core.missing
         return core.get_value(req.forms, name, field)
 
     def parse_json(self, req, name, field):
