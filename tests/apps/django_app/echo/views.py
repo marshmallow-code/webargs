@@ -54,7 +54,7 @@ def echo_form(request):
 
 @handle_view_errors
 def echo_json(request):
-    return json_response(parser.parse(hello_args, request))
+    return json_response(parser.parse(hello_args, request, location="json"))
 
 
 @handle_view_errors

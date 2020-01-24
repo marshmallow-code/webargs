@@ -37,8 +37,9 @@ class Webapp2Parser(core.Parser):
     """webapp2 request argument parser."""
 
     def _raw_load_json(self, req):
-        """Return a json payload from the request for the core parser's
-        load_json"""
+        """Return a json payload from the request for the core parser's load_json."""
+        if not core.is_json(req.content_type):
+            return core.missing
         return core.parse_json(req.body)
 
     def load_querystring(self, req, schema):

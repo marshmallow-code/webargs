@@ -36,7 +36,7 @@ def echo_form(request):
 
 def echo_json(request):
     try:
-        return parser.parse(hello_args, request)
+        return parser.parse(hello_args, request, location="json")
     except json.JSONDecodeError:
         error = HTTPBadRequest()
         error.body = json.dumps(["Invalid JSON."]).encode("utf-8")

@@ -54,6 +54,11 @@ class BottleParser(core.Parser):
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
+        # For consistency with other parsers' behavior, don't attempt to
+        #  parse if content-type is mismatched.
+        #  TODO: Make this check more specific
+        if core.is_json(req.content_type):
+            return core.missing
         return MultiDictProxy(req.forms, schema)
 
     def load_headers(self, req, schema):

@@ -36,7 +36,7 @@ class EchoForm:
 
 class EchoJSON:
     def on_post(self, req, resp):
-        parsed = parser.parse(hello_args, req)
+        parsed = parser.parse(hello_args, req, location="json")
         resp.body = json.dumps(parsed)
 
 

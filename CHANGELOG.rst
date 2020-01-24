@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+6.0.0b4 (unreleased)
+********************
+
+Bug fixes:
+
+* :cve:`CVE-2020-7965`: Don't attempt to parse JSON if request's content type is mismatched
+  (bugfix from 5.5.3).
+
 6.0.0b3 (2020-01-21)
 ********************
 
@@ -70,6 +78,13 @@ Refactoring:
   different. See the docs on `location_loader` for proper usage.
 
 Thanks :user:`sirosen` for the PR!
+
+5.5.3 (2020-01-28)
+******************
+
+Bug fixes:
+
+* :cve:`CVE-2020-7965`: Don't attempt to parse JSON if request's content type is mismatched.
 
 5.5.2 (2019-10-06)
 ******************
