@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+6.0.0b7 (Unreleased)
+********************
+
+Features:
+
+* *Backwards-incompatible*: webargs will rewrite the error messages in
+  ValidationErrors to be namespaced under the location which raised the error.
+  The `messages` field on errors will therefore be one layer deeper with a
+  single top-level key.
+
 6.0.0b6 (2020-01-31)
 ********************
 
