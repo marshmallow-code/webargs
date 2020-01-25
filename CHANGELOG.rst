@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+6.0.0b5 (Unreleased)
+********************
+
+Refactoring:
+
+* *Backwards-incompatible*: `DelimitedList` now requires that its input be a
+  string and always serializes as a string. It can still serialize and deserialize
+  using another field, e.g. `DelimitedList(Int())` is still valid and requires
+  that the values in the list parse as ints.
+
 6.0.0b4 (2020-01-28)
 ********************
 

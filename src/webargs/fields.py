@@ -44,37 +44,35 @@ class Nested(ma.fields.Nested):
 
 
 class DelimitedList(ma.fields.List):
-    """Same as `marshmallow.fields.List`, except can load from either a list or
-    a delimited string (e.g. "foo,bar,baz").
+    """A field which is similar to a List, but takes its input as a delimited
+    string (e.g. "foo,bar,baz").
+
+    Like List, it can be given a nested field type which it will use to
+    de/serialize each element of the list.
 
     :param Field cls_or_instance: A field class or instance.
     :param str delimiter: Delimiter between values.
-    :param bool as_string: Dump values to string.
     """
 
+    default_error_messages = {"invalid": "Not a valid delimited list."}
     delimiter = ","
 
-    def __init__(self, cls_or_instance, delimiter=None, as_string=False, **kwargs):
+    def __init__(self, cls_or_instance, delimiter=None, **kwargs):
         self.delimiter = delimiter or self.delimiter
-        self.as_string = as_string
         super().__init__(cls_or_instance, **kwargs)
 
     def _serialize(self, value, attr, obj):
-        ret = super()._serialize(value, attr, obj)
-        if self.as_string:
-            return self.delimiter.join(format(each) for each in ret)
-        return ret
+        # serializing will start with List serialization, so that we correctly
+        # output lists of non-primitive types, e.g. DelimitedList(DateTime)
+        return self.delimiter.join(
+            format(each) for each in super()._serialize(value, attr, obj)
+        )
 
     def _deserialize(self, value, attr, data, **kwargs):
-        try:
-            ret = (
-                value
-                if ma.utils.is_iterable_but_not_string(value)
-                else value.split(self.delimiter)
-            )
-        except AttributeError:
+        # attempting to deserialize from a non-string source is an error
+        if not isinstance(value, (str, bytes)):
             if MARSHMALLOW_VERSION_INFO[0] < 3:
                 self.fail("invalid")
             else:
                 raise self.make_error("invalid")
-        return super()._deserialize(ret, attr, data, **kwargs)
+        return super()._deserialize(value.split(self.delimiter), attr, data, **kwargs)
