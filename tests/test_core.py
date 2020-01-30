@@ -837,32 +837,13 @@ def test_delimited_list_default_delimiter(web_request, parser):
 
     dumped = schema.dump(parsed)
     data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
-    assert data["ids"] == [1, 2, 3]
-
-
-def test_delimited_list_as_string(web_request, parser):
-    web_request.json = {"ids": "1,2,3"}
-    schema_cls = dict2schema(
-        {"ids": fields.DelimitedList(fields.Int(), as_string=True)}
-    )
-    schema = schema_cls()
-
-    parsed = parser.parse(schema, web_request)
-    assert parsed["ids"] == [1, 2, 3]
-
-    dumped = schema.dump(parsed)
-    data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
     assert data["ids"] == "1,2,3"
 
 
 def test_delimited_list_as_string_v2(web_request, parser):
     web_request.json = {"dates": "2018-11-01,2018-11-02"}
     schema_cls = dict2schema(
-        {
-            "dates": fields.DelimitedList(
-                fields.DateTime(format="%Y-%m-%d"), as_string=True
-            )
-        }
+        {"dates": fields.DelimitedList(fields.DateTime(format="%Y-%m-%d"))}
     )
     schema = schema_cls()
 
@@ -886,13 +867,17 @@ def test_delimited_list_custom_delimiter(web_request, parser):
     assert parsed["ids"] == [1, 2, 3]
 
 
-def test_delimited_list_load_list(web_request, parser):
+def test_delimited_list_load_list_errors(web_request, parser):
     web_request.json = {"ids": [1, 2, 3]}
     schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
-    parsed = parser.parse(schema, web_request)
-    assert parsed["ids"] == [1, 2, 3]
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(schema, web_request)
+    exc = excinfo.value
+    assert isinstance(exc, ValidationError)
+    errors = exc.args[0]
+    assert errors["ids"] == ["Not a valid delimited list."]
 
 
 # Regresion test for https://github.com/marshmallow-code/webargs/issues/149
@@ -903,7 +888,7 @@ def test_delimited_list_passed_invalid_type(web_request, parser):
 
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(schema, web_request)
-    assert excinfo.value.messages == {"ids": ["Not a valid list."]}
+    assert excinfo.value.messages == {"ids": ["Not a valid delimited list."]}
 
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
