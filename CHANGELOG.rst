@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-6.0.0b5 (Unreleased)
+6.0.0b5 (2020-01-30)
 ********************
 
 Refactoring:
