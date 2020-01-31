@@ -136,7 +136,7 @@ class FalconParser(core.Parser):
             "Parsing files not yet supported by {}".format(self.__class__.__name__)
         )
 
-    def handle_error(self, error, req, schema, error_status_code, error_headers):
+    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing."""
         status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
         if status is None:

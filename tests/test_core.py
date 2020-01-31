@@ -251,7 +251,13 @@ def test_handle_error_called_when_parsing_raises_error(handle_error, web_request
 def test_handle_error_reraises_errors(web_request):
     p = Parser()
     with pytest.raises(ValidationError):
-        p.handle_error(ValidationError("error raised"), web_request, Schema())
+        p.handle_error(
+            ValidationError("error raised"),
+            web_request,
+            Schema(),
+            error_status_code=422,
+            error_headers={},
+        )
 
 
 @mock.patch("webargs.core.Parser.load_headers")
@@ -266,7 +272,7 @@ def test_custom_error_handler(web_request):
     class CustomError(Exception):
         pass
 
-    def error_handler(error, req, schema, status_code, headers):
+    def error_handler(error, req, schema, *, error_status_code, error_headers):
         assert isinstance(schema, Schema)
         raise CustomError(error)
 
@@ -294,7 +300,7 @@ def test_custom_error_handler_decorator(web_request):
     parser = Parser()
 
     @parser.error_handler
-    def handle_error(error, req, schema, status_code, headers):
+    def handle_error(error, req, schema, *, error_status_code, error_headers):
         assert isinstance(schema, Schema)
         raise CustomError(error)
 
@@ -1010,9 +1016,7 @@ def test_get_mimetype():
 
 
 class MockRequestParserWithErrorHandler(MockRequestParser):
-    def handle_error(
-        self, error, req, schema, error_status_code=None, error_headers=None
-    ):
+    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         assert isinstance(error, ValidationError)
         assert isinstance(schema, Schema)
         raise MockHTTPError(error_status_code, error_headers)

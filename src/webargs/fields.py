@@ -57,7 +57,7 @@ class DelimitedList(ma.fields.List):
     default_error_messages = {"invalid": "Not a valid delimited list."}
     delimiter = ","
 
-    def __init__(self, cls_or_instance, delimiter=None, **kwargs):
+    def __init__(self, cls_or_instance, *, delimiter=None, **kwargs):
         self.delimiter = delimiter or self.delimiter
         super().__init__(cls_or_instance, **kwargs)
 

@@ -26,10 +26,11 @@ class AsyncParser(core.Parser):
         self,
         argmap: ArgMap,
         req: Request = None,
+        *,
         location: str = None,
         validate: Validate = None,
         error_status_code: typing.Union[int, None] = None,
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None
     ) -> typing.Union[typing.Mapping, None]:
         """Coroutine variant of `webargs.core.Parser`.
 
@@ -51,7 +52,12 @@ class AsyncParser(core.Parser):
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             await self._on_validation_error(
-                error, req, schema, location, error_status_code, error_headers
+                error,
+                req,
+                schema,
+                location,
+                error_status_code=error_status_code,
+                error_headers=error_headers,
             )
         return data
 
@@ -80,8 +86,9 @@ class AsyncParser(core.Parser):
         req: Request,
         schema: Schema,
         location: str,
+        *,
         error_status_code: typing.Union[int, None],
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
+        error_headers: typing.Union[typing.Mapping[str, str], None]
     ) -> None:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -90,17 +97,24 @@ class AsyncParser(core.Parser):
         #      {"foo":["Not a valid integer."]}
         error.messages = {location: error.messages}
         error_handler = self.error_callback or self.handle_error
-        await error_handler(error, req, schema, error_status_code, error_headers)
+        await error_handler(
+            error,
+            req,
+            schema,
+            error_status_code=error_status_code,
+            error_headers=error_headers,
+        )
 
     def use_args(
         self,
         argmap: ArgMap,
         req: typing.Optional[Request] = None,
+        *,
         location: str = None,
         as_kwargs: bool = False,
         validate: Validate = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -111,7 +125,7 @@ class AsyncParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = core.dict2schema(argmap, self.schema_class)()
+            argmap = core.dict2schema(argmap, schema_class=self.schema_class)()
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
