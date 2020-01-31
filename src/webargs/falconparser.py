@@ -91,9 +91,7 @@ class FalconParser(core.Parser):
 
             The request stream will be read and left at EOF.
         """
-        form = self._cache.get("form")
-        if form is None:
-            self._cache["form"] = form = parse_form_body(req)
+        form = parse_form_body(req)
         if form is core.missing:
             return form
         return MultiDictProxy(form, schema)

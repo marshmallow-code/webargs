@@ -2,7 +2,6 @@ import functools
 import inspect
 import logging
 import warnings
-from copy import copy
 from collections.abc import Mapping
 import json
 
@@ -130,8 +129,6 @@ class Parser:
         self.location = location or self.DEFAULT_LOCATION
         self.error_callback = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
-        #: A short-lived cache to store results from processing request bodies.
-        self._cache = {}
 
     def _get_loader(self, location):
         """Get the loader function for the given location.
@@ -207,15 +204,6 @@ class Parser:
             )
         return schema
 
-    def _clone(self):
-        """Clone the current parser in order to ensure that it has a fresh and
-        independent cache. This is used whenever `Parser.parse` is called, so
-        that these methods always have separate caches.
-        """
-        clone = copy(self)
-        clone.clear_cache()
-        return clone
-
     def parse(
         self,
         argmap,
@@ -250,31 +238,19 @@ class Parser:
             raise ValueError("Must pass req object")
         data = None
         validators = _ensure_list_of_callables(validate)
-        parser = self._clone()
         schema = self._get_schema(argmap, req)
         try:
-            location_data = parser._load_location_data(
+            location_data = self._load_location_data(
                 schema=schema, req=req, location=location or self.location
             )
             result = schema.load(location_data)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
-            parser._validate_arguments(data, validators)
+            self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            parser._on_validation_error(
+            self._on_validation_error(
                 error, req, schema, error_status_code, error_headers
             )
         return data
-
-    def clear_cache(self):
-        """Invalidate the parser's cache.
-
-        This is usually a no-op now since the Parser clone used for parsing a
-        request is discarded afterwards.  It can still be used when manually
-        calling ``parse_*`` methods which would populate the cache on the main
-        Parser instance.
-        """
-        self._cache = {}
-        return None
 
     def get_default_request(self):
         """Optional override. Provides a hook for frameworks that use thread-local
@@ -458,19 +434,14 @@ class Parser:
         # `_handle_invalid_json_error` and `_raw_load_json`
         # these methods are not part of the public API and are used to simplify
         # code sharing amongst the built-in webargs parsers
-        if "json" not in self._cache:
-            try:
-                json_data = self._raw_load_json(req)
-            except json.JSONDecodeError as e:
-                if e.doc == "":
-                    json_data = missing
-                else:
-                    return self._handle_invalid_json_error(e, req)
-            except UnicodeDecodeError as e:
-                return self._handle_invalid_json_error(e, req)
-            self._cache["json"] = json_data
-
-        return self._cache["json"]
+        try:
+            return self._raw_load_json(req)
+        except json.JSONDecodeError as e:
+            if e.doc == "":
+                return missing
+            return self._handle_invalid_json_error(e, req)
+        except UnicodeDecodeError as e:
+            return self._handle_invalid_json_error(e, req)
 
     def load_json_or_form(self, req, schema):
         """Load data from a request, accepting either JSON or form-encoded
