@@ -138,7 +138,7 @@ class PyramidParser(core.Parser):
         location = location or self.location
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
-        if isinstance(argmap, collections.Mapping):
+        if isinstance(argmap, collections.abc.Mapping):
             argmap = core.dict2schema(argmap, self.schema_class)()
 
         def decorator(func):
