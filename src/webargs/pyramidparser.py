@@ -24,8 +24,8 @@ Example usage: ::
         server = make_server('0.0.0.0', 6543, app)
         server.serve_forever()
 """
-import collections
 import functools
+from collections.abc import Mapping
 
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
@@ -138,7 +138,7 @@ class PyramidParser(core.Parser):
         location = location or self.location
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
-        if isinstance(argmap, collections.abc.Mapping):
+        if isinstance(argmap, Mapping):
             argmap = core.dict2schema(argmap, self.schema_class)()
 
         def decorator(func):
