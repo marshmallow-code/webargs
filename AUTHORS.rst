@@ -45,3 +45,4 @@ Contributors (chronological)
 * Stephen Rosen `@sirosen <https://github.com/sirosen>`_
 * `@dodumosu <https://github.com/dodumosu>`_
 * Nate Dellinger `@Nateyo <https://github.com/Nateyo>`_
+* Karthikeyan Singaravelan `@tirkarthi <https://github.com/tirkarthi>`_
