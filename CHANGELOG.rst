@@ -9,6 +9,11 @@ Refactoring:
 * Remove the cache attached to webargs parsers. Due to changes between webargs
   v5 and v6, the cache is no longer considered useful.
 
+Other changes:
+
+* Import ``Mapping`` from ``collections.abc`` in pyramidparser.py (:pr:`471`).
+  Thanks :user:`tirkarthi` for the PR.
+
 6.0.0b5 (2020-01-30)
 ********************
 
