@@ -196,7 +196,7 @@ Then decorate that function with :func:`Parser.error_handler <webargs.core.Parse
 
 
     @parser.error_handler
-    def handle_error(error, req, schema, status_code, headers):
+    def handle_error(error, req, schema, *, status_code, headers):
         raise CustomError(error.messages)
 
 Parsing Lists in Query Strings

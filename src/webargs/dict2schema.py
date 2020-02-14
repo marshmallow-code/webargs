@@ -1,7 +1,7 @@
 import marshmallow as ma
 
 
-def dict2schema(dct, schema_class=ma.Schema):
+def dict2schema(dct, *, schema_class=ma.Schema):
     """Generate a `marshmallow.Schema` class given a dictionary of
     `Fields <marshmallow.fields.Field>`.
     """

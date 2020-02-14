@@ -119,7 +119,7 @@ class TornadoParser(core.Parser):
         """Return files from the request as a MultiDictProxy."""
         return WebArgsTornadoMultiDictProxy(req.files, schema)
 
-    def handle_error(self, error, req, schema, error_status_code, error_headers):
+    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
