@@ -168,8 +168,14 @@ class Parser:
         return data
 
     def _on_validation_error(
-        self, error, req, schema, error_status_code, error_headers
+        self, error, req, schema, location, error_status_code, error_headers
     ):
+        # rewrite messages to be namespaced under the location which created
+        # them
+        # e.g. {"json":{"foo":["Not a valid integer."]}}
+        #      instead of
+        #      {"foo":["Not a valid integer."]}
+        error.messages = {location: error.messages}
         error_handler = self.error_callback or self.handle_error
         error_handler(error, req, schema, error_status_code, error_headers)
 
@@ -234,6 +240,7 @@ class Parser:
          :return: A dictionary of parsed arguments
         """
         req = req if req is not None else self.get_default_request()
+        location = location or self.location
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -241,14 +248,14 @@ class Parser:
         schema = self._get_schema(argmap, req)
         try:
             location_data = self._load_location_data(
-                schema=schema, req=req, location=location or self.location
+                schema=schema, req=req, location=location
             )
             result = schema.load(location_data)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(
-                error, req, schema, error_status_code, error_headers
+                error, req, schema, location, error_status_code, error_headers
             )
         return data
 

@@ -165,7 +165,9 @@ def test_parse_required_list(parser, web_request):
     args = {"foo": fields.List(fields.Field(), required=True)}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
-    assert excinfo.value.messages["foo"][0] == "Missing data for required field."
+    assert (
+        excinfo.value.messages["json"]["foo"][0] == "Missing data for required field."
+    )
 
 
 # Regression test for https://github.com/marshmallow-code/webargs/issues/107
@@ -180,7 +182,7 @@ def test_parse_list_dont_allow_none(parser, web_request):
     args = {"foo": fields.List(fields.Field(), allow_none=False)}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
-    assert excinfo.value.messages["foo"][0] == "Field may not be null."
+    assert excinfo.value.messages["json"]["foo"][0] == "Field may not be null."
 
 
 def test_parse_empty_list(parser, web_request):
@@ -369,7 +371,7 @@ def test_required_with_custom_error(parser, web_request):
         # Test that `validate` receives dictionary of args
         parser.parse(args, web_request)
 
-    assert "We need foo" in excinfo.value.messages["foo"]
+    assert "We need foo" in excinfo.value.messages["json"]["foo"]
     if MARSHMALLOW_VERSION_INFO[0] < 3:
         assert "foo" in excinfo.value.field_names
 
@@ -402,7 +404,7 @@ def test_full_input_validator_receives_nonascii_input(web_request):
     args = {"text": fields.Str()}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request, validate=validate)
-    assert excinfo.value.messages == ["Invalid value."]
+    assert excinfo.value.messages == {"json": ["Invalid value."]}
 
 
 def test_invalid_argument_for_validate(web_request, parser):
@@ -482,8 +484,9 @@ def test_parse_with_data_key_retains_field_name_in_error(web_request):
     args = {"content_type": fields.Str(**data_key_kwargs)}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
-    assert "Content-Type" in excinfo.value.messages
-    assert excinfo.value.messages["Content-Type"] == ["Not a valid string."]
+    assert "json" in excinfo.value.messages
+    assert "Content-Type" in excinfo.value.messages["json"]
+    assert excinfo.value.messages["json"]["Content-Type"] == ["Not a valid string."]
 
 
 def test_parse_nested_with_data_key(web_request):
@@ -607,7 +610,9 @@ def test_multiple_arg_required_with_int_conversion(web_request, parser):
     web_request.json = {}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
-    assert excinfo.value.messages == {"ids": ["Missing data for required field."]}
+    assert excinfo.value.messages == {
+        "json": {"ids": ["Missing data for required field."]}
+    }
 
 
 def test_parse_with_callable(web_request, parser):
@@ -888,7 +893,7 @@ def test_delimited_list_passed_invalid_type(web_request, parser):
 
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(schema, web_request)
-    assert excinfo.value.messages == {"ids": ["Not a valid delimited list."]}
+    assert excinfo.value.messages == {"json": {"ids": ["Not a valid delimited list."]}}
 
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):

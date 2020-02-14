@@ -36,6 +36,7 @@ class AsyncParser(core.Parser):
         Receives the same arguments as `webargs.core.Parser.parse`.
         """
         req = req if req is not None else self.get_default_request()
+        location = location or self.location
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -43,14 +44,14 @@ class AsyncParser(core.Parser):
         schema = self._get_schema(argmap, req)
         try:
             location_data = await self._load_location_data(
-                schema=schema, req=req, location=location or self.location
+                schema=schema, req=req, location=location
             )
             result = schema.load(location_data)
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             await self._on_validation_error(
-                error, req, schema, error_status_code, error_headers
+                error, req, schema, location, error_status_code, error_headers
             )
         return data
 
@@ -78,9 +79,16 @@ class AsyncParser(core.Parser):
         error: ValidationError,
         req: Request,
         schema: Schema,
+        location: str,
         error_status_code: typing.Union[int, None],
         error_headers: typing.Union[typing.Mapping[str, str], None] = None,
     ) -> None:
+        # rewrite messages to be namespaced under the location which created
+        # them
+        # e.g. {"json":{"foo":["Not a valid integer."]}}
+        #      instead of
+        #      {"foo":["Not a valid integer."]}
+        error.messages = {location: error.messages}
         error_handler = self.error_callback or self.handle_error
         await error_handler(error, req, schema, error_status_code, error_headers)
 
