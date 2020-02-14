@@ -212,16 +212,16 @@ def echo_use_kwargs_missing(username, **kwargs):
 def handle_error(err):
     if err.code == 422:
         assert isinstance(err.data["schema"], ma.Schema)
-    try:
+
+    if MARSHMALLOW_VERSION_INFO[0] >= 3:
         return J(err.data["messages"]), err.code
+
     # on marshmallow2, validation errors for nested schemas can fail to encode:
     # https://github.com/marshmallow-code/marshmallow/issues/493
     # to workaround this, convert integer keys to strings
-    except TypeError:
+    def tweak_data(value):
+        if not isinstance(value, dict):
+            return value
+        return {str(k): v for k, v in value.items()}
 
-        def tweak_data(value):
-            if not isinstance(value, dict):
-                return value
-            return {str(k): v for k, v in value.items()}
-
-        return J({k: tweak_data(v) for k, v in err.data["messages"].items()}), err.code
+    return J({k: tweak_data(v) for k, v in err.data["messages"].items()}), err.code
