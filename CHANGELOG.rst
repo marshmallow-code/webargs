@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+6.0.0b8 (2020-02-16)
+********************
+
+Refactoring:
+
+* *Backwards-incompatible*: Use keyword-only arguments (:pr:`472`).
+
 6.0.0b7 (2020-02-14)
 ********************
 
