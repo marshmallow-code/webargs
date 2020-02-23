@@ -35,9 +35,9 @@ class MultiDictProxy(Mapping):
             return val
         if hasattr(self.data, "getlist"):
             return self.data.getlist(key)
-        elif hasattr(self.data, "getall"):
+        if hasattr(self.data, "getall"):
             return self.data.getall(key)
-        elif isinstance(val, (list, tuple)):
+        if isinstance(val, (list, tuple)):
             return val
         if val is None:
             return None

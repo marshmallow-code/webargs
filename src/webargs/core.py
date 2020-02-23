@@ -35,8 +35,7 @@ def _callable_or_raise(obj):
     """
     if obj and not callable(obj):
         raise ValueError("{!r} is not callable.".format(obj))
-    else:
-        return obj
+    return obj
 
 
 def is_multiple(field):
@@ -66,17 +65,17 @@ def is_json(mimetype):
     return False
 
 
-def parse_json(s, *, encoding="utf-8"):
-    if isinstance(s, bytes):
+def parse_json(string, *, encoding="utf-8"):
+    if isinstance(string, bytes):
         try:
-            s = s.decode(encoding)
-        except UnicodeDecodeError as e:
+            string = string.decode(encoding)
+        except UnicodeDecodeError as exc:
             raise json.JSONDecodeError(
-                "Bytes decoding error : {}".format(e.reason),
-                doc=str(e.object),
-                pos=e.start,
+                "Bytes decoding error : {}".format(exc.reason),
+                doc=str(exc.object),
+                pos=exc.start,
             )
-    return json.loads(s)
+    return json.loads(string)
 
 
 def _ensure_list_of_callables(obj):
@@ -352,11 +351,10 @@ class Parser:
                 )
                 if as_kwargs:
                     kwargs.update(parsed_args)
-                    return func(*args, **kwargs)
                 else:
                     # Add parsed_args after other positional arguments
-                    new_args = args + (parsed_args,)
-                    return func(*new_args, **kwargs)
+                    args += (parsed_args,)
+                return func(*args, **kwargs)
 
             wrapper.__wrapped__ = func
             return wrapper
@@ -456,12 +454,12 @@ class Parser:
         # code sharing amongst the built-in webargs parsers
         try:
             return self._raw_load_json(req)
-        except json.JSONDecodeError as e:
-            if e.doc == "":
+        except json.JSONDecodeError as exc:
+            if exc.doc == "":
                 return missing
-            return self._handle_invalid_json_error(e, req)
-        except UnicodeDecodeError as e:
-            return self._handle_invalid_json_error(e, req)
+            return self._handle_invalid_json_error(exc, req)
+        except UnicodeDecodeError as exc:
+            return self._handle_invalid_json_error(exc, req)
 
     def load_json_or_form(self, req, schema):
         """Load data from a request, accepting either JSON or form-encoded

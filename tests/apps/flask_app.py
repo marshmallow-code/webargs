@@ -1,11 +1,10 @@
-from webargs.core import json
 from flask import Flask, jsonify as J, Response, request
 from flask.views import MethodView
-
 import marshmallow as ma
+
 from webargs import fields
 from webargs.flaskparser import parser, use_args, use_kwargs
-from webargs.core import MARSHMALLOW_VERSION_INFO
+from webargs.core import json, MARSHMALLOW_VERSION_INFO
 
 
 class TestAppConfig:

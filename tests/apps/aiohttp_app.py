@@ -1,9 +1,9 @@
 import asyncio
 
 import aiohttp
-import marshmallow as ma
-from aiohttp import web
 from aiohttp.web import json_response
+import marshmallow as ma
+
 from webargs import fields
 from webargs.aiohttpparser import parser, use_args, use_kwargs
 from webargs.core import MARSHMALLOW_VERSION_INFO, json
@@ -48,7 +48,7 @@ async def echo_json(request):
     try:
         parsed = await parser.parse(hello_args, request, location="json")
     except json.JSONDecodeError:
-        raise web.HTTPBadRequest(
+        raise aiohttp.web.HTTPBadRequest(
             body=json.dumps(["Invalid JSON."]).encode("utf-8"),
             content_type="application/json",
         )
@@ -59,7 +59,7 @@ async def echo_json_or_form(request):
     try:
         parsed = await parser.parse(hello_args, request, location="json_or_form")
     except json.JSONDecodeError:
-        raise web.HTTPBadRequest(
+        raise aiohttp.web.HTTPBadRequest(
             body=json.dumps(["Invalid JSON."]).encode("utf-8"),
             content_type="application/json",
         )
@@ -184,7 +184,7 @@ class EchoHandler:
         return json_response(args)
 
 
-class EchoHandlerView(web.View):
+class EchoHandlerView(aiohttp.web.View):
     @asyncio.coroutine
     @use_args(hello_args, location="query")
     def get(self, args):
