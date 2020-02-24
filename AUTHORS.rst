@@ -46,3 +46,4 @@ Contributors (chronological)
 * `@dodumosu <https://github.com/dodumosu>`_
 * Nate Dellinger `@Nateyo <https://github.com/Nateyo>`_
 * Karthikeyan Singaravelan `@tirkarthi <https://github.com/tirkarthi>`_
+* Sami Salonen `@suola <https://github.com/suola>`_
