@@ -45,7 +45,7 @@ class TestFalconParser(CommonTestCase):
         assert res.json == {"NAME": "Fred"}
 
     # `falcon.testing.TestClient.simulate_request` parses request with `wsgiref`
-    def test_body_parsing_works_with_simulate(self, testapp):
+    def test_body_parsing_works_with_simulate(self):
         app = self.create_app()
         client = falcon.testing.TestClient(app)
         res = client.simulate_post("/echo_json", json={"name": "Fred"},)
