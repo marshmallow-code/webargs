@@ -1,4 +1,5 @@
 import pytest
+import falcon.testing
 
 from webargs.testing import CommonTestCase
 from tests.apps.falcon_app import create_app
@@ -42,3 +43,10 @@ class TestFalconParser(CommonTestCase):
     def test_parsing_headers(self, testapp):
         res = testapp.get("/echo_headers", headers={"name": "Fred"})
         assert res.json == {"NAME": "Fred"}
+
+    # `falcon.testing.TestClient.simulate_request` parses request with `wsgiref`
+    def test_body_parsing_works_with_simulate(self, testapp):
+        app = self.create_app()
+        client = falcon.testing.TestClient(app)
+        res = client.simulate_post("/echo_json", json={"name": "Fred"},)
+        assert res.json == {"name": "Fred"}
