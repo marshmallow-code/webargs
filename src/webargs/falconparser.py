@@ -103,7 +103,7 @@ class FalconParser(core.Parser):
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req) or req.content_length in (None, 0):
             return core.missing
-        body = req.stream.read()
+        body = req.stream.read(req.content_length)
         if body:
             return core.parse_json(body)
         else:
