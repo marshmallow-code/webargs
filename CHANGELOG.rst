@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+6.0.0 (unreleased)
+******************
+
+Features:
+
+* ``FalconParser``: Pass request content length to ``req.stream.read`` to
+  provide compatibility with ``falcon.testing`` (:pr:`477`).
+  Thanks :user:`suola` for the PR.
+
+
 6.0.0b8 (2020-02-16)
 ********************
 
