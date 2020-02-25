@@ -290,6 +290,16 @@ class Parser:
         """
         return None
 
+    @staticmethod
+    def _update_args_kwargs(args, kwargs, parsed_args, as_kwargs):
+        """Update args or kwargs with parsed_args depending on as_kwargs"""
+        if as_kwargs:
+            kwargs.update(parsed_args)
+        else:
+            # Add parsed_args after other positional arguments
+            args += (parsed_args,)
+        return args, kwargs
+
     def use_args(
         self,
         argmap,
@@ -349,11 +359,9 @@ class Parser:
                     error_status_code=error_status_code,
                     error_headers=error_headers,
                 )
-                if as_kwargs:
-                    kwargs.update(parsed_args)
-                else:
-                    # Add parsed_args after other positional arguments
-                    args += (parsed_args,)
+                args, kwargs = self._update_args_kwargs(
+                    args, kwargs, parsed_args, as_kwargs
+                )
                 return func(*args, **kwargs)
 
             wrapper.__wrapped__ = func
