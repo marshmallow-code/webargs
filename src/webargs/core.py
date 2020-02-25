@@ -1,5 +1,6 @@
 import functools
 import inspect
+import typing
 import logging
 import warnings
 from collections.abc import Mapping
@@ -369,7 +370,7 @@ class Parser:
 
         return decorator
 
-    def use_kwargs(self, *args, **kwargs):
+    def use_kwargs(self, *args, **kwargs) -> typing.Callable:
         """Decorator that injects parsed arguments into a view function or method
         as keyword arguments.
 

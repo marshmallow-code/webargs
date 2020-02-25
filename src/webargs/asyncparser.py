@@ -177,11 +177,3 @@ class AsyncParser(core.Parser):
             return wrapper
 
         return decorator
-
-    def use_kwargs(self, *args, **kwargs) -> typing.Callable:
-        """Decorator that injects parsed arguments into a view function or method.
-
-        Receives the same arguments as `webargs.core.Parser.use_kwargs`.
-
-        """
-        return super().use_kwargs(*args, **kwargs)
