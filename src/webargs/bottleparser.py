@@ -45,8 +45,7 @@ class BottleParser(core.Parser):
         # see: https://github.com/bottlepy/bottle/issues/1160
         if data is None:
             return core.missing
-        else:
-            return data
+        return data
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""

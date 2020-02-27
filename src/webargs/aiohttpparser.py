@@ -101,13 +101,12 @@ class AIOHTTPParser(AsyncParser):
             return core.missing
         try:
             return await req.json(loads=json.loads)
-        except json.JSONDecodeError as e:
-            if e.doc == "":
+        except json.JSONDecodeError as exc:
+            if exc.doc == "":
                 return core.missing
-            else:
-                return self._handle_invalid_json_error(e, req)
-        except UnicodeDecodeError as e:
-            return self._handle_invalid_json_error(e, req)
+            return self._handle_invalid_json_error(exc, req)
+        except UnicodeDecodeError as exc:
+            return self._handle_invalid_json_error(exc, req)
 
     def load_headers(self, req: Request, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""
@@ -138,7 +137,7 @@ class AIOHTTPParser(AsyncParser):
             if isinstance(arg, web.Request):
                 req = arg
                 break
-            elif isinstance(arg, web.View):
+            if isinstance(arg, web.View):
                 req = arg.request
                 break
         if not isinstance(req, web.Request):

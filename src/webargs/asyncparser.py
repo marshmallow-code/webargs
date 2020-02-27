@@ -147,13 +147,10 @@ class AsyncParser(core.Parser):
                         error_status_code=error_status_code,
                         error_headers=error_headers,
                     )
-                    if as_kwargs:
-                        kwargs.update(parsed_args or {})
-                        return await func(*args, **kwargs)
-                    else:
-                        # Add parsed_args after other positional arguments
-                        new_args = args + (parsed_args,)
-                        return await func(*new_args, **kwargs)
+                    args, kwargs = self._update_args_kwargs(
+                        args, kwargs, parsed_args, as_kwargs
+                    )
+                    return await func(*args, **kwargs)
 
             else:
 
@@ -172,22 +169,11 @@ class AsyncParser(core.Parser):
                         error_status_code=error_status_code,
                         error_headers=error_headers,
                     )
-                    if as_kwargs:
-                        kwargs.update(parsed_args)
-                        return func(*args, **kwargs)  # noqa: B901
-                    else:
-                        # Add parsed_args after other positional arguments
-                        new_args = args + (parsed_args,)
-                        return func(*new_args, **kwargs)
+                    args, kwargs = self._update_args_kwargs(
+                        args, kwargs, parsed_args, as_kwargs
+                    )
+                    return func(*args, **kwargs)
 
             return wrapper
 
         return decorator
-
-    def use_kwargs(self, *args, **kwargs) -> typing.Callable:
-        """Decorator that injects parsed arguments into a view function or method.
-
-        Receives the same arguments as `webargs.core.Parser.use_kwargs`.
-
-        """
-        return super().use_kwargs(*args, **kwargs)

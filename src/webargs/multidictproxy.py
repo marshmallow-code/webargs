@@ -1,7 +1,7 @@
+from collections.abc import Mapping
+
 from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.core import missing, is_multiple
-
-from collections.abc import Mapping
 
 
 class MultiDictProxy(Mapping):
@@ -18,7 +18,8 @@ class MultiDictProxy(Mapping):
         self.data = multidict
         self.multiple_keys = self._collect_multiple_keys(schema)
 
-    def _collect_multiple_keys(self, schema):
+    @staticmethod
+    def _collect_multiple_keys(schema):
         result = set()
         for name, field in schema.fields.items():
             if not is_multiple(field):
@@ -35,9 +36,9 @@ class MultiDictProxy(Mapping):
             return val
         if hasattr(self.data, "getlist"):
             return self.data.getlist(key)
-        elif hasattr(self.data, "getall"):
+        if hasattr(self.data, "getall"):
             return self.data.getall(key)
-        elif isinstance(val, (list, tuple)):
+        if isinstance(val, (list, tuple)):
             return val
         if val is None:
             return None

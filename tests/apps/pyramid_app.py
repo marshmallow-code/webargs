@@ -1,12 +1,10 @@
-from webargs.core import json
-
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPBadRequest
 import marshmallow as ma
 
 from webargs import fields
 from webargs.pyramidparser import parser, use_args, use_kwargs
-from webargs.core import MARSHMALLOW_VERSION_INFO
+from webargs.core import json, MARSHMALLOW_VERSION_INFO
 
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}

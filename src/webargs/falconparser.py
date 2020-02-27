@@ -106,8 +106,7 @@ class FalconParser(core.Parser):
         body = req.stream.read(req.content_length)
         if body:
             return core.parse_json(body)
-        else:
-            return core.missing
+        return core.missing
 
     def load_headers(self, req, schema):
         """Return headers from the request."""

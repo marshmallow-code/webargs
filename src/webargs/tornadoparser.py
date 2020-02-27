@@ -46,17 +46,16 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
             value = self.data.get(key, core.missing)
             if value is core.missing:
                 return core.missing
-            elif key in self.multiple_keys:
+            if key in self.multiple_keys:
                 return [
                     _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
                 ]
-            elif value and isinstance(value, (list, tuple)):
+            if value and isinstance(value, (list, tuple)):
                 value = value[0]
 
             if isinstance(value, (str, bytes)):
                 return _unicode(value)
-            else:
-                return value
+            return value
         # based on tornado.web.RequestHandler.decode_argument
         except UnicodeDecodeError:
             raise HTTPError(400, "Invalid unicode in {}: {!r}".format(key, value[:40]))
@@ -73,10 +72,9 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
         cookie = self.data.get(key, core.missing)
         if cookie is core.missing:
             return core.missing
-        elif key in self.multiple_keys:
+        if key in self.multiple_keys:
             return [cookie.value]
-        else:
-            return cookie.value
+        return cookie.value
 
 
 class TornadoParser(core.Parser):

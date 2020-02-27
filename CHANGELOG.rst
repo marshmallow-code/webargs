@@ -10,6 +10,12 @@ Features:
   provide compatibility with ``falcon.testing`` (:pr:`477`).
   Thanks :user:`suola` for the PR.
 
+* *Backwards-incompatible*: Factorize the ``use_args`` / ``use_kwargs`` branch
+  in all parsers. When ``as_kwargs`` is ``False``, arguments are now
+  consistently appended to the arguments list by the ``use_args`` decorator.
+  Before this change, the ``PyramidParser`` would prepend the argument list on
+  each call to ``use_args``. Pyramid view functions must reverse the order of
+  their arguments. (:pr:`478`)
 
 6.0.0b8 (2020-02-16)
 ********************
