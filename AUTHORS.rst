@@ -47,3 +47,4 @@ Contributors (chronological)
 * Nate Dellinger `@Nateyo <https://github.com/Nateyo>`_
 * Karthikeyan Singaravelan `@tirkarthi <https://github.com/tirkarthi>`_
 * Sami Salonen `@suola <https://github.com/suola>`_
+* Tim Gates `@timgates42 <https://github.com/timgates42>`_
