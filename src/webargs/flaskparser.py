@@ -114,7 +114,7 @@ class FlaskParser(core.Parser):
         )
 
     def get_default_request(self):
-        """Override to use Flask's thread-local request objec by default"""
+        """Override to use Flask's thread-local request object by default"""
         return flask.request
 
 
