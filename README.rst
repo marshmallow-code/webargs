@@ -36,7 +36,7 @@ webargs is a Python library for parsing and validating HTTP request objects, wit
 
 
     @app.route("/")
-    @use_args({"name": fields.Str(required=True)})
+    @use_args({"name": fields.Str(required=True)}, location="query")
     def index(args):
         return "Hello " + args["name"]
 
