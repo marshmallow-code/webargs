@@ -48,3 +48,4 @@ Contributors (chronological)
 * Karthikeyan Singaravelan `@tirkarthi <https://github.com/tirkarthi>`_
 * Sami Salonen `@suola <https://github.com/suola>`_
 * Tim Gates `@timgates42 <https://github.com/timgates42>`_
+* Lefteris Karapetsas `@lefterisjp <https://github.com/lefterisjp>`_
