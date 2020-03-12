@@ -324,7 +324,7 @@ class Parser:
         :param argmap: Either a `marshmallow.Schema`, a `dict`
             of argname -> `marshmallow.fields.Field` pairs, or a callable
             which accepts a request and returns a `marshmallow.Schema`.
-        :param str locations: Where on the request to load values.
+        :param str location: Where on the request to load values.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
