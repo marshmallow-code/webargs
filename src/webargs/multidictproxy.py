@@ -44,6 +44,14 @@ class MultiDictProxy(Mapping):
             return None
         return [val]
 
+    def __str__(self):  # str(proxy) proxies to str(proxy.data)
+        return str(self.data)
+
+    def __repr__(self):
+        return "MultiDictProxy(data={!r}, multiple_keys={!r})".format(
+            self.data, self.multiple_keys
+        )
+
     def __delitem__(self, key):
         del self.data[key]
 
