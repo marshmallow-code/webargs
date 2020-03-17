@@ -6,6 +6,14 @@ Release v\ |version|. (:doc:`Changelog <changelog>`)
 
 webargs is a Python library for parsing and validating HTTP request objects, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, webapp2, Falcon, and aiohttp.
 
+Upgrading from an older version?
+--------------------------------
+
+See the :doc:`Upgrading to Newer Releases <upgrading>` page for notes on getting your code up-to-date with the latest version.
+
+
+Usage and Simple Examples
+-------------------------
 
 .. code-block:: python
 
@@ -109,5 +117,6 @@ Project Info
 
    license
    changelog
+   upgrading
    authors
    contributing
