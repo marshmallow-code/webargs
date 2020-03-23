@@ -6,14 +6,10 @@ This section documents migration paths to new releases.
 Upgrading to 6.0
 ++++++++++++++++
 
-In webargs 6, the way that data is loaded from various locations and passed to
-your schemas changed significantly. This may require you to change several
-different parts of your webargs usage.
-
-Multiple locations are no longer supported in a single call
+Multiple Locations Are No Longer Supported In A Single Call
 -----------------------------------------------------------
 
-And only JSON data is parsed by default.
+The default location is JSON/body.
 
 Under webargs 5.x, you may have written code which did not specify a location.
 
@@ -29,23 +25,24 @@ parameter, you must be explicit and rewrite like so:
 
     # webargs 5.x
     @parser.use_args({"q": ma.fields.String()})
-    def foo(q):
-        return some_function(user_query=q)
+    def foo(args):
+        return some_function(user_query=args.get("q"))
 
 
     # webargs 6.x
     @parser.use_args({"q": ma.fields.String()}, location="query")
-    def foo(q):
-        return some_function(user_query=q)
+    def foo(args):
+        return some_function(user_query=args.get("q"))
 
 This also means that another usage from 5.x is not supported. If you had code
 with multiple locations in a single `use_args`, `use_kwargs`, or `parse` call,
-you must write it in multiple separate `use_args` invocations, like so:
+you must write it in multiple separate `use_args` or `use_kwargs` invocations,
+like so:
 
 .. code-block:: python
 
     # webargs 5.x
-    @parser.use_args(
+    @parser.use_kwargs(
         {
             "q1": ma.fields.Int(location="query"),
             "q2": ma.fields.Int(location="query"),
@@ -58,13 +55,13 @@ you must write it in multiple separate `use_args` invocations, like so:
 
 
     # webargs 6.x
-    @parser.use_args({"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query")
-    @parser.use_args({"h1": ma.fields.Int()}, location="headers")
+    @parser.use_kwargs({"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query")
+    @parser.use_kwargs({"h1": ma.fields.Int()}, location="headers")
     def foo(q1, q2, h1):
         ...
 
 
-Fields no longer support location=...
+Fields No Longer Support location=...
 -------------------------------------
 
 Because a single `parser.use_args`, `parser.use_kwargs`, or `parser.parse` call
@@ -75,16 +72,16 @@ to specify its location. Rewrite code like so:
 
     # webargs 5.x
     @parser.use_args({"q": ma.fields.String(location="query")})
-    def foo(q):
-        return some_function(user_query=q)
+    def foo(args):
+        return some_function(user_query=args.get("q"))
 
 
     # webargs 6.x
     @parser.use_args({"q": ma.fields.String()}, location="query")
-    def foo(q):
-        return some_function(user_query=q)
+    def foo(args):
+        return some_function(user_query=args.get("q"))
 
-location_handler has been replaced with location_loader
+location_handler Has Been Replaced With location_loader
 -------------------------------------------------------
 
 This is not just a name change. The expected signature of a `location_loader`
@@ -108,17 +105,17 @@ Rewrite code like this:
     def load_data(request, schema):
         return request.data
 
-Data is not filtered before being passed to your schema, and it may be proxified
+Data Is Not Filtered Before Being Passed To Your Schema, And It May Be Proxified
 --------------------------------------------------------------------------------
 
-In webargs 5.x, the schema you gave was used to pull data out of the request
-object. That data was compiled into a dictionary which was then passed to your
-schema.
+In webargs 5.x, the deserialization schema was used to pull data out of the
+request object. That data was compiled into a dictionary which was then passed
+to the schema.
 
 One of the major changes in webargs 6.x allows the use of `unknown` parameter
 on schemas. This lets a schema decide what to do with fields not specified in
 the schema. In order to achieve this, webargs now passes the full data from
-the location you selected to your schema.
+the specified location to the schema.
 
 However, many types of request data are so-called "multidicts" -- dictionary-like
 types which can return one or multiple values as you prefer. To handle
@@ -230,7 +227,7 @@ the data in-place. You may need to apply rewrites like so:
         ...
 
 
-DelimitedList now only takes a string input
+DelimitedList Now Only Takes A String Input
 -------------------------------------------
 
 Combining `List` and string parsing functionality in a single type had some
@@ -274,7 +271,7 @@ you need to allow both usages in your API, you can do a rewrite like so:
         ...
 
 
-ValidationError messages are namespaced under the location
+ValidationError Messages Are Namespaced Under The Location
 ----------------------------------------------------------
 
 If you were parsing ValidationError messages, you will notice a change in the
@@ -312,7 +309,7 @@ to traverse messages by one additional level. For example:
                 log.debug("bad value for '{}' [{}]: {}".format(field, location, messages))
 
 
-Some functions take keyword-only arguments now
+Some Functions Take Keyword-Only Arguments Now
 ----------------------------------------------
 
 The signature of several methods has changed to have keyword-only arguments.
@@ -422,26 +419,58 @@ and finally, the `dict2schema` function:
         ...
 
 
-PyramidParser now appends arguments (used to prepend)
+PyramidParser Now Appends Arguments (Used To Prepend)
 -----------------------------------------------------
 
 `PyramidParser.use_args` was not conformant with the other parsers in webargs.
 While all other parsers added new arguments to the end of the argument list of
 a decorated view function, the Pyramid implementation added them to the front
-of the argument list. This has been corrected, but as a result pyramid views
-with `use_args` will need to be rewritten like so:
+of the argument list.
+
+This has been corrected, but as a result pyramid views with `use_args` may need
+to be rewritten. The `request` object is always passed first in both versions,
+so the issue is only apparent with view functions taking other positional
+arguments.
+
+For example, imagine code with a decorator for passing user information,
+`pass_userinfo`, like so:
+
+.. code-block:: python
+
+    # a decorator which gets information about the authenticated user
+    def pass_userinfo(f):
+        def decorator(request, *args, **kwargs):
+            return f(request, get_userinfo(), *args, **kwargs)
+
+        return decorator
+
+You will see a behavioral change if `pass_userinfo` is called on a function
+decorated with `use_args`. The difference between the two versions will be like
+so:
 
 .. code-block:: python
 
     from webargs.pyramidparser import use_args
 
     # webargs 5.x
+    # pass_userinfo is called first, webargs sees positional arguments of
+    #   (userinfo,)
+    # and changes it to
+    #   (request, args, userinfo)
+    @pass_userinfo
     @use_args({"q": ma.fields.String()}, locations=("query",))
-    def viewfunc(q, request):
+    def viewfunc(request, args, userinfo):
+        q = args.get("q")
         ...
 
 
     # webargs 6.x
+    # pass_userinfo is called first, webargs sees positional arguments of
+    #   (userinfo,)
+    # and changes it to
+    #   (request, userinfo, args)
+    @pass_userinfo
     @use_args({"q": ma.fields.String()}, location="query")
-    def viewfunc(request, q):
+    def viewfunc(request, userinfo, args):
+        q = args.get("q")
         ...
