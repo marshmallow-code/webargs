@@ -16,6 +16,14 @@ webargs.fields
 .. automodule:: webargs.fields
     :members: Nested, DelimitedList
 
+
+webargs.multidictproxy
+----------------------
+
+.. automodule:: webargs.multidictproxy
+    :members:
+
+
 webargs.asyncparser
 -------------------
 
