@@ -19,25 +19,66 @@ Example: ::
         return 'Hello ' + args['name']
 """
 import flask
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import default_exceptions
+from werkzeug.utils import escape
 
 from webargs import core
 from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.multidictproxy import MultiDictProxy
 
 
+class VerboseError:
+    """Mixin class for handling verbose error information and additional
+    headers.
+    """
+
+    def __init__(self, exc, **kwargs):
+        # Note that this will call the __init__() of the sibling class to which
+        # it is mixed in!
+        super().__init__()
+        self.exc = exc
+        self.messages = kwargs.get("messages")
+        self.extra_headers = kwargs.get("headers")
+        self.data = kwargs
+
+    def get_description(self, environ):
+        if self.messages is None:
+            return super().get_description()
+        html = []
+        for source, errors in self.messages.items():
+            html.append(f"<h2>Errors in {escape(source)}</h2>")
+            html.append("<p>")
+            if isinstance(errors, dict):
+                for field, message in errors.items():
+                    if isinstance(message, list):
+                        message = ", ".join(message)
+                    html.append(f"{escape(field)}: {escape(message)}<br>")
+            else:
+                html.append(escape(errors))
+            html.append("</p>")
+        return "\n".join(html)
+
+    def get_headers(self, environ):
+        if self.extra_headers:
+            extra = list(self.extra_headers.items())
+        else:
+            extra = []
+        return super().get_headers(environ) + extra
+
+
 def abort(http_status_code, exc=None, **kwargs):
     """Raise a HTTPException for the given http_status_code. Attach any keyword
     arguments to the exception for later processing.
-
-    From Flask-Restful. See NOTICE file for license information.
     """
-    try:
-        flask.abort(http_status_code)
-    except HTTPException as err:
-        err.data = kwargs
-        err.exc = exc
-        raise err
+    # Determine the HTTPException subclass to use.
+    http_exception_class = default_exceptions[http_status_code]
+
+    # Mix in our special behaviour.
+    class ArgumentValidationError(VerboseError, http_exception_class):
+        pass
+
+    # Actually raise the exception.
+    raise ArgumentValidationError(exc, **kwargs)
 
 
 def is_json_request(req):
