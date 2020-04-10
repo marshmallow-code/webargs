@@ -46,13 +46,13 @@ class VerboseError:
             return super().get_description()
         html = []
         for source, errors in self.messages.items():
-            html.append(f"<h2>Errors in {escape(source)}</h2>")
+            html.append("<h2>Errors in {}</h2>".format(escape(source)))
             html.append("<p>")
             if isinstance(errors, dict):
                 for field, message in errors.items():
                     if isinstance(message, list):
                         message = ", ".join(message)
-                    html.append(f"{escape(field)}: {escape(message)}<br>")
+                    html.append("{}: {}<br>".format(escape(field), escape(message)))
             else:
                 html.append(escape(errors))
             html.append("</p>")
