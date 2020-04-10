@@ -9,14 +9,16 @@ Example: ::
 
     app = Flask(__name__)
 
-    hello_args = {
-        'name': fields.Str(required=True)
+    user_detail_args = {
+        'per_page': fields.Int()
     }
 
-    @app.route('/')
-    @use_args(hello_args)
-    def index(args):
-        return 'Hello ' + args['name']
+    @app.route("/user/<int:uid>")
+    @use_args(user_detail_args)
+    def user_detail(args, uid):
+        return ("The user page for user {uid}, showing {per_page} posts.").format(
+            uid=uid, per_page=args["per_page"]
+        )
 """
 import flask
 from werkzeug.exceptions import HTTPException
