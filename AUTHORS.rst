@@ -49,3 +49,4 @@ Contributors (chronological)
 * Sami Salonen `@suola <https://github.com/suola>`_
 * Tim Gates `@timgates42 <https://github.com/timgates42>`_
 * Lefteris Karapetsas `@lefterisjp <https://github.com/lefterisjp>`_
+* Utku Gultopu `@ugultopu <https://github.com/ugultopu>`_
