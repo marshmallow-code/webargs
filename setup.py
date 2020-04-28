@@ -16,7 +16,7 @@ EXTRAS_REQUIRE = {
     "tests": [
         "pytest",
         'mock; python_version == "3.5"',
-        "webtest==2.0.34",
+        "webtest==2.0.35",
         "webtest-aiohttp==2.0.0",
         "pytest-aiohttp>=0.3.0",
     ]
