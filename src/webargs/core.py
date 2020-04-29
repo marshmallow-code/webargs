@@ -191,7 +191,7 @@ class Parser:
                 msg = self.DEFAULT_VALIDATION_MESSAGE
                 raise ValidationError(msg, data=data)
 
-    def _get_schema(self, argmap, req):
+    def _get_schema(self, argmap, req, unknown):
         """Return a `marshmallow.Schema` for the given argmap and request.
 
         :param argmap: Either a `marshmallow.Schema`, `dict`
@@ -207,7 +207,14 @@ class Parser:
         elif callable(argmap):
             schema = argmap(req)
         else:
-            schema = dict2schema(argmap, schema_class=self.schema_class)()
+            if 'unknown' in argmap:
+                unknown = argmap['unknown']
+            else:
+                pass
+            if unknown is None:
+                schema = dict2schema(argmap, schema_class=self.schema_class)()
+            else:
+                schema = dict2schema(argmap, schema_class=self.schema_class)(unknown=unknown)
         if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
             warnings.warn(
                 "It is highly recommended that you set strict=True on your schema "
@@ -224,7 +231,8 @@ class Parser:
         location=None,
         validate=None,
         error_status_code=None,
-        error_headers=None
+        error_headers=None,
+        unknown=None
     ):
         """Main request parsing method.
 
@@ -252,7 +260,7 @@ class Parser:
             raise ValueError("Must pass req object")
         data = None
         validators = _ensure_list_of_callables(validate)
-        schema = self._get_schema(argmap, req)
+        schema = self._get_schema(argmap, req, unknown)
         try:
             location_data = self._load_location_data(
                 schema=schema, req=req, location=location
@@ -310,7 +318,8 @@ class Parser:
         as_kwargs=False,
         validate=None,
         error_status_code=None,
-        error_headers=None
+        error_headers=None,
+        unknown=None
     ):
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -339,7 +348,10 @@ class Parser:
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = dict2schema(argmap, schema_class=self.schema_class)()
+            if unknown is None:
+                argmap = dict2schema(argmap, schema_class=self.schema_class)()
+            else:
+                argmap = dict2schema(argmap, schema_class=self.schema_class)(unknown = unknown)
 
         def decorator(func):
             req_ = request_obj
