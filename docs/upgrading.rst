@@ -11,15 +11,15 @@ Multiple Locations Are No Longer Supported In A Single Call
 
 The default location is JSON/body.
 
-Under webargs 5.x, you may have written code which did not specify a location.
+Under webargs 5.x, code often did not have to specify a location.
 
-Because webargs would parse data from multiple locations automatically, you did
-not need to specify where a parameter, call it `q`, was passed.
+Because webargs would parse data from multiple locations automatically, users
+did not need to specify where a parameter, call it `q`, was passed.
 `q` could be in a query parameter or in a JSON or form-post body.
 
-Now, webargs requires that you specify only one location for data loading per
+Now, webargs requires that users specify only one location for data loading per
 `use_args` call, and `"json"` is the default. If `q` is intended to be a query
-parameter, you must be explicit and rewrite like so:
+parameter, the developer must be explicit and rewrite like so:
 
 .. code-block:: python
 
@@ -34,9 +34,9 @@ parameter, you must be explicit and rewrite like so:
     def foo(args):
         return some_function(user_query=args.get("q"))
 
-This also means that another usage from 5.x is not supported. If you had code
-with multiple locations in a single `use_args`, `use_kwargs`, or `parse` call,
-you must write it in multiple separate `use_args` or `use_kwargs` invocations,
+This also means that another usage from 5.x is not supported. Dode with
+multiple locations in a single `use_args`, `use_kwargs`, or `parse` call
+must be rewritten in multiple separate `use_args` or `use_kwargs` invocations,
 like so:
 
 .. code-block:: python
@@ -87,9 +87,11 @@ location_handler Has Been Replaced With location_loader
 This is not just a name change. The expected signature of a `location_loader`
 is slightly different from the signature for a `location_handler`.
 
-Where previously your code took the incoming request data and details of a
-single field being loaded, it now takes the request and the schema as a pair.
-It does not return a specific field's data, but data for the whole location.
+Where previously a `location_handler` code took the incoming request data and
+details of a single field being loaded, a `location_loader` takes the request
+and the schema as a pair. It does not return a specific field's data, but data
+for the whole location.
+
 Rewrite code like this:
 
 .. code-block:: python
@@ -105,8 +107,8 @@ Rewrite code like this:
     def load_data(request, schema):
         return request.data
 
-Data Is Not Filtered Before Being Passed To Your Schema, And It May Be Proxified
---------------------------------------------------------------------------------
+Data Is Not Filtered Before Being Passed To Schemas, And It May Be Proxified
+----------------------------------------------------------------------------
 
 In webargs 5.x, the deserialization schema was used to pull data out of the
 request object. That data was compiled into a dictionary which was then passed
@@ -118,15 +120,14 @@ the schema. In order to achieve this, webargs now passes the full data from
 the specified location to the schema.
 
 However, many types of request data are so-called "multidicts" -- dictionary-like
-types which can return one or multiple values as you prefer. To handle
-`marshmallow.fields.List` and `webargs.fields.DelimitedList` fields correctly,
-passing list data, webargs must combine schema information with the raw request
-data. This is done in the
+types which can return one or multiple values. To handle `marshmallow.fields.List`
+and `webargs.fields.DelimitedList` fields correctly, passing list data, webargs
+must combine schema information with the raw request data. This is done in the
 :class:`MultiDictProxy <webargs.multidictproxy.MultiDictProxy>` type, which
-will often be passed to your schemas.
+will often be passed to schemas.
 
-Therefore, you should specify `unknown=marshmallow.EXCLUDE` on your schemas if
-you want to filter out unknown fields. Like so:
+Therefore, users should specify `unknown=marshmallow.EXCLUDE` on their schemas in
+order to filter out unknown fields. Like so:
 
 .. code-block:: python
 
@@ -161,8 +162,7 @@ you want to filter out unknown fields. Like so:
         ...
 
 
-This also allows you to write code which passes the unknown parameters through,
-like so:
+This also allows usage which passes the unknown parameters through, like so:
 
 .. code-block:: python
 
@@ -177,11 +177,11 @@ like so:
         ...
 
 
-Finally, this change passes a proxy object where you once saw a dict. This
-means that if your schema has a `pre_load` hook which interacts with the data,
+Finally, this change passes a proxy object where schemas once saw a dict. This
+means that if a schema has a `pre_load` hook which interacts with the data,
 it may need modifications. For example, a `flask` query string will be parsed
 into an `ImmutableMultiDict` type, which will break pre-load hooks which modify
-the data in-place. You may need to apply rewrites like so:
+the data in-place. Such usages need rewrites like so:
 
 .. code-block:: python
 
@@ -231,8 +231,8 @@ DelimitedList Now Only Takes A String Input
 -------------------------------------------
 
 Combining `List` and string parsing functionality in a single type had some
-messy corner cases. For the most part, this should not require rewrites. But if
-you need to allow both usages in your API, you can do a rewrite like so:
+messy corner cases. For the most part, this should not require rewrites. But
+for APIs which need to allow both usages, rewrites are possible like so:
 
 .. code-block:: python
 
@@ -274,14 +274,14 @@ you need to allow both usages in your API, you can do a rewrite like so:
 ValidationError Messages Are Namespaced Under The Location
 ----------------------------------------------------------
 
-If you were parsing ValidationError messages, you will notice a change in the
-messages produced by webargs.
+Code parsing ValidationError messages will notice a change in the messages
+produced by webargs.
 What would previously have come back with messages like `{"foo":["Not a valid integer."]}`
 will now have messages nested one layer deeper, like
 `{"json":{"foo":["Not a valid integer."]}}`.
 
-To rewrite code which was handling these errors, you will need to be prepared
-to traverse messages by one additional level. For example:
+To rewrite code which was handling these errors, the handler will need to be
+prepared to traverse messages by one additional level. For example:
 
 .. code-block:: python
 
