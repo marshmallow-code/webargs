@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+6.1.0 (Unreleased)
+******************
+
+Features:
+
+* Add ``fields.DelimitedTuple`` when using marshmallow 3. This behaves as a
+  combination of ``fields.DelimitedList`` and ``marshmallow.fields.Tuple``. It
+  takes an iterable of fields, plus a delimiter (defaults to ``,``), and parses
+  delimiter-separated strings into tuples.
+
+
 6.0.0 (2020-02-27)
 ******************
 
