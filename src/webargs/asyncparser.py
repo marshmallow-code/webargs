@@ -30,7 +30,8 @@ class AsyncParser(core.Parser):
         location: str = None,
         validate: Validate = None,
         error_status_code: typing.Union[int, None] = None,
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
+        unknown=None
     ) -> typing.Union[typing.Mapping, None]:
         """Coroutine variant of `webargs.core.Parser`.
 
@@ -42,7 +43,7 @@ class AsyncParser(core.Parser):
             raise ValueError("Must pass req object")
         data = None
         validators = core._ensure_list_of_callables(validate)
-        schema = self._get_schema(argmap, req)
+        schema = self._get_schema(argmap, req, unknown=unknown)
         try:
             location_data = await self._load_location_data(
                 schema=schema, req=req, location=location
@@ -114,7 +115,8 @@ class AsyncParser(core.Parser):
         as_kwargs: bool = False,
         validate: Validate = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None
+        error_headers: typing.Union[typing.Mapping[str, str], None] = None,
+        unknown = None
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -125,7 +127,10 @@ class AsyncParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = core.dict2schema(argmap, schema_class=self.schema_class)()
+            if unknown is None:
+                argmap = core.dict2schema(argmap, schema_class=self.schema_class)()
+            else:
+                argmap = core.dict2schema(argmap, schema_class=self.schema_class)(unknown=unknown)
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj

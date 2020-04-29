@@ -191,7 +191,7 @@ class Parser:
                 msg = self.DEFAULT_VALIDATION_MESSAGE
                 raise ValidationError(msg, data=data)
 
-    def _get_schema(self, argmap, req, unknown):
+    def _get_schema(self, argmap, req, unknown=None):
         """Return a `marshmallow.Schema` for the given argmap and request.
 
         :param argmap: Either a `marshmallow.Schema`, `dict`
