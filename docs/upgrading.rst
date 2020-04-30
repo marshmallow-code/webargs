@@ -34,7 +34,7 @@ parameter, the developer must be explicit and rewrite like so:
     def foo(args):
         return some_function(user_query=args.get("q"))
 
-This also means that another usage from 5.x is not supported. Dode with
+This also means that another usage from 5.x is not supported. Code with
 multiple locations in a single `use_args`, `use_kwargs`, or `parse` call
 must be rewritten in multiple separate `use_args` or `use_kwargs` invocations,
 like so:
@@ -119,13 +119,6 @@ on schemas. This lets a schema decide what to do with fields not specified in
 the schema. In order to achieve this, webargs now passes the full data from
 the specified location to the schema.
 
-However, many types of request data are so-called "multidicts" -- dictionary-like
-types which can return one or multiple values. To handle `marshmallow.fields.List`
-and `webargs.fields.DelimitedList` fields correctly, passing list data, webargs
-must combine schema information with the raw request data. This is done in the
-:class:`MultiDictProxy <webargs.multidictproxy.MultiDictProxy>` type, which
-will often be passed to schemas.
-
 Therefore, users should specify `unknown=marshmallow.EXCLUDE` on their schemas in
 order to filter out unknown fields. Like so:
 
@@ -177,8 +170,14 @@ This also allows usage which passes the unknown parameters through, like so:
         ...
 
 
-Finally, this change passes a proxy object where schemas once saw a dict. This
-means that if a schema has a `pre_load` hook which interacts with the data,
+However, many types of request data are so-called "multidicts" -- dictionary-like
+types which can return one or multiple values. To handle `marshmallow.fields.List`
+and `webargs.fields.DelimitedList` fields correctly, passing list data, webargs
+must combine schema information with the raw request data. This is done in the
+:class:`MultiDictProxy <webargs.multidictproxy.MultiDictProxy>` type, which
+will often be passed to schemas.
+
+This means that if a schema has a `pre_load` hook which interacts with the data,
 it may need modifications. For example, a `flask` query string will be parsed
 into an `ImmutableMultiDict` type, which will break pre-load hooks which modify
 the data in-place. Such usages need rewrites like so:
