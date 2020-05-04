@@ -43,7 +43,40 @@ class Nested(ma.fields.Nested):
         super().__init__(nested, *args, **kwargs)
 
 
-class DelimitedList(ma.fields.List):
+class DelimitedFieldMixin:
+    """
+    This is a mixin class for subclasses of ma.fields.List and ma.fields.Tuple
+    which split on a pre-specified delimiter. By default, the delimiter will be ","
+
+    Because we want the MRO to reach this class before the List or Tuple class,
+    it must be listed first in the superclasses
+
+    For example, a DelimitedList-like type can be defined like so:
+
+    >>> class MyDelimitedList(DelimitedFieldMixin, ma.fields.List):
+    >>>     pass
+    """
+
+    delimiter = ","
+
+    def _serialize(self, value, attr, obj):
+        # serializing will start with parent-class serialization, so that we correctly
+        # output lists of non-primitive types, e.g. DelimitedList(DateTime)
+        return self.delimiter.join(
+            format(each) for each in super()._serialize(value, attr, obj)
+        )
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        # attempting to deserialize from a non-string source is an error
+        if not isinstance(value, (str, bytes)):
+            if MARSHMALLOW_VERSION_INFO[0] < 3:
+                self.fail("invalid")
+            else:
+                raise self.make_error("invalid")
+        return super()._deserialize(value.split(self.delimiter), attr, data, **kwargs)
+
+
+class DelimitedList(DelimitedFieldMixin, ma.fields.List):
     """A field which is similar to a List, but takes its input as a delimited
     string (e.g. "foo,bar,baz").
 
@@ -61,18 +94,25 @@ class DelimitedList(ma.fields.List):
         self.delimiter = delimiter or self.delimiter
         super().__init__(cls_or_instance, **kwargs)
 
-    def _serialize(self, value, attr, obj):
-        # serializing will start with List serialization, so that we correctly
-        # output lists of non-primitive types, e.g. DelimitedList(DateTime)
-        return self.delimiter.join(
-            format(each) for each in super()._serialize(value, attr, obj)
-        )
 
-    def _deserialize(self, value, attr, data, **kwargs):
-        # attempting to deserialize from a non-string source is an error
-        if not isinstance(value, (str, bytes)):
-            if MARSHMALLOW_VERSION_INFO[0] < 3:
-                self.fail("invalid")
-            else:
-                raise self.make_error("invalid")
-        return super()._deserialize(value.split(self.delimiter), attr, data, **kwargs)
+# DelimitedTuple can only be defined when using marshmallow3, when Tuple was
+# added
+if MARSHMALLOW_VERSION_INFO[0] >= 3:
+
+    class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
+        """A field which is similar to a Tuple, but takes its input as a delimited
+        string (e.g. "foo,bar,baz").
+
+        Like Tuple, it can be given a tuple of nested field types which it will use to
+        de/serialize each element of the tuple.
+
+        :param Iterable[Field] tuple_fields: An iterable of field classes or instances.
+        :param str delimiter: Delimiter between values.
+        """
+
+        default_error_messages = {"invalid": "Not a valid delimited tuple."}
+        delimiter = ","
+
+        def __init__(self, tuple_fields, *, delimiter=None, **kwargs):
+            self.delimiter = delimiter or self.delimiter
+            super().__init__(tuple_fields, **kwargs)

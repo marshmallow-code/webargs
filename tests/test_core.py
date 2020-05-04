@@ -851,7 +851,53 @@ def test_delimited_list_default_delimiter(web_request, parser):
     assert data["ids"] == "1,2,3"
 
 
-def test_delimited_list_as_string_v2(web_request, parser):
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
+)
+def test_delimited_tuple_default_delimiter(web_request, parser):
+    """
+    Test load and dump from DelimitedTuple, including the use of a datetime
+    type (similar to a DelimitedList test below) which confirms that we aren't
+    relying on __str__, but are properly de/serializing the included fields
+    """
+    web_request.json = {"ids": "1,2,2020-05-04"}
+    schema_cls = dict2schema(
+        {
+            "ids": fields.DelimitedTuple(
+                (fields.Int, fields.Int, fields.DateTime(format="%Y-%m-%d"))
+            )
+        }
+    )
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["ids"] == (1, 2, datetime.datetime(2020, 5, 4))
+
+    data = schema.dump(parsed)
+    assert data["ids"] == "1,2,2020-05-04"
+
+
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
+)
+def test_delimited_tuple_incorrect_arity(web_request, parser):
+    web_request.json = {"ids": "1,2"}
+    schema_cls = dict2schema(
+        {"ids": fields.DelimitedTuple((fields.Int, fields.Int, fields.Int))}
+    )
+    schema = schema_cls()
+
+    with pytest.raises(ValidationError):
+        parser.parse(schema, web_request)
+
+
+def test_delimited_list_with_datetime(web_request, parser):
+    """
+    Test that DelimitedList(DateTime(format=...)) correctly parses and dumps
+    dates to and from strings -- indicates that we're doing proper
+    serialization of values in dump() and not just relying on __str__ producing
+    correct results
+    """
     web_request.json = {"dates": "2018-11-01,2018-11-02"}
     schema_cls = dict2schema(
         {"dates": fields.DelimitedList(fields.DateTime(format="%Y-%m-%d"))}
@@ -877,6 +923,27 @@ def test_delimited_list_custom_delimiter(web_request, parser):
     parsed = parser.parse(schema, web_request)
     assert parsed["ids"] == [1, 2, 3]
 
+    dumped = schema.dump(parsed)
+    data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
+    assert data["ids"] == "1|2|3"
+
+
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
+)
+def test_delimited_tuple_custom_delimiter(web_request, parser):
+    web_request.json = {"ids": "1|2"}
+    schema_cls = dict2schema(
+        {"ids": fields.DelimitedTuple((fields.Int, fields.Int), delimiter="|")}
+    )
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["ids"] == (1, 2)
+
+    data = schema.dump(parsed)
+    assert data["ids"] == "1|2"
+
 
 def test_delimited_list_load_list_errors(web_request, parser):
     web_request.json = {"ids": [1, 2, 3]}
@@ -891,6 +958,22 @@ def test_delimited_list_load_list_errors(web_request, parser):
     assert errors["ids"] == ["Not a valid delimited list."]
 
 
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
+)
+def test_delimited_tuple_load_list_errors(web_request, parser):
+    web_request.json = {"ids": [1, 2]}
+    schema_cls = dict2schema({"ids": fields.DelimitedTuple((fields.Int, fields.Int))})
+    schema = schema_cls()
+
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(schema, web_request)
+    exc = excinfo.value
+    assert isinstance(exc, ValidationError)
+    errors = exc.args[0]
+    assert errors["ids"] == ["Not a valid delimited tuple."]
+
+
 # Regresion test for https://github.com/marshmallow-code/webargs/issues/149
 def test_delimited_list_passed_invalid_type(web_request, parser):
     web_request.json = {"ids": 1}
@@ -900,6 +983,19 @@ def test_delimited_list_passed_invalid_type(web_request, parser):
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(schema, web_request)
     assert excinfo.value.messages == {"json": {"ids": ["Not a valid delimited list."]}}
+
+
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
+)
+def test_delimited_tuple_passed_invalid_type(web_request, parser):
+    web_request.json = {"ids": 1}
+    schema_cls = dict2schema({"ids": fields.DelimitedTuple((fields.Int,))})
+    schema = schema_cls()
+
+    with pytest.raises(ValidationError) as excinfo:
+        parser.parse(schema, web_request)
+    assert excinfo.value.messages == {"json": {"ids": ["Not a valid delimited tuple."]}}
 
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
