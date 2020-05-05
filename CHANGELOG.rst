@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-6.1.0 (Unreleased)
+6.1.0 (2020-04-05)
 ******************
 
 Features:
@@ -9,7 +9,15 @@ Features:
 * Add ``fields.DelimitedTuple`` when using marshmallow 3. This behaves as a
   combination of ``fields.DelimitedList`` and ``marshmallow.fields.Tuple``. It
   takes an iterable of fields, plus a delimiter (defaults to ``,``), and parses
-  delimiter-separated strings into tuples.
+  delimiter-separated strings into tuples. (:pr:`509`)
+
+* Add ``__str__`` and ``__repr__`` to MultiDictProxy to make it easier to work
+  with (:pr:`488`)
+
+Support:
+
+* Various docs updates (:pr:`482`, :pr:`486`, :pr:`489`, :pr:`498`, :pr:`508`).
+  Thanks :user:`lefterisjp`, :user:`timgates42`, and :user:`ugultopu` for the PRs.
 
 
 6.0.0 (2020-02-27)
