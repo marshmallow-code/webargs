@@ -434,7 +434,7 @@ class Parser:
 
 
             @parser.error_handler
-            def handle_error(error, req, schema, *, status_code, headers):
+            def handle_error(error, req, schema, *, error_status_code, error_headers):
                 raise CustomError(error.messages)
 
         :param callable func: The error callback to register.

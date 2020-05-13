@@ -308,6 +308,27 @@ prepared to traverse messages by one additional level. For example:
                 log.debug("bad value for '{}' [{}]: {}".format(field, location, messages))
 
 
+Custom Error Handler Argument Names Changed
+-------------------------------------------
+
+If you define a custom error handler via `@parser.error_handler` the function
+arguments are now keyword-only and `status_code` and `headers` have been renamed
+`error_status_code` and `error_headers`.
+
+.. code-block:: python
+
+    # webargs 5.x
+    @parser.error_handler
+    def custom_handle_error(error, req, schema, status_code, headers):
+        ...
+
+
+    # webargs 6.x
+    @parser.error_handler
+    def custom_handle_error(error, req, schema, *, error_status_code, error_headers):
+        ...
+
+
 Some Functions Take Keyword-Only Arguments Now
 ----------------------------------------------
 
@@ -325,7 +346,7 @@ the changes.
 
 
     # webargs 6.x
-    def handle_error(error, req, schema, *, status_code, headers):
+    def handle_error(error, req, schema, *, error_status_code, error_headers):
         ...
 
 `parser.__init__` methods:
