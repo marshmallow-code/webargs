@@ -108,7 +108,11 @@ def test_parse(parser, web_request):
 @pytest.mark.skipif(
     MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=... added in marshmallow3"
 )
-def test_parse_with_unknown_behavior_specified(parser, web_request):
+@pytest.mark.parametrize(
+    "set_location",
+    ["schema_instance", "parse_call", "parser_default", "parser_class_default"],
+)
+def test_parse_with_unknown_behavior_specified(parser, web_request, set_location):
     # This is new in webargs 6.x ; it's the way you can "get back" the behavior
     # of webargs 5.x in which extra args are ignored
     from marshmallow import EXCLUDE, INCLUDE, RAISE
@@ -119,17 +123,65 @@ def test_parse_with_unknown_behavior_specified(parser, web_request):
         username = fields.Field()
         password = fields.Field()
 
+    def parse_with_desired_behavior(value):
+        if set_location == "schema_instance":
+            if value is not None:
+                return parser.parse(CustomSchema(unknown=value), web_request)
+            else:
+                return parser.parse(CustomSchema(), web_request)
+        elif set_location == "parse_call":
+            return parser.parse(CustomSchema(), web_request, unknown=value)
+        elif set_location == "parser_default":
+            parser.unknown = value
+            return parser.parse(CustomSchema(), web_request)
+        elif set_location == "parser_class_default":
+
+            class CustomParser(MockRequestParser):
+                DEFAULT_UNKNOWN = value
+
+            return CustomParser().parse(CustomSchema(), web_request)
+        else:
+            raise NotImplementedError
+
     # with no unknown setting or unknown=RAISE, it blows up
     with pytest.raises(ValidationError, match="Unknown field."):
-        parser.parse(CustomSchema(), web_request)
+        parse_with_desired_behavior(None)
     with pytest.raises(ValidationError, match="Unknown field."):
-        parser.parse(CustomSchema(unknown=RAISE), web_request)
+        parse_with_desired_behavior(RAISE)
 
     # with unknown=EXCLUDE the data is omitted
-    ret = parser.parse(CustomSchema(unknown=EXCLUDE), web_request)
+    ret = parse_with_desired_behavior(EXCLUDE)
     assert {"username": 42, "password": 42} == ret
     # with unknown=INCLUDE it is added even though it isn't part of the schema
-    ret = parser.parse(CustomSchema(unknown=INCLUDE), web_request)
+    ret = parse_with_desired_behavior(INCLUDE)
+    assert {"username": 42, "password": 42, "fjords": 42} == ret
+
+
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=... added in marshmallow3"
+)
+def test_parse_with_explicit_unknown_overrides_schema(parser, web_request):
+    # this test ensures that if you specify unknown=... in your parse call (or
+    # use_args) it takes precedence over a setting in the schema object
+    from marshmallow import EXCLUDE, INCLUDE, RAISE
+
+    web_request.json = {"username": 42, "password": 42, "fjords": 42}
+
+    class CustomSchema(Schema):
+        username = fields.Field()
+        password = fields.Field()
+
+    # setting RAISE in the parse call overrides schema setting
+    with pytest.raises(ValidationError, match="Unknown field."):
+        parser.parse(CustomSchema(unknown=EXCLUDE), web_request, unknown=RAISE)
+    with pytest.raises(ValidationError, match="Unknown field."):
+        parser.parse(CustomSchema(unknown=INCLUDE), web_request, unknown=RAISE)
+
+    # and the reverse -- setting EXCLUDE or INCLUDE in the parse call overrides
+    # a schema with RAISE already set
+    ret = parser.parse(CustomSchema(unknown=RAISE), web_request, unknown=EXCLUDE)
+    assert {"username": 42, "password": 42} == ret
+    ret = parser.parse(CustomSchema(unknown=RAISE), web_request, unknown=INCLUDE)
     assert {"username": 42, "password": 42, "fjords": 42} == ret
 
 
@@ -756,22 +808,18 @@ class TestPassingSchema:
         assert "strict=True" in str(warning.message)
 
     def test_use_kwargs_stacked(self, web_request, parser):
+        parse_kwargs = {}
         if MARSHMALLOW_VERSION_INFO[0] >= 3:
             from marshmallow import EXCLUDE
 
-            class PageSchema(Schema):
-                page = fields.Int()
-
-            pageschema = PageSchema(unknown=EXCLUDE)
-            userschema = self.UserSchema(unknown=EXCLUDE)
-        else:
-            pageschema = {"page": fields.Int()}
-            userschema = self.UserSchema(**strict_kwargs)
+            parse_kwargs = {"unknown": EXCLUDE}
 
         web_request.json = {"email": "foo@bar.com", "password": "bar", "page": 42}
 
-        @parser.use_kwargs(pageschema, web_request)
-        @parser.use_kwargs(userschema, web_request)
+        @parser.use_kwargs({"page": fields.Int()}, web_request, **parse_kwargs)
+        @parser.use_kwargs(
+            self.UserSchema(**strict_kwargs), web_request, **parse_kwargs
+        )
         def viewfunc(email, password, page):
             return {"email": email, "password": password, "page": page}
 

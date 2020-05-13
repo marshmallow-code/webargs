@@ -1,6 +1,51 @@
 Changelog
 ---------
 
+6.2.0 (Unreleased)
+******************
+
+Features:
+
+* Add a new ``unknown`` parameter to ``Parser.parse``, ``Parser.use_args``, and
+  ``Parser.use_kwargs``. When set, it will be passed to the ``Schema.load``
+  call. If set to ``None`` (the default), no value is passed, so the schema's
+  ``unknown`` behavior is used.
+
+This allows usages like
+
+.. code-block:: python
+
+    import marshmallow as ma
+
+    # marshmallow 3 only, for use of ``unknown`` and ``EXCLUDE``
+    @parser.use_kwargs(
+        {"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query", unknown=ma.EXCLUDE
+    )
+    def foo(q1, q2):
+        ...
+
+* Add the ability to set defaults for ``unknown`` on either a Parser instance
+  or Parser class. Set ``Parser.DEFAULT_UNKNOWN`` on a parser class to apply a value
+  to any new parser instances created from that class, or set ``unknown`` during
+  ``Parser`` initialization.
+
+Usages are varied, but include
+
+.. code-block:: python
+
+    import marshmallow as ma
+    from webargs.flaskparser import FlaskParser
+
+    parser = FlaskParser(unknown=ma.INCLUDE)
+
+    # as well as...
+    class MyParser(FlaskParser):
+        DEFAULT_UNKNOWN = ma.INCLUDE
+
+
+    parser = MyParser()
+
+
 6.1.0 (2020-04-05)
 ******************
 
