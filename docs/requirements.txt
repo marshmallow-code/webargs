@@ -1,3 +1,4 @@
 -r ../dev-requirements-py3.txt
-sphinx<=1.4
-sphinx-issues==0.2.0
+Sphinx==3.0.3
+sphinx-issues==1.2.0
+sphinx-typlog-theme==0.8.0
