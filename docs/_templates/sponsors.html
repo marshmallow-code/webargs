@@ -1,0 +1,11 @@
+<div class="sponsors">
+  {% if tidelift_url %}
+  <div class="sponsor">
+    <a class="image" href="{{ tidelift_url }}">
+      <img src="https://user-images.githubusercontent.com/2379650/45126032-50b69880-b13f-11e8-9c2c-abd16c433495.png" alt="Sponsor"></a>
+    <div class="text">Professionally-supported {{ project }} is available with the
+      <a href="{{ tidelift_url }}">Tidelift Subscription</a>.
+    </div>
+  </div>
+  {% endif %}
+</div>

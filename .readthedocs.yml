@@ -1,5 +1,7 @@
-build:
-  image: latest
+version: 2
 python:
   version: 3.6
-  pip_install: true
+  install:
+    - requirements: docs/requirements.txt
+    - method: setuptools
+      path: .
