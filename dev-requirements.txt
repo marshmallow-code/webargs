@@ -1,5 +1,5 @@
 # Requirements
-marshmallow
+marshmallow<2.10.3
 
 # Task running
 invoke==0.13.0
@@ -20,7 +20,7 @@ Django>=1.6.5
 bottle>=0.12.3
 tornado>=4.0
 pyramid>=1.5.2
-webapp2>=2.5.2
+webapp2>=2.5.2; python_version < '3.6'
 falcon>=0.3.0
 
 # Syntax checking
