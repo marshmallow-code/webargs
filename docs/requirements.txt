@@ -1,5 +1,5 @@
 -e '.[frameworks]'
-marshmallow~=2.0
+marshmallow~=2.15.3
 Sphinx==1.8.3
 sphinx-issues==1.2.0
 # TODO: Use PyPI release of sphinx-typlog-theme after latest changes are released
