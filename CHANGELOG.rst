@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+6.1.1 (Unreleased)
+******************
+
+Bug fixes:
+
+* Failure to validate flask headers would produce error data which contained
+  tuples as keys, and was therefore not JSON-serializable. (:issue:`500`)
+  These errors will now extract the headername as the key correctly.
+  Thanks to :user:`shughes-uk` for reporting.
+
 6.1.0 (2020-04-05)
 ******************
 

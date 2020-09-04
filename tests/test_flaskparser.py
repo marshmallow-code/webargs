@@ -67,6 +67,21 @@ class TestFlaskParser(CommonTestCase):
         res = testapp.post_json("/echo_nested_many_data_key", {})
         assert res.json == {}
 
+    # regression test for
+    # https://github.com/marshmallow-code/webargs/issues/500
+    def test_parsing_unexpected_headers_when_raising(self, testapp):
+        res = testapp.get(
+            "/echo_headers_raising", expect_errors=True, headers={"X-Unexpected": "foo"}
+        )
+        # under marshmallow 2 this is allowed and works
+        if MARSHMALLOW_VERSION_INFO[0] < 3:
+            assert res.json == {"name": "World"}
+        # but on ma3 it's supposed to be a validation error
+        else:
+            assert res.status_code == 422
+            assert "headers" in res.json
+            assert "X-Unexpected" in set(res.json["headers"].keys())
+
 
 @mock.patch("webargs.flaskparser.abort")
 def test_abort_called_on_validation_error(mock_abort):

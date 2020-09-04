@@ -126,6 +126,14 @@ def echo_headers():
     return J(parser.parse(hello_exclude_schema, location="headers"))
 
 
+@app.route("/echo_headers_raising")
+@use_args(HelloSchema(**strict_kwargs), location="headers")
+def echo_headers_raising(args):
+    # as above, but in this case, don't use the exclude schema (so unexpected
+    # headers will raise errors)
+    return J(args)
+
+
 @app.route("/echo_cookie")
 def echo_cookie():
     return J(parser.parse(hello_args, request, location="cookies"))
