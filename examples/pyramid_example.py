@@ -29,8 +29,7 @@ hello_args = {"name": fields.Str(missing="Friend")}
 @view_config(route_name="hello", request_method="GET", renderer="json")
 @use_args(hello_args)
 def index(request, args):
-    """A welcome page.
-    """
+    """A welcome page."""
     return {"message": "Welcome, {}!".format(args["name"])}
 
 

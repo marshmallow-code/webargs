@@ -48,5 +48,8 @@ class TestFalconParser(CommonTestCase):
     def test_body_parsing_works_with_simulate(self):
         app = self.create_app()
         client = falcon.testing.TestClient(app)
-        res = client.simulate_post("/echo_json", json={"name": "Fred"},)
+        res = client.simulate_post(
+            "/echo_json",
+            json={"name": "Fred"},
+        )
         assert res.json == {"name": "Fred"}

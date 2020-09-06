@@ -25,8 +25,7 @@ hello_args = {"name": fields.Str(missing="Friend")}
 
 @use_args(hello_args)
 async def index(request, args):
-    """A welcome page.
-    """
+    """A welcome page."""
     return json_response({"message": "Welcome, {}!".format(args["name"])})
 
 

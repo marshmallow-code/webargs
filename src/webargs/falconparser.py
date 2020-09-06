@@ -54,8 +54,7 @@ def parse_form_body(req):
 
 
 class HTTPError(falcon.HTTPError):
-    """HTTPError that stores a dictionary of validation error messages.
-    """
+    """HTTPError that stores a dictionary of validation error messages."""
 
     def __init__(self, status, errors, *args, **kwargs):
         self.errors = errors

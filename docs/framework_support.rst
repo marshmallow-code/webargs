@@ -443,6 +443,5 @@ The preferred way to apply decorators to Bottle routes is using the
 
   @route("/users/<_id:int>", method="GET", apply=use_args(user_args))
   def users(args, _id):
-      """A welcome page.
-      """
+      """A welcome page."""
       return {"message": "Welcome, {}!".format(args["name"]), "_id": _id}
