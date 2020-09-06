@@ -19,7 +19,7 @@ from webargs.multidictproxy import MultiDictProxy
 
 try:
     # Python 3.5
-    from unittest import mock
+    import mock
 except ImportError:
     # Python 3.6+
     from unittest import mock
