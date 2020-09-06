@@ -24,8 +24,7 @@ hello_args = {"name": fields.Str(missing="Friend")}
 
 @route("/", method="GET", apply=use_args(hello_args))
 def index(args):
-    """A welcome page.
-    """
+    """A welcome page."""
     return {"message": "Welcome, {}!".format(args["name"])}
 
 

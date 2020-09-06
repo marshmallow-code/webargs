@@ -517,8 +517,7 @@ class Parser:
         return missing
 
     def load_headers(self, req, schema):
-        """Load the headers or return `missing` if no value can be found.
-        """
+        """Load the headers or return `missing` if no value can be found."""
         return missing
 
     def load_cookies(self, req, schema):

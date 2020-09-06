@@ -26,8 +26,7 @@ hello_args = {"name": fields.Str(missing="Friend")}
 @app.route("/", methods=["GET"])
 @use_args(hello_args)
 def index(args):
-    """A welcome page.
-    """
+    """A welcome page."""
     return jsonify({"message": "Welcome, {}!".format(args["name"])})
 
 
