@@ -62,7 +62,13 @@ class MultiDictProxy(Mapping):
         return getattr(self.data, name)
 
     def __iter__(self):
-        return iter(self.data)
+        for x in iter(self.data):
+            # special case for header dicts which produce an iterator of tuples
+            # instead of an iterator of strings
+            if isinstance(x, tuple):
+                yield x[0]
+            else:
+                yield x
 
     def __contains__(self, x):
         return x in self.data
