@@ -2,7 +2,6 @@ import functools
 import inspect
 import typing
 import logging
-import warnings
 from collections.abc import Mapping
 import json
 
@@ -10,8 +9,6 @@ import marshmallow as ma
 from marshmallow import ValidationError
 from marshmallow.utils import missing
 
-from webargs.compat import MARSHMALLOW_VERSION_INFO
-from webargs.dict2schema import dict2schema
 from webargs.fields import DelimitedList
 
 logger = logging.getLogger(__name__)
@@ -19,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "ValidationError",
-    "dict2schema",
     "is_multiple",
     "Parser",
     "missing",
@@ -214,13 +210,7 @@ class Parser:
         elif callable(argmap):
             schema = argmap(req)
         else:
-            schema = dict2schema(argmap, schema_class=self.schema_class)()
-        if MARSHMALLOW_VERSION_INFO[0] < 3 and not schema.strict:
-            warnings.warn(
-                "It is highly recommended that you set strict=True on your schema "
-                "so that the parser's error handler will be invoked when expected.",
-                UserWarning,
-            )
+            schema = self.schema_class.from_dict(argmap)()
         return schema
 
     def parse(
@@ -245,7 +235,7 @@ class Parser:
             default, that means one of ``('json', 'query', 'querystring',
             'form', 'headers', 'cookies', 'files', 'json_or_form')``.
         :param str unknown: A value to pass for ``unknown`` when calling the
-            schema's ``load`` method (marshmallow 3 only).
+            schema's ``load`` method.
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
@@ -259,9 +249,7 @@ class Parser:
         req = req if req is not None else self.get_default_request()
         location = location or self.location
         unknown = unknown or self.unknown
-        load_kwargs = (
-            {"unknown": unknown} if MARSHMALLOW_VERSION_INFO[0] >= 3 and unknown else {}
-        )
+        load_kwargs = {"unknown": unknown}
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -271,8 +259,7 @@ class Parser:
             location_data = self._load_location_data(
                 schema=schema, req=req, location=location
             )
-            result = schema.load(location_data, **load_kwargs)
-            data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
+            data = schema.load(location_data, **load_kwargs)
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(
@@ -344,7 +331,7 @@ class Parser:
             which accepts a request and returns a `marshmallow.Schema`.
         :param str location: Where on the request to load values.
         :param str unknown: A value to pass for ``unknown`` when calling the
-            schema's ``load`` method (marshmallow 3 only).
+            schema's ``load`` method.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -359,7 +346,7 @@ class Parser:
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = dict2schema(argmap, schema_class=self.schema_class)()
+            argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func):
             req_ = request_obj

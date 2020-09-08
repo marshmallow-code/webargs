@@ -1,6 +1,5 @@
 from collections.abc import Mapping
 
-from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs.core import missing, is_multiple
 
 
@@ -24,10 +23,7 @@ class MultiDictProxy(Mapping):
         for name, field in schema.fields.items():
             if not is_multiple(field):
                 continue
-            if MARSHMALLOW_VERSION_INFO[0] < 3:
-                result.add(field.load_from if field.load_from is not None else name)
-            else:
-                result.add(field.data_key if field.data_key is not None else name)
+            result.add(field.data_key if field.data_key is not None else name)
         return result
 
     def __getitem__(self, key):

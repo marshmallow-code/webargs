@@ -70,7 +70,7 @@ setup(
     url="https://github.com/marshmallow-code/webargs",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    install_requires=["marshmallow>=2.15.2"],
+    install_requires=["marshmallow>=3.0.0"],
     extras_require=EXTRAS_REQUIRE,
     license="MIT",
     zip_safe=False,

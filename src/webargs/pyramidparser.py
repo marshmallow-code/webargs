@@ -129,7 +129,7 @@ class PyramidParser(core.Parser):
         :param req: The request object to parse. Pulled off of the view by default.
         :param str location: Where on the request to load values.
         :param str unknown: A value to pass for ``unknown`` when calling the
-            schema's ``load`` method (marshmallow 3 only).
+            schema's ``load`` method.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -143,7 +143,7 @@ class PyramidParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = core.dict2schema(argmap, schema_class=self.schema_class)()
+            argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func):
             @functools.wraps(func)

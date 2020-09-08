@@ -2,7 +2,7 @@ import falcon
 import marshmallow as ma
 
 from webargs import fields
-from webargs.core import MARSHMALLOW_VERSION_INFO, json
+from webargs.core import json
 from webargs.falconparser import parser, use_args, use_kwargs
 
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
@@ -13,14 +13,10 @@ class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
 
 
-strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
-hello_many_schema = HelloSchema(many=True, **strict_kwargs)
+hello_many_schema = HelloSchema(many=True)
 
 # variant which ignores unknown fields
-exclude_kwargs = (
-    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
-)
-hello_exclude_schema = HelloSchema(**exclude_kwargs)
+hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 
 
 class Echo:
@@ -123,7 +119,7 @@ class EchoHeaders:
             NAME = fields.Str(missing="World")
 
         resp.body = json.dumps(
-            parser.parse(HeaderSchema(**exclude_kwargs), req, location="headers")
+            parser.parse(HeaderSchema(unknown=ma.EXCLUDE), req, location="headers")
         )
 
 

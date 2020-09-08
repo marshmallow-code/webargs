@@ -107,10 +107,6 @@ When you need more flexibility in defining input schemas, you can pass a marshma
         last_name = fields.Str(missing="")
         date_registered = fields.DateTime(dump_only=True)
 
-        # NOTE: Uncomment below two lines if you're using marshmallow 2
-        # class Meta:
-        #    strict = True
-
 
     @use_args(UserSchema())
     def profile_view(args):
@@ -130,9 +126,6 @@ When you need more flexibility in defining input schemas, you can pass a marshma
     def profile_posts(args, posts_per_page):
         username = args["username"]
         # ...
-
-.. warning::
-    If you're using marshmallow 2, you should always set ``strict=True`` (either as a ``class Meta`` option or in the Schema's constructor) when passing a schema to webargs. This will ensure that the parser's error handler is invoked when expected.
 
 
 When to avoid `use_kwargs`

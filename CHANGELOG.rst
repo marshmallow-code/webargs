@@ -4,6 +4,27 @@ Changelog
 7.0.0 (Unreleased)
 ******************
 
+Refactoring:
+
+* *Backwards-incompatible*: Remove support for marshmallow2 (:issue:`539`)
+
+* *Backwards-incompatible*: Remove `dict2schema`
+
+  Users desiring the `dict2schema` functionality may now rely upon
+  `marshmallow.Schema.from_dict`. Rewrite any code using `dict2schema` like so:
+
+.. code-block:: python
+
+    import marshmallow as ma
+
+    # webargs 6.x and older
+    from webargs import dict2schema
+
+    myschema = dict2schema({"q1", ma.fields.Int()})
+
+    # webargs 7.x
+    myschema = ma.Schema.from_dict({"q1", ma.fields.Int()})
+
 Features:
 
 * Add a new ``unknown`` parameter to ``Parser.parse``, ``Parser.use_args``, and
@@ -17,7 +38,7 @@ This allows usages like
 
     import marshmallow as ma
 
-    # marshmallow 3 only, for use of ``unknown`` and ``EXCLUDE``
+
     @parser.use_kwargs(
         {"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query", unknown=ma.EXCLUDE
     )

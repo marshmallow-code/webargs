@@ -1,10 +1,11 @@
 from werkzeug.exceptions import HTTPException, BadRequest
 import pytest
 
+from marshmallow import Schema
 from flask import Flask
-from webargs import fields, ValidationError, missing, dict2schema
+from webargs import fields, ValidationError, missing
 from webargs.flaskparser import parser, abort
-from webargs.core import MARSHMALLOW_VERSION_INFO, json
+from webargs.core import json
 
 from .apps.flask_app import app
 from webargs.testing import CommonTestCase
@@ -52,14 +53,8 @@ class TestFlaskParser(CommonTestCase):
             "/echo_nested_many_data_key",
             {"x_field": [{"id": 42}]},
         )
-        # under marshmallow 2 this is allowed and works
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-            res = testapp.post_json(*post_with_raw_fieldname_args)
-            assert res.json == {"x_field": [{"id": 42}]}
-        # but under marshmallow3 , only data_key is checked, field name is ignored
-        else:
-            res = testapp.post_json(*post_with_raw_fieldname_args, expect_errors=True)
-            assert res.status_code == 422
+        res = testapp.post_json(*post_with_raw_fieldname_args, expect_errors=True)
+        assert res.status_code == 422
 
         res = testapp.post_json("/echo_nested_many_data_key", {"X-Field": [{"id": 24}]})
         assert res.json == {"x_field": [{"id": 24}]}
@@ -73,14 +68,9 @@ class TestFlaskParser(CommonTestCase):
         res = testapp.get(
             "/echo_headers_raising", expect_errors=True, headers={"X-Unexpected": "foo"}
         )
-        # under marshmallow 2 this is allowed and works
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-            assert res.json == {"name": "World"}
-        # but on ma3 it's supposed to be a validation error
-        else:
-            assert res.status_code == 422
-            assert "headers" in res.json
-            assert "X-Unexpected" in set(res.json["headers"].keys())
+        assert res.status_code == 422
+        assert "headers" in res.json
+        assert "X-Unexpected" in set(res.json["headers"].keys())
 
 
 @mock.patch("webargs.flaskparser.abort")
@@ -115,7 +105,7 @@ def test_load_json_returns_missing_if_no_data(mimetype):
     req = mock.Mock()
     req.mimetype = mimetype
     req.get_data.return_value = ""
-    schema = dict2schema({"foo": fields.Field()})()
+    schema = Schema.from_dict({"foo": fields.Field()})()
     assert parser.load_json(req, schema) is missing
 
 

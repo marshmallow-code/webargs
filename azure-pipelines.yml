@@ -27,15 +27,13 @@ jobs:
     toxenvs:
       - lint
 
-      - py35-marshmallow2
-      - py35-marshmallow3
+      - py35
 
-      - py36-marshmallow3
+      - py36
 
-      - py37-marshmallow3
+      - py37
 
-      - py38-marshmallow2
-      - py38-marshmallow3
+      - py38
 
       - py38-marshmallowdev
 

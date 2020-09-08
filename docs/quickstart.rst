@@ -25,9 +25,7 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
         "languages": fields.DelimitedList(fields.Str()),
         # When value is keyed on a variable-unsafe name
         # or you want to rename a key
-        "user_type": fields.Str(load_from="user-type"),
-        # OR, on marshmallow 3
-        # "user_type": fields.Str(data_key="user-type"),
+        "user_type": fields.Str(data_key="user-type"),
     }
 
 .. note::

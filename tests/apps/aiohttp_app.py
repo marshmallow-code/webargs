@@ -6,7 +6,7 @@ import marshmallow as ma
 
 from webargs import fields
 from webargs.aiohttpparser import parser, use_args, use_kwargs
-from webargs.core import MARSHMALLOW_VERSION_INFO, json
+from webargs.core import json
 
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
@@ -15,20 +15,11 @@ hello_multiple = {"name": fields.List(fields.Str())}
 class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
 
-    if MARSHMALLOW_VERSION_INFO[0] < 3:
 
-        class Meta:
-            strict = True
-
-
-strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
-hello_many_schema = HelloSchema(many=True, **strict_kwargs)
+hello_many_schema = HelloSchema(many=True)
 
 # variant which ignores unknown fields
-exclude_kwargs = (
-    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
-)
-hello_exclude_schema = HelloSchema(**exclude_kwargs)
+hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 
 
 ##### Handlers #####
@@ -163,10 +154,9 @@ async def echo_nested_many(request):
 
 
 async def echo_nested_many_data_key(request):
-    data_key_kwarg = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "X-Field"
+    args = {
+        "x_field": fields.Nested({"id": fields.Int()}, many=True, data_key="X-Field")
     }
-    args = {"x_field": fields.Nested({"id": fields.Int()}, many=True, **data_key_kwarg)}
     parsed = await parser.parse(args, request)
     return json_response(parsed)
 
