@@ -45,6 +45,12 @@ Usages are varied, but include
 
     parser = MyParser()
 
+Changes:
+
+* Registered `error_handler` callbacks are required to raise an exception.
+  If a handler is invoked and no exception is raised, `webargs` will raise
+  a `ValueError` (:issue:`527`)
+
 6.1.1 (2020-09-08)
 ******************
 

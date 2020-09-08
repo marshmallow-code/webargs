@@ -283,10 +283,9 @@ class Parser:
                 error_status_code=error_status_code,
                 error_headers=error_headers,
             )
-            warnings.warn(
-                "_on_validation_error hook did not raise an exception and flow "
-                "of control returned to parse(). You may get unexpected results"
-            )
+            raise ValueError(
+                "_on_validation_error hook did not raise an exception"
+            ) from error
         return data
 
     def get_default_request(self):
