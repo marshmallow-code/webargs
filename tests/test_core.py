@@ -289,14 +289,19 @@ def test_value_error_raised_if_parse_called_with_invalid_location(parser, web_re
 
 @mock.patch("webargs.core.Parser.handle_error")
 def test_handle_error_called_when_parsing_raises_error(handle_error, web_request):
+    # handle_error must raise an error to be valid
+    handle_error.side_effect = ValidationError("parsing failed")
+
     def always_fail(*args, **kwargs):
         raise ValidationError("error occurred")
 
     p = Parser()
     assert handle_error.call_count == 0
-    p.parse({"foo": fields.Field()}, web_request, validate=always_fail)
+    with pytest.raises(ValidationError):
+        p.parse({"foo": fields.Field()}, web_request, validate=always_fail)
     assert handle_error.call_count == 1
-    p.parse({"foo": fields.Field()}, web_request, validate=always_fail)
+    with pytest.raises(ValidationError):
+        p.parse({"foo": fields.Field()}, web_request, validate=always_fail)
     assert handle_error.call_count == 2
 
 
@@ -357,6 +362,25 @@ def test_custom_error_handler_decorator(web_request):
         raise CustomError(error)
 
     with pytest.raises(CustomError):
+        parser.parse(mock_schema, web_request)
+
+
+def test_custom_error_handler_must_reraise(web_request):
+    class CustomError(Exception):
+        pass
+
+    mock_schema = mock.Mock(spec=Schema)
+    mock_schema.strict = True
+    mock_schema.load.side_effect = ValidationError("parsing json failed")
+    parser = Parser()
+
+    @parser.error_handler
+    def handle_error(error, req, schema, *, error_status_code, error_headers):
+        pass
+
+    # because the handler above does not raise a new error, the parser should
+    # raise a ValueError -- indicating a programming error
+    with pytest.raises(ValueError):
         parser.parse(mock_schema, web_request)
 
 

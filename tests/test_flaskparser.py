@@ -1,4 +1,4 @@
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, BadRequest
 import pytest
 
 from flask import Flask
@@ -85,6 +85,9 @@ class TestFlaskParser(CommonTestCase):
 
 @mock.patch("webargs.flaskparser.abort")
 def test_abort_called_on_validation_error(mock_abort):
+    # error handling must raise an error to be valid
+    mock_abort.side_effect = BadRequest("foo")
+
     app = Flask("testapp")
 
     def validate(x):
@@ -97,7 +100,8 @@ def test_abort_called_on_validation_error(mock_abort):
         data=json.dumps({"value": 41}),
         content_type="application/json",
     ):
-        parser.parse(argmap)
+        with pytest.raises(HTTPException):
+            parser.parse(argmap)
     mock_abort.assert_called()
     abort_args, abort_kwargs = mock_abort.call_args
     assert abort_args[0] == 422
