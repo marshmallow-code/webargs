@@ -113,6 +113,7 @@ class PyramidParser(core.Parser):
         req=None,
         *,
         location=core.Parser.DEFAULT_LOCATION,
+        unknown=None,
         as_kwargs=False,
         validate=None,
         error_status_code=None,
@@ -127,6 +128,8 @@ class PyramidParser(core.Parser):
             which accepts a request and returns a `marshmallow.Schema`.
         :param req: The request object to parse. Pulled off of the view by default.
         :param str location: Where on the request to load values.
+        :param str unknown: A value to pass for ``unknown`` when calling the
+            schema's ``load`` method (marshmallow 3 only).
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -155,6 +158,7 @@ class PyramidParser(core.Parser):
                     argmap,
                     req=request,
                     location=location,
+                    unknown=unknown,
                     validate=validate,
                     error_status_code=error_status_code,
                     error_headers=error_headers,

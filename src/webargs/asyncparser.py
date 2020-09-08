@@ -9,6 +9,7 @@ from marshmallow import Schema, ValidationError
 from marshmallow.fields import Field
 import marshmallow as ma
 
+from webargs.compat import MARSHMALLOW_VERSION_INFO
 from webargs import core
 
 Request = typing.TypeVar("Request")
@@ -28,6 +29,7 @@ class AsyncParser(core.Parser):
         req: Request = None,
         *,
         location: str = None,
+        unknown: str = None,
         validate: Validate = None,
         error_status_code: typing.Union[int, None] = None,
         error_headers: typing.Union[typing.Mapping[str, str], None] = None
@@ -38,6 +40,10 @@ class AsyncParser(core.Parser):
         """
         req = req if req is not None else self.get_default_request()
         location = location or self.location
+        unknown = unknown or self.unknown
+        load_kwargs = (
+            {"unknown": unknown} if MARSHMALLOW_VERSION_INFO[0] >= 3 and unknown else {}
+        )
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -47,7 +53,7 @@ class AsyncParser(core.Parser):
             location_data = await self._load_location_data(
                 schema=schema, req=req, location=location
             )
-            result = schema.load(location_data)
+            result = schema.load(location_data, **load_kwargs)
             data = result.data if core.MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
@@ -111,6 +117,7 @@ class AsyncParser(core.Parser):
         req: typing.Optional[Request] = None,
         *,
         location: str = None,
+        unknown=None,
         as_kwargs: bool = False,
         validate: Validate = None,
         error_status_code: typing.Optional[int] = None,
@@ -143,6 +150,7 @@ class AsyncParser(core.Parser):
                         argmap,
                         req=req_obj,
                         location=location,
+                        unknown=unknown,
                         validate=validate,
                         error_status_code=error_status_code,
                         error_headers=error_headers,
@@ -165,6 +173,7 @@ class AsyncParser(core.Parser):
                         argmap,
                         req=req_obj,
                         location=location,
+                        unknown=unknown,
                         validate=validate,
                         error_status_code=error_status_code,
                         error_headers=error_headers,

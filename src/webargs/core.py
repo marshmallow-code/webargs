@@ -101,11 +101,15 @@ class Parser:
     etc.
 
     :param str location: Default location to use for data
+    :param str unknown: Default value for ``unknown`` in ``parse``,
+        ``use_args``, and ``use_kwargs``
     :param callable error_handler: Custom error handler function.
     """
 
     #: Default location to check for data
     DEFAULT_LOCATION = "json"
+    #: Default value to use for 'unknown' on schema load
+    DEFAULT_UNKNOWN = None
     #: The marshmallow Schema class to use when creating new schemas
     DEFAULT_SCHEMA_CLASS = ma.Schema
     #: Default status code to return for validation errors
@@ -125,10 +129,13 @@ class Parser:
         "json_or_form": "load_json_or_form",
     }
 
-    def __init__(self, location=None, *, error_handler=None, schema_class=None):
+    def __init__(
+        self, location=None, *, unknown=None, error_handler=None, schema_class=None
+    ):
         self.location = location or self.DEFAULT_LOCATION
         self.error_callback = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
+        self.unknown = unknown or self.DEFAULT_UNKNOWN
 
     def _get_loader(self, location):
         """Get the loader function for the given location.
@@ -222,6 +229,7 @@ class Parser:
         req=None,
         *,
         location=None,
+        unknown=None,
         validate=None,
         error_status_code=None,
         error_headers=None
@@ -236,6 +244,8 @@ class Parser:
             Can be any of the values in :py:attr:`~__location_map__`. By
             default, that means one of ``('json', 'query', 'querystring',
             'form', 'headers', 'cookies', 'files', 'json_or_form')``.
+        :param str unknown: A value to pass for ``unknown`` when calling the
+            schema's ``load`` method (marshmallow 3 only).
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
@@ -248,6 +258,10 @@ class Parser:
         """
         req = req if req is not None else self.get_default_request()
         location = location or self.location
+        unknown = unknown or self.unknown
+        load_kwargs = (
+            {"unknown": unknown} if MARSHMALLOW_VERSION_INFO[0] >= 3 and unknown else {}
+        )
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -257,7 +271,7 @@ class Parser:
             location_data = self._load_location_data(
                 schema=schema, req=req, location=location
             )
-            result = schema.load(location_data)
+            result = schema.load(location_data, **load_kwargs)
             data = result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else result
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
@@ -311,6 +325,7 @@ class Parser:
         req=None,
         *,
         location=None,
+        unknown=None,
         as_kwargs=False,
         validate=None,
         error_status_code=None,
@@ -329,6 +344,8 @@ class Parser:
             of argname -> `marshmallow.fields.Field` pairs, or a callable
             which accepts a request and returns a `marshmallow.Schema`.
         :param str location: Where on the request to load values.
+        :param str unknown: A value to pass for ``unknown`` when calling the
+            schema's ``load`` method (marshmallow 3 only).
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
@@ -360,6 +377,7 @@ class Parser:
                     argmap,
                     req=req_obj,
                     location=location,
+                    unknown=unknown,
                     validate=validate,
                     error_status_code=error_status_code,
                     error_headers=error_headers,
