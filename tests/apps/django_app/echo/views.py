@@ -73,7 +73,7 @@ def echo_use_args_validated(args):
 
 @handle_view_errors
 def echo_ignoring_extra_data(request):
-    return json_response(parser.parse(hello_exclude_schema, request))
+    return json_response(parser.parse(hello_exclude_schema, request, unknown=None))
 
 
 @handle_view_errors
@@ -125,9 +125,7 @@ def always_error(request):
 
 @handle_view_errors
 def echo_headers(request):
-    return json_response(
-        parser.parse(hello_exclude_schema, request, location="headers")
-    )
+    return json_response(parser.parse(hello_args, request, location="headers"))
 
 
 @handle_view_errors

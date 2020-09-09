@@ -50,7 +50,7 @@ def echo_json_or_form(request):
 
 def echo_json_ignore_extra_data(request):
     try:
-        return parser.parse(hello_exclude_schema, request)
+        return parser.parse(hello_exclude_schema, request, unknown=None)
     except json.JSONDecodeError:
         error = HTTPBadRequest()
         error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
@@ -114,7 +114,7 @@ def always_error(request):
 
 
 def echo_headers(request):
-    return parser.parse(hello_exclude_schema, request, location="headers")
+    return parser.parse(hello_args, request, location="headers")
 
 
 def echo_cookie(request):

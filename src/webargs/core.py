@@ -23,6 +23,10 @@ __all__ = [
 ]
 
 
+# a value used as the default for arguments, so that when `None` is passed, it
+# can be distinguished from the default value
+_UNKNOWN_DEFAULT_PARAM = "_default"
+
 DEFAULT_VALIDATION_STATUS = 422  # type: int
 
 
@@ -97,15 +101,23 @@ class Parser:
     etc.
 
     :param str location: Default location to use for data
-    :param str unknown: Default value for ``unknown`` in ``parse``,
-        ``use_args``, and ``use_kwargs``
+    :param str unknown: A default value to pass for ``unknown`` when calling the
+        schema's ``load`` method. Defaults to EXCLUDE for non-body
+        locations and RAISE for request bodies. Pass ``None`` to use the
+        schema's setting instead.
     :param callable error_handler: Custom error handler function.
     """
 
     #: Default location to check for data
     DEFAULT_LOCATION = "json"
     #: Default value to use for 'unknown' on schema load
-    DEFAULT_UNKNOWN = None
+    DEFAULT_UNKNOWN = ma.EXCLUDE
+    #: per-location default for 'unknown'
+    DEFAULT_UNKNOWN_BY_LOCATION = {
+        "json": ma.RAISE,
+        "form": ma.RAISE,
+        "json_or_form": ma.RAISE,
+    }
     #: The marshmallow Schema class to use when creating new schemas
     DEFAULT_SCHEMA_CLASS = ma.Schema
     #: Default status code to return for validation errors
@@ -126,12 +138,17 @@ class Parser:
     }
 
     def __init__(
-        self, location=None, *, unknown=None, error_handler=None, schema_class=None
+        self,
+        location=None,
+        *,
+        unknown=_UNKNOWN_DEFAULT_PARAM,
+        error_handler=None,
+        schema_class=None
     ):
         self.location = location or self.DEFAULT_LOCATION
         self.error_callback = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
-        self.unknown = unknown or self.DEFAULT_UNKNOWN
+        self.unknown = unknown
 
     def _get_loader(self, location):
         """Get the loader function for the given location.
@@ -219,7 +236,7 @@ class Parser:
         req=None,
         *,
         location=None,
-        unknown=None,
+        unknown=_UNKNOWN_DEFAULT_PARAM,
         validate=None,
         error_status_code=None,
         error_headers=None
@@ -235,7 +252,9 @@ class Parser:
             default, that means one of ``('json', 'query', 'querystring',
             'form', 'headers', 'cookies', 'files', 'json_or_form')``.
         :param str unknown: A value to pass for ``unknown`` when calling the
-            schema's ``load`` method.
+            schema's ``load`` method. Defaults to EXCLUDE for non-body
+            locations and RAISE for request bodies. Pass ``None`` to use the
+            schema's setting instead.
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
@@ -248,8 +267,19 @@ class Parser:
         """
         req = req if req is not None else self.get_default_request()
         location = location or self.location
-        unknown = unknown or self.unknown
-        load_kwargs = {"unknown": unknown}
+        # precedence order: explicit, instance setting, default per location, default
+        unknown = (
+            unknown
+            if unknown != _UNKNOWN_DEFAULT_PARAM
+            else (
+                self.unknown
+                if self.unknown != _UNKNOWN_DEFAULT_PARAM
+                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(
+                    location, self.DEFAULT_UNKNOWN
+                )
+            )
+        )
+        load_kwargs = {"unknown": unknown} if unknown else {}
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -311,7 +341,7 @@ class Parser:
         req=None,
         *,
         location=None,
-        unknown=None,
+        unknown=_UNKNOWN_DEFAULT_PARAM,
         as_kwargs=False,
         validate=None,
         error_status_code=None,

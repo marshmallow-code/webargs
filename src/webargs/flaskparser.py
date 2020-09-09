@@ -23,6 +23,8 @@ Example: ::
 import flask
 from werkzeug.exceptions import HTTPException
 
+import marshmallow as ma
+
 from webargs import core
 from webargs.multidictproxy import MultiDictProxy
 
@@ -48,6 +50,11 @@ def is_json_request(req):
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
+    DEFAULT_UNKNOWN_BY_LOCATION = {
+        "view_args": ma.RAISE,
+        "path": ma.RAISE,
+        **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,
+    }
     __location_map__ = dict(
         view_args="load_view_args",
         path="load_view_args",

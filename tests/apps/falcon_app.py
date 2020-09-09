@@ -67,7 +67,7 @@ class EchoUseArgsValidated:
 
 class EchoJSONIgnoreExtraData:
     def on_post(self, req, resp):
-        resp.body = json.dumps(parser.parse(hello_exclude_schema, req))
+        resp.body = json.dumps(parser.parse(hello_exclude_schema, req, unknown=None))
 
 
 class EchoMulti:
@@ -118,9 +118,7 @@ class EchoHeaders:
         class HeaderSchema(ma.Schema):
             NAME = fields.Str(missing="World")
 
-        resp.body = json.dumps(
-            parser.parse(HeaderSchema(unknown=ma.EXCLUDE), req, location="headers")
-        )
+        resp.body = json.dumps(parser.parse(HeaderSchema(), req, location="headers"))
 
 
 class EchoCookie:

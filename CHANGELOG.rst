@@ -27,10 +27,11 @@ Refactoring:
 
 Features:
 
-* Add a new ``unknown`` parameter to ``Parser.parse``, ``Parser.use_args``, and
-  ``Parser.use_kwargs``. When set, it will be passed to the ``Schema.load``
-  call. If set to ``None`` (the default), no value is passed, so the schema's
-  ``unknown`` behavior is used.
+* Add ``unknown`` as a parameter to ``Parser.parse``, ``Parser.use_args``, and
+  ``Parser.use_kwargs``, or to parser instantiation. When set, it will be passed
+  to ``Schema.load``. When not set, the value passed will depend on the parser's
+  settings. If set to ``None``, the schema's default behavior will be used (i.e.
+  no value is passed to ``Schema.load``) and parser settings will be ignored.
 
 This allows usages like
 
@@ -45,10 +46,10 @@ This allows usages like
     def foo(q1, q2):
         ...
 
-* Add the ability to set defaults for ``unknown`` on either a Parser instance
-  or Parser class. Set ``Parser.DEFAULT_UNKNOWN`` on a parser class to apply a value
-  to any new parser instances created from that class, or set ``unknown`` during
-  ``Parser`` initialization.
+* Defaults for ``unknown`` may be customized on parser classes via
+  ``Parser.DEFAULT_UNKNOWN_BY_LOCATION``, which maps location names to values
+  to use, and ``Parser.DEFAULT_UNKNOWN``, which is used when a location is not
+  found in ``DEFAULT_UNKNOWN_BY_LOCATION``.
 
 Usages are varied, but include
 
@@ -61,10 +62,24 @@ Usages are varied, but include
 
     # as well as...
     class MyParser(FlaskParser):
-        DEFAULT_UNKNOWN = ma.INCLUDE
+        DEFAULT_UNKNOWN_BY_LOCATION = {"query": ma.INCLUDE}
 
 
     parser = MyParser()
+
+Setting the ``unknown`` value for a Parser instance has higher precedence. So
+
+.. code-block:: python
+
+    parser = MyParser(unknown=ma.RAISE)
+
+will always pass ``RAISE``, even when the location is ``query``.
+
+* By default, webargs will pass ``unknown=EXCLUDE`` for all locations except
+  for request bodies (``json``, ``form``, and ``json_or_form``) and path
+  parameters. Request bodies and path parameters will pass ``unknown=RAISE``.
+  This behavior is defined by the default values for ``DEFAULT_UNKNOWN`` and
+  ``DEFAULT_UNKNOWN_BY_LOCATION``.
 
 Changes:
 

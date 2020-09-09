@@ -28,7 +28,7 @@ class AsyncParser(core.Parser):
         req: Request = None,
         *,
         location: str = None,
-        unknown: str = None,
+        unknown: str = core._UNKNOWN_DEFAULT_PARAM,
         validate: Validate = None,
         error_status_code: typing.Union[int, None] = None,
         error_headers: typing.Union[typing.Mapping[str, str], None] = None
@@ -39,7 +39,17 @@ class AsyncParser(core.Parser):
         """
         req = req if req is not None else self.get_default_request()
         location = location or self.location
-        unknown = unknown or self.unknown
+        unknown = (
+            unknown
+            if unknown != core._UNKNOWN_DEFAULT_PARAM
+            else (
+                self.unknown
+                if self.unknown != core._UNKNOWN_DEFAULT_PARAM
+                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(
+                    location, self.DEFAULT_UNKNOWN
+                )
+            )
+        )
         load_kwargs = {"unknown": unknown}
         if req is None:
             raise ValueError("Must pass req object")
@@ -113,7 +123,7 @@ class AsyncParser(core.Parser):
         req: typing.Optional[Request] = None,
         *,
         location: str = None,
-        unknown=None,
+        unknown=core._UNKNOWN_DEFAULT_PARAM,
         as_kwargs: bool = False,
         validate: Validate = None,
         error_status_code: typing.Optional[int] = None,
