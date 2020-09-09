@@ -9,7 +9,6 @@ from marshmallow import fields, ValidationError
 import webtest
 import webapp2
 from webargs.webapp2parser import parser
-from webargs.core import MARSHMALLOW_VERSION_INFO
 
 hello_args = {"name": fields.Str(missing="World")}
 
@@ -28,10 +27,7 @@ class HelloSchema(ma.Schema):
 
 
 # variant which ignores unknown fields
-exclude_kwargs = (
-    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
-)
-hello_exclude_schema = HelloSchema(**exclude_kwargs)
+hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 
 
 def test_parse_querystring_args():

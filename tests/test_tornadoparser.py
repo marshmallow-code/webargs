@@ -8,7 +8,7 @@ import tornado.ioloop
 import tornado.web
 from tornado.testing import AsyncHTTPTestCase
 from webargs import fields, missing
-from webargs.core import MARSHMALLOW_VERSION_INFO, json, parse_json
+from webargs.core import json, parse_json
 from webargs.tornadoparser import (
     WebArgsTornadoMultiDictProxy,
     parser,
@@ -35,8 +35,7 @@ class AuthorSchema(ma.Schema):
     works = fields.List(fields.Str())
 
 
-strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
-author_schema = AuthorSchema(**strict_kwargs)
+author_schema = AuthorSchema()
 
 
 def test_tornado_multidictproxy():
@@ -119,7 +118,7 @@ class TestJSONArgs:
                 fields.Nested({"author": fields.Str(), "workname": fields.Str()})
             )
 
-        custom_schema = CustomSchema(**strict_kwargs)
+        custom_schema = CustomSchema()
 
         query = {
             "works": [

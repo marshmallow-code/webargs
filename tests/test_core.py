@@ -1,8 +1,15 @@
-import itertools
 import datetime
 
 import pytest
-from marshmallow import Schema, post_load, pre_load, class_registry, validates_schema
+from marshmallow import (
+    Schema,
+    post_load,
+    pre_load,
+    validates_schema,
+    EXCLUDE,
+    INCLUDE,
+    RAISE,
+)
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 from django.utils.datastructures import MultiValueDict as DjMultiDict
 from bottle import MultiDict as BotMultiDict
@@ -10,10 +17,8 @@ from bottle import MultiDict as BotMultiDict
 from webargs import fields, ValidationError
 from webargs.core import (
     Parser,
-    dict2schema,
     is_json,
     get_mimetype,
-    MARSHMALLOW_VERSION_INFO,
 )
 from webargs.multidictproxy import MultiDictProxy
 
@@ -23,9 +28,6 @@ try:
 except ImportError:
     # Python 3.6+
     from unittest import mock
-
-
-strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
 
 
 class MockHTTPError(Exception):
@@ -66,7 +68,7 @@ def parser():
 
 @mock.patch("webargs.core.Parser.load_json")
 def test_load_json_called_by_parse_default(load_json, web_request):
-    schema = dict2schema({"foo": fields.Field()})()
+    schema = Schema.from_dict({"foo": fields.Field()})()
     load_json.return_value = {"foo": 1}
     p = Parser()
     p.parse(schema, web_request)
@@ -105,18 +107,11 @@ def test_parse(parser, web_request):
     assert {"username": 42, "password": 42} == ret
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=... added in marshmallow3"
-)
 @pytest.mark.parametrize(
     "set_location",
     ["schema_instance", "parse_call", "parser_default", "parser_class_default"],
 )
 def test_parse_with_unknown_behavior_specified(parser, web_request, set_location):
-    # This is new in webargs 6.x ; it's the way you can "get back" the behavior
-    # of webargs 5.x in which extra args are ignored
-    from marshmallow import EXCLUDE, INCLUDE, RAISE
-
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
 
     class CustomSchema(Schema):
@@ -157,14 +152,7 @@ def test_parse_with_unknown_behavior_specified(parser, web_request, set_location
     assert {"username": 42, "password": 42, "fjords": 42} == ret
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="unknown=... added in marshmallow3"
-)
 def test_parse_with_explicit_unknown_overrides_schema(parser, web_request):
-    # this test ensures that if you specify unknown=... in your parse call (or
-    # use_args) it takes precedence over a setting in the schema object
-    from marshmallow import EXCLUDE, INCLUDE, RAISE
-
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
 
     class CustomSchema(Schema):
@@ -339,7 +327,7 @@ def test_custom_error_handler(web_request):
     class MySchema(Schema):
         foo = fields.Int()
 
-    myschema = MySchema(**strict_kwargs)
+    myschema = MySchema()
     web_request.json = {"foo": "hello world"}
 
     p = Parser(error_handler=error_handler)
@@ -405,11 +393,8 @@ def test_custom_location_loader_with_data_key(web_request):
     def load_data(req, schema):
         return req.data
 
-    data_key_kwarg = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "X-Foo"
-    }
     result = parser.parse(
-        {"x_foo": fields.Int(**data_key_kwarg)}, web_request, location="data"
+        {"x_foo": fields.Int(data_key="X-Foo")}, web_request, location="data"
     )
     assert result["x_foo"] == 42
 
@@ -454,8 +439,6 @@ def test_required_with_custom_error(parser, web_request):
         parser.parse(args, web_request)
 
     assert "We need foo" in excinfo.value.messages["json"]["foo"]
-    if MARSHMALLOW_VERSION_INFO[0] < 3:
-        assert "foo" in excinfo.value.field_names
 
 
 def test_required_with_custom_error_and_validation_error(parser, web_request):
@@ -472,8 +455,6 @@ def test_required_with_custom_error_and_validation_error(parser, web_request):
         parser.parse(args, web_request)
 
     assert "foo required length is 3" in excinfo.value.args[0]["foo"]
-    if MARSHMALLOW_VERSION_INFO[0] < 3:
-        assert "foo" in excinfo.value.field_names
 
 
 def test_full_input_validator_receives_nonascii_input(web_request):
@@ -534,24 +515,7 @@ def test_parse_with_data_key(web_request):
     web_request.json = {"Content-Type": "application/json"}
 
     parser = MockRequestParser()
-    data_key_kwargs = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "Content-Type"
-    }
-    args = {"content_type": fields.Field(**data_key_kwargs)}
-    parsed = parser.parse(args, web_request)
-    assert parsed == {"content_type": "application/json"}
-
-
-# https://github.com/marshmallow-code/webargs/issues/118
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] >= 3, reason="Behaviour changed in marshmallow 3"
-)
-# https://github.com/marshmallow-code/marshmallow/pull/714
-def test_load_from_is_checked_after_given_key(web_request):
-    web_request.json = {"content_type": "application/json"}
-
-    parser = MockRequestParser()
-    args = {"content_type": fields.Field(load_from="Content-Type")}
+    args = {"content_type": fields.Field(data_key="Content-Type")}
     parsed = parser.parse(args, web_request)
     assert parsed == {"content_type": "application/json"}
 
@@ -560,10 +524,7 @@ def test_parse_with_data_key_retains_field_name_in_error(web_request):
     web_request.json = {"Content-Type": 12345}
 
     parser = MockRequestParser()
-    data_key_kwargs = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "Content-Type"
-    }
-    args = {"content_type": fields.Str(**data_key_kwargs)}
+    args = {"content_type": fields.Str(data_key="Content-Type")}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
     assert "json" in excinfo.value.messages
@@ -574,10 +535,7 @@ def test_parse_with_data_key_retains_field_name_in_error(web_request):
 def test_parse_nested_with_data_key(web_request):
     parser = MockRequestParser()
     web_request.json = {"nested_arg": {"wrong": "OK"}}
-    data_key_kwarg = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "wrong"
-    }
-    args = {"nested_arg": fields.Nested({"right": fields.Field(**data_key_kwarg)})}
+    args = {"nested_arg": fields.Nested({"right": fields.Field(data_key="wrong")})}
 
     parsed = parser.parse(args, web_request)
     assert parsed == {"nested_arg": {"right": "OK"}}
@@ -587,12 +545,9 @@ def test_parse_nested_with_missing_key_and_data_key(web_request):
     parser = MockRequestParser()
 
     web_request.json = {"nested_arg": {}}
-    data_key_kwargs = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "miss"
-    }
     args = {
         "nested_arg": fields.Nested(
-            {"found": fields.Field(missing=None, allow_none=True, **data_key_kwargs)}
+            {"found": fields.Field(missing=None, allow_none=True, data_key="miss")}
         )
     }
 
@@ -704,11 +659,6 @@ def test_parse_with_callable(web_request, parser):
     class MySchema(Schema):
         foo = fields.Field()
 
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-
-            class Meta:
-                strict = True
-
     def make_schema(req):
         assert req is web_request
         return MySchema(context={"request": req})
@@ -721,11 +671,6 @@ def test_parse_with_callable(web_request, parser):
 def test_use_args_callable(web_request, parser):
     class HelloSchema(Schema):
         name = fields.Str()
-
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-
-            class Meta:
-                strict = True
 
         @post_load
         def request_data(self, item, **kwargs):
@@ -751,15 +696,11 @@ class TestPassingSchema:
         id = fields.Int(dump_only=True)
         email = fields.Email()
         password = fields.Str(load_only=True)
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-
-            class Meta:
-                strict = True
 
     def test_passing_schema_to_parse(self, parser, web_request):
         web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
-        result = parser.parse(self.UserSchema(**strict_kwargs), web_request)
+        result = parser.parse(self.UserSchema(), web_request)
 
         assert result == {"email": "foo@bar.com", "password": "bar"}
 
@@ -767,7 +708,7 @@ class TestPassingSchema:
 
         web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
-        @parser.use_args(self.UserSchema(**strict_kwargs), web_request)
+        @parser.use_args(self.UserSchema(), web_request)
         def viewfunc(args):
             return args
 
@@ -778,7 +719,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req}, **strict_kwargs)
+            return self.UserSchema(context={"request": req})
 
         result = parser.parse(factory, web_request)
 
@@ -789,7 +730,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req}, **strict_kwargs)
+            return self.UserSchema(context={"request": req})
 
         @parser.use_args(factory, web_request)
         def viewfunc(args):
@@ -801,7 +742,7 @@ class TestPassingSchema:
 
         web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
-        @parser.use_kwargs(self.UserSchema(**strict_kwargs), web_request)
+        @parser.use_kwargs(self.UserSchema(), web_request)
         def viewfunc(email, password):
             return {"email": email, "password": password}
 
@@ -812,7 +753,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req}, **strict_kwargs)
+            return self.UserSchema(context={"request": req})
 
         @parser.use_kwargs(factory, web_request)
         def viewfunc(email, password):
@@ -820,30 +761,11 @@ class TestPassingSchema:
 
         assert viewfunc() == {"email": "foo@bar.com", "password": "bar"}
 
-    @pytest.mark.skipif(
-        MARSHMALLOW_VERSION_INFO[0] >= 3,
-        reason='"strict" parameter is removed in marshmallow 3',
-    )
-    def test_warning_raised_if_schema_is_not_in_strict_mode(self, web_request, parser):
-
-        with pytest.warns(UserWarning) as record:
-            parser.parse(self.UserSchema(strict=False), web_request)
-        warning = record[0]
-        assert "strict=True" in str(warning.message)
-
     def test_use_kwargs_stacked(self, web_request, parser):
-        parse_kwargs = {}
-        if MARSHMALLOW_VERSION_INFO[0] >= 3:
-            from marshmallow import EXCLUDE
-
-            parse_kwargs = {"unknown": EXCLUDE}
-
         web_request.json = {"email": "foo@bar.com", "password": "bar", "page": 42}
 
-        @parser.use_kwargs({"page": fields.Int()}, web_request, **parse_kwargs)
-        @parser.use_kwargs(
-            self.UserSchema(**strict_kwargs), web_request, **parse_kwargs
-        )
+        @parser.use_kwargs({"page": fields.Int()}, web_request, unknown=EXCLUDE)
+        @parser.use_kwargs(self.UserSchema(), web_request, unknown=EXCLUDE)
         def viewfunc(email, password, page):
             return {"email": email, "password": password, "page": page}
 
@@ -856,10 +778,6 @@ class TestPassingSchema:
         class UserSchema(Schema):
             name = fields.Str()
             location = fields.Field(required=False)
-            if MARSHMALLOW_VERSION_INFO[0] < 3:
-
-                class Meta:
-                    strict = True
 
             @validates_schema(pass_original=True)
             def validate_schema(self, data, original_data, **kwargs):
@@ -912,20 +830,16 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
 
 def test_delimited_list_default_delimiter(web_request, parser):
     web_request.json = {"ids": "1,2,3"}
-    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
+    schema_cls = Schema.from_dict({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
     assert parsed["ids"] == [1, 2, 3]
 
-    dumped = schema.dump(parsed)
-    data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
+    data = schema.dump(parsed)
     assert data["ids"] == "1,2,3"
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
-)
 def test_delimited_tuple_default_delimiter(web_request, parser):
     """
     Test load and dump from DelimitedTuple, including the use of a datetime
@@ -933,7 +847,7 @@ def test_delimited_tuple_default_delimiter(web_request, parser):
     relying on __str__, but are properly de/serializing the included fields
     """
     web_request.json = {"ids": "1,2,2020-05-04"}
-    schema_cls = dict2schema(
+    schema_cls = Schema.from_dict(
         {
             "ids": fields.DelimitedTuple(
                 (fields.Int, fields.Int, fields.DateTime(format="%Y-%m-%d"))
@@ -949,12 +863,9 @@ def test_delimited_tuple_default_delimiter(web_request, parser):
     assert data["ids"] == "1,2,2020-05-04"
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
-)
 def test_delimited_tuple_incorrect_arity(web_request, parser):
     web_request.json = {"ids": "1,2"}
-    schema_cls = dict2schema(
+    schema_cls = Schema.from_dict(
         {"ids": fields.DelimitedTuple((fields.Int, fields.Int, fields.Int))}
     )
     schema = schema_cls()
@@ -971,7 +882,7 @@ def test_delimited_list_with_datetime(web_request, parser):
     correct results
     """
     web_request.json = {"dates": "2018-11-01,2018-11-02"}
-    schema_cls = dict2schema(
+    schema_cls = Schema.from_dict(
         {"dates": fields.DelimitedList(fields.DateTime(format="%Y-%m-%d"))}
     )
     schema = schema_cls()
@@ -982,30 +893,27 @@ def test_delimited_list_with_datetime(web_request, parser):
         datetime.datetime(2018, 11, 2),
     ]
 
-    dumped = schema.dump(parsed)
-    data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
+    data = schema.dump(parsed)
     assert data["dates"] == "2018-11-01,2018-11-02"
 
 
 def test_delimited_list_custom_delimiter(web_request, parser):
     web_request.json = {"ids": "1|2|3"}
-    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int(), delimiter="|")})
+    schema_cls = Schema.from_dict(
+        {"ids": fields.DelimitedList(fields.Int(), delimiter="|")}
+    )
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
     assert parsed["ids"] == [1, 2, 3]
 
-    dumped = schema.dump(parsed)
-    data = dumped.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dumped
+    data = schema.dump(parsed)
     assert data["ids"] == "1|2|3"
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
-)
 def test_delimited_tuple_custom_delimiter(web_request, parser):
     web_request.json = {"ids": "1|2"}
-    schema_cls = dict2schema(
+    schema_cls = Schema.from_dict(
         {"ids": fields.DelimitedTuple((fields.Int, fields.Int), delimiter="|")}
     )
     schema = schema_cls()
@@ -1019,7 +927,7 @@ def test_delimited_tuple_custom_delimiter(web_request, parser):
 
 def test_delimited_list_load_list_errors(web_request, parser):
     web_request.json = {"ids": [1, 2, 3]}
-    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
+    schema_cls = Schema.from_dict({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
     with pytest.raises(ValidationError) as excinfo:
@@ -1030,12 +938,11 @@ def test_delimited_list_load_list_errors(web_request, parser):
     assert errors["ids"] == ["Not a valid delimited list."]
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
-)
 def test_delimited_tuple_load_list_errors(web_request, parser):
     web_request.json = {"ids": [1, 2]}
-    schema_cls = dict2schema({"ids": fields.DelimitedTuple((fields.Int, fields.Int))})
+    schema_cls = Schema.from_dict(
+        {"ids": fields.DelimitedTuple((fields.Int, fields.Int))}
+    )
     schema = schema_cls()
 
     with pytest.raises(ValidationError) as excinfo:
@@ -1049,7 +956,7 @@ def test_delimited_tuple_load_list_errors(web_request, parser):
 # Regresion test for https://github.com/marshmallow-code/webargs/issues/149
 def test_delimited_list_passed_invalid_type(web_request, parser):
     web_request.json = {"ids": 1}
-    schema_cls = dict2schema({"ids": fields.DelimitedList(fields.Int())})
+    schema_cls = Schema.from_dict({"ids": fields.DelimitedList(fields.Int())})
     schema = schema_cls()
 
     with pytest.raises(ValidationError) as excinfo:
@@ -1057,12 +964,9 @@ def test_delimited_list_passed_invalid_type(web_request, parser):
     assert excinfo.value.messages == {"json": {"ids": ["Not a valid delimited list."]}}
 
 
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION_INFO[0] < 3, reason="fields.Tuple added in marshmallow3"
-)
 def test_delimited_tuple_passed_invalid_type(web_request, parser):
     web_request.json = {"ids": 1}
-    schema_cls = dict2schema({"ids": fields.DelimitedTuple((fields.Int,))})
+    schema_cls = Schema.from_dict({"ids": fields.DelimitedTuple((fields.Int,))})
     schema = schema_cls()
 
     with pytest.raises(ValidationError) as excinfo:
@@ -1115,54 +1019,10 @@ def test_parse_raises_validation_error_if_data_invalid(web_request, parser):
         parser.parse(args, web_request)
 
 
-def test_dict2schema():
-    data_key_kwargs = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "content-type"
-    }
-    argmap = {
-        "id": fields.Int(required=True),
-        "title": fields.Str(),
-        "description": fields.Str(),
-        "content_type": fields.Str(**data_key_kwargs),
-    }
-
-    schema_cls = dict2schema(argmap)
-    assert issubclass(schema_cls, Schema)
-
-    schema = schema_cls()
-
-    for each in ["id", "title", "description", "content_type"]:
-        assert each in schema.fields
-    assert schema.fields["id"].required
-    if MARSHMALLOW_VERSION_INFO[0] < 3:
-        assert schema.opts.strict is True
-
-
-# Regression test for https://github.com/marshmallow-code/webargs/issues/101
-def test_dict2schema_doesnt_add_to_class_registry():
-    old_n_entries = len(
-        list(
-            itertools.chain(
-                [classes for _, classes in class_registry._registry.items()]
-            )
-        )
-    )
-    argmap = {"id": fields.Field()}
-    dict2schema(argmap)
-    dict2schema(argmap)
-    new_n_entries = len(
-        list(
-            itertools.chain(
-                [classes for _, classes in class_registry._registry.items()]
-            )
-        )
-    )
-    assert new_n_entries == old_n_entries
-
-
-def test_dict2schema_with_nesting():
+def test_nested_field_from_dict():
+    # webargs.fields.Nested implements dict handling
     argmap = {"nest": fields.Nested({"foo": fields.Field()})}
-    schema_cls = dict2schema(argmap)
+    schema_cls = Schema.from_dict(argmap)
     assert issubclass(schema_cls, Schema)
     schema = schema_cls()
     assert "nest" in schema.fields

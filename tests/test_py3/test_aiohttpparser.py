@@ -4,7 +4,6 @@ import webtest_aiohttp
 import pytest
 
 from io import BytesIO
-from webargs.core import MARSHMALLOW_VERSION_INFO
 from webargs.testing import CommonTestCase
 from tests.apps.aiohttp_app import create_app
 
@@ -41,14 +40,6 @@ class TestAIOHTTPParser(CommonTestCase):
 
     # regression test for https://github.com/marshmallow-code/webargs/issues/145
     def test_nested_many_with_data_key(self, testapp):
-        # https://github.com/marshmallow-code/marshmallow/pull/714
-        # on marshmallow 2, the field name can also be used
-        if MARSHMALLOW_VERSION_INFO[0] < 3:
-            res = testapp.post_json(
-                "/echo_nested_many_data_key", {"x_field": [{"id": 42}]}
-            )
-            assert res.json == {"x_field": [{"id": 42}]}
-
         res = testapp.post_json("/echo_nested_many_data_key", {"X-Field": [{"id": 24}]})
         assert res.json == {"x_field": [{"id": 24}]}
 

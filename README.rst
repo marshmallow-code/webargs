@@ -14,9 +14,9 @@ webargs
    :target: https://webargs.readthedocs.io/
    :alt: Documentation
 
-.. image:: https://badgen.net/badge/marshmallow/2,3?list=1
+.. image:: https://badgen.net/badge/marshmallow/3
     :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
-    :alt: marshmallow 2/3 compatible
+    :alt: marshmallow 3 compatible
 
 .. image:: https://badgen.net/badge/code%20style/black/000
     :target: https://github.com/ambv/black

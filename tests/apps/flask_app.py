@@ -4,7 +4,7 @@ import marshmallow as ma
 
 from webargs import fields
 from webargs.flaskparser import parser, use_args, use_kwargs
-from webargs.core import json, MARSHMALLOW_VERSION_INFO
+from webargs.core import json
 
 
 class TestAppConfig:
@@ -19,14 +19,10 @@ class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
 
 
-strict_kwargs = {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {}
-hello_many_schema = HelloSchema(many=True, **strict_kwargs)
+hello_many_schema = HelloSchema(many=True)
 
 # variant which ignores unknown fields
-exclude_kwargs = (
-    {"strict": True} if MARSHMALLOW_VERSION_INFO[0] < 3 else {"unknown": ma.EXCLUDE}
-)
-hello_exclude_schema = HelloSchema(**exclude_kwargs)
+hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 
 app = Flask(__name__)
 app.config.from_object(TestAppConfig)
@@ -127,7 +123,7 @@ def echo_headers():
 
 
 @app.route("/echo_headers_raising")
-@use_args(HelloSchema(**strict_kwargs), location="headers")
+@use_args(HelloSchema(), location="headers")
 def echo_headers_raising(args):
     # as above, but in this case, don't use the exclude schema (so unexpected
     # headers will raise errors)
@@ -175,10 +171,9 @@ def echo_nested_many():
 
 @app.route("/echo_nested_many_data_key", methods=["POST"])
 def echo_nested_many_with_data_key():
-    data_key_kwarg = {
-        "load_from" if (MARSHMALLOW_VERSION_INFO[0] < 3) else "data_key": "X-Field"
+    args = {
+        "x_field": fields.Nested({"id": fields.Int()}, many=True, data_key="X-Field")
     }
-    args = {"x_field": fields.Nested({"id": fields.Int()}, many=True, **data_key_kwarg)}
     return J(parser.parse(args))
 
 
@@ -220,15 +215,4 @@ def handle_error(err):
     if err.code == 422:
         assert isinstance(err.data["schema"], ma.Schema)
 
-    if MARSHMALLOW_VERSION_INFO[0] >= 3:
-        return J(err.data["messages"]), err.code
-
-    # on marshmallow2, validation errors for nested schemas can fail to encode:
-    # https://github.com/marshmallow-code/marshmallow/issues/493
-    # to workaround this, convert integer keys to strings
-    def tweak_data(value):
-        if not isinstance(value, dict):
-            return value
-        return {str(k): v for k, v in value.items()}
-
-    return J({k: tweak_data(v) for k, v in err.data["messages"].items()}), err.code
+    return J(err.data["messages"]), err.code

@@ -12,16 +12,11 @@ tells webargs where to parse the request argument from.
         "active": fields.Bool(location="query"),
         "content_type": fields.Str(data_key="Content-Type", location="headers"),
     }
-
-Note: `data_key` replaced `load_from` in marshmallow 3.
-When using marshmallow 2, use `load_from`.
 """
 import marshmallow as ma
 
 # Expose all fields from marshmallow.fields.
 from marshmallow.fields import *  # noqa: F40
-from webargs.compat import MARSHMALLOW_VERSION_INFO
-from webargs.dict2schema import dict2schema
 
 __all__ = ["DelimitedList"] + ma.fields.__all__
 
@@ -39,7 +34,7 @@ class Nested(ma.fields.Nested):
 
     def __init__(self, nested, *args, **kwargs):
         if isinstance(nested, dict):
-            nested = dict2schema(nested)
+            nested = ma.Schema.from_dict(nested)
         super().__init__(nested, *args, **kwargs)
 
 
@@ -69,10 +64,7 @@ class DelimitedFieldMixin:
     def _deserialize(self, value, attr, data, **kwargs):
         # attempting to deserialize from a non-string source is an error
         if not isinstance(value, (str, bytes)):
-            if MARSHMALLOW_VERSION_INFO[0] < 3:
-                self.fail("invalid")
-            else:
-                raise self.make_error("invalid")
+            raise self.make_error("invalid")
         return super()._deserialize(value.split(self.delimiter), attr, data, **kwargs)
 
 
@@ -95,24 +87,20 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         super().__init__(cls_or_instance, **kwargs)
 
 
-# DelimitedTuple can only be defined when using marshmallow3, when Tuple was
-# added
-if MARSHMALLOW_VERSION_INFO[0] >= 3:
+class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
+    """A field which is similar to a Tuple, but takes its input as a delimited
+    string (e.g. "foo,bar,baz").
 
-    class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
-        """A field which is similar to a Tuple, but takes its input as a delimited
-        string (e.g. "foo,bar,baz").
+    Like Tuple, it can be given a tuple of nested field types which it will use to
+    de/serialize each element of the tuple.
 
-        Like Tuple, it can be given a tuple of nested field types which it will use to
-        de/serialize each element of the tuple.
+    :param Iterable[Field] tuple_fields: An iterable of field classes or instances.
+    :param str delimiter: Delimiter between values.
+    """
 
-        :param Iterable[Field] tuple_fields: An iterable of field classes or instances.
-        :param str delimiter: Delimiter between values.
-        """
+    default_error_messages = {"invalid": "Not a valid delimited tuple."}
+    delimiter = ","
 
-        default_error_messages = {"invalid": "Not a valid delimited tuple."}
-        delimiter = ","
-
-        def __init__(self, tuple_fields, *, delimiter=None, **kwargs):
-            self.delimiter = delimiter or self.delimiter
-            super().__init__(tuple_fields, **kwargs)
+    def __init__(self, tuple_fields, *, delimiter=None, **kwargs):
+        self.delimiter = delimiter or self.delimiter
+        super().__init__(tuple_fields, **kwargs)
