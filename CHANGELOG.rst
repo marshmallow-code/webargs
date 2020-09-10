@@ -27,8 +27,8 @@ Refactoring:
 
 Features:
 
-* Add ``unknown`` as a parameter to ``Parser.parse``, ``Parser.use_args``, and
-  ``Parser.use_kwargs``, or to parser instantiation. When set, it will be passed
+* Add ``unknown`` as a parameter to ``Parser.parse``, ``Parser.use_args``,
+  ``Parser.use_kwargs``, and parser instantiation. When set, it will be passed
   to ``Schema.load``. When not set, the value passed will depend on the parser's
   settings. If set to ``None``, the schema's default behavior will be used (i.e.
   no value is passed to ``Schema.load``) and parser settings will be ignored.
@@ -48,8 +48,7 @@ This allows usages like
 
 * Defaults for ``unknown`` may be customized on parser classes via
   ``Parser.DEFAULT_UNKNOWN_BY_LOCATION``, which maps location names to values
-  to use, and ``Parser.DEFAULT_UNKNOWN``, which is used when a location is not
-  found in ``DEFAULT_UNKNOWN_BY_LOCATION``.
+  to use.
 
 Usages are varied, but include
 
@@ -57,8 +56,6 @@ Usages are varied, but include
 
     import marshmallow as ma
     from webargs.flaskparser import FlaskParser
-
-    parser = FlaskParser(unknown=ma.INCLUDE)
 
     # as well as...
     class MyParser(FlaskParser):
@@ -78,7 +75,7 @@ will always pass ``RAISE``, even when the location is ``query``.
 * By default, webargs will pass ``unknown=EXCLUDE`` for all locations except
   for request bodies (``json``, ``form``, and ``json_or_form``) and path
   parameters. Request bodies and path parameters will pass ``unknown=RAISE``.
-  This behavior is defined by the default values for ``DEFAULT_UNKNOWN`` and
+  This behavior is defined by the default value for
   ``DEFAULT_UNKNOWN_BY_LOCATION``.
 
 Changes:

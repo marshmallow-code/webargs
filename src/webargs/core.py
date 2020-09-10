@@ -111,12 +111,16 @@ class Parser:
     #: Default location to check for data
     DEFAULT_LOCATION = "json"
     #: Default value to use for 'unknown' on schema load
-    DEFAULT_UNKNOWN = ma.EXCLUDE
-    #: per-location default for 'unknown'
+    #  on a per-location basis
     DEFAULT_UNKNOWN_BY_LOCATION = {
         "json": ma.RAISE,
         "form": ma.RAISE,
         "json_or_form": ma.RAISE,
+        "querystring": ma.EXCLUDE,
+        "query": ma.EXCLUDE,
+        "headers": ma.EXCLUDE,
+        "cookies": ma.EXCLUDE,
+        "files": ma.EXCLUDE,
     }
     #: The marshmallow Schema class to use when creating new schemas
     DEFAULT_SCHEMA_CLASS = ma.Schema
@@ -267,16 +271,14 @@ class Parser:
         """
         req = req if req is not None else self.get_default_request()
         location = location or self.location
-        # precedence order: explicit, instance setting, default per location, default
+        # precedence order: explicit, instance setting, default per location
         unknown = (
             unknown
             if unknown != _UNKNOWN_DEFAULT_PARAM
             else (
                 self.unknown
                 if self.unknown != _UNKNOWN_DEFAULT_PARAM
-                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(
-                    location, self.DEFAULT_UNKNOWN
-                )
+                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
         load_kwargs = {"unknown": unknown} if unknown else {}

@@ -114,7 +114,6 @@ def test_parse(parser, web_request):
         "parse_call",
         "parser_default",
         "parser_class_default",
-        "parser_class_location_default",
     ],
 )
 def test_parse_with_unknown_behavior_specified(parser, web_request, set_location):
@@ -142,14 +141,6 @@ def test_parse_with_unknown_behavior_specified(parser, web_request, set_location
         elif set_location == "parser_class_default":
 
             class CustomParser(MockRequestParser):
-                DEFAULT_UNKNOWN = value
-                DEFAULT_UNKNOWN_BY_LOCATION = {}
-
-            return CustomParser().parse(CustomSchema(), web_request)
-        elif set_location == "parser_class_location_default":
-
-            class CustomParser(MockRequestParser):
-                DEFAULT_UNKNOWN = None
                 DEFAULT_UNKNOWN_BY_LOCATION = {"json": value}
 
             return CustomParser().parse(CustomSchema(), web_request)
@@ -204,7 +195,6 @@ def test_parse_with_default_unknown_cleared_uses_schema_value(
     if clear_method == "custom_class":
 
         class CustomParser(MockRequestParser):
-            DEFAULT_UNKNOWN = None
             DEFAULT_UNKNOWN_BY_LOCATION = {}
 
         parser = CustomParser()
@@ -213,7 +203,6 @@ def test_parse_with_default_unknown_cleared_uses_schema_value(
     elif clear_method == "both":
         # setting things in multiple ways should not result in errors
         class CustomParser(MockRequestParser):
-            DEFAULT_UNKNOWN = None
             DEFAULT_UNKNOWN_BY_LOCATION = {}
 
         parser = CustomParser(unknown=None)

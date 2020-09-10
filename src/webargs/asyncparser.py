@@ -45,9 +45,7 @@ class AsyncParser(core.Parser):
             else (
                 self.unknown
                 if self.unknown != core._UNKNOWN_DEFAULT_PARAM
-                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(
-                    location, self.DEFAULT_UNKNOWN
-                )
+                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
         load_kwargs = {"unknown": unknown}

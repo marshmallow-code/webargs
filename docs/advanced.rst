@@ -151,30 +151,24 @@ Default `unknown`
 +++++++++++++++++
 
 By default, webargs will pass `unknown=marshmallow.EXCLUDE` except when the
-location is `json`, `form`, or `json_or_form`. In those cases, it uses
-`unknown=marshmallow.RAISE` instead.
+location is `json`, `form`, `json_or_form`, `path`, or `path`. In those cases,
+it uses `unknown=marshmallow.RAISE` instead.
 
-You can change these defaults by overriding `DEFAULT_UNKNOWN_BY_LOCATION` and
-`DEFAULT_UNKNOWN`. The first is a mapping of locations to values to pass, and
-the second is the fallback value used if the location is not included in the
-map.
-
-You can also define a default at parser instantiation, which will take
-precedence over these defaults.
+You can change these defaults by overriding `DEFAULT_UNKNOWN_BY_LOCATION`.
+This is a mapping of locations to values to pass.
 
 For example,
 
 .. code-block:: python
 
     from flask import Flask
-    from marshmallow import EXCLUDE, INCLUDE, fields
+    from marshmallow import EXCLUDE, fields
     from webargs.flaskparser import FlaskParser
 
     app = Flask(__name__)
 
 
     class Parser(FlaskParser):
-        DEFAULT_UNKNOWN = INCLUDE
         DEFAULT_UNKNOWN_BY_LOCATION = {"query": EXCLUDE}
 
 
@@ -190,13 +184,29 @@ For example,
 
 
     # location is "json", which is not in DEFAULT_UNKNOWN_BY_LOCATION,
-    # so the parser's default value, `INCLUDE`, will be used
+    # so no value will be passed for `unknown`
+    @app.route("/", methods=["POST"])
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Int()}, location="json")
+    def post(self, args):
+        return f"foo x bar = {args['foo'] * args['bar']}"
+
+
+You can also define a default at parser instantiation, which will take
+precedence over these defaults, as in
+
+.. code-block:: python
+
+    from marshmallow import INCLUDE
+
+    parser = Parser(unknown=INCLUDE)
+
+    # because `unknown` is set on the parser, `DEFAULT_UNKNOWN_BY_LOCATION` has
+    # effect and `INCLUDE` will always be used
     @app.route("/", methods=["POST"])
     @parser.use_args({"foo": fields.Int(), "bar": fields.Int()}, location="json")
     def post(self, args):
         unexpected_args = [k for k in args.keys() if k not in ("foo", "bar")]
         return f"foo x bar = {args['foo'] * args['bar']}; unexpected args={unexpected_args}"
-
 
 Using Schema-Specfied `unknown`
 +++++++++++++++++++++++++++++++
@@ -230,9 +240,8 @@ If you wish to use the value of `unknown` specified by a schema, simply pass
         return f"area = {args['length'] * args['width']}"
 
 
-You can also set ``unknown=None`` when instantiating a parser, or set
-``DEFAULT_UNKNOWN = None`` to make this behavior the default for a parser
-class.
+You can also set ``unknown=None`` when instantiating a parser to make this
+behavior the default for a parser.
 
 
 When to avoid `use_kwargs`
