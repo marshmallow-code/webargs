@@ -30,6 +30,8 @@ from collections.abc import Mapping
 from webob.multidict import MultiDict
 from pyramid.httpexceptions import exception_response
 
+import marshmallow as ma
+
 from webargs import core
 from webargs.core import json
 from webargs.multidictproxy import MultiDictProxy
@@ -42,6 +44,11 @@ def is_json_request(req):
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
+    DEFAULT_UNKNOWN_BY_LOCATION = {
+        "matchdict": ma.RAISE,
+        "path": ma.RAISE,
+        **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,
+    }
     __location_map__ = dict(
         matchdict="load_matchdict",
         path="load_matchdict",

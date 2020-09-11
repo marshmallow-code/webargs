@@ -65,7 +65,7 @@ def echo_use_args_validated(args):
 
 @app.route("/echo_ignoring_extra_data", method=["POST"])
 def echo_json_ignore_extra_data():
-    return parser.parse(hello_exclude_schema)
+    return parser.parse(hello_exclude_schema, unknown=None)
 
 
 @app.route(
@@ -123,9 +123,7 @@ def always_error():
 
 @app.route("/echo_headers")
 def echo_headers():
-    # the "exclude schema" must be used in this case because WSGI headers may
-    # be populated with many fields not sent by the caller
-    return parser.parse(hello_exclude_schema, request, location="headers")
+    return parser.parse(hello_args, request, location="headers")
 
 
 @app.route("/echo_cookie")

@@ -128,6 +128,122 @@ When you need more flexibility in defining input schemas, you can pass a marshma
         # ...
 
 
+Setting `unknown`
+-----------------
+
+webargs supports several ways of setting and passing the `unknown` parameter
+for `handling unknown fields <https://marshmallow.readthedocs.io/en/stable/quickstart.html#handling-unknown-fields>`_.
+
+You can pass `unknown=...` as a parameter to any of
+`Parser.parse <webargs.core.Parser.parse>`,
+`Parser.use_args <webargs.core.Parser.use_args>`, and
+`Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
+
+
+.. note::
+
+    The `unknown` value is passed to the schema's `load()` call. It therefore
+    only applies to the top layer when nesting is used. To control `unknown` at
+    multiple layers of a nested schema, you must use other mechanisms, like
+    the `unknown` argument to `fields.Nested`.
+
+Default `unknown`
++++++++++++++++++
+
+By default, webargs will pass `unknown=marshmallow.EXCLUDE` except when the
+location is `json`, `form`, `json_or_form`, `path`, or `path`. In those cases,
+it uses `unknown=marshmallow.RAISE` instead.
+
+You can change these defaults by overriding `DEFAULT_UNKNOWN_BY_LOCATION`.
+This is a mapping of locations to values to pass.
+
+For example,
+
+.. code-block:: python
+
+    from flask import Flask
+    from marshmallow import EXCLUDE, fields
+    from webargs.flaskparser import FlaskParser
+
+    app = Flask(__name__)
+
+
+    class Parser(FlaskParser):
+        DEFAULT_UNKNOWN_BY_LOCATION = {"query": EXCLUDE}
+
+
+    parser = Parser()
+
+
+    # location is "query", which is listed in DEFAULT_UNKNOWN_BY_LOCATION,
+    # so EXCLUDE will be used
+    @app.route("/", methods=["GET"])
+    @parser.use_args({"foo": fields.Int()}, location="query")
+    def get(self, args):
+        return f"foo x 2 = {args['foo'] * 2}"
+
+
+    # location is "json", which is not in DEFAULT_UNKNOWN_BY_LOCATION,
+    # so no value will be passed for `unknown`
+    @app.route("/", methods=["POST"])
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Int()}, location="json")
+    def post(self, args):
+        return f"foo x bar = {args['foo'] * args['bar']}"
+
+
+You can also define a default at parser instantiation, which will take
+precedence over these defaults, as in
+
+.. code-block:: python
+
+    from marshmallow import INCLUDE
+
+    parser = Parser(unknown=INCLUDE)
+
+    # because `unknown` is set on the parser, `DEFAULT_UNKNOWN_BY_LOCATION` has
+    # effect and `INCLUDE` will always be used
+    @app.route("/", methods=["POST"])
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Int()}, location="json")
+    def post(self, args):
+        unexpected_args = [k for k in args.keys() if k not in ("foo", "bar")]
+        return f"foo x bar = {args['foo'] * args['bar']}; unexpected args={unexpected_args}"
+
+Using Schema-Specfied `unknown`
++++++++++++++++++++++++++++++++
+
+If you wish to use the value of `unknown` specified by a schema, simply pass
+``unknown=None``. This will disable webargs' automatic passing of values for
+``unknown``. For example,
+
+.. code-block:: python
+
+    from flask import Flask
+    from marshmallow import Schema, fields, EXCLUDE, missing
+    from webargs.flaskparser import use_args
+
+
+    class RectangleSchema(Schema):
+        length = fields.Float()
+        width = fields.Float()
+
+        class Meta:
+            unknown = EXCLUDE
+
+
+    app = Flask(__name__)
+
+    # because unknown=None was passed, no value is passed during schema loading
+    # as a result, the schema's behavior (EXCLUDE) is used
+    @app.route("/", methods=["POST"])
+    @use_args(RectangleSchema(), location="json", unknown=None)
+    def get(self, args):
+        return f"area = {args['length'] * args['width']}"
+
+
+You can also set ``unknown=None`` when instantiating a parser to make this
+behavior the default for a parser.
+
+
 When to avoid `use_kwargs`
 --------------------------
 

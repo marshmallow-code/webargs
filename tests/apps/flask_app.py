@@ -21,9 +21,6 @@ class HelloSchema(ma.Schema):
 
 hello_many_schema = HelloSchema(many=True)
 
-# variant which ignores unknown fields
-hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
-
 app = Flask(__name__)
 app.config.from_object(TestAppConfig)
 
@@ -64,7 +61,7 @@ def echo_use_args_validated(args):
 
 @app.route("/echo_ignoring_extra_data", methods=["POST"])
 def echo_json_ignore_extra_data():
-    return J(parser.parse(hello_exclude_schema))
+    return J(parser.parse(hello_args, unknown=ma.EXCLUDE))
 
 
 @app.route("/echo_use_kwargs", methods=["GET"])
@@ -117,16 +114,14 @@ def error():
 
 @app.route("/echo_headers")
 def echo_headers():
-    # the "exclude schema" must be used in this case because WSGI headers may
-    # be populated with many fields not sent by the caller
-    return J(parser.parse(hello_exclude_schema, location="headers"))
+    return J(parser.parse(hello_args, location="headers"))
 
 
+# as above, but in this case, turn off the default `EXCLUDE` behavior for
+# `headers`, so that errors will be raised
 @app.route("/echo_headers_raising")
-@use_args(HelloSchema(), location="headers")
+@use_args(HelloSchema(), location="headers", unknown=None)
 def echo_headers_raising(args):
-    # as above, but in this case, don't use the exclude schema (so unexpected
-    # headers will raise errors)
     return J(args)
 
 

@@ -27,7 +27,7 @@ import typing
 from aiohttp import web
 from aiohttp.web import Request
 from aiohttp import web_exceptions
-from marshmallow import Schema, ValidationError
+from marshmallow import Schema, ValidationError, RAISE
 
 from webargs import core
 from webargs.core import json
@@ -72,6 +72,11 @@ del _find_exceptions
 class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
+    DEFAULT_UNKNOWN_BY_LOCATION = {
+        "match_info": RAISE,
+        "path": RAISE,
+        **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,
+    }
     __location_map__ = dict(
         match_info="load_match_info",
         path="load_match_info",

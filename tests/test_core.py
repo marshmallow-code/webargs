@@ -109,7 +109,12 @@ def test_parse(parser, web_request):
 
 @pytest.mark.parametrize(
     "set_location",
-    ["schema_instance", "parse_call", "parser_default", "parser_class_default"],
+    [
+        "schema_instance",
+        "parse_call",
+        "parser_default",
+        "parser_class_default",
+    ],
 )
 def test_parse_with_unknown_behavior_specified(parser, web_request, set_location):
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
@@ -121,7 +126,11 @@ def test_parse_with_unknown_behavior_specified(parser, web_request, set_location
     def parse_with_desired_behavior(value):
         if set_location == "schema_instance":
             if value is not None:
-                return parser.parse(CustomSchema(unknown=value), web_request)
+                # pass 'unknown=None' to parse() in order to indicate that the
+                # schema setting should be respected
+                return parser.parse(
+                    CustomSchema(unknown=value), web_request, unknown=None
+                )
             else:
                 return parser.parse(CustomSchema(), web_request)
         elif set_location == "parse_call":
@@ -132,7 +141,7 @@ def test_parse_with_unknown_behavior_specified(parser, web_request, set_location
         elif set_location == "parser_class_default":
 
             class CustomParser(MockRequestParser):
-                DEFAULT_UNKNOWN = value
+                DEFAULT_UNKNOWN_BY_LOCATION = {"json": value}
 
             return CustomParser().parse(CustomSchema(), web_request)
         else:
@@ -170,6 +179,44 @@ def test_parse_with_explicit_unknown_overrides_schema(parser, web_request):
     ret = parser.parse(CustomSchema(unknown=RAISE), web_request, unknown=EXCLUDE)
     assert {"username": 42, "password": 42} == ret
     ret = parser.parse(CustomSchema(unknown=RAISE), web_request, unknown=INCLUDE)
+    assert {"username": 42, "password": 42, "fjords": 42} == ret
+
+
+@pytest.mark.parametrize("clear_method", ["custom_class", "instance_setting", "both"])
+def test_parse_with_default_unknown_cleared_uses_schema_value(
+    parser, web_request, clear_method
+):
+    web_request.json = {"username": 42, "password": 42, "fjords": 42}
+
+    class CustomSchema(Schema):
+        username = fields.Field()
+        password = fields.Field()
+
+    if clear_method == "custom_class":
+
+        class CustomParser(MockRequestParser):
+            DEFAULT_UNKNOWN_BY_LOCATION = {}
+
+        parser = CustomParser()
+    elif clear_method == "instance_setting":
+        parser = MockRequestParser(unknown=None)
+    elif clear_method == "both":
+        # setting things in multiple ways should not result in errors
+        class CustomParser(MockRequestParser):
+            DEFAULT_UNKNOWN_BY_LOCATION = {}
+
+        parser = CustomParser(unknown=None)
+    else:
+        raise NotImplementedError
+
+    with pytest.raises(ValidationError, match="Unknown field."):
+        parser.parse(CustomSchema(), web_request)
+    with pytest.raises(ValidationError, match="Unknown field."):
+        parser.parse(CustomSchema(unknown=RAISE), web_request)
+
+    ret = parser.parse(CustomSchema(unknown=EXCLUDE), web_request)
+    assert {"username": 42, "password": 42} == ret
+    ret = parser.parse(CustomSchema(unknown=INCLUDE), web_request)
     assert {"username": 42, "password": 42, "fjords": 42} == ret
 
 

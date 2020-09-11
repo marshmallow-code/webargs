@@ -75,7 +75,9 @@ async def echo_use_args_validated(request, args):
 
 
 async def echo_ignoring_extra_data(request):
-    return json_response(await parser.parse(hello_exclude_schema, request))
+    return json_response(
+        await parser.parse(hello_exclude_schema, request, unknown=None)
+    )
 
 
 async def echo_multi(request):
@@ -124,7 +126,7 @@ async def always_error(request):
 
 
 async def echo_headers(request):
-    parsed = await parser.parse(hello_exclude_schema, request, location="headers")
+    parsed = await parser.parse(hello_args, request, location="headers")
     return json_response(parsed)
 
 
