@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+(unreleased)
+************
+
+Other changes:
+
+* Test against Python 3.9.
+
 7.0.0b1 (2020-09-11)
 ********************
 
