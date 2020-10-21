@@ -26,23 +26,18 @@ jobs:
   parameters:
     toxenvs:
       - lint
-
       - py35
-
       - py36
-
       - py37
-
       - py38
-
-      - py38-marshmallowdev
-
+      - py39
+      - py39-marshmallowdev
       - docs
     os: linux
 # Build wheels
 - template: job--pypi-release.yml@sloria
   parameters:
-    python: "3.7"
+    python: "3.9"
     distributions: "sdist bdist_wheel"
     dependsOn:
       - tox_linux
