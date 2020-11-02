@@ -15,7 +15,6 @@ EXTRAS_REQUIRE = {
     "frameworks": FRAMEWORKS,
     "tests": [
         "pytest",
-        'mock; python_version == "3.5"',
         "webtest==2.0.35",
         "webtest-aiohttp==2.0.0",
         "pytest-aiohttp>=0.3.0",
@@ -91,14 +90,13 @@ setup(
         "api",
         "marshmallow",
     ),
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

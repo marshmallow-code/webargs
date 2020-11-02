@@ -1,4 +1,4 @@
-"""Asynchronous request parser. Compatible with Python>=3.5."""
+"""Asynchronous request parser. Compatible with Python>=3.6."""
 import asyncio
 import functools
 import inspect

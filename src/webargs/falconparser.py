@@ -131,14 +131,14 @@ class FalconParser(core.Parser):
 
     def load_files(self, req, schema):
         raise NotImplementedError(
-            "Parsing files not yet supported by {}".format(self.__class__.__name__)
+            f"Parsing files not yet supported by {self.__class__.__name__}"
         )
 
     def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing."""
         status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
         if status is None:
-            raise LookupError("Status code {} not supported".format(error_status_code))
+            raise LookupError(f"Status code {error_status_code} not supported")
         raise HTTPError(status, errors=error.messages, headers=error_headers)
 
     def _handle_invalid_json_error(self, error, req, *args, **kwargs):

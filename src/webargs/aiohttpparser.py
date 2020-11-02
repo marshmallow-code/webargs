@@ -121,7 +121,7 @@ class AIOHTTPParser(AsyncParser):
         """Return cookies from the request as a MultiDictProxy."""
         return MultiDictProxy(req.cookies, schema)
 
-    def load_files(self, req: Request, schema: Schema) -> "typing.NoReturn":
+    def load_files(self, req: Request, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(
             "load_files is not implemented. You may be able to use load_form for "
             "parsing upload data."
@@ -157,7 +157,7 @@ class AIOHTTPParser(AsyncParser):
         *,
         error_status_code: typing.Union[int, None],
         error_headers: typing.Union[typing.Mapping[str, str], None]
-    ) -> "typing.NoReturn":
+    ) -> typing.NoReturn:
         """Handle ValidationErrors and return a JSON response of error messages
         to the client.
         """
@@ -165,7 +165,7 @@ class AIOHTTPParser(AsyncParser):
             error_status_code or self.DEFAULT_VALIDATION_STATUS
         )
         if not error_class:
-            raise LookupError("No exception for {}".format(error_status_code))
+            raise LookupError(f"No exception for {error_status_code}")
         headers = error_headers
         raise error_class(
             body=json.dumps(error.messages).encode("utf-8"),
@@ -179,7 +179,7 @@ class AIOHTTPParser(AsyncParser):
         req: Request,
         *args,
         **kwargs
-    ) -> "typing.NoReturn":
+    ) -> typing.NoReturn:
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise error_class(

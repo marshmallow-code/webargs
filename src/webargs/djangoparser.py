@@ -60,7 +60,7 @@ class DjangoParser(core.Parser):
 
     def load_headers(self, req, schema):
         raise NotImplementedError(
-            "Header parsing not supported by {}".format(self.__class__.__name__)
+            f"Header parsing not supported by {self.__class__.__name__}"
         )
 
     def load_files(self, req, schema):

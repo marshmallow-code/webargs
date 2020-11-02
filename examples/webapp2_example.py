@@ -30,7 +30,7 @@ class MainPage(webapp2.RequestHandler):
 
     @use_kwargs(hello_args)
     def get_kwargs(self, name=None):
-        self.response.write("Hello, {name}!".format(name=name))
+        self.response.write(f"Hello, {name}!")
 
 
 app = webapp2.WSGIApplication(

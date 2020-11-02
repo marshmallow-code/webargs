@@ -1,4 +1,5 @@
 import datetime
+from unittest import mock
 
 import pytest
 from marshmallow import (
@@ -21,13 +22,6 @@ from webargs.core import (
     get_mimetype,
 )
 from webargs.multidictproxy import MultiDictProxy
-
-try:
-    # Python 3.5
-    import mock
-except ImportError:
-    # Python 3.6+
-    from unittest import mock
 
 
 class MockHTTPError(Exception):
@@ -80,7 +74,7 @@ def test_load_json_called_by_parse_default(load_json, web_request):
 )
 def test_load_nondefault_called_by_parse_with_location(location, web_request):
     with mock.patch(
-        "webargs.core.Parser.load_{}".format(location)
+        f"webargs.core.Parser.load_{location}"
     ) as mock_loadfunc, mock.patch("webargs.core.Parser.load_json") as load_json:
         mock_loadfunc.return_value = {}
         load_json.return_value = {}

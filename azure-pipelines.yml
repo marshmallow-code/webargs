@@ -26,7 +26,6 @@ jobs:
   parameters:
     toxenvs:
       - lint
-      - py35
       - py36
       - py37
       - py38

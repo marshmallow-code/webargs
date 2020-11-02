@@ -1,3 +1,5 @@
+from unittest import mock
+
 from werkzeug.exceptions import HTTPException, BadRequest
 import pytest
 
@@ -9,13 +11,6 @@ from webargs.core import json
 
 from .apps.flask_app import app
 from webargs.testing import CommonTestCase
-
-try:
-    # Python 3.5
-    import mock
-except ImportError:
-    # Python 3.6+
-    from unittest import mock
 
 
 class TestFlaskParser(CommonTestCase):
