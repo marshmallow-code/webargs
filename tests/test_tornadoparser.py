@@ -1,3 +1,6 @@
+from unittest import mock
+from urllib.parse import urlencode
+
 import marshmallow as ma
 import pytest
 import tornado.concurrent
@@ -15,15 +18,6 @@ from webargs.tornadoparser import (
     use_args,
     use_kwargs,
 )
-
-from urllib.parse import urlencode
-
-try:
-    # Python 3.5
-    import mock
-except ImportError:
-    # Python 3.6+
-    from unittest import mock
 
 
 name = "name"

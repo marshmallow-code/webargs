@@ -35,7 +35,7 @@ def _callable_or_raise(obj):
     callable, a ValueError is raised.
     """
     if obj and not callable(obj):
-        raise ValueError("{!r} is not callable.".format(obj))
+        raise ValueError(f"{obj!r} is not callable.")
     return obj
 
 
@@ -72,7 +72,7 @@ def parse_json(string, *, encoding="utf-8"):
             string = string.decode(encoding)
         except UnicodeDecodeError as exc:
             raise json.JSONDecodeError(
-                "Bytes decoding error : {}".format(exc.reason),
+                f"Bytes decoding error : {exc.reason}",
                 doc=str(exc.object),
                 pos=exc.start,
             )
@@ -86,7 +86,7 @@ def _ensure_list_of_callables(obj):
         elif callable(obj):
             validators = [obj]
         else:
-            raise ValueError("{!r} is not a callable or list of callables.".format(obj))
+            raise ValueError(f"{obj!r} is not a callable or list of callables.")
     else:
         validators = []
     return validators
@@ -161,7 +161,7 @@ class Parser:
         """
         valid_locations = set(self.__location_map__.keys())
         if location not in valid_locations:
-            msg = "Invalid location argument: {}".format(location)
+            msg = f"Invalid location argument: {location}"
             raise ValueError(msg)
 
         # Parsing function to call
@@ -173,7 +173,7 @@ class Parser:
             else:
                 function = getattr(self, func)
         else:
-            raise ValueError('Invalid location: "{}"'.format(location))
+            raise ValueError(f'Invalid location: "{location}"')
         return function
 
     def _load_location_data(self, *, schema, req, location):

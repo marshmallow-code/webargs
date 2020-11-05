@@ -77,5 +77,5 @@ if __name__ == "__main__":
     app = config.make_wsgi_app()
     port = 5001
     server = make_server("0.0.0.0", port, app)
-    print("Serving on port {}".format(port))
+    print(f"Serving on port {port}")
     server.serve_forever()

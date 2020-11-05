@@ -85,5 +85,5 @@ if __name__ == "__main__":
     )
     port = 5001
     app.listen(port)
-    print("Serving on port {}".format(port))
+    print(f"Serving on port {port}")
     tornado.ioloop.IOLoop.instance().start()

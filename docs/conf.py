@@ -22,7 +22,7 @@ default_role = "py:obj"
 github_user = "marshmallow-code"
 github_repo = "webargs"
 
-issues_github_path = "{}/{}".format(github_user, github_repo)
+issues_github_path = f"{github_user}/{github_repo}"
 
 intersphinx_mapping = {
     "python": ("http://python.readthedocs.io/en/latest/", None),
@@ -37,7 +37,7 @@ language = "en"
 html_domain_indices = False
 source_suffix = ".rst"
 project = "webargs"
-copyright = "2014-{:%Y}, Steven Loria and contributors".format(dt.datetime.utcnow())
+copyright = f"2014-{dt.datetime.utcnow():%Y}, Steven Loria and contributors"
 version = release = webargs.__version__
 templates_path = ["_templates"]
 exclude_patterns = ["_build"]
