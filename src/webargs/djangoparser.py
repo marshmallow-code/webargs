@@ -59,9 +59,7 @@ class DjangoParser(core.Parser):
         return req.COOKIES
 
     def load_headers(self, req, schema):
-        raise NotImplementedError(
-            f"Header parsing not supported by {self.__class__.__name__}"
-        )
+        return req.headers
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
