@@ -37,6 +37,12 @@ class EchoJSON:
         resp.body = json.dumps(parsed)
 
 
+class EchoMedia:
+    def on_post(self, req, resp):
+        parsed = parser.parse(hello_args, req, location="media")
+        resp.body = json.dumps(parsed)
+
+
 class EchoJSONOrForm:
     def on_post(self, req, resp):
         parsed = parser.parse(hello_args, req, location="json_or_form")
@@ -161,6 +167,7 @@ def create_app():
     app.add_route("/echo", Echo())
     app.add_route("/echo_form", EchoForm())
     app.add_route("/echo_json", EchoJSON())
+    app.add_route("/echo_media", EchoMedia())
     app.add_route("/echo_json_or_form", EchoJSONOrForm())
     app.add_route("/echo_use_args", EchoUseArgs())
     app.add_route("/echo_use_kwargs", EchoUseKwargs())
