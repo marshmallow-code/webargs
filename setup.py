@@ -2,14 +2,14 @@ import re
 from setuptools import setup, find_packages
 
 FRAMEWORKS = [
-    "Flask>=0.12.2",
+    "Flask>=0.12.5",
     "Django>=2.2.0",
     "bottle>=0.12.13",
     "tornado>=4.5.2",
     "pyramid>=1.9.1",
     "webapp2>=3.0.0b1",
     "falcon>=2.0.0",
-    "aiohttp>=3.0.0",
+    "aiohttp>=3.0.8",
 ]
 EXTRAS_REQUIRE = {
     "frameworks": FRAMEWORKS,

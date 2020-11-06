@@ -27,9 +27,11 @@ jobs:
     toxenvs:
       - lint
       - py36
+      - py36-mindeps
       - py37
       - py38
       - py39
+      - py39-mindeps
       - py39-marshmallowdev
       - docs
     os: linux
