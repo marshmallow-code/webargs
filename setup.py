@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 FRAMEWORKS = [
     "Flask>=0.12.2",
-    "Django>=1.11.16",
+    "Django>=2.2.0",
     "bottle>=0.12.13",
     "tornado>=4.5.2",
     "pyramid>=1.9.1",

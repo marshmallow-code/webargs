@@ -59,6 +59,9 @@ class DjangoParser(core.Parser):
         return req.COOKIES
 
     def load_headers(self, req, schema):
+        """Return headers from the request."""
+        # Django's HttpRequest.headers is a case-insensitive dict type, but it
+        # isn't a multidict, so this is not proxied
         return req.headers
 
     def load_files(self, req, schema):
