@@ -16,28 +16,47 @@ class TestFalconParser(CommonTestCase):
     def test_use_args_hook(self, testapp):
         assert testapp.get("/echo_use_args_hook?name=Fred").json == {"name": "Fred"}
 
+    def test_parse_media(self, testapp):
+        assert testapp.post_json("/echo_media", {"name": "Fred"}).json == {
+            "name": "Fred"
+        }
+
+    def test_parse_media_missing(self, testapp):
+        assert testapp.post("/echo_media", "").json == {"name": "World"}
+
+    def test_parse_media_empty(self, testapp):
+        assert testapp.post_json("/echo_media", {}).json == {"name": "World"}
+
+    def test_parse_media_error_unexpected_int(self, testapp):
+        res = testapp.post_json("/echo_media", 1, expect_errors=True)
+        assert res.status_code == 422
+
     # https://github.com/marshmallow-code/webargs/issues/427
-    def test_parse_json_with_nonutf8_chars(self, testapp):
+    @pytest.mark.parametrize("path", ["/echo_json", "/echo_media"])
+    def test_parse_json_with_nonutf8_chars(self, testapp, path):
         res = testapp.post(
-            "/echo_json",
+            path,
             b"\xfe",
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
         )
 
         assert res.status_code == 400
-        assert res.json["errors"] == {"json": ["Invalid JSON body."]}
+        if path.endswith("json"):
+            assert res.json["errors"] == {"json": ["Invalid JSON body."]}
 
     # https://github.com/sloria/webargs/issues/329
-    def test_invalid_json(self, testapp):
+    @pytest.mark.parametrize("path", ["/echo_json", "/echo_media"])
+    def test_invalid_json(self, testapp, path):
         res = testapp.post(
-            "/echo_json",
+            path,
             '{"foo": "bar", }',
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
         )
         assert res.status_code == 400
-        assert res.json["errors"] == {"json": ["Invalid JSON body."]}
+        if path.endswith("json"):
+            assert res.json["errors"] == {"json": ["Invalid JSON body."]}
 
     # Falcon converts headers to all-caps
     def test_parsing_headers(self, testapp):

@@ -3,6 +3,8 @@
 import falcon
 from falcon.util.uri import parse_query_string
 
+import marshmallow as ma
+
 from webargs import core
 from webargs.multidictproxy import MultiDictProxy
 
@@ -69,7 +71,21 @@ class HTTPError(falcon.HTTPError):
 
 
 class FalconParser(core.Parser):
-    """Falcon request argument parser."""
+    """Falcon request argument parser.
+
+    Defaults to using the `media` location. See :py:meth:`~FalconParser.load_media` for
+    details on the media location."""
+
+    # by default, Falcon will use the 'media' location to load data
+    #
+    # this effectively looks the same as loading JSON data by default, but if
+    # you add a handler for a different media type to Falcon, webargs will
+    # automatically pick up on that capability
+    DEFAULT_LOCATION = "media"
+    DEFAULT_UNKNOWN_BY_LOCATION = dict(
+        media=ma.RAISE, **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION
+    )
+    __location_map__ = dict(media="load_media", **core.Parser.__location_map__)
 
     # Note on the use of MultiDictProxy throughout:
     # Falcon parses query strings and form values into ordinary dicts, but with
@@ -94,6 +110,25 @@ class FalconParser(core.Parser):
         if form is core.missing:
             return form
         return MultiDictProxy(form, schema)
+
+    def load_media(self, req, schema):
+        """Return data unpacked and parsed by one of Falcon's media handlers.
+        By default, Falcon only handles JSON payloads.
+
+        To configure additional media handlers, see the
+        `Falcon documentation on media types`__.
+
+        .. _FalconMedia: https://falcon.readthedocs.io/en/stable/api/media.html
+        __ FalconMedia_
+
+        .. note::
+
+            The request stream will be read and left at EOF.
+        """
+        # if there is no body, return missing instead of erroring
+        if req.content_length in (None, 0):
+            return core.missing
+        return req.media
 
     def _raw_load_json(self, req):
         """Return a json payload from the request for the core parser's load_json

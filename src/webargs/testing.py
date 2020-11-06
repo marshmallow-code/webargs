@@ -62,9 +62,6 @@ class CommonTestCase:
     def test_parse_querystring_default(self, testapp):
         assert testapp.get("/echo").json == {"name": "World"}
 
-    def test_parse_json_default(self, testapp):
-        assert testapp.post_json("/echo_json", {}).json == {"name": "World"}
-
     def test_parse_json_with_charset(self, testapp):
         res = testapp.post(
             "/echo_json",
