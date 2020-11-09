@@ -1,5 +1,3 @@
-import asyncio
-
 import aiohttp
 from aiohttp.web import json_response
 import marshmallow as ma
@@ -177,15 +175,13 @@ class EchoHandler:
 
 
 class EchoHandlerView(aiohttp.web.View):
-    @asyncio.coroutine
     @use_args(hello_args, location="query")
-    def get(self, args):
+    async def get(self, args):
         return json_response(args)
 
 
-@asyncio.coroutine
 @use_args(HelloSchema, as_kwargs=True, location="query")
-def echo_use_schema_as_kwargs(request, name):
+async def echo_use_schema_as_kwargs(request, name):
     return json_response({"name": name})
 
 
