@@ -31,7 +31,6 @@ jobs:
       - py37
       - py38
       - py39
-      - py39-mindeps
       - py39-marshmallowdev
       - docs
     os: linux
