@@ -1,12 +1,29 @@
 Changelog
 ---------
 
-(unreleased)
-************
+7.0.0b2 (unreleased)
+********************
 
-Other changes:
+Features:
+
+* `DjangoParser` now supports the `headers` location. (:issue:`540`)
+
+* `FalconParser` now defaults to the new `media` location, which uses
+  Falcon's `media` decoding. (:issue:`253`)
+  
+`media` behaves very similarly to the `json` location but also supports any
+registered media handler. See the
+`Falcon documentation on media types
+<https://falcon.readthedocs.io/en/stable/api/media.html>`_ for more details.
+
+Changes:
+
+* `FalconParser` now defaults to using the new `media` location instead of
+  `json`. (:issue:`253`)
 
 * Test against Python 3.9.
+
+* *Backwards-incompatible*: Drop support for Python 3.5.
 
 7.0.0b1 (2020-09-11)
 ********************
