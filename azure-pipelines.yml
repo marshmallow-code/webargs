@@ -27,6 +27,7 @@ jobs:
     toxenvs:
       - lint
       - py36
+      - py36-mindeps
       - py37
       - py38
       - py39
