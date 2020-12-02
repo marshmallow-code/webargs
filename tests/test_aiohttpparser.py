@@ -1,4 +1,3 @@
-import asyncio
 import webtest
 import webtest_aiohttp
 import pytest
@@ -12,13 +11,12 @@ class TestAIOHTTPParser(CommonTestCase):
     def create_app(self):
         return create_app()
 
-    def create_testapp(self, app):
-        loop = asyncio.get_event_loop()
-        self.loop = loop
+    def create_testapp(self, app, loop):
         return webtest_aiohttp.TestApp(app, loop=loop)
 
-    def after_create_app(self):
-        self.loop.close()
+    @pytest.fixture
+    def testapp(self, loop):
+        return self.create_testapp(self.create_app(), loop)
 
     @pytest.mark.skip(reason="files location not supported for aiohttpparser")
     def test_parse_files(self, testapp):
