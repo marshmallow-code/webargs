@@ -60,14 +60,6 @@ webargs.pyramidparser
 .. automodule:: webargs.pyramidparser
     :members:
 
-
-webargs.webapp2parser
----------------------
-
-.. automodule:: webargs.webapp2parser
-    :members:
-
-
 webargs.falconparser
 ---------------------
 
