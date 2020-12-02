@@ -7,7 +7,6 @@ FRAMEWORKS = [
     "bottle>=0.12.13",
     "tornado>=4.5.2",
     "pyramid>=1.9.1",
-    "webapp2>=3.0.0b1",
     "falcon>=2.0.0",
     "aiohttp>=3.0.8",
 ]
@@ -61,7 +60,7 @@ setup(
     description=(
         "Declarative parsing and validation of HTTP request objects, "
         "with built-in support for popular web frameworks, including "
-        "Flask, Django, Bottle, Tornado, Pyramid, webapp2, Falcon, and aiohttp."
+        "Flask, Django, Bottle, Tornado, Pyramid, Falcon, and aiohttp."
     ),
     long_description=read("README.rst"),
     author="Steven Loria",
@@ -81,7 +80,6 @@ setup(
         "bottle",
         "tornado",
         "aiohttp",
-        "webapp2",
         "request",
         "arguments",
         "validation",

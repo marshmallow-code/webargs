@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+7.0.0 (unreleased)
+******************
+
+Changes:
+
+* *Backwards-incompatible*: Drop support for webapp2 (:pr:`565`).
+
 7.0.0b2 (2020-12-01)
 ********************
 
@@ -19,10 +26,8 @@ registered media handler. See the
 Changes:
 
 * `FalconParser` defaults to the `media` location instead of `json`. (:issue:`253`)
-
-* Test against Python 3.9.
-
-* *Backwards-incompatible*: Drop support for Python 3.5.
+* Test against Python 3.9 (:pr:`552`).
+* *Backwards-incompatible*: Drop support for Python 3.5 (:pr:`553`).
 
 7.0.0b1 (2020-09-11)
 ********************
