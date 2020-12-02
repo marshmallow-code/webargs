@@ -8,9 +8,9 @@ Features:
 
 * `DjangoParser` now supports the `headers` location. (:issue:`540`)
 
-* `FalconParser` now defaults to the new `media` location, which uses
+* `FalconParser` now supports a new `media` location, which uses
   Falcon's `media` decoding. (:issue:`253`)
-  
+
 `media` behaves very similarly to the `json` location but also supports any
 registered media handler. See the
 `Falcon documentation on media types
@@ -18,8 +18,7 @@ registered media handler. See the
 
 Changes:
 
-* `FalconParser` now defaults to using the new `media` location instead of
-  `json`. (:issue:`253`)
+* `FalconParser` defaults to the `media` location instead of `json`. (:issue:`253`)
 
 * Test against Python 3.9.
 
