@@ -155,8 +155,8 @@ class AIOHTTPParser(AsyncParser):
         req: Request,
         schema: Schema,
         *,
-        error_status_code: typing.Union[int, None],
-        error_headers: typing.Union[typing.Mapping[str, str], None]
+        error_status_code: typing.Optional[int],
+        error_headers: typing.Optional[typing.Mapping[str, str]]
     ) -> typing.NoReturn:
         """Handle ValidationErrors and return a JSON response of error messages
         to the client.
