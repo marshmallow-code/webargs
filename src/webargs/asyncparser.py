@@ -6,14 +6,11 @@ import typing
 from collections.abc import Mapping
 
 from marshmallow import Schema, ValidationError
-from marshmallow.fields import Field
 import marshmallow as ma
 
 from webargs import core
 
-Request = typing.TypeVar("Request")
-ArgMap = typing.Union[Schema, typing.Mapping[str, Field]]
-Validate = typing.Union[typing.Callable, typing.Iterable[typing.Callable]]
+AsyncErrorHandler = typing.Callable[..., typing.Awaitable[typing.NoReturn]]
 
 
 class AsyncParser(core.Parser):
@@ -24,15 +21,15 @@ class AsyncParser(core.Parser):
     # TODO: Lots of duplication from core.Parser here. Rethink.
     async def parse(
         self,
-        argmap: ArgMap,
-        req: Request = None,
+        argmap: core.ArgMap,
+        req: typing.Optional[core.Request] = None,
         *,
-        location: str = None,
-        unknown: str = core._UNKNOWN_DEFAULT_PARAM,
-        validate: Validate = None,
-        error_status_code: typing.Union[int, None] = None,
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None
-    ) -> typing.Union[typing.Mapping, None]:
+        location: typing.Optional[str] = None,
+        unknown: typing.Optional[str] = core._UNKNOWN_DEFAULT_PARAM,
+        validate: core.ValidateArg = None,
+        error_status_code: typing.Optional[int] = None,
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+    ) -> typing.Optional[typing.Mapping]:
         """Coroutine variant of `webargs.core.Parser`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
@@ -61,7 +58,7 @@ class AsyncParser(core.Parser):
             data = schema.load(location_data, **load_kwargs)
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
-            await self._on_validation_error(
+            await self._async_on_validation_error(
                 error,
                 req,
                 schema,
@@ -90,16 +87,16 @@ class AsyncParser(core.Parser):
             data = {}
         return data
 
-    async def _on_validation_error(
+    async def _async_on_validation_error(
         self,
         error: ValidationError,
-        req: Request,
+        req: core.Request,
         schema: Schema,
         location: str,
         *,
-        error_status_code: typing.Union[int, None],
-        error_headers: typing.Union[typing.Mapping[str, str], None]
-    ) -> None:
+        error_status_code: typing.Optional[int],
+        error_headers: typing.Optional[typing.Mapping[str, str]]
+    ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
         # e.g. {"json":{"foo":["Not a valid integer."]}}
@@ -107,25 +104,41 @@ class AsyncParser(core.Parser):
         #      {"foo":["Not a valid integer."]}
         error.messages = {location: error.messages}
         error_handler = self.error_callback or self.handle_error
-        await error_handler(
-            error,
-            req,
-            schema,
-            error_status_code=error_status_code,
-            error_headers=error_headers,
-        )
+        # an async error handler was registered, await it
+        if inspect.iscoroutinefunction(error_handler):
+            async_error_handler = typing.cast(AsyncErrorHandler, error_handler)
+            await async_error_handler(
+                error,
+                req,
+                schema,
+                error_status_code=error_status_code,
+                error_headers=error_headers,
+            )
+            # workaround for mypy not understanding `await Awaitable[NoReturn]`
+            # see: https://github.com/python/mypy/issues/8974
+            raise NotImplementedError("unreachable")
+        # the error handler was synchronous (e.g. Parser.handle_error) so it
+        # will raise an error
+        else:
+            error_handler(
+                error,
+                req,
+                schema,
+                error_status_code=error_status_code,
+                error_headers=error_headers,
+            )
 
     def use_args(
         self,
-        argmap: ArgMap,
-        req: typing.Optional[Request] = None,
+        argmap: core.ArgMap,
+        req: typing.Optional[core.Request] = None,
         *,
         location: str = None,
         unknown=core._UNKNOWN_DEFAULT_PARAM,
         as_kwargs: bool = False,
-        validate: Validate = None,
+        validate: core.ValidateArg = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Union[typing.Mapping[str, str], None] = None
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 

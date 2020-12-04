@@ -1,5 +1,7 @@
 from collections.abc import Mapping
 
+import marshmallow as ma
+
 from webargs.core import missing, is_multiple
 
 
@@ -13,12 +15,12 @@ class MultiDictProxy(Mapping):
     In all other cases, __getitem__ proxies directly to the input multidict.
     """
 
-    def __init__(self, multidict, schema):
+    def __init__(self, multidict, schema: ma.Schema):
         self.data = multidict
         self.multiple_keys = self._collect_multiple_keys(schema)
 
     @staticmethod
-    def _collect_multiple_keys(schema):
+    def _collect_multiple_keys(schema: ma.Schema):
         result = set()
         for name, field in schema.fields.items():
             if not is_multiple(field):
