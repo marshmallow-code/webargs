@@ -68,6 +68,7 @@ setup(
     url="https://github.com/marshmallow-code/webargs",
     packages=find_packages("src"),
     package_dir={"": "src"},
+    package_data={"webargs": ["py.typed"]},
     install_requires=["marshmallow>=3.0.0"],
     extras_require=EXTRAS_REQUIRE,
     license="MIT",
