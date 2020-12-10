@@ -3,6 +3,54 @@ Upgrading to Newer Releases
 
 This section documents migration paths to new releases.
 
+Upgrading to 7.0
+++++++++++++++++
+
+`unknown` is Now Settable by the Parser
+---------------------------------------
+
+As of 7.0, `Parsers` have multiple settings for controlling the value for
+`unknown` which is passed to `schema.load` when parsing.
+
+To set unknown behavior on a parser, see the advanced doc on this topic:
+:ref:`advanced_setting_unknown`.
+
+Importantly, by default, any schema setting for `unknown` will be overridden by
+the `unknown` settings for the parser.
+
+In order to use a schema's `unknown` value, set `unknown=None` on the parser.
+In 6.x versions of webargs, schema values for `unknown` are used, so the
+`unknown=None` setting is the best way to emulate this.
+
+To get identical behavior:
+
+.. code-block:: python
+
+    # assuming you have a schema named MySchema
+
+    # webargs 6.x
+    @parser.use_args(MySchema)
+    def foo(args):
+        ...
+
+
+    # webargs 7.x
+    # as a parameter to use_args or parse
+    @parser.use_args(MySchema, unknown=None)
+    def foo(args):
+        ...
+
+
+    # webargs 7.x
+    # as a parser setting
+    # example with flaskparser, but any parser class works
+    parser = FlaskParser(unknown=None)
+
+
+    @parser.use_args(MySchema)
+    def foo(args):
+        ...
+
 Upgrading to 6.0
 ++++++++++++++++
 
