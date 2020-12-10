@@ -8,6 +8,9 @@ Changes:
 
 * *Backwards-incompatible*: Drop support for webapp2 (:pr:`565`).
 
+* Add type annotations to `Parser` class, `DelimitedList`, and
+  `DelimitedTuple`. (:issue:`566`)
+
 7.0.0b2 (2020-12-01)
 ********************
 

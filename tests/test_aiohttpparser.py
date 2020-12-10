@@ -1,10 +1,22 @@
+from io import BytesIO
+from unittest import mock
+
 import webtest
 import webtest_aiohttp
 import pytest
 
-from io import BytesIO
+from webargs import fields
+from webargs.aiohttpparser import AIOHTTPParser
 from webargs.testing import CommonTestCase
 from tests.apps.aiohttp_app import create_app
+
+
+@pytest.fixture
+def web_request():
+    req = mock.Mock()
+    req.query = {}
+    yield req
+    req.query = {}
 
 
 class TestAIOHTTPParser(CommonTestCase):
@@ -65,3 +77,40 @@ class TestAIOHTTPParser(CommonTestCase):
             "query_parsed": {"page": 2, "q": 10},
             "json_parsed": {"name": "Steve"},
         }
+
+
+async def test_aiohttpparser_synchronous_error_handler(web_request):
+    parser = AIOHTTPParser()
+
+    class CustomError(Exception):
+        pass
+
+    @parser.error_handler
+    def custom_handle_error(error, req, schema, *, error_status_code, error_headers):
+        raise CustomError("foo")
+
+    with pytest.raises(CustomError):
+        await parser.parse(
+            {"foo": fields.Int(required=True)}, web_request, location="query"
+        )
+
+
+async def test_aiohttpparser_asynchronous_error_handler(web_request):
+    parser = AIOHTTPParser()
+
+    class CustomError(Exception):
+        pass
+
+    @parser.error_handler
+    async def custom_handle_error(
+        error, req, schema, *, error_status_code, error_headers
+    ):
+        async def inner():
+            raise CustomError("foo")
+
+        await inner()
+
+    with pytest.raises(CustomError):
+        await parser.parse(
+            {"foo": fields.Int(required=True)}, web_request, location="query"
+        )

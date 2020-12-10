@@ -1081,7 +1081,6 @@ def test_is_json():
 def test_get_mimetype():
     assert get_mimetype("application/json") == "application/json"
     assert get_mimetype("application/json;charset=utf8") == "application/json"
-    assert get_mimetype(None) is None
 
 
 class MockRequestParserWithErrorHandler(MockRequestParser):

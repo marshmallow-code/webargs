@@ -1,5 +1,4 @@
 import functools
-import inspect
 import typing
 import logging
 from collections.abc import Mapping
@@ -23,34 +22,53 @@ __all__ = [
 ]
 
 
+Request = typing.TypeVar("Request")
+ArgMap = typing.Union[
+    ma.Schema,
+    typing.Mapping[str, ma.fields.Field],
+    typing.Callable[[Request], ma.Schema],
+]
+ValidateArg = typing.Union[None, typing.Callable, typing.Iterable[typing.Callable]]
+CallableList = typing.List[typing.Callable]
+ErrorHandler = typing.Callable[..., typing.NoReturn]
+# generic type var with no particular meaning
+T = typing.TypeVar("T")
+
+
 # a value used as the default for arguments, so that when `None` is passed, it
 # can be distinguished from the default value
 _UNKNOWN_DEFAULT_PARAM = "_default"
 
-DEFAULT_VALIDATION_STATUS = 422  # type: int
+DEFAULT_VALIDATION_STATUS: int = 422
 
 
-def _callable_or_raise(obj):
+def _iscallable(x) -> bool:
+    # workaround for
+    #   https://github.com/python/mypy/issues/9778
+    return callable(x)
+
+
+def _callable_or_raise(obj: typing.Optional[T]) -> typing.Optional[T]:
     """Makes sure an object is callable if it is not ``None``. If not
     callable, a ValueError is raised.
     """
-    if obj and not callable(obj):
+    if obj and not _iscallable(obj):
         raise ValueError(f"{obj!r} is not callable.")
     return obj
 
 
-def is_multiple(field):
+def is_multiple(field: ma.fields.Field) -> bool:
     """Return whether or not `field` handles repeated/multi-value arguments."""
     return isinstance(field, ma.fields.List) and not isinstance(field, DelimitedList)
 
 
-def get_mimetype(content_type):
-    return content_type.split(";")[0].strip() if content_type else None
+def get_mimetype(content_type: str) -> str:
+    return content_type.split(";")[0].strip()
 
 
 # Adapted from werkzeug:
 # https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
-def is_json(mimetype):
+def is_json(mimetype: typing.Optional[str]) -> bool:
     """Indicates if this mimetype is JSON or not.  By default a request
     is considered to include JSON data if the mimetype is
     ``application/json`` or ``application/*+json``.
@@ -66,23 +84,25 @@ def is_json(mimetype):
     return False
 
 
-def parse_json(string, *, encoding="utf-8"):
-    if isinstance(string, bytes):
+def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
+    if isinstance(s, str):
+        decoded = s
+    else:
         try:
-            string = string.decode(encoding)
+            decoded = s.decode(encoding)
         except UnicodeDecodeError as exc:
             raise json.JSONDecodeError(
                 f"Bytes decoding error : {exc.reason}",
                 doc=str(exc.object),
                 pos=exc.start,
             )
-    return json.loads(string)
+    return json.loads(decoded)
 
 
-def _ensure_list_of_callables(obj):
+def _ensure_list_of_callables(obj: typing.Any) -> CallableList:
     if obj:
         if isinstance(obj, (list, tuple)):
-            validators = obj
+            validators = typing.cast(CallableList, list(obj))
         elif callable(obj):
             validators = [obj]
         else:
@@ -109,10 +129,10 @@ class Parser:
     """
 
     #: Default location to check for data
-    DEFAULT_LOCATION = "json"
+    DEFAULT_LOCATION: str = "json"
     #: Default value to use for 'unknown' on schema load
     #  on a per-location basis
-    DEFAULT_UNKNOWN_BY_LOCATION = {
+    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, str] = {
         "json": ma.RAISE,
         "form": ma.RAISE,
         "json_or_form": ma.RAISE,
@@ -123,14 +143,14 @@ class Parser:
         "files": ma.EXCLUDE,
     }
     #: The marshmallow Schema class to use when creating new schemas
-    DEFAULT_SCHEMA_CLASS = ma.Schema
+    DEFAULT_SCHEMA_CLASS: typing.Type = ma.Schema
     #: Default status code to return for validation errors
-    DEFAULT_VALIDATION_STATUS = DEFAULT_VALIDATION_STATUS
+    DEFAULT_VALIDATION_STATUS: int = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
-    DEFAULT_VALIDATION_MESSAGE = "Invalid value."
+    DEFAULT_VALIDATION_MESSAGE: str = "Invalid value."
 
     #: Maps location => method name
-    __location_map__ = {
+    __location_map__: typing.Dict[str, typing.Union[str, typing.Callable]] = {
         "json": "load_json",
         "querystring": "load_querystring",
         "query": "load_querystring",
@@ -143,40 +163,38 @@ class Parser:
 
     def __init__(
         self,
-        location=None,
+        location: typing.Optional[str] = None,
         *,
-        unknown=_UNKNOWN_DEFAULT_PARAM,
-        error_handler=None,
-        schema_class=None
+        unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
+        error_handler: typing.Optional[ErrorHandler] = None,
+        schema_class: typing.Optional[typing.Type] = None
     ):
         self.location = location or self.DEFAULT_LOCATION
-        self.error_callback = _callable_or_raise(error_handler)
+        self.error_callback: typing.Optional[ErrorHandler] = _callable_or_raise(
+            error_handler
+        )
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
         self.unknown = unknown
 
-    def _get_loader(self, location):
+    def _get_loader(self, location: str) -> typing.Callable:
         """Get the loader function for the given location.
 
         :raises: ValueError if a given location is invalid.
         """
         valid_locations = set(self.__location_map__.keys())
         if location not in valid_locations:
-            msg = f"Invalid location argument: {location}"
-            raise ValueError(msg)
+            raise ValueError(f"Invalid location argument: {location}")
 
         # Parsing function to call
         # May be a method name (str) or a function
-        func = self.__location_map__.get(location)
-        if func:
-            if inspect.isfunction(func):
-                function = func
-            else:
-                function = getattr(self, func)
-        else:
-            raise ValueError(f'Invalid location: "{location}"')
-        return function
+        func = self.__location_map__[location]
+        if isinstance(func, str):
+            return getattr(self, func)
+        return func
 
-    def _load_location_data(self, *, schema, req, location):
+    def _load_location_data(
+        self, *, schema: ma.Schema, req: Request, location: str
+    ) -> typing.Optional[typing.Mapping]:
         """Return a dictionary-like object for the location on the given request.
 
         Needs to have the schema in hand in order to correctly handle loading
@@ -192,15 +210,22 @@ class Parser:
         return data
 
     def _on_validation_error(
-        self, error, req, schema, location, *, error_status_code, error_headers
-    ):
+        self,
+        error: ValidationError,
+        req: Request,
+        schema: ma.Schema,
+        location: str,
+        *,
+        error_status_code: typing.Optional[int],
+        error_headers: typing.Optional[typing.Mapping[str, str]]
+    ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
         # e.g. {"json":{"foo":["Not a valid integer."]}}
         #      instead of
         #      {"foo":["Not a valid integer."]}
         error.messages = {location: error.messages}
-        error_handler = self.error_callback or self.handle_error
+        error_handler: ErrorHandler = self.error_callback or self.handle_error
         error_handler(
             error,
             req,
@@ -209,13 +234,15 @@ class Parser:
             error_headers=error_headers,
         )
 
-    def _validate_arguments(self, data, validators):
+    def _validate_arguments(self, data: typing.Any, validators: CallableList) -> None:
+        # although `data` is typically a Mapping, nothing forbids a `schema.load`
+        # from returning an arbitrary object subject to validators
         for validator in validators:
             if validator(data) is False:
                 msg = self.DEFAULT_VALIDATION_MESSAGE
                 raise ValidationError(msg, data=data)
 
-    def _get_schema(self, argmap, req):
+    def _get_schema(self, argmap: ArgMap, req: Request) -> ma.Schema:
         """Return a `marshmallow.Schema` for the given argmap and request.
 
         :param argmap: Either a `marshmallow.Schema`, `dict`
@@ -236,14 +263,14 @@ class Parser:
 
     def parse(
         self,
-        argmap,
-        req=None,
+        argmap: ArgMap,
+        req: typing.Optional[Request] = None,
         *,
-        location=None,
-        unknown=_UNKNOWN_DEFAULT_PARAM,
-        validate=None,
-        error_status_code=None,
-        error_headers=None
+        location: typing.Optional[str] = None,
+        unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
+        validate: ValidateArg = None,
+        error_status_code: typing.Optional[int] = None,
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None
     ):
         """Main request parsing method.
 
@@ -307,13 +334,18 @@ class Parser:
             ) from error
         return data
 
-    def get_default_request(self):
+    def get_default_request(self) -> typing.Optional[Request]:
         """Optional override. Provides a hook for frameworks that use thread-local
         request objects.
         """
         return None
 
-    def get_request_from_view_args(self, view, args, kwargs):
+    def get_request_from_view_args(
+        self,
+        view: typing.Callable,
+        args: typing.Tuple,
+        kwargs: typing.Mapping[str, typing.Any],
+    ) -> typing.Optional[Request]:
         """Optional override. Returns the request object to be parsed, given a view
         function's args and kwargs.
 
@@ -328,7 +360,12 @@ class Parser:
         return None
 
     @staticmethod
-    def _update_args_kwargs(args, kwargs, parsed_args, as_kwargs):
+    def _update_args_kwargs(
+        args: typing.Tuple,
+        kwargs: typing.Dict[str, typing.Any],
+        parsed_args: typing.Tuple,
+        as_kwargs: bool,
+    ) -> typing.Tuple[typing.Tuple, typing.Mapping]:
         """Update args or kwargs with parsed_args depending on as_kwargs"""
         if as_kwargs:
             kwargs.update(parsed_args)
@@ -339,16 +376,16 @@ class Parser:
 
     def use_args(
         self,
-        argmap,
-        req=None,
+        argmap: ArgMap,
+        req: typing.Optional[Request] = None,
         *,
-        location=None,
-        unknown=_UNKNOWN_DEFAULT_PARAM,
-        as_kwargs=False,
-        validate=None,
-        error_status_code=None,
-        error_headers=None
-    ):
+        location: typing.Optional[str] = None,
+        unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
+        as_kwargs: bool = False,
+        validate: ValidateArg = None,
+        error_status_code: typing.Optional[int] = None,
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+    ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -428,7 +465,7 @@ class Parser:
         kwargs["as_kwargs"] = True
         return self.use_args(*args, **kwargs)
 
-    def location_loader(self, name):
+    def location_loader(self, name: str):
         """Decorator that registers a function for loading a request location.
         The wrapped function receives a schema and a request.
 
@@ -455,7 +492,7 @@ class Parser:
 
         return decorator
 
-    def error_handler(self, func):
+    def error_handler(self, func: ErrorHandler) -> ErrorHandler:
         """Decorator that registers a custom error handling function. The
         function should receive the raised error, request object,
         `marshmallow.Schema` instance used to parse the request, error status code,
@@ -482,7 +519,13 @@ class Parser:
         self.error_callback = func
         return func
 
-    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(
+        self,
+        error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
+        req: Request,
+        *args,
+        **kwargs
+    ) -> typing.NoReturn:
         """Internal hook for overriding treatment of JSONDecodeErrors.
 
         Invoked by default `load_json` implementation.
@@ -492,7 +535,7 @@ class Parser:
         """
         raise error
 
-    def load_json(self, req, schema):
+    def load_json(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load JSON from a request object or return `missing` if no value can
         be found.
         """
@@ -510,7 +553,7 @@ class Parser:
         except UnicodeDecodeError as exc:
             return self._handle_invalid_json_error(exc, req)
 
-    def load_json_or_form(self, req, schema):
+    def load_json_or_form(self, req: Request, schema: ma.Schema):
         """Load data from a request, accepting either JSON or form-encoded
         data.
 
@@ -524,7 +567,7 @@ class Parser:
 
     # Abstract Methods
 
-    def _raw_load_json(self, req):
+    def _raw_load_json(self, req: Request):
         """Internal hook method for implementing load_json()
 
         Get a request body for feeding in to `load_json`, and parse it either
@@ -540,35 +583,43 @@ class Parser:
         """
         return missing
 
-    def load_querystring(self, req, schema):
+    def load_querystring(self, req: Request, schema: ma.Schema):
         """Load the query string of a request object or return `missing` if no
         value can be found.
         """
         return missing
 
-    def load_form(self, req, schema):
+    def load_form(self, req: Request, schema: ma.Schema):
         """Load the form data of a request object or return `missing` if no
         value can be found.
         """
         return missing
 
-    def load_headers(self, req, schema):
+    def load_headers(self, req: Request, schema: ma.Schema):
         """Load the headers or return `missing` if no value can be found."""
         return missing
 
-    def load_cookies(self, req, schema):
+    def load_cookies(self, req: Request, schema: ma.Schema):
         """Load the cookies from the request or return `missing` if no value
         can be found.
         """
         return missing
 
-    def load_files(self, req, schema):
+    def load_files(self, req: Request, schema: ma.Schema):
         """Load files from the request or return `missing` if no values can be
         found.
         """
         return missing
 
-    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
+    def handle_error(
+        self,
+        error: ValidationError,
+        req: Request,
+        schema: ma.Schema,
+        *,
+        error_status_code: int,
+        error_headers: typing.Mapping[str, str]
+    ) -> typing.NoReturn:
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
         """

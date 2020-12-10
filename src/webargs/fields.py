@@ -13,6 +13,8 @@ tells webargs where to parse the request argument from.
         "content_type": fields.Str(data_key="Content-Type", location="headers"),
     }
 """
+import typing
+
 import marshmallow as ma
 
 # Expose all fields from marshmallow.fields.
@@ -52,7 +54,7 @@ class DelimitedFieldMixin:
     >>>     pass
     """
 
-    delimiter = ","
+    delimiter: str = ","
 
     def _serialize(self, value, attr, obj):
         # serializing will start with parent-class serialization, so that we correctly
@@ -80,9 +82,14 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
     """
 
     default_error_messages = {"invalid": "Not a valid delimited list."}
-    delimiter = ","
 
-    def __init__(self, cls_or_instance, *, delimiter=None, **kwargs):
+    def __init__(
+        self,
+        cls_or_instance: typing.Union[ma.fields.Field, type],
+        *,
+        delimiter: typing.Optional[str] = None,
+        **kwargs
+    ):
         self.delimiter = delimiter or self.delimiter
         super().__init__(cls_or_instance, **kwargs)
 
@@ -99,8 +106,9 @@ class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
     """
 
     default_error_messages = {"invalid": "Not a valid delimited tuple."}
-    delimiter = ","
 
-    def __init__(self, tuple_fields, *, delimiter=None, **kwargs):
+    def __init__(
+        self, tuple_fields, *, delimiter: typing.Optional[str] = None, **kwargs
+    ):
         self.delimiter = delimiter or self.delimiter
         super().__init__(tuple_fields, **kwargs)
