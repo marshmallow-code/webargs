@@ -6,6 +6,10 @@ Changelog
 
 Features:
 
+* Add `Parser.pre_load` as a method for allowing users to modify data before
+  schema loading, but without redefining location loaders. See advanced docs on
+  `Parser pre_load` for usage information
+
 * ``unknown`` defaults to `None` for body locations (`json`, `form` and
   `json_or_form`) (:issue:`580`).
 
