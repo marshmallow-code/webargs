@@ -194,7 +194,7 @@ class Parser:
 
     def _load_location_data(
         self, *, schema: ma.Schema, req: Request, location: str
-    ) -> typing.Optional[typing.Mapping]:
+    ) -> typing.Mapping:
         """Return a dictionary-like object for the location on the given request.
 
         Needs to have the schema in hand in order to correctly handle loading
@@ -308,7 +308,9 @@ class Parser:
                 else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
-        load_kwargs = {"unknown": unknown} if unknown else {}
+        load_kwargs: typing.Dict[str, typing.Any] = (
+            {"unknown": unknown} if unknown else {}
+        )
         if req is None:
             raise ValueError("Must pass req object")
         data = None

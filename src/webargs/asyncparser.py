@@ -45,7 +45,9 @@ class AsyncParser(core.Parser):
                 else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
-        load_kwargs = {"unknown": unknown}
+        load_kwargs: typing.Dict[str, typing.Any] = (
+            {"unknown": unknown} if unknown else {}
+        )
         if req is None:
             raise ValueError("Must pass req object")
         data = None
