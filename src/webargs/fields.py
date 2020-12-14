@@ -23,7 +23,7 @@ from marshmallow.fields import *  # noqa: F40
 __all__ = ["DelimitedList"] + ma.fields.__all__
 
 
-class Nested(ma.fields.Nested):
+class Nested(ma.fields.Nested):  # type: ignore[no-redef]
     """Same as `marshmallow.fields.Nested`, except can be passed a dictionary as
     the first argument, which will be converted to a `marshmallow.Schema`.
 
@@ -56,11 +56,11 @@ class DelimitedFieldMixin:
 
     delimiter: str = ","
 
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         # serializing will start with parent-class serialization, so that we correctly
         # output lists of non-primitive types, e.g. DelimitedList(DateTime)
         return self.delimiter.join(
-            format(each) for each in super()._serialize(value, attr, obj)
+            format(each) for each in super()._serialize(value, attr, obj, **kwargs)
         )
 
     def _deserialize(self, value, attr, data, **kwargs):

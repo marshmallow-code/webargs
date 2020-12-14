@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+7.0.1 (Unreleased)
+******************
+
+Bug fixes:
+
+* Fix `DelimitedList` and `DelimitedTuple` to pass additional keyword arguments
+  through their `_serialize` methods to the child fields and fix type checking
+  on these classes. (:issue:`569`)
+  Thanks to :user:`decaz` for reporting.
+
 7.0.0 (2020-12-10)
 ******************
 

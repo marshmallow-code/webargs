@@ -25,7 +25,6 @@ Example: ::
 import typing
 
 from aiohttp import web
-from aiohttp.web import Request
 from aiohttp import web_exceptions
 from marshmallow import Schema, ValidationError, RAISE
 
@@ -35,7 +34,7 @@ from webargs.asyncparser import AsyncParser
 from webargs.multidictproxy import MultiDictProxy
 
 
-def is_json_request(req: Request) -> bool:
+def is_json_request(req) -> bool:
     content_type = req.content_type
     return core.is_json(content_type)
 
@@ -83,24 +82,24 @@ class AIOHTTPParser(AsyncParser):
         **core.Parser.__location_map__,
     )
 
-    def load_querystring(self, req: Request, schema: Schema) -> MultiDictProxy:
+    def load_querystring(self, req, schema: Schema) -> MultiDictProxy:
         """Return query params from the request as a MultiDictProxy."""
         return MultiDictProxy(req.query, schema)
 
-    async def load_form(self, req: Request, schema: Schema) -> MultiDictProxy:
+    async def load_form(self, req, schema: Schema) -> MultiDictProxy:
         """Return form values from the request as a MultiDictProxy."""
         post_data = await req.post()
         return MultiDictProxy(post_data, schema)
 
     async def load_json_or_form(
-        self, req: Request, schema: Schema
+        self, req, schema: Schema
     ) -> typing.Union[typing.Dict, MultiDictProxy]:
         data = await self.load_json(req, schema)
         if data is not core.missing:
             return data
         return await self.load_form(req, schema)
 
-    async def load_json(self, req: Request, schema: Schema) -> typing.Dict:
+    async def load_json(self, req, schema: Schema):
         """Return a parsed json payload from the request."""
         if not (req.body_exists and is_json_request(req)):
             return core.missing
@@ -113,27 +112,27 @@ class AIOHTTPParser(AsyncParser):
         except UnicodeDecodeError as exc:
             return self._handle_invalid_json_error(exc, req)
 
-    def load_headers(self, req: Request, schema: Schema) -> MultiDictProxy:
+    def load_headers(self, req, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""
         return MultiDictProxy(req.headers, schema)
 
-    def load_cookies(self, req: Request, schema: Schema) -> MultiDictProxy:
+    def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
         return MultiDictProxy(req.cookies, schema)
 
-    def load_files(self, req: Request, schema: Schema) -> typing.NoReturn:
+    def load_files(self, req, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(
             "load_files is not implemented. You may be able to use load_form for "
             "parsing upload data."
         )
 
-    def load_match_info(self, req: Request, schema: Schema) -> typing.Mapping:
+    def load_match_info(self, req, schema: Schema) -> typing.Mapping:
         """Load the request's ``match_info``."""
         return req.match_info
 
     def get_request_from_view_args(
         self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
-    ) -> Request:
+    ):
         """Get request object from a handler function or method. Used internally by
         ``use_args`` and ``use_kwargs``.
         """
@@ -152,7 +151,7 @@ class AIOHTTPParser(AsyncParser):
     def handle_error(
         self,
         error: ValidationError,
-        req: Request,
+        req,
         schema: Schema,
         *,
         error_status_code: typing.Optional[int],
@@ -176,7 +175,7 @@ class AIOHTTPParser(AsyncParser):
     def _handle_invalid_json_error(
         self,
         error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
-        req: Request,
+        req,
         *args,
         **kwargs
     ) -> typing.NoReturn:
