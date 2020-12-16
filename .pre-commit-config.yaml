@@ -25,3 +25,4 @@ repos:
   - id: mypy
     language_version: python3
     files: ^src/webargs/
+    additional_dependencies: ["marshmallow>=3,<4"]
