@@ -180,7 +180,7 @@ For example,
     # so EXCLUDE will be used
     @app.route("/", methods=["GET"])
     @parser.use_args({"foo": fields.Int()}, location="query")
-    def get(self, args):
+    def get(args):
         return f"foo x 2 = {args['foo'] * 2}"
 
 
@@ -188,7 +188,7 @@ For example,
     # so no value will be passed for `unknown`
     @app.route("/", methods=["POST"])
     @parser.use_args({"foo": fields.Int(), "bar": fields.Int()}, location="json")
-    def post(self, args):
+    def post(args):
         return f"foo x bar = {args['foo'] * args['bar']}"
 
 
@@ -205,7 +205,7 @@ precedence over these defaults, as in
     # effect and `INCLUDE` will always be used
     @app.route("/", methods=["POST"])
     @parser.use_args({"foo": fields.Int(), "bar": fields.Int()}, location="json")
-    def post(self, args):
+    def post(args):
         unexpected_args = [k for k in args.keys() if k not in ("foo", "bar")]
         return f"foo x bar = {args['foo'] * args['bar']}; unexpected args={unexpected_args}"
 
@@ -237,7 +237,7 @@ If you wish to use the value of `unknown` specified by a schema, simply pass
     # as a result, the schema's behavior (EXCLUDE) is used
     @app.route("/", methods=["POST"])
     @use_args(RectangleSchema(), location="json", unknown=None)
-    def get(self, args):
+    def get(args):
         return f"area = {args['length'] * args['width']}"
 
 
@@ -275,7 +275,7 @@ you should use `use_args <webargs.core.Parser.use_args>` instead.
 
 
     @use_args(RectangleSchema)
-    def post(self, rect: Rectangle):
+    def post(rect: Rectangle):
         return f"Area: {rect.length * rect.width}"
 
 Packages such as  `marshmallow-sqlalchemy <https://github.com/marshmallow-code/marshmallow-sqlalchemy>`_ and `marshmallow-dataclass <https://github.com/lovasoa/marshmallow_dataclass>`_ generate schemas that deserialize to non-dictionary objects.
