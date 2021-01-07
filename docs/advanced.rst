@@ -152,8 +152,8 @@ Default `unknown`
 +++++++++++++++++
 
 By default, webargs will pass `unknown=marshmallow.EXCLUDE` except when the
-location is `json`, `form`, `json_or_form`, `path`, or `path`. In those cases,
-it uses `unknown=marshmallow.RAISE` instead.
+location is `json`, `form`, `json_or_form`, or `path`. In those cases, it uses
+`unknown=marshmallow.RAISE` instead.
 
 You can change these defaults by overriding `DEFAULT_UNKNOWN_BY_LOCATION`.
 This is a mapping of locations to values to pass.
