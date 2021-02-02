@@ -1032,6 +1032,72 @@ def test_type_conversion_with_multiple_required(web_request, parser):
         parser.parse(args, web_request)
 
 
+@pytest.mark.parametrize("input_dict", multidicts)
+@pytest.mark.parametrize(
+    "setting",
+    ["is_multiple_true", "is_multiple_false", "is_multiple_notset", "list_field"],
+)
+def test_is_multiple_detection(web_request, parser, input_dict, setting):
+    # define a custom List-like type which deserializes string lists
+    str_instance = fields.String()
+
+    # this custom class "multiplexes" in that it can be given a single value or
+    # list of values -- a single value is treated as a string, and a list of
+    # values is treated as a list of strings
+    class CustomMultiplexingField(fields.Field):
+        def _deserialize(self, value, attr, data, **kwargs):
+            if isinstance(value, str):
+                return str_instance.deserialize(value, **kwargs)
+            return [str_instance.deserialize(v, **kwargs) for v in value]
+
+        def _serialize(self, value, attr, data, **kwargs):
+            if isinstance(value, str):
+                return str_instance._serialize(value, **kwargs)
+            return [str_instance._serialize(v, **kwargs) for v in value]
+
+    class CustomMultipleField(CustomMultiplexingField):
+        is_multiple = True
+
+    class CustomNonMultipleField(CustomMultiplexingField):
+        is_multiple = False
+
+    # the request's query params are the input multidict
+    web_request.query = input_dict
+
+    # case 1: is_multiple=True
+    if setting == "is_multiple_true":
+        # the multidict should unpack to a list of strings
+        #
+        # order is not necessarily guaranteed by the multidict implementations, but
+        # both values must be present
+        args = {"foos": CustomMultipleField()}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in (["a", "b"], ["b", "a"])
+    # case 2: is_multiple=False
+    elif setting == "is_multiple_false":
+        # the multidict should unpack to a string
+        #
+        # either value may be returned, depending on the multidict implementation,
+        # but not both
+        args = {"foos": CustomNonMultipleField()}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in ("a", "b")
+    # case 3: is_multiple is not set
+    elif setting == "is_multiple_notset":
+        # this should be the same as is_multiple=False
+        args = {"foos": CustomMultiplexingField()}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in ("a", "b")
+    # case 4: the field is a List (special case)
+    elif setting == "list_field":
+        # this should behave like the is_multiple=True case
+        args = {"foos": fields.List(fields.Str())}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in (["a", "b"], ["b", "a"])
+    else:
+        raise NotImplementedError
+
+
 def test_validation_errors_in_validator_are_passed_to_handle_error(parser, web_request):
     def validate(value):
         raise ValidationError("Something went wrong.")

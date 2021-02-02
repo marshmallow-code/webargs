@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+7.1.0 (Unreleased)
+******************
+
+Features:
+
+* Detection of fields as "multi-value" for unpacking lists from multi-dict
+  types is now extensible with the `is_multiple` attribute. If a field sets
+  `is_multiple = True` it will be detected as a multi-value field.
+  (:issue:`563`)
+
+* If `is_multiple` is not set or is set to `None`, webargs will check if the
+  field is an instance of `List`.
+
 7.0.1 (2020-12-14)
 ******************
 
