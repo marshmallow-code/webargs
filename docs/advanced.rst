@@ -110,7 +110,7 @@ When you need more flexibility in defining input schemas, you can pass a marshma
 
     @use_args(UserSchema())
     def profile_view(args):
-        username = args["userame"]
+        username = args["username"]
         # ...
 
 
