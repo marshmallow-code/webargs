@@ -22,7 +22,7 @@ EXTRAS_REQUIRE = {
     "lint": [
         "mypy==0.812",
         "flake8==3.8.4",
-        "flake8-bugbear==20.11.1",
+        "flake8-bugbear==21.3.1",
         "pre-commit~=2.4",
     ],
     "docs": ["Sphinx==3.5.1", "sphinx-issues==1.2.0", "sphinx-typlog-theme==0.8.0"]
