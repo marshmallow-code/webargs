@@ -35,8 +35,8 @@ T = typing.TypeVar("T")
 # a set of fields which are known to satisfy the `is_multiple` criteria, but
 # which come from marshmallow and therefore don't know about webargs (and
 # do not set `is_multiple=True`)
-# TODO: should `ma.fields.Tuple` be added here?
-KNOWN_MULTI_FIELDS: typing.Tuple[typing.Type, ...] = (ma.fields.List,)
+# TODO: `ma.fields.Tuple` should be added here in v8.0
+KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List]
 
 
 # a value used as the default for arguments, so that when `None` is passed, it
@@ -68,7 +68,7 @@ def is_multiple(field: ma.fields.Field) -> bool:
     is_multiple_attr = getattr(field, "is_multiple", None)
     if is_multiple_attr is not None:
         return is_multiple_attr
-    return isinstance(field, KNOWN_MULTI_FIELDS)
+    return isinstance(field, tuple(KNOWN_MULTI_FIELDS))
 
 
 def get_mimetype(content_type: str) -> str:
