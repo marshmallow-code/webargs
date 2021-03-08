@@ -18,7 +18,6 @@ Example usage: ::
             return HttpResponse('Hello ' + args['name'])
 """
 from webargs import core
-from webargs.multidictproxy import MultiDictProxy
 
 
 def is_json_request(req):
@@ -48,11 +47,11 @@ class DjangoParser(core.Parser):
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.GET, schema)
+        return self._makeproxy(req.GET, schema)
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.POST, schema)
+        return self._makeproxy(req.POST, schema)
 
     def load_cookies(self, req, schema):
         """Return cookies from the request."""
@@ -66,7 +65,7 @@ class DjangoParser(core.Parser):
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.FILES, schema)
+        return self._makeproxy(req.FILES, schema)
 
     def get_request_from_view_args(self, view, args, kwargs):
         # The first argument is either `self` or `request`

@@ -14,6 +14,12 @@ Features:
 * If `is_multiple` is not set or is set to `None`, webargs will check if the
   field is an instance of `List`.
 
+* A new attribute on `Parser` objects, ``Parser.KNOWN_MULTI_FIELDS`` can be
+  used to set fields which should be detected as ``is_multiple=True`` even when
+  the attribute is not set.
+
+See docs on "Multi-Field Detection" for more details.
+
 7.0.1 (2020-12-14)
 ******************
 

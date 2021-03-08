@@ -84,12 +84,12 @@ class AIOHTTPParser(AsyncParser):
 
     def load_querystring(self, req, schema: Schema) -> MultiDictProxy:
         """Return query params from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.query, schema)
+        return self._makeproxy(req.query, schema)
 
     async def load_form(self, req, schema: Schema) -> MultiDictProxy:
         """Return form values from the request as a MultiDictProxy."""
         post_data = await req.post()
-        return MultiDictProxy(post_data, schema)
+        return self._makeproxy(post_data, schema)
 
     async def load_json_or_form(
         self, req, schema: Schema
@@ -114,11 +114,11 @@ class AIOHTTPParser(AsyncParser):
 
     def load_headers(self, req, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.headers, schema)
+        return self._makeproxy(req.headers, schema)
 
     def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.cookies, schema)
+        return self._makeproxy(req.cookies, schema)
 
     def load_files(self, req, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(

@@ -1035,7 +1035,13 @@ def test_type_conversion_with_multiple_required(web_request, parser):
 @pytest.mark.parametrize("input_dict", multidicts)
 @pytest.mark.parametrize(
     "setting",
-    ["is_multiple_true", "is_multiple_false", "is_multiple_notset", "list_field"],
+    [
+        "is_multiple_true",
+        "is_multiple_false",
+        "is_multiple_notset",
+        "list_field",
+        "added_to_known",
+    ],
 )
 def test_is_multiple_detection(web_request, parser, input_dict, setting):
     # define a custom List-like type which deserializes string lists
@@ -1094,6 +1100,13 @@ def test_is_multiple_detection(web_request, parser, input_dict, setting):
         args = {"foos": fields.List(fields.Str())}
         result = parser.parse(args, web_request, location="query")
         assert result["foos"] in (["a", "b"], ["b", "a"])
+    elif setting == "added_to_known":
+        # if it's included in the known multifields and is_multiple is not set, behave
+        # like is_multiple=True
+        parser.KNOWN_MULTI_FIELDS.append(CustomMultiplexingField)
+        args = {"foos": CustomMultiplexingField()}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in ("a", "b")
     else:
         raise NotImplementedError
 

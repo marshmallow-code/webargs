@@ -493,6 +493,91 @@ For example, you might implement JSON PATCH according to `RFC 6902 <https://tool
         """
         # ...
 
+Multi-Field Detection
+---------------------
+
+If a ``List`` field is used to parse data from a location like query parameters --
+where one or multiple values can be passed for a single parameter name -- then
+webargs will automatically treat that field as a list and parse multiple values
+if present.
+
+To implement this behavior, webargs will examine schemas for ``marshmallow.fields.List``
+fields. ``List`` fields get unpacked to list values when data is loaded, and
+other fields do not. This also applies fields which inherit from ``List``.
+
+.. note::
+
+    In webargs v8, ``Tuple`` will be treated this way as well, in addition to ``List``.
+
+What if you have a list which should be treated as a "multi-field" but which
+does not inherit from ``List``? webargs offers two solutions.
+You can add the custom attribute `is_multiple=True` to your field or you
+can add your class to your parser's list of `KNOWN_MULTI_FIELDS`.
+
+First, let's define a "multiplexing field" which takes a string or list of
+strings to serve as an example:
+
+.. code-block:: python
+
+    # a custom field class which can accept values like List(String()) or String()
+    str_instance = fields.String()
+
+
+    class CustomMultiplexingField(fields.Field):
+        def _deserialize(self, value, attr, data, **kwargs):
+            if isinstance(value, str):
+                return str_instance.deserialize(value, **kwargs)
+            return [str_instance.deserialize(v, **kwargs) for v in value]
+
+        def _serialize(self, value, attr, data, **kwargs):
+            if isinstance(value, str):
+                return str_instance._serialize(value, **kwargs)
+            return [str_instance._serialize(v, **kwargs) for v in value]
+
+
+If you control the definition of ``CustomMultiplexingField``, you can just add
+``is_multiple=True`` to it:
+
+.. code-block:: python
+
+    # option 1: define the field with is_multiple = True
+    from webargs.flaskparser import parser
+
+
+    class CustomMultiplexingField(fields.Field):
+        is_multiple = True  # <----- this marks this as a multi-field
+
+        ...  # as above
+
+If you don't control the definition of ``CustomMultiplexingField``, for example
+because it comes from a library, you can add it to the list of known
+multifields:
+
+.. code-block:: python
+
+    # option 2: add the field to the parer's list of multi-fields
+    class MyParser(FlaskParser):
+        KNOWN_MULTI_FIELDS = list(FlaskParser.KNOWN_MULTI_FIELDS) + [
+            CustomMultiplexingField
+        ]
+
+
+    parser = MyParser()
+
+In either case, the end result is that you can use the multifield and it will
+be detected as a list when unpacking query string data:
+
+.. code-block:: python
+
+    # gracefully handles
+    #   ...?foo=a
+    #   ...?foo=a&foo=b
+    # and treats them as ["a"] and ["a", "b"] respectively
+    @parser.use_args({"foo": CustomMultiplexingField()}, location="query")
+    def show_foos(foo):
+        ...
+
+
 Mixing Locations
 ----------------
 

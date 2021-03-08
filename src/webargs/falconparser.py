@@ -6,7 +6,6 @@ from falcon.util.uri import parse_query_string
 import marshmallow as ma
 
 from webargs import core
-from webargs.multidictproxy import MultiDictProxy
 
 HTTP_422 = "422 Unprocessable Entity"
 
@@ -97,7 +96,7 @@ class FalconParser(core.Parser):
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.params, schema)
+        return self._makeproxy(req.params, schema)
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy
@@ -109,7 +108,7 @@ class FalconParser(core.Parser):
         form = parse_form_body(req)
         if form is core.missing:
             return form
-        return MultiDictProxy(form, schema)
+        return self._makeproxy(form, schema)
 
     def load_media(self, req, schema):
         """Return data unpacked and parsed by one of Falcon's media handlers.
