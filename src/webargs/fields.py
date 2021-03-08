@@ -55,6 +55,8 @@ class DelimitedFieldMixin:
     """
 
     delimiter: str = ","
+    # delimited fields set is_multiple=False for webargs.core.is_multiple
+    is_multiple: bool = False
 
     def _serialize(self, value, attr, obj, **kwargs):
         # serializing will start with parent-class serialization, so that we correctly

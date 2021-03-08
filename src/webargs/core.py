@@ -8,8 +8,6 @@ import marshmallow as ma
 from marshmallow import ValidationError
 from marshmallow.utils import missing
 
-from webargs.fields import DelimitedList
-
 logger = logging.getLogger(__name__)
 
 
@@ -33,6 +31,12 @@ CallableList = typing.List[typing.Callable]
 ErrorHandler = typing.Callable[..., typing.NoReturn]
 # generic type var with no particular meaning
 T = typing.TypeVar("T")
+
+# a set of fields which are known to satisfy the `is_multiple` criteria, but
+# which come from marshmallow and therefore don't know about webargs (and
+# do not set `is_multiple=True`)
+# TODO: `ma.fields.Tuple` should be added here in v8.0
+KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List]
 
 
 # a value used as the default for arguments, so that when `None` is passed, it
@@ -59,7 +63,12 @@ def _callable_or_raise(obj: typing.Optional[T]) -> typing.Optional[T]:
 
 def is_multiple(field: ma.fields.Field) -> bool:
     """Return whether or not `field` handles repeated/multi-value arguments."""
-    return isinstance(field, ma.fields.List) and not isinstance(field, DelimitedList)
+    # fields which set `is_multiple = True/False` will have the value selected,
+    # otherwise, we check for explicit criteria
+    is_multiple_attr = getattr(field, "is_multiple", None)
+    if is_multiple_attr is not None:
+        return is_multiple_attr
+    return isinstance(field, tuple(KNOWN_MULTI_FIELDS))
 
 
 def get_mimetype(content_type: str) -> str:
