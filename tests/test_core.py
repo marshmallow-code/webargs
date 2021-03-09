@@ -1044,22 +1044,25 @@ def test_type_conversion_with_multiple_required(web_request, parser):
     ],
 )
 def test_is_multiple_detection(web_request, parser, input_dict, setting):
-    # define a custom List-like type which deserializes string lists
-    str_instance = fields.String()
-
     # this custom class "multiplexes" in that it can be given a single value or
     # list of values -- a single value is treated as a string, and a list of
     # values is treated as a list of strings
-    class CustomMultiplexingField(fields.Field):
+    class CustomMultiplexingField(fields.String):
         def _deserialize(self, value, attr, data, **kwargs):
             if isinstance(value, str):
-                return str_instance.deserialize(value, **kwargs)
-            return [str_instance.deserialize(v, **kwargs) for v in value]
+                return super()._deserialize(value, attr, data, **kwargs)
+            return [
+                self._deserialize(v, attr, data, **kwargs)
+                for v in value
+                if isinstance(v, str)
+            ]
 
-        def _serialize(self, value, attr, data, **kwargs):
+        def _serialize(self, value, attr, **kwargs):
             if isinstance(value, str):
-                return str_instance._serialize(value, **kwargs)
-            return [str_instance._serialize(v, **kwargs) for v in value]
+                return super()._serialize(value, attr, **kwargs)
+            return [
+                self._serialize(v, attr, **kwargs) for v in value if isinstance(v, str)
+            ]
 
     class CustomMultipleField(CustomMultiplexingField):
         is_multiple = True

@@ -503,7 +503,7 @@ if present.
 
 To implement this behavior, webargs will examine schemas for ``marshmallow.fields.List``
 fields. ``List`` fields get unpacked to list values when data is loaded, and
-other fields do not. This also applies fields which inherit from ``List``.
+other fields do not. This also applies to fields which inherit from ``List``.
 
 .. note::
 
@@ -520,19 +520,20 @@ strings to serve as an example:
 .. code-block:: python
 
     # a custom field class which can accept values like List(String()) or String()
-    str_instance = fields.String()
-
-
-    class CustomMultiplexingField(fields.Field):
+    class CustomMultiplexingField(fields.String):
         def _deserialize(self, value, attr, data, **kwargs):
             if isinstance(value, str):
-                return str_instance.deserialize(value, **kwargs)
-            return [str_instance.deserialize(v, **kwargs) for v in value]
+                return super()._deserialize(value, attr, data, **kwargs)
+            return [
+                self._deserialize(v, attr, data, **kwargs)
+                for v in value
+                if isinstance(v, str)
+            ]
 
-        def _serialize(self, value, attr, data, **kwargs):
+        def _serialize(self, value, attr, **kwargs):
             if isinstance(value, str):
-                return str_instance._serialize(value, **kwargs)
-            return [str_instance._serialize(v, **kwargs) for v in value]
+                return super()._serialize(value, attr, **kwargs)
+            return [self._serialize(v, attr, **kwargs) for v in value if isinstance(v, str)]
 
 
 If you control the definition of ``CustomMultiplexingField``, you can just add
