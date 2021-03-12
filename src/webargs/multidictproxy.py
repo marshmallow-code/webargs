@@ -18,7 +18,10 @@ class MultiDictProxy(Mapping):
         self,
         multidict,
         schema: ma.Schema,
-        known_multi_fields: typing.Tuple[typing.Type, ...] = (ma.fields.List,),
+        known_multi_fields: typing.Tuple[typing.Type, ...] = (
+            ma.fields.List,
+            ma.fields.Tuple,
+        ),
     ):
         self.data = multidict
         self.known_multi_fields = known_multi_fields

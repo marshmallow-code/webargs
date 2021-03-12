@@ -35,7 +35,7 @@ class MockRequestParser(Parser):
     """A minimal parser implementation that parses mock requests."""
 
     def load_querystring(self, req, schema):
-        return MultiDictProxy(req.query, schema)
+        return self._makeproxy(req.query, schema)
 
     def load_json(self, req, schema):
         return req.json
@@ -1040,6 +1040,7 @@ def test_type_conversion_with_multiple_required(web_request, parser):
         "is_multiple_false",
         "is_multiple_notset",
         "list_field",
+        "tuple_field",
         "added_to_known",
     ],
 )
@@ -1103,13 +1104,20 @@ def test_is_multiple_detection(web_request, parser, input_dict, setting):
         args = {"foos": fields.List(fields.Str())}
         result = parser.parse(args, web_request, location="query")
         assert result["foos"] in (["a", "b"], ["b", "a"])
+    # case 5: the field is a Tuple (special case)
+    elif setting == "tuple_field":
+        # this should behave like the is_multiple=True case and produce a tuple
+        args = {"foos": fields.Tuple((fields.Str, fields.Str))}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in (("a", "b"), ("b", "a"))
+    # case 6: the field is custom, but added to the known fields of the parser
     elif setting == "added_to_known":
         # if it's included in the known multifields and is_multiple is not set, behave
         # like is_multiple=True
         parser.KNOWN_MULTI_FIELDS.append(CustomMultiplexingField)
         args = {"foos": CustomMultiplexingField()}
         result = parser.parse(args, web_request, location="query")
-        assert result["foos"] in ("a", "b")
+        assert result["foos"] in (["a", "b"], ["b", "a"])
     else:
         raise NotImplementedError
 

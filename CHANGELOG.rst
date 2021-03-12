@@ -1,20 +1,20 @@
 Changelog
 ---------
 
-7.1.0 (Unreleased)
+8.0.0 (Unreleased)
 ******************
 
 Features:
 
 * Detection of fields as "multi-value" for unpacking lists from multi-dict
-  types is now extensible with the `is_multiple` attribute. If a field sets
-  `is_multiple = True` it will be detected as a multi-value field.
+  types is now extensible with the ``is_multiple`` attribute. If a field sets
+  ``is_multiple = True`` it will be detected as a multi-value field.
   (:issue:`563`)
 
-* If `is_multiple` is not set or is set to `None`, webargs will check if the
-  field is an instance of `List`.
+* If ``is_multiple`` is not set or is set to ``None``, webargs will check if the
+  field is an instance of ``List`` or ``Tuple``.
 
-* A new attribute on `Parser` objects, ``Parser.KNOWN_MULTI_FIELDS`` can be
+* A new attribute on ``Parser`` objects, ``Parser.KNOWN_MULTI_FIELDS`` can be
   used to set fields which should be detected as ``is_multiple=True`` even when
   the attribute is not set.
 
