@@ -25,6 +25,7 @@ Example usage: ::
         server.serve_forever()
 """
 import functools
+import typing
 from collections.abc import Mapping
 
 from webob.multidict import MultiDict
@@ -43,7 +44,7 @@ def is_json_request(req):
 class PyramidParser(core.Parser):
     """Pyramid request argument parser."""
 
-    DEFAULT_UNKNOWN_BY_LOCATION = {
+    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, typing.Optional[str]] = {
         "matchdict": ma.RAISE,
         "path": ma.RAISE,
         **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,

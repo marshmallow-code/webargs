@@ -126,10 +126,10 @@ class Parser:
     DEFAULT_LOCATION: str = "json"
     #: Default value to use for 'unknown' on schema load
     #  on a per-location basis
-    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, str] = {
-        "json": ma.RAISE,
-        "form": ma.RAISE,
-        "json_or_form": ma.RAISE,
+    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, typing.Optional[str]] = {
+        "json": None,
+        "form": None,
+        "json_or_form": None,
         "querystring": ma.EXCLUDE,
         "query": ma.EXCLUDE,
         "headers": ma.EXCLUDE,
