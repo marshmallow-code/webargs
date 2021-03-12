@@ -8,12 +8,13 @@ import marshmallow as ma
 from marshmallow import ValidationError
 from marshmallow.utils import missing
 
+from webargs.multidictproxy import MultiDictProxy
+
 logger = logging.getLogger(__name__)
 
 
 __all__ = [
     "ValidationError",
-    "is_multiple",
     "Parser",
     "missing",
     "parse_json",
@@ -31,12 +32,6 @@ CallableList = typing.List[typing.Callable]
 ErrorHandler = typing.Callable[..., typing.NoReturn]
 # generic type var with no particular meaning
 T = typing.TypeVar("T")
-
-# a set of fields which are known to satisfy the `is_multiple` criteria, but
-# which come from marshmallow and therefore don't know about webargs (and
-# do not set `is_multiple=True`)
-# TODO: `ma.fields.Tuple` should be added here in v8.0
-KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List]
 
 
 # a value used as the default for arguments, so that when `None` is passed, it
@@ -59,16 +54,6 @@ def _callable_or_raise(obj: typing.Optional[T]) -> typing.Optional[T]:
     if obj and not _iscallable(obj):
         raise ValueError(f"{obj!r} is not callable.")
     return obj
-
-
-def is_multiple(field: ma.fields.Field) -> bool:
-    """Return whether or not `field` handles repeated/multi-value arguments."""
-    # fields which set `is_multiple = True/False` will have the value selected,
-    # otherwise, we check for explicit criteria
-    is_multiple_attr = getattr(field, "is_multiple", None)
-    if is_multiple_attr is not None:
-        return is_multiple_attr
-    return isinstance(field, tuple(KNOWN_MULTI_FIELDS))
 
 
 def get_mimetype(content_type: str) -> str:
@@ -157,6 +142,9 @@ class Parser:
     DEFAULT_VALIDATION_STATUS: int = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
     DEFAULT_VALIDATION_MESSAGE: str = "Invalid value."
+    # TODO: add ma.fields.Tuple in v8.0
+    #: field types which should always be treated as if they set `is_multiple=True`
+    KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List]
 
     #: Maps location => method name
     __location_map__: typing.Dict[str, typing.Union[str, typing.Callable]] = {
@@ -184,6 +172,12 @@ class Parser:
         )
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
         self.unknown = unknown
+
+    def _makeproxy(
+        self, multidict, schema: ma.Schema, cls: typing.Type = MultiDictProxy
+    ):
+        """Create a multidict proxy object with options from the current parser"""
+        return cls(multidict, schema, known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS))
 
     def _get_loader(self, location: str) -> typing.Callable:
         """Get the loader function for the given location.

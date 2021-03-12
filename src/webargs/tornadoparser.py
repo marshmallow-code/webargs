@@ -97,25 +97,31 @@ class TornadoParser(core.Parser):
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return WebArgsTornadoMultiDictProxy(req.query_arguments, schema)
+        return self._makeproxy(
+            req.query_arguments, schema, cls=WebArgsTornadoMultiDictProxy
+        )
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
-        return WebArgsTornadoMultiDictProxy(req.body_arguments, schema)
+        return self._makeproxy(
+            req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
+        )
 
     def load_headers(self, req, schema):
         """Return headers from the request as a MultiDictProxy."""
-        return WebArgsTornadoMultiDictProxy(req.headers, schema)
+        return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
 
     def load_cookies(self, req, schema):
         """Return cookies from the request as a MultiDictProxy."""
         # use the specialized subclass specifically for handling Tornado
         # cookies
-        return WebArgsTornadoCookiesMultiDictProxy(req.cookies, schema)
+        return self._makeproxy(
+            req.cookies, schema, cls=WebArgsTornadoCookiesMultiDictProxy
+        )
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
-        return WebArgsTornadoMultiDictProxy(req.files, schema)
+        return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy)
 
     def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`

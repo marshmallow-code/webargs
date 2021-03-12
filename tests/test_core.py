@@ -1035,25 +1035,34 @@ def test_type_conversion_with_multiple_required(web_request, parser):
 @pytest.mark.parametrize("input_dict", multidicts)
 @pytest.mark.parametrize(
     "setting",
-    ["is_multiple_true", "is_multiple_false", "is_multiple_notset", "list_field"],
+    [
+        "is_multiple_true",
+        "is_multiple_false",
+        "is_multiple_notset",
+        "list_field",
+        "added_to_known",
+    ],
 )
 def test_is_multiple_detection(web_request, parser, input_dict, setting):
-    # define a custom List-like type which deserializes string lists
-    str_instance = fields.String()
-
     # this custom class "multiplexes" in that it can be given a single value or
     # list of values -- a single value is treated as a string, and a list of
     # values is treated as a list of strings
-    class CustomMultiplexingField(fields.Field):
+    class CustomMultiplexingField(fields.String):
         def _deserialize(self, value, attr, data, **kwargs):
             if isinstance(value, str):
-                return str_instance.deserialize(value, **kwargs)
-            return [str_instance.deserialize(v, **kwargs) for v in value]
+                return super()._deserialize(value, attr, data, **kwargs)
+            return [
+                self._deserialize(v, attr, data, **kwargs)
+                for v in value
+                if isinstance(v, str)
+            ]
 
-        def _serialize(self, value, attr, data, **kwargs):
+        def _serialize(self, value, attr, **kwargs):
             if isinstance(value, str):
-                return str_instance._serialize(value, **kwargs)
-            return [str_instance._serialize(v, **kwargs) for v in value]
+                return super()._serialize(value, attr, **kwargs)
+            return [
+                self._serialize(v, attr, **kwargs) for v in value if isinstance(v, str)
+            ]
 
     class CustomMultipleField(CustomMultiplexingField):
         is_multiple = True
@@ -1094,6 +1103,13 @@ def test_is_multiple_detection(web_request, parser, input_dict, setting):
         args = {"foos": fields.List(fields.Str())}
         result = parser.parse(args, web_request, location="query")
         assert result["foos"] in (["a", "b"], ["b", "a"])
+    elif setting == "added_to_known":
+        # if it's included in the known multifields and is_multiple is not set, behave
+        # like is_multiple=True
+        parser.KNOWN_MULTI_FIELDS.append(CustomMultiplexingField)
+        args = {"foos": CustomMultiplexingField()}
+        result = parser.parse(args, web_request, location="query")
+        assert result["foos"] in ("a", "b")
     else:
         raise NotImplementedError
 

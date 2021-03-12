@@ -1,8 +1,7 @@
 from collections.abc import Mapping
+import typing
 
 import marshmallow as ma
-
-from webargs.core import missing, is_multiple
 
 
 class MultiDictProxy(Mapping):
@@ -15,22 +14,36 @@ class MultiDictProxy(Mapping):
     In all other cases, __getitem__ proxies directly to the input multidict.
     """
 
-    def __init__(self, multidict, schema: ma.Schema):
+    def __init__(
+        self,
+        multidict,
+        schema: ma.Schema,
+        known_multi_fields: typing.Tuple[typing.Type, ...] = (ma.fields.List,),
+    ):
         self.data = multidict
+        self.known_multi_fields = known_multi_fields
         self.multiple_keys = self._collect_multiple_keys(schema)
 
-    @staticmethod
-    def _collect_multiple_keys(schema: ma.Schema):
+    def _is_multiple(self, field: ma.fields.Field) -> bool:
+        """Return whether or not `field` handles repeated/multi-value arguments."""
+        # fields which set `is_multiple = True/False` will have the value selected,
+        # otherwise, we check for explicit criteria
+        is_multiple_attr = getattr(field, "is_multiple", None)
+        if is_multiple_attr is not None:
+            return is_multiple_attr
+        return isinstance(field, self.known_multi_fields)
+
+    def _collect_multiple_keys(self, schema: ma.Schema):
         result = set()
         for name, field in schema.fields.items():
-            if not is_multiple(field):
+            if not self._is_multiple(field):
                 continue
             result.add(field.data_key if field.data_key is not None else name)
         return result
 
     def __getitem__(self, key):
-        val = self.data.get(key, missing)
-        if val is missing or key not in self.multiple_keys:
+        val = self.data.get(key, ma.missing)
+        if val is ma.missing or key not in self.multiple_keys:
             return val
         if hasattr(self.data, "getlist"):
             return self.data.getlist(key)

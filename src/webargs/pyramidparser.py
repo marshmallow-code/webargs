@@ -34,7 +34,6 @@ import marshmallow as ma
 
 from webargs import core
 from webargs.core import json
-from webargs.multidictproxy import MultiDictProxy
 
 
 def is_json_request(req):
@@ -67,28 +66,28 @@ class PyramidParser(core.Parser):
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.GET, schema)
+        return self._makeproxy(req.GET, schema)
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.POST, schema)
+        return self._makeproxy(req.POST, schema)
 
     def load_cookies(self, req, schema):
         """Return cookies from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.cookies, schema)
+        return self._makeproxy(req.cookies, schema)
 
     def load_headers(self, req, schema):
         """Return headers from the request as a MultiDictProxy."""
-        return MultiDictProxy(req.headers, schema)
+        return self._makeproxy(req.headers, schema)
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
-        return MultiDictProxy(MultiDict(files), schema)
+        return self._makeproxy(MultiDict(files), schema)
 
     def load_matchdict(self, req, schema):
         """Return the request's ``matchdict`` as a MultiDictProxy."""
-        return MultiDictProxy(req.matchdict, schema)
+        return self._makeproxy(req.matchdict, schema)
 
     def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current HTTP request and
