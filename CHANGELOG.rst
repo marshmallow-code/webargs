@@ -1,10 +1,13 @@
 Changelog
 ---------
 
-7.1.0 (Unreleased)
+8.0.0 (Unreleased)
 ******************
 
 Features:
+
+* ``unknown`` defaults to `None` for body locations (`json`, `form` and
+  `json_or_form`) (:issue:`580`).
 
 * Detection of fields as "multi-value" for unpacking lists from multi-dict
   types is now extensible with the `is_multiple` attribute. If a field sets
