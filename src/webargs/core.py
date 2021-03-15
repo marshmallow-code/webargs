@@ -142,9 +142,8 @@ class Parser:
     DEFAULT_VALIDATION_STATUS: int = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
     DEFAULT_VALIDATION_MESSAGE: str = "Invalid value."
-    # TODO: add ma.fields.Tuple in v8.0
     #: field types which should always be treated as if they set `is_multiple=True`
-    KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List]
+    KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List, ma.fields.Tuple]
 
     #: Maps location => method name
     __location_map__: typing.Dict[str, typing.Union[str, typing.Callable]] = {
