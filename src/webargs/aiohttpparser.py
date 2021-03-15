@@ -71,7 +71,7 @@ del _find_exceptions
 class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
-    DEFAULT_UNKNOWN_BY_LOCATION = {
+    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, typing.Optional[str]] = {
         "match_info": RAISE,
         "path": RAISE,
         **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,
