@@ -1,4 +1,5 @@
 import datetime
+import typing
 from unittest import mock
 
 import pytest
@@ -36,6 +37,9 @@ class MockRequestParser(Parser):
 
     def load_querystring(self, req, schema):
         return self._makeproxy(req.query, schema)
+
+    def load_form(self, req, schema):
+        return MultiDictProxy(req.form, schema)
 
     def load_json(self, req, schema):
         return req.json
@@ -1224,3 +1228,84 @@ def test_custom_default_schema_class(load_json, web_request):
     p = CustomParser()
     ret = p.parse(argmap, web_request)
     assert ret == {"value": "hello world"}
+
+
+def test_parser_pre_load(web_request):
+    class CustomParser(MockRequestParser):
+        # pre-load hook to strip whitespace from query params
+        def pre_load(self, data, *, schema, req, location):
+            if location == "query":
+                return {k: v.strip() for k, v in data.items()}
+            return data
+
+    parser = CustomParser()
+
+    # mock data for both query and json
+    web_request.query = web_request.json = {"value": " hello "}
+    argmap = {"value": fields.Str()}
+
+    # data gets through for 'json' just fine
+    ret = parser.parse(argmap, web_request)
+    assert ret == {"value": " hello "}
+
+    # but for 'query', the pre_load hook changes things
+    ret = parser.parse(argmap, web_request, location="query")
+    assert ret == {"value": "hello"}
+
+
+# this test is meant to be a run of the WhitspaceStrippingFlaskParser we give
+# in the docs/advanced.rst examples for how to use pre_load
+# this helps ensure that the example code is correct
+# rather than a FlaskParser, we're working with the mock parser, but it's
+# otherwise the same
+def test_whitespace_stripping_parser_example(web_request):
+    def _strip_whitespace(value):
+        if isinstance(value, str):
+            value = value.strip()
+        elif isinstance(value, typing.Mapping):
+            return {k: _strip_whitespace(value[k]) for k in value}
+        elif isinstance(value, (list, tuple)):
+            return type(value)(map(_strip_whitespace, value))
+        return value
+
+    class WhitspaceStrippingParser(MockRequestParser):
+        def pre_load(self, location_data, *, schema, req, location):
+            if location in ("query", "form"):
+                ret = _strip_whitespace(location_data)
+                return ret
+            return location_data
+
+    parser = WhitspaceStrippingParser()
+
+    # mock data for query, form, and json
+    web_request.form = web_request.query = web_request.json = {"value": " hello "}
+    argmap = {"value": fields.Str()}
+
+    # data gets through for 'json' just fine
+    ret = parser.parse(argmap, web_request)
+    assert ret == {"value": " hello "}
+
+    # but for 'query' and 'form', the pre_load hook changes things
+    for loc in ("query", "form"):
+        ret = parser.parse(argmap, web_request, location=loc)
+        assert ret == {"value": "hello"}
+
+    # check that it applies in the case where the field is a list type
+    # applied to an argument (logic for `tuple` is effectively the same)
+    web_request.form = web_request.query = web_request.json = {
+        "ids": [" 1", "3", " 4"],
+        "values": [" foo  ", " bar"],
+    }
+    schema = Schema.from_dict(
+        {"ids": fields.List(fields.Int), "values": fields.List(fields.Str)}
+    )
+    for loc in ("query", "form"):
+        ret = parser.parse(schema, web_request, location=loc)
+        assert ret == {"ids": [1, 3, 4], "values": ["foo", "bar"]}
+
+    # json loading should also work even though the pre_load hook above
+    # doesn't strip whitespace from JSON data
+    #   - values=[" foo  ", ...]  will have whitespace preserved
+    #   - ids=[" 1", ...]  will still parse okay because "  1" is valid for fields.Int
+    ret = parser.parse(schema, web_request, location="json")
+    assert ret == {"ids": [1, 3, 4], "values": [" foo  ", " bar"]}

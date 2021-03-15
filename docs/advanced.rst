@@ -435,6 +435,50 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
             structure_dict_pair(r, k, v)
         return r
 
+Parser pre_load
+---------------
+
+Similar to ``@pre_load`` decorated hooks on marshmallow Schemas,
+:class:`Parser <webargs.core.Parser>` classes define a method,
+`pre_load <webargs.core.Parser.pre_load>` which can
+be overridden to provide per-parser transformations of data.
+The only way to make use of `pre_load <webargs.core.Parser.pre_load>` is to
+subclass a :class:`Parser <webargs.core.Parser>` and provide an
+implementation.
+
+`pre_load <webargs.core.Parser.pre_load>` is given the data fetched from a
+location, the schema which will be used, the request object, and the location
+name which was requested. For example, to define a ``FlaskParser`` which strips
+whitespace from ``form`` and ``query`` data, one could write the following:
+
+.. code-block:: python
+
+    from webargs.flaskparser import FlaskParser
+    import typing
+
+
+    def _strip_whitespace(value):
+        if isinstance(value, str):
+            value = value.strip()
+        elif isinstance(value, typing.Mapping):
+            return {k: _strip_whitespace(value[k]) for k in value}
+        elif isinstance(value, (list, tuple)):
+            return type(value)(map(_strip_whitespace, value))
+        return value
+
+
+    class WhitspaceStrippingFlaskParser(FlaskParser):
+        def pre_load(self, location_data, *, schema, req, location):
+            if location in ("query", "form"):
+                return _strip_whitespace(location_data)
+            return location_data
+
+Note that `Parser.pre_load <webargs.core.Parser.pre_load>` is run after location
+loading but before ``Schema.load`` is called. It can therefore be called on
+multiple types of mapping objects, including
+:class:`MultiDictProxy <webargs.MultiDictProxy>`, depending on what the
+location loader returns.
+
 Returning HTTP 400 Responses
 ----------------------------
 

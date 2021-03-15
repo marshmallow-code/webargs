@@ -322,7 +322,10 @@ class Parser:
             location_data = self._load_location_data(
                 schema=schema, req=req, location=location
             )
-            data = schema.load(location_data, **load_kwargs)
+            preprocessed_data = self.pre_load(
+                location_data, schema=schema, req=req, location=location
+            )
+            data = schema.load(preprocessed_data, **load_kwargs)
             self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(
@@ -522,6 +525,15 @@ class Parser:
         """
         self.error_callback = func
         return func
+
+    def pre_load(
+        self, location_data: Mapping, *, schema: ma.Schema, req: Request, location: str
+    ) -> Mapping:
+        """A method of the parser which can transform data after location
+        loading is done. By default it does nothing, but users can subclass
+        parsers and override this method.
+        """
+        return location_data
 
     def _handle_invalid_json_error(
         self,
