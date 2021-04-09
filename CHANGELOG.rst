@@ -8,24 +8,26 @@ Features:
 
 * Add `Parser.pre_load` as a method for allowing users to modify data before
   schema loading, but without redefining location loaders. See advanced docs on
-  `Parser pre_load` for usage information
+  `Parser pre_load` for usage information. (:pr:`583`)
 
-* ``unknown`` defaults to `None` for body locations (`json`, `form` and
-  `json_or_form`) (:issue:`580`).
+* *Backwards-incompatible*: ``unknown`` defaults to `None` for body locations
+  (`json`, `form` and `json_or_form`) (:issue:`580`).
 
 * Detection of fields as "multi-value" for unpacking lists from multi-dict
   types is now extensible with the ``is_multiple`` attribute. If a field sets
-  ``is_multiple = True`` it will be detected as a multi-value field.
-  (:issue:`563`)
-
-* If ``is_multiple`` is not set or is set to ``None``, webargs will check if the
-  field is an instance of ``List`` or ``Tuple``.
+  ``is_multiple = True`` it will be detected as a multi-value field. If
+  ``is_multiple`` is not set or is set to ``None``, webargs will check if the
+  field is an instance of ``List`` or ``Tuple``. (:issue:`563`)
 
 * A new attribute on ``Parser`` objects, ``Parser.KNOWN_MULTI_FIELDS`` can be
   used to set fields which should be detected as ``is_multiple=True`` even when
-  the attribute is not set.
+  the attribute is not set (:pr:`592`).
 
 See docs on "Multi-Field Detection" for more details.
+
+Bug fixes:
+
+* ``Tuple`` field now behaves as a "multiple" field (:pr:`585`).
 
 7.0.1 (2020-12-14)
 ******************
