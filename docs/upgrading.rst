@@ -3,6 +3,57 @@ Upgrading to Newer Releases
 
 This section documents migration paths to new releases.
 
+Upgrading to 8.0
+++++++++++++++++
+
+In 8.0, the default values for ``unknown`` were changed.
+When the location is set to ``json``, ``form``, or ``json_or_form``, the
+default for ``unknown`` is now ``None``. Previously, the default was ``RAISE``.
+
+Because ``RAISE`` is the default value for ``unknown`` on marshmallow schemas,
+this change only affects usage in which the following conditions are met:
+
+* A schema with ``unknown`` set to ``INCLUDE`` or ``EXCLUDE`` is passed to
+  webargs ``use_args``, ``use_kwargs``, or ``parse``
+
+* ``unknown`` is not passed explicitly to the webargs function
+
+* ``location`` is not set (default of ``json``) or is set explicitly to
+  ``json``, ``form``, or ``json_or__form``
+
+For example
+
+.. code-block:: python
+
+    import marshmallow as ma
+
+
+    class BodySchema(ma.Schema):
+        foo = ma.fields.String()
+
+        class Meta:
+            unknown = ma.EXCLUDE
+
+
+    @parser.use_args(BodySchema)
+    def foo(data):
+        ...
+
+
+In this case, under webargs 7.0 the schema ``unknown`` setting of ``EXCLUDE``
+would be ignored. Instead, ``unknown=RAISE`` would be used.
+
+In webargs 8.0, the schema ``unknown`` is used.
+
+To get the webargs 7.0 behavior (overriding the Schema ``unknown``), simply
+pass ``unknown`` to ``use_args``, as in
+
+.. code-block:: python
+
+    @parser.use_args(BodySchema, unknown=ma.RAISE)
+    def foo(data):
+        ...
+
 Upgrading to 7.0
 ++++++++++++++++
 
