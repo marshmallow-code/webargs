@@ -1,7 +1,6 @@
 import datetime as dt
 import sys
 import os
-import sphinx_typlog_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -44,17 +43,13 @@ exclude_patterns = ["_build"]
 
 # THEME
 
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme = "sphinx_typlog_theme"
-html_theme_path = [sphinx_typlog_theme.get_path()]
+html_theme = "furo"
 
 html_theme_options = {
-    "color": "#268bd2",
-    "logo_name": "webargs",
+    "light_css_variables": {"color-brand-primary": "#268bd2"},
     "description": "Declarative parsing and validation of HTTP request objects.",
-    "github_user": github_user,
-    "github_repo": github_repo,
 }
+html_logo = "_static/logo.png"
 
 html_context = {
     "tidelift_url": (
@@ -63,14 +58,15 @@ html_context = {
     ),
     "donate_url": "https://opencollective.com/marshmallow",
 }
-
 html_sidebars = {
-    "**": [
-        "logo.html",
-        "github.html",
-        "globaltoc.html",
+    "*": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
         "donate.html",
-        "searchbox.html",
         "sponsors.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
     ]
 }

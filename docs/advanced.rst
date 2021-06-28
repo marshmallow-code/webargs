@@ -149,7 +149,7 @@ You can pass `unknown=...` as a parameter to any of
     the `unknown` argument to `fields.Nested`.
 
 Default `unknown`
-+++++++++++++++++
+~~~~~~~~~~~~~~~~~
 
 By default, webargs will pass `unknown=marshmallow.EXCLUDE` except when the
 location is `json`, `form`, `json_or_form`, or `path`. In those cases, it uses
@@ -210,7 +210,7 @@ precedence over these defaults, as in
         return f"foo x bar = {args['foo'] * args['bar']}; unexpected args={unexpected_args}"
 
 Using Schema-Specfied `unknown`
-+++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you wish to use the value of `unknown` specified by a schema, simply pass
 ``unknown=None``. This will disable webargs' automatic passing of values for
@@ -330,7 +330,7 @@ Consider the following use cases:
 
 
 Reducing Boilerplate
-++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~
 
 We can reduce boilerplate and improve [re]usability with a simple helper function:
 
@@ -370,7 +370,7 @@ Custom Fields
 See the "Custom Fields" section of the marshmallow docs for a detailed guide on defining custom fields which you can pass to webargs parsers: https://marshmallow.readthedocs.io/en/latest/custom_fields.html.
 
 Using ``Method`` and ``Function`` Fields with webargs
-+++++++++++++++++++++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Using the :class:`Method <marshmallow.fields.Method>` and :class:`Function <marshmallow.fields.Function>` fields requires that you pass the ``deserialize`` parameter.
 

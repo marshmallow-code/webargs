@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+* New documentation theme with `furo`. Thanks to :user:`pradyunsg` for writing
+  furo!
+* Webargs has a new logo. Thanks to :user:`michaelizergit`! (:issue:`312`)
+
 8.0.0 (2021-04-08)
 ******************
 
