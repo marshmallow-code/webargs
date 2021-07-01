@@ -52,3 +52,4 @@ Contributors (chronological)
 * Utku Gultopu `@ugultopu <https://github.com/ugultopu>`_
 * Jason Williams `@jaswilli <https://github.com/jaswilli>`_
 * Grey Li `@greyli <https://github.com/greyli>`_
+* `@michaelizergit <https://github.com/michaelizergit>`_
