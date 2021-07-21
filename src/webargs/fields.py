@@ -69,7 +69,8 @@ class DelimitedFieldMixin:
         # attempting to deserialize from a non-string source is an error
         if not isinstance(value, (str, bytes)):
             raise self.make_error("invalid")
-        return super()._deserialize(value.split(self.delimiter), attr, data, **kwargs)
+        values = value.split(self.delimiter) if value else []
+        return super()._deserialize(values, attr, data, **kwargs)
 
 
 class DelimitedList(DelimitedFieldMixin, ma.fields.List):
