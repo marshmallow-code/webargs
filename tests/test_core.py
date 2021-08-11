@@ -873,6 +873,18 @@ def test_use_kwargs_with_arg_missing(web_request, parser):
     assert viewfunc() == {"username": "foo"}
 
 
+def test_delimited_list_empty_string(web_request, parser):
+    web_request.json = {"dates": ""}
+    schema_cls = Schema.from_dict({"dates": fields.DelimitedList(fields.Str())})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["dates"] == []
+
+    data = schema.dump(parsed)
+    assert data["dates"] == ""
+
+
 def test_delimited_list_default_delimiter(web_request, parser):
     web_request.json = {"ids": "1,2,3"}
     schema_cls = Schema.from_dict({"ids": fields.DelimitedList(fields.Int())})
