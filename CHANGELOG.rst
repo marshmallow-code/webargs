@@ -1,9 +1,23 @@
 Changelog
 ---------
 
+8.0.1 (2021-08-12)
+******************
+
+Bug fixes:
+
+* Fix "``DelimitedList`` deserializes empty string as ``['']``" (:issue:`623`).
+  Thanks :user:`TTWSchell` for reporting and for the PR.
+
+Other changes:
+
 * New documentation theme with `furo`. Thanks to :user:`pradyunsg` for writing
   furo!
 * Webargs has a new logo. Thanks to :user:`michaelizergit`! (:issue:`312`)
+* Don't build universal wheels. We don't support Python 2 anymore.
+  (:pr:`632`)
+* Make the build reproducible (:pr:`#631`).
+
 
 8.0.0 (2021-04-08)
 ******************
