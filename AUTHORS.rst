@@ -53,3 +53,4 @@ Contributors (chronological)
 * Jason Williams `@jaswilli <https://github.com/jaswilli>`_
 * Grey Li `@greyli <https://github.com/greyli>`_
 * `@michaelizergit <https://github.com/michaelizergit>`_
+* Legolas Bloom `@TTWShell <https://github.com/TTWShell>`_
