@@ -7,6 +7,7 @@ Lead
 
 * Steven Loria `@sloria <https://github.com/sloria>`_
 * Jérôme Lafréchoux `@lafrech <https://github.com/lafrech>`_
+* Stephen Rosen `@sirosen <https://github.com/sirosen>`_
 
 Contributors (chronological)
 ----------------------------
@@ -42,7 +43,6 @@ Contributors (chronological)
 * `@zhenhua32 <https://github.com/zhenhua32>`_
 * Martin Roy `@lindycoder <https://github.com/lindycoder>`_
 * Kubilay Kocak `@koobs <https://github.com/koobs>`_
-* Stephen Rosen `@sirosen <https://github.com/sirosen>`_
 * `@dodumosu <https://github.com/dodumosu>`_
 * Nate Dellinger `@Nateyo <https://github.com/Nateyo>`_
 * Karthikeyan Singaravelan `@tirkarthi <https://github.com/tirkarthi>`_
