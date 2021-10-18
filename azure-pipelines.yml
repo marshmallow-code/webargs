@@ -32,7 +32,8 @@ jobs:
       - py37
       - py38
       - py39
-      - py39-marshmallowdev
+      - py310
+      - py310-marshmallowdev
       - docs
     os: linux
 # Build wheels
