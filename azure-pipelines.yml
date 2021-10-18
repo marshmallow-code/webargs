@@ -29,9 +29,6 @@ jobs:
       - mypy
       - py36
       - py36-mindeps
-      - py37
-      - py38
-      - py39
       - py310
       - py310-marshmallowdev
       - docs
