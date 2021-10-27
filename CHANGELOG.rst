@@ -16,7 +16,7 @@ Other changes:
 * Webargs has a new logo. Thanks to :user:`michaelizergit`! (:issue:`312`)
 * Don't build universal wheels. We don't support Python 2 anymore.
   (:pr:`632`)
-* Make the build reproducible (:pr:`#631`).
+* Make the build reproducible (:pr:`631`).
 
 
 8.0.0 (2021-04-08)
