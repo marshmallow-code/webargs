@@ -1,6 +1,20 @@
 Changelog
 ---------
 
+8.1.0 (unreleased)
+******************
+
+Bug fixes:
+
+- Fix publishing type hints per `PEP-561 <https://www.python.org/dev/peps/pep-0561/>`_.
+  (:pr:`650`).
+
+Other changes:
+
+* Test against Python 3.10 (:pr:`647`).
+* Address distutils deprecation warning in Python 3.10 (:pr:`652`).
+  Thanks :user:`kkirsche` for the PR.
+
 8.0.1 (2021-08-12)
 ******************
 

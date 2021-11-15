@@ -54,3 +54,4 @@ Contributors (chronological)
 * Grey Li `@greyli <https://github.com/greyli>`_
 * `@michaelizergit <https://github.com/michaelizergit>`_
 * Legolas Bloom `@TTWShell <https://github.com/TTWShell>`_
+* Kevin Kirsche  `@kkirsche <https://github.com/kkirsche>`_
