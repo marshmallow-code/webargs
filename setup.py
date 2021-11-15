@@ -73,7 +73,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     package_data={"webargs": ["py.typed"]},
-    install_requires=["marshmallow>=3.0.0"],
+    install_requires=["marshmallow>=3.0.0", "packaging"],
     extras_require=EXTRAS_REQUIRE,
     license="MIT",
     zip_safe=False,
