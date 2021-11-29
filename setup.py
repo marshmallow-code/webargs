@@ -26,7 +26,7 @@ EXTRAS_REQUIRE = {
         "pre-commit~=2.4",
     ],
     "docs": [
-        "Sphinx==4.3.0",
+        "Sphinx==4.3.1",
         "sphinx-issues==1.2.0",
         "furo==2021.11.23",
     ]
