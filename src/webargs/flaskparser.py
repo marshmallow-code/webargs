@@ -23,11 +23,10 @@ Example: ::
 from __future__ import annotations
 
 import flask
+import marshmallow as ma
 from werkzeug.exceptions import HTTPException
 
-import marshmallow as ma
-
-from webargs import core
+from webargs import core, asyncparser
 
 
 def abort(http_status_code, exc=None, **kwargs):
@@ -117,6 +116,18 @@ class FlaskParser(core.Parser):
         return flask.request
 
 
+class FlaskAsyncParser(FlaskParser, asyncparser.AsyncParser):
+    """Flask request argument parser for async views (supported on Flask
+    2.0 and higher).
+    """
+
+    pass
+
+
 parser = FlaskParser()
+async_parser = FlaskAsyncParser()
+
 use_args = parser.use_args
+use_args_async = async_parser.use_args
 use_kwargs = parser.use_kwargs
+use_kwargs_async = async_parser.use_kwargs
