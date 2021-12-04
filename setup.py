@@ -14,6 +14,7 @@ EXTRAS_REQUIRE = {
     "frameworks": FRAMEWORKS,
     "tests": [
         "pytest",
+        "pytest-asyncio",
         "webtest==3.0.0",
         "webtest-aiohttp==2.0.0",
         "pytest-aiohttp>=0.3.0",

@@ -152,6 +152,7 @@ def test_abort_called_on_validation_error(mock_abort):
     assert type(abort_kwargs["exc"]) == ValidationError
 
 
+@pytest.mark.asyncio
 @mock.patch("webargs.flaskparser.abort")
 async def test_abort_called_on_validation_error_async(mock_abort):
     # error handling must raise an error to be valid
