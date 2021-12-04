@@ -55,3 +55,4 @@ Contributors (chronological)
 * `@michaelizergit <https://github.com/michaelizergit>`_
 * Legolas Bloom `@TTWShell <https://github.com/TTWShell>`_
 * Kevin Kirsche  `@kkirsche <https://github.com/kkirsche>`_
+* Isira Seneviratne `@Isira-Seneviratne <https://github.com/Isira-Seneviratne>`_
