@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import typing
 import logging
@@ -47,7 +49,7 @@ def _iscallable(x) -> bool:
     return callable(x)
 
 
-def _callable_or_raise(obj: typing.Optional[T]) -> typing.Optional[T]:
+def _callable_or_raise(obj: T | None) -> T | None:
     """Makes sure an object is callable if it is not ``None``. If not
     callable, a ValueError is raised.
     """
@@ -62,7 +64,7 @@ def get_mimetype(content_type: str) -> str:
 
 # Adapted from werkzeug:
 # https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
-def is_json(mimetype: typing.Optional[str]) -> bool:
+def is_json(mimetype: str | None) -> bool:
     """Indicates if this mimetype is JSON or not.  By default a request
     is considered to include JSON data if the mimetype is
     ``application/json`` or ``application/*+json``.
@@ -126,7 +128,7 @@ class Parser:
     DEFAULT_LOCATION: str = "json"
     #: Default value to use for 'unknown' on schema load
     #  on a per-location basis
-    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, typing.Optional[str]] = {
+    DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {
         "json": None,
         "form": None,
         "json_or_form": None,
@@ -137,16 +139,16 @@ class Parser:
         "files": ma.EXCLUDE,
     }
     #: The marshmallow Schema class to use when creating new schemas
-    DEFAULT_SCHEMA_CLASS: typing.Type = ma.Schema
+    DEFAULT_SCHEMA_CLASS: type = ma.Schema
     #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS: int = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
     DEFAULT_VALIDATION_MESSAGE: str = "Invalid value."
     #: field types which should always be treated as if they set `is_multiple=True`
-    KNOWN_MULTI_FIELDS: typing.List[typing.Type] = [ma.fields.List, ma.fields.Tuple]
+    KNOWN_MULTI_FIELDS: list[type] = [ma.fields.List, ma.fields.Tuple]
 
     #: Maps location => method name
-    __location_map__: typing.Dict[str, typing.Union[str, typing.Callable]] = {
+    __location_map__: dict[str, str | typing.Callable] = {
         "json": "load_json",
         "querystring": "load_querystring",
         "query": "load_querystring",
@@ -159,22 +161,18 @@ class Parser:
 
     def __init__(
         self,
-        location: typing.Optional[str] = None,
+        location: str | None = None,
         *,
-        unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
-        error_handler: typing.Optional[ErrorHandler] = None,
-        schema_class: typing.Optional[typing.Type] = None
+        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
+        error_handler: ErrorHandler | None = None,
+        schema_class: type | None = None
     ):
         self.location = location or self.DEFAULT_LOCATION
-        self.error_callback: typing.Optional[ErrorHandler] = _callable_or_raise(
-            error_handler
-        )
+        self.error_callback: ErrorHandler | None = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
         self.unknown = unknown
 
-    def _makeproxy(
-        self, multidict, schema: ma.Schema, cls: typing.Type = MultiDictProxy
-    ):
+    def _makeproxy(self, multidict, schema: ma.Schema, cls: type = MultiDictProxy):
         """Create a multidict proxy object with options from the current parser"""
         return cls(multidict, schema, known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS))
 
@@ -218,8 +216,8 @@ class Parser:
         schema: ma.Schema,
         location: str,
         *,
-        error_status_code: typing.Optional[int],
-        error_headers: typing.Optional[typing.Mapping[str, str]]
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None
     ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -266,13 +264,13 @@ class Parser:
     def parse(
         self,
         argmap: ArgMap,
-        req: typing.Optional[Request] = None,
+        req: Request | None = None,
         *,
-        location: typing.Optional[str] = None,
-        unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
+        location: str | None = None,
+        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         validate: ValidateArg = None,
-        error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None
     ):
         """Main request parsing method.
 
@@ -310,9 +308,7 @@ class Parser:
                 else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
-        load_kwargs: typing.Dict[str, typing.Any] = (
-            {"unknown": unknown} if unknown else {}
-        )
+        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if unknown else {}
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -341,7 +337,7 @@ class Parser:
             ) from error
         return data
 
-    def get_default_request(self) -> typing.Optional[Request]:
+    def get_default_request(self) -> Request | None:
         """Optional override. Provides a hook for frameworks that use thread-local
         request objects.
         """
@@ -350,9 +346,9 @@ class Parser:
     def get_request_from_view_args(
         self,
         view: typing.Callable,
-        args: typing.Tuple,
+        args: tuple,
         kwargs: typing.Mapping[str, typing.Any],
-    ) -> typing.Optional[Request]:
+    ) -> Request | None:
         """Optional override. Returns the request object to be parsed, given a view
         function's args and kwargs.
 
@@ -368,11 +364,11 @@ class Parser:
 
     @staticmethod
     def _update_args_kwargs(
-        args: typing.Tuple,
-        kwargs: typing.Dict[str, typing.Any],
-        parsed_args: typing.Tuple,
+        args: tuple,
+        kwargs: dict[str, typing.Any],
+        parsed_args: tuple,
         as_kwargs: bool,
-    ) -> typing.Tuple[typing.Tuple, typing.Mapping]:
+    ) -> tuple[tuple, typing.Mapping]:
         """Update args or kwargs with parsed_args depending on as_kwargs"""
         if as_kwargs:
             kwargs.update(parsed_args)
@@ -384,14 +380,14 @@ class Parser:
     def use_args(
         self,
         argmap: ArgMap,
-        req: typing.Optional[Request] = None,
+        req: Request | None = None,
         *,
-        location: typing.Optional[str] = None,
-        unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
+        location: str | None = None,
+        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         as_kwargs: bool = False,
         validate: ValidateArg = None,
-        error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -537,7 +533,7 @@ class Parser:
 
     def _handle_invalid_json_error(
         self,
-        error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
+        error: json.JSONDecodeError | UnicodeDecodeError,
         req: Request,
         *args,
         **kwargs

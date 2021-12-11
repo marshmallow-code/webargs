@@ -13,7 +13,7 @@ tells webargs where to parse the request argument from.
         "content_type": fields.Str(data_key="Content-Type", location="headers"),
     }
 """
-import typing
+from __future__ import annotations
 
 import marshmallow as ma
 
@@ -88,9 +88,9 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
 
     def __init__(
         self,
-        cls_or_instance: typing.Union[ma.fields.Field, type],
+        cls_or_instance: ma.fields.Field | type,
         *,
-        delimiter: typing.Optional[str] = None,
+        delimiter: str | None = None,
         **kwargs
     ):
         self.delimiter = delimiter or self.delimiter
@@ -110,8 +110,6 @@ class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
 
     default_error_messages = {"invalid": "Not a valid delimited tuple."}
 
-    def __init__(
-        self, tuple_fields, *, delimiter: typing.Optional[str] = None, **kwargs
-    ):
+    def __init__(self, tuple_fields, *, delimiter: str | None = None, **kwargs):
         self.delimiter = delimiter or self.delimiter
         super().__init__(tuple_fields, **kwargs)

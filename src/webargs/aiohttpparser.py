@@ -22,6 +22,8 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
+from __future__ import annotations
+
 import typing
 
 from aiohttp import web
@@ -71,7 +73,7 @@ del _find_exceptions
 class AIOHTTPParser(AsyncParser):
     """aiohttp request argument parser."""
 
-    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, typing.Optional[str]] = {
+    DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {
         "match_info": RAISE,
         "path": RAISE,
         **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,
@@ -91,9 +93,7 @@ class AIOHTTPParser(AsyncParser):
         post_data = await req.post()
         return self._makeproxy(post_data, schema)
 
-    async def load_json_or_form(
-        self, req, schema: Schema
-    ) -> typing.Union[typing.Dict, MultiDictProxy]:
+    async def load_json_or_form(self, req, schema: Schema) -> dict | MultiDictProxy:
         data = await self.load_json(req, schema)
         if data is not core.missing:
             return data
@@ -154,8 +154,8 @@ class AIOHTTPParser(AsyncParser):
         req,
         schema: Schema,
         *,
-        error_status_code: typing.Optional[int],
-        error_headers: typing.Optional[typing.Mapping[str, str]]
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None
     ) -> typing.NoReturn:
         """Handle ValidationErrors and return a JSON response of error messages
         to the client.
@@ -173,11 +173,7 @@ class AIOHTTPParser(AsyncParser):
         )
 
     def _handle_invalid_json_error(
-        self,
-        error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
-        req,
-        *args,
-        **kwargs
+        self, error: json.JSONDecodeError | UnicodeDecodeError, req, *args, **kwargs
     ) -> typing.NoReturn:
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}

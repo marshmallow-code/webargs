@@ -20,7 +20,7 @@ Example: ::
             uid=uid, per_page=args["per_page"]
         )
 """
-import typing
+from __future__ import annotations
 
 import flask
 from werkzeug.exceptions import HTTPException
@@ -51,7 +51,7 @@ def is_json_request(req):
 class FlaskParser(core.Parser):
     """Flask request argument parser."""
 
-    DEFAULT_UNKNOWN_BY_LOCATION: typing.Dict[str, typing.Optional[str]] = {
+    DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {
         "view_args": ma.RAISE,
         "path": ma.RAISE,
         **core.Parser.DEFAULT_UNKNOWN_BY_LOCATION,
