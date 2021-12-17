@@ -121,8 +121,6 @@ class FlaskAsyncParser(FlaskParser, asyncparser.AsyncParser):
     2.0 and higher).
     """
 
-    pass
-
 
 parser = FlaskParser()
 async_parser = FlaskAsyncParser()
