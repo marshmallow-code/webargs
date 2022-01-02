@@ -27,8 +27,8 @@ jobs:
     toxenvs:
       - lint
       - mypy
-      - py36
-      - py36-mindeps
+      - py37
+      - py37-mindeps
       - py310
       - py310-marshmallowdev
       - docs
