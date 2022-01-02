@@ -28,7 +28,7 @@ class AsyncParser(core.Parser):
         unknown: typing.Optional[str] = core._UNKNOWN_DEFAULT_PARAM,
         validate: core.ValidateArg = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> typing.Optional[typing.Mapping]:
         """Coroutine variant of `webargs.core.Parser`.
 
@@ -97,7 +97,7 @@ class AsyncParser(core.Parser):
         location: str,
         *,
         error_status_code: typing.Optional[int],
-        error_headers: typing.Optional[typing.Mapping[str, str]]
+        error_headers: typing.Optional[typing.Mapping[str, str]],
     ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -140,7 +140,7 @@ class AsyncParser(core.Parser):
         as_kwargs: bool = False,
         validate: core.ValidateArg = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 

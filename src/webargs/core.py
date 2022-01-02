@@ -89,7 +89,7 @@ def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
                 f"Bytes decoding error : {exc.reason}",
                 doc=str(exc.object),
                 pos=exc.start,
-            )
+            ) from exc
     return json.loads(decoded)
 
 
@@ -163,7 +163,7 @@ class Parser:
         *,
         unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
         error_handler: typing.Optional[ErrorHandler] = None,
-        schema_class: typing.Optional[typing.Type] = None
+        schema_class: typing.Optional[typing.Type] = None,
     ):
         self.location = location or self.DEFAULT_LOCATION
         self.error_callback: typing.Optional[ErrorHandler] = _callable_or_raise(
@@ -219,7 +219,7 @@ class Parser:
         location: str,
         *,
         error_status_code: typing.Optional[int],
-        error_headers: typing.Optional[typing.Mapping[str, str]]
+        error_headers: typing.Optional[typing.Mapping[str, str]],
     ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -272,7 +272,7 @@ class Parser:
         unknown: typing.Optional[str] = _UNKNOWN_DEFAULT_PARAM,
         validate: ValidateArg = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None,
     ):
         """Main request parsing method.
 
@@ -391,7 +391,7 @@ class Parser:
         as_kwargs: bool = False,
         validate: ValidateArg = None,
         error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None
+        error_headers: typing.Optional[typing.Mapping[str, str]] = None,
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -540,7 +540,7 @@ class Parser:
         error: typing.Union[json.JSONDecodeError, UnicodeDecodeError],
         req: Request,
         *args,
-        **kwargs
+        **kwargs,
     ) -> typing.NoReturn:
         """Internal hook for overriding treatment of JSONDecodeErrors.
 
@@ -634,7 +634,7 @@ class Parser:
         schema: ma.Schema,
         *,
         error_status_code: int,
-        error_headers: typing.Mapping[str, str]
+        error_headers: typing.Mapping[str, str],
     ) -> typing.NoReturn:
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.

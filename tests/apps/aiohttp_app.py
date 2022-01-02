@@ -36,22 +36,22 @@ async def echo_form(request):
 async def echo_json(request):
     try:
         parsed = await parser.parse(hello_args, request, location="json")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as exc:
         raise aiohttp.web.HTTPBadRequest(
             body=json.dumps(["Invalid JSON."]).encode("utf-8"),
             content_type="application/json",
-        )
+        ) from exc
     return json_response(parsed)
 
 
 async def echo_json_or_form(request):
     try:
         parsed = await parser.parse(hello_args, request, location="json_or_form")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as exc:
         raise aiohttp.web.HTTPBadRequest(
             body=json.dumps(["Invalid JSON."]).encode("utf-8"),
             content_type="application/json",
-        )
+        ) from exc
     return json_response(parsed)
 
 

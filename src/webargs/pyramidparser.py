@@ -124,7 +124,7 @@ class PyramidParser(core.Parser):
         as_kwargs=False,
         validate=None,
         error_status_code=None,
-        error_headers=None
+        error_headers=None,
     ):
         """Decorator that injects parsed arguments into a view callable.
         Supports the *Class-based View* pattern where `request` is saved as an instance
