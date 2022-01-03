@@ -91,7 +91,7 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         cls_or_instance: typing.Union[ma.fields.Field, type],
         *,
         delimiter: typing.Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         self.delimiter = delimiter or self.delimiter
         super().__init__(cls_or_instance, **kwargs)
