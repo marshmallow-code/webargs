@@ -20,7 +20,7 @@ import marshmallow as ma
 # Expose all fields from marshmallow.fields.
 from marshmallow.fields import *  # noqa: F40
 
-__all__ = ["DelimitedList"] + ma.fields.__all__
+__all__ = ["DelimitedList", "DelimitedTuple"] + ma.fields.__all__
 
 
 class Nested(ma.fields.Nested):  # type: ignore[no-redef]
