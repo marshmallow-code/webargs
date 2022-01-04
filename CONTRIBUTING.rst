@@ -57,11 +57,6 @@ Setting Up for Local Development
     # The pre-commit CLI was installed above
     $ pre-commit install
 
-.. note::
-
-    webargs uses `black <https://github.com/ambv/black>`_ for code formatting, which is only compatible with Python>=3.6.
-    Therefore, the pre-commit hooks require a minimum Python version of 3.6.
-
 Git Branch Structure
 ++++++++++++++++++++
 

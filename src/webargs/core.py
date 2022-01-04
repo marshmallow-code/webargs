@@ -91,7 +91,7 @@ def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
                 f"Bytes decoding error : {exc.reason}",
                 doc=str(exc.object),
                 pos=exc.start,
-            )
+            ) from exc
     return json.loads(decoded)
 
 
@@ -139,7 +139,7 @@ class Parser:
         "files": ma.EXCLUDE,
     }
     #: The marshmallow Schema class to use when creating new schemas
-    DEFAULT_SCHEMA_CLASS: type = ma.Schema
+    DEFAULT_SCHEMA_CLASS: type[ma.Schema] = ma.Schema
     #: Default status code to return for validation errors
     DEFAULT_VALIDATION_STATUS: int = DEFAULT_VALIDATION_STATUS
     #: Default error message for validation errors
@@ -165,7 +165,7 @@ class Parser:
         *,
         unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         error_handler: ErrorHandler | None = None,
-        schema_class: type | None = None
+        schema_class: type[ma.Schema] | None = None,
     ):
         self.location = location or self.DEFAULT_LOCATION
         self.error_callback: ErrorHandler | None = _callable_or_raise(error_handler)
@@ -217,7 +217,7 @@ class Parser:
         location: str,
         *,
         error_status_code: int | None,
-        error_headers: typing.Mapping[str, str] | None
+        error_headers: typing.Mapping[str, str] | None,
     ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -258,7 +258,7 @@ class Parser:
         elif callable(argmap):
             schema = argmap(req)
         else:
-            schema = self.schema_class.from_dict(argmap)()
+            schema = self.schema_class.from_dict(dict(argmap))()
         return schema
 
     def parse(
@@ -270,7 +270,7 @@ class Parser:
         unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         validate: ValidateArg = None,
         error_status_code: int | None = None,
-        error_headers: typing.Mapping[str, str] | None = None
+        error_headers: typing.Mapping[str, str] | None = None,
     ):
         """Main request parsing method.
 
@@ -387,7 +387,7 @@ class Parser:
         as_kwargs: bool = False,
         validate: ValidateArg = None,
         error_status_code: int | None = None,
-        error_headers: typing.Mapping[str, str] | None = None
+        error_headers: typing.Mapping[str, str] | None = None,
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -418,7 +418,7 @@ class Parser:
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = self.schema_class.from_dict(argmap)()
+            argmap = self.schema_class.from_dict(dict(argmap))()
 
         def decorator(func):
             req_ = request_obj
@@ -536,7 +536,7 @@ class Parser:
         error: json.JSONDecodeError | UnicodeDecodeError,
         req: Request,
         *args,
-        **kwargs
+        **kwargs,
     ) -> typing.NoReturn:
         """Internal hook for overriding treatment of JSONDecodeErrors.
 
@@ -630,7 +630,7 @@ class Parser:
         schema: ma.Schema,
         *,
         error_status_code: int,
-        error_headers: typing.Mapping[str, str]
+        error_headers: typing.Mapping[str, str],
     ) -> typing.NoReturn:
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.

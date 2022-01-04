@@ -26,9 +26,9 @@ EXTRAS_REQUIRE = {
         "pre-commit~=2.4",
     ],
     "docs": [
-        "Sphinx==4.3.1",
-        "sphinx-issues==1.2.0",
-        "furo==2021.11.23",
+        "Sphinx==4.3.2",
+        "sphinx-issues==2.0.0",
+        "furo==2022.1.2",
     ]
     + FRAMEWORKS,
 }
@@ -93,14 +93,13 @@ setup(
         "api",
         "marshmallow",
     ),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

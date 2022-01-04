@@ -488,7 +488,7 @@ the changes.
         location=None,
         validate=None,
         error_status_code=None,
-        error_headers=None
+        error_headers=None,
     ):
         ...
 
@@ -517,7 +517,7 @@ the changes.
         as_kwargs=False,
         validate=None,
         error_status_code=None,
-        error_headers=None
+        error_headers=None,
     ):
         ...
 

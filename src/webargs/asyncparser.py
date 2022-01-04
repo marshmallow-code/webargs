@@ -30,7 +30,7 @@ class AsyncParser(core.Parser):
         unknown: str | None = core._UNKNOWN_DEFAULT_PARAM,
         validate: core.ValidateArg = None,
         error_status_code: int | None = None,
-        error_headers: typing.Mapping[str, str] | None = None
+        error_headers: typing.Mapping[str, str] | None = None,
     ) -> typing.Mapping | None:
         """Coroutine variant of `webargs.core.Parser`.
 
@@ -97,7 +97,7 @@ class AsyncParser(core.Parser):
         location: str,
         *,
         error_status_code: int | None,
-        error_headers: typing.Mapping[str, str] | None
+        error_headers: typing.Mapping[str, str] | None,
     ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -140,7 +140,7 @@ class AsyncParser(core.Parser):
         as_kwargs: bool = False,
         validate: core.ValidateArg = None,
         error_status_code: int | None = None,
-        error_headers: typing.Mapping[str, str] | None = None
+        error_headers: typing.Mapping[str, str] | None = None,
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -151,7 +151,7 @@ class AsyncParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = self.schema_class.from_dict(argmap)()
+            argmap = self.schema_class.from_dict(dict(argmap))()
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj

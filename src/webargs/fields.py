@@ -20,7 +20,7 @@ import marshmallow as ma
 # Expose all fields from marshmallow.fields.
 from marshmallow.fields import *  # noqa: F40
 
-__all__ = ["DelimitedList"] + ma.fields.__all__
+__all__ = ["DelimitedList", "DelimitedTuple"] + ma.fields.__all__
 
 
 class Nested(ma.fields.Nested):  # type: ignore[no-redef]
@@ -91,7 +91,7 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         cls_or_instance: ma.fields.Field | type,
         *,
         delimiter: str | None = None,
-        **kwargs
+        **kwargs,
     ):
         self.delimiter = delimiter or self.delimiter
         super().__init__(cls_or_instance, **kwargs)

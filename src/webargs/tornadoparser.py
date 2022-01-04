@@ -57,8 +57,8 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
                 return _unicode(value)
             return value
         # based on tornado.web.RequestHandler.decode_argument
-        except UnicodeDecodeError:
-            raise HTTPError(400, f"Invalid unicode in {key}: {value[:40]!r}")
+        except UnicodeDecodeError as exc:
+            raise HTTPError(400, f"Invalid unicode in {key}: {value[:40]!r}") from exc
 
 
 class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
