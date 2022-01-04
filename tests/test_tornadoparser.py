@@ -109,7 +109,7 @@ class TestJSONArgs:
     def test_it_should_get_multiple_nested_values(self):
         class CustomSchema(ma.Schema):
             works = fields.List(
-                fields.Nested({"author": fields.Str(), "workname": fields.Str()})
+                fields.WebargsNested({"author": fields.Str(), "workname": fields.Str()})
             )
 
         custom_schema = CustomSchema()

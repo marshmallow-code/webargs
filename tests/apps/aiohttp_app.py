@@ -134,7 +134,7 @@ async def echo_cookie(request):
 
 
 async def echo_nested(request):
-    args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
+    args = {"name": fields.WebargsNested({"first": fields.Str(), "last": fields.Str()})}
     parsed = await parser.parse(args, request)
     return json_response(parsed)
 
@@ -147,7 +147,9 @@ async def echo_multiple_args(request):
 
 async def echo_nested_many(request):
     args = {
-        "users": fields.Nested({"id": fields.Int(), "name": fields.Str()}, many=True)
+        "users": fields.WebargsNested(
+            {"id": fields.Int(), "name": fields.Str()}, many=True
+        )
     }
     parsed = await parser.parse(args, request)
     return json_response(parsed)
@@ -155,7 +157,9 @@ async def echo_nested_many(request):
 
 async def echo_nested_many_data_key(request):
     args = {
-        "x_field": fields.Nested({"id": fields.Int()}, many=True, data_key="X-Field")
+        "x_field": fields.WebargsNested(
+            {"id": fields.Int()}, many=True, data_key="X-Field"
+        )
     }
     parsed = await parser.parse(args, request)
     return json_response(parsed)

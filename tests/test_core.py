@@ -580,7 +580,9 @@ def test_parse_with_data_key_retains_field_name_in_error(web_request):
 def test_parse_nested_with_data_key(web_request):
     parser = MockRequestParser()
     web_request.json = {"nested_arg": {"wrong": "OK"}}
-    args = {"nested_arg": fields.Nested({"right": fields.Field(data_key="wrong")})}
+    args = {
+        "nested_arg": fields.WebargsNested({"right": fields.Field(data_key="wrong")})
+    }
 
     parsed = parser.parse(args, web_request)
     assert parsed == {"nested_arg": {"right": "OK"}}
@@ -591,7 +593,7 @@ def test_parse_nested_with_missing_key_and_data_key(web_request):
 
     web_request.json = {"nested_arg": {}}
     args = {
-        "nested_arg": fields.Nested(
+        "nested_arg": fields.WebargsNested(
             {"found": fields.Field(missing=None, allow_none=True, data_key="miss")}
         )
     }
@@ -604,7 +606,7 @@ def test_parse_nested_with_default(web_request):
     parser = MockRequestParser()
 
     web_request.json = {"nested_arg": {}}
-    args = {"nested_arg": fields.Nested({"miss": fields.Field(missing="<foo>")})}
+    args = {"nested_arg": fields.WebargsNested({"miss": fields.Field(missing="<foo>")})}
 
     parsed = parser.parse(args, web_request)
     assert parsed == {"nested_arg": {"miss": "<foo>"}}
@@ -612,7 +614,9 @@ def test_parse_nested_with_default(web_request):
 
 def test_nested_many(web_request, parser):
     web_request.json = {"pets": [{"name": "Pips"}, {"name": "Zula"}]}
-    args = {"pets": fields.Nested({"name": fields.Str()}, required=True, many=True)}
+    args = {
+        "pets": fields.WebargsNested({"name": fields.Str()}, required=True, many=True)
+    }
     parsed = parser.parse(args, web_request)
     assert parsed == {"pets": [{"name": "Pips"}, {"name": "Zula"}]}
     web_request.json = {}
@@ -1167,8 +1171,23 @@ def test_parse_raises_validation_error_if_data_invalid(web_request, parser):
 
 
 def test_nested_field_from_dict():
+    # webargs.fields.WebargsNested implements dict handling
+    argmap = {"nest": fields.WebargsNested({"foo": fields.Field()})}
+    schema_cls = Schema.from_dict(argmap)
+    assert issubclass(schema_cls, Schema)
+    schema = schema_cls()
+    assert "nest" in schema.fields
+    assert type(schema.fields["nest"]) is fields.WebargsNested
+    assert "foo" in schema.fields["nest"].schema.fields
+
+
+def test_nested_field_from_dict_deprecated_variant_warns():
     # webargs.fields.Nested implements dict handling
-    argmap = {"nest": fields.Nested({"foo": fields.Field()})}
+    # but warns when it is instantiated in this way
+    with pytest.warns(
+        DeprecationWarning, match="Passing a dict to `fields.Nested` is deprecated"
+    ):
+        argmap = {"nest": fields.Nested({"foo": fields.Field()})}
     schema_cls = Schema.from_dict(argmap)
     assert issubclass(schema_cls, Schema)
     schema = schema_cls()

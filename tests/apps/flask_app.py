@@ -152,14 +152,16 @@ def echo_view_arg_with_use_args(args, **kwargs):
 
 @app.route("/echo_nested", methods=["POST"])
 def echo_nested():
-    args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
+    args = {"name": fields.WebargsNested({"first": fields.Str(), "last": fields.Str()})}
     return J(parser.parse(args))
 
 
 @app.route("/echo_nested_many", methods=["POST"])
 def echo_nested_many():
     args = {
-        "users": fields.Nested({"id": fields.Int(), "name": fields.Str()}, many=True)
+        "users": fields.WebargsNested(
+            {"id": fields.Int(), "name": fields.Str()}, many=True
+        )
     }
     return J(parser.parse(args))
 
@@ -167,7 +169,9 @@ def echo_nested_many():
 @app.route("/echo_nested_many_data_key", methods=["POST"])
 def echo_nested_many_with_data_key():
     args = {
-        "x_field": fields.Nested({"id": fields.Int()}, many=True, data_key="X-Field")
+        "x_field": fields.WebargsNested(
+            {"id": fields.Int()}, many=True, data_key="X-Field"
+        )
     }
     return J(parser.parse(args))
 

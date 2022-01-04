@@ -228,7 +228,7 @@ Nesting Fields
     from webargs import fields
 
     args = {
-        "name": fields.Nested(
+        "name": fields.WebargsNested(
             {"first": fields.Str(required=True), "last": fields.Str(required=True)}
         )
     }

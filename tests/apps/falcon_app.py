@@ -134,14 +134,16 @@ class EchoCookie:
 
 class EchoNested:
     def on_post(self, req, resp):
-        args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
+        args = {
+            "name": fields.WebargsNested({"first": fields.Str(), "last": fields.Str()})
+        }
         resp.body = json.dumps(parser.parse(args, req))
 
 
 class EchoNestedMany:
     def on_post(self, req, resp):
         args = {
-            "users": fields.Nested(
+            "users": fields.WebargsNested(
                 {"id": fields.Int(), "name": fields.Str()}, many=True
             )
         }

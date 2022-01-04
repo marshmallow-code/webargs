@@ -142,14 +142,16 @@ def echo_file():
 
 @app.route("/echo_nested", method=["POST"])
 def echo_nested():
-    args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
+    args = {"name": fields.WebargsNested({"first": fields.Str(), "last": fields.Str()})}
     return parser.parse(args)
 
 
 @app.route("/echo_nested_many", method=["POST"])
 def echo_nested_many():
     args = {
-        "users": fields.Nested({"id": fields.Int(), "name": fields.Str()}, many=True)
+        "users": fields.WebargsNested(
+            {"id": fields.Int(), "name": fields.Str()}, many=True
+        )
     }
     return parser.parse(args)
 

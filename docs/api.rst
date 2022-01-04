@@ -14,7 +14,7 @@ webargs.fields
 --------------
 
 .. automodule:: webargs.fields
-    :members: Nested, DelimitedList
+    :members: WebargsNested, DelimitedList, DelimitedTuple
 
 
 webargs.multidictproxy

@@ -15,6 +15,8 @@ tells webargs where to parse the request argument from.
 """
 from __future__ import annotations
 
+import warnings
+
 import marshmallow as ma
 
 # Expose all fields from marshmallow.fields.
@@ -23,9 +25,12 @@ from marshmallow.fields import *  # noqa: F40
 __all__ = ["DelimitedList", "DelimitedTuple"] + ma.fields.__all__
 
 
-class Nested(ma.fields.Nested):  # type: ignore[no-redef]
+class WebargsNested(ma.fields.Nested):
     """Same as `marshmallow.fields.Nested`, except can be passed a dictionary as
     the first argument, which will be converted to a `marshmallow.Schema`.
+
+    In previous versions, this field was named ``Nested`` and replaced ``Nested``
+    from ``marshmallow.fields``.
 
     .. note::
 
@@ -37,6 +42,23 @@ class Nested(ma.fields.Nested):  # type: ignore[no-redef]
     def __init__(self, nested, *args, **kwargs):
         if isinstance(nested, dict):
             nested = ma.Schema.from_dict(nested)
+        super().__init__(nested, *args, **kwargs)
+
+
+class Nested(WebargsNested):  # type: ignore[no-redef]
+    # fields.Nested is redefined here, for compatibility with prior webargs releases
+    # however, this usage is deprecated for the case where the nested schema is
+    # provided as a dict
+    #
+    # Therefore, we need an explicit subclass of WebargsNested which warns if
+    # `nested` is a dict
+    def __init__(self, nested, *args, **kwargs):
+        if isinstance(nested, dict):
+            warnings.warn(
+                "Passing a dict to `fields.Nested` is deprecated. "
+                "Use `fields.WebargsNested` instead.",
+                DeprecationWarning,
+            )
         super().__init__(nested, *args, **kwargs)
 
 

@@ -130,13 +130,17 @@ def echo_file(request):
 
 
 def echo_nested(request):
-    argmap = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
+    argmap = {
+        "name": fields.WebargsNested({"first": fields.Str(), "last": fields.Str()})
+    }
     return parser.parse(argmap, request)
 
 
 def echo_nested_many(request):
     argmap = {
-        "users": fields.Nested({"id": fields.Int(), "name": fields.Str()}, many=True)
+        "users": fields.WebargsNested(
+            {"id": fields.Int(), "name": fields.Str()}, many=True
+        )
     }
     return parser.parse(argmap, request)
 
