@@ -1,4 +1,6 @@
 """Asynchronous request parser."""
+from __future__ import annotations
+
 import asyncio
 import functools
 import inspect
@@ -22,14 +24,14 @@ class AsyncParser(core.Parser):
     async def parse(
         self,
         argmap: core.ArgMap,
-        req: typing.Optional[core.Request] = None,
+        req: core.Request | None = None,
         *,
-        location: typing.Optional[str] = None,
-        unknown: typing.Optional[str] = core._UNKNOWN_DEFAULT_PARAM,
+        location: str | None = None,
+        unknown: str | None = core._UNKNOWN_DEFAULT_PARAM,
         validate: core.ValidateArg = None,
-        error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None,
-    ) -> typing.Optional[typing.Mapping]:
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None,
+    ) -> typing.Mapping | None:
         """Coroutine variant of `webargs.core.Parser`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
@@ -45,9 +47,7 @@ class AsyncParser(core.Parser):
                 else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
-        load_kwargs: typing.Dict[str, typing.Any] = (
-            {"unknown": unknown} if unknown else {}
-        )
+        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if unknown else {}
         if req is None:
             raise ValueError("Must pass req object")
         data = None
@@ -96,8 +96,8 @@ class AsyncParser(core.Parser):
         schema: Schema,
         location: str,
         *,
-        error_status_code: typing.Optional[int],
-        error_headers: typing.Optional[typing.Mapping[str, str]],
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None,
     ) -> typing.NoReturn:
         # rewrite messages to be namespaced under the location which created
         # them
@@ -133,14 +133,14 @@ class AsyncParser(core.Parser):
     def use_args(
         self,
         argmap: core.ArgMap,
-        req: typing.Optional[core.Request] = None,
+        req: core.Request | None = None,
         *,
         location: str = None,
         unknown=core._UNKNOWN_DEFAULT_PARAM,
         as_kwargs: bool = False,
         validate: core.ValidateArg = None,
-        error_status_code: typing.Optional[int] = None,
-        error_headers: typing.Optional[typing.Mapping[str, str]] = None,
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None,
     ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
@@ -151,7 +151,7 @@ class AsyncParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
-            argmap = self.schema_class.from_dict(argmap)()
+            argmap = self.schema_class.from_dict(dict(argmap))()
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
