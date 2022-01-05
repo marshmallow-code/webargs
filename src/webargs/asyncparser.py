@@ -5,7 +5,6 @@ import asyncio
 import functools
 import inspect
 import typing
-from collections.abc import Mapping
 
 from marshmallow import Schema, ValidationError
 import marshmallow as ma
@@ -150,8 +149,8 @@ class AsyncParser(core.Parser):
         request_obj = req
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
-        if isinstance(argmap, Mapping):
-            argmap = self.schema_class.from_dict(dict(argmap))()
+        if isinstance(argmap, dict):
+            argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
