@@ -1,3 +1,4 @@
+import collections
 import datetime
 import typing
 from unittest import mock
@@ -1321,3 +1322,15 @@ def test_whitespace_stripping_parser_example(web_request):
     #   - ids=[" 1", ...]  will still parse okay because "  1" is valid for fields.Int
     ret = parser.parse(schema, web_request, location="json")
     assert ret == {"ids": [1, 3, 4], "values": [" foo  ", " bar"]}
+
+
+def test_parse_rejects_non_dict_argmap_mapping(parser, web_request):
+    web_request.json = {"username": 42, "password": 42}
+    argmap = collections.UserDict(
+        {"username": fields.Field(), "password": fields.Field()}
+    )
+
+    # UserDict is dict-like in all meaningful ways, but not a subclass of `dict`
+    # it will therefore be rejected with a TypeError when used
+    with pytest.raises(TypeError):
+        parser.parse(argmap, web_request)

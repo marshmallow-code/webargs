@@ -3,7 +3,6 @@ from __future__ import annotations
 import functools
 import typing
 import logging
-from collections.abc import Mapping
 import json
 
 import marshmallow as ma
@@ -26,7 +25,7 @@ __all__ = [
 Request = typing.TypeVar("Request")
 ArgMap = typing.Union[
     ma.Schema,
-    typing.Mapping[str, ma.fields.Field],
+    typing.Dict[str, typing.Union[ma.fields.Field, typing.Type[ma.fields.Field]]],
     typing.Callable[[Request], ma.Schema],
 ]
 ValidateArg = typing.Union[None, typing.Callable, typing.Iterable[typing.Callable]]
@@ -34,6 +33,11 @@ CallableList = typing.List[typing.Callable]
 ErrorHandler = typing.Callable[..., typing.NoReturn]
 # generic type var with no particular meaning
 T = typing.TypeVar("T")
+# type var for callables, to make type-preserving decorators
+C = typing.TypeVar("C", bound=typing.Callable)
+# type var for a callable which is an error handler
+# used to ensure that the error_handler decorator is type preserving
+ErrorHandlerT = typing.TypeVar("ErrorHandlerT", bound=ErrorHandler)
 
 
 # a value used as the default for arguments, so that when `None` is passed, it
@@ -257,8 +261,10 @@ class Parser:
             schema = argmap()
         elif callable(argmap):
             schema = argmap(req)
+        elif isinstance(argmap, dict):
+            schema = self.schema_class.from_dict(argmap)()
         else:
-            schema = self.schema_class.from_dict(dict(argmap))()
+            raise TypeError(f"argmap was of unexpected type {type(argmap)}")
         return schema
 
     def parse(
@@ -417,8 +423,8 @@ class Parser:
         request_obj = req
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
-        if isinstance(argmap, Mapping):
-            argmap = self.schema_class.from_dict(dict(argmap))()
+        if isinstance(argmap, dict):
+            argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func):
             req_ = request_obj
@@ -468,7 +474,7 @@ class Parser:
         kwargs["as_kwargs"] = True
         return self.use_args(*args, **kwargs)
 
-    def location_loader(self, name: str):
+    def location_loader(self, name: str) -> typing.Callable[[C], C]:
         """Decorator that registers a function for loading a request location.
         The wrapped function receives a schema and a request.
 
@@ -489,13 +495,13 @@ class Parser:
         :param str name: The name of the location to register.
         """
 
-        def decorator(func):
+        def decorator(func: C) -> C:
             self.__location_map__[name] = func
             return func
 
         return decorator
 
-    def error_handler(self, func: ErrorHandler) -> ErrorHandler:
+    def error_handler(self, func: ErrorHandlerT) -> ErrorHandlerT:
         """Decorator that registers a custom error handling function. The
         function should receive the raised error, request object,
         `marshmallow.Schema` instance used to parse the request, error status code,
@@ -523,8 +529,13 @@ class Parser:
         return func
 
     def pre_load(
-        self, location_data: Mapping, *, schema: ma.Schema, req: Request, location: str
-    ) -> Mapping:
+        self,
+        location_data: typing.Mapping,
+        *,
+        schema: ma.Schema,
+        req: Request,
+        location: str,
+    ) -> typing.Mapping:
         """A method of the parser which can transform data after location
         loading is done. By default it does nothing, but users can subclass
         parsers and override this method.
