@@ -6,14 +6,21 @@ Changelog
 
 Bug fixes:
 
-- Fix publishing type hints per `PEP-561 <https://www.python.org/dev/peps/pep-0561/>`_.
+* Fix publishing type hints per `PEP-561 <https://www.python.org/dev/peps/pep-0561/>`_.
   (:pr:`650`).
+* Add DelimitedTuple to fields.__all__ (:pr:`678`).
+* Narrow type of ``argmap`` from ``Mapping`` to ``Dict`` (:pr:`682`).
 
 Other changes:
 
 * Test against Python 3.10 (:pr:`647`).
+* Drop support for Python 3.6 (:pr:`673`).
 * Address distutils deprecation warning in Python 3.10 (:pr:`652`).
   Thanks :user:`kkirsche` for the PR.
+* Use postponed evaluation of annotations (:pr:`663`).
+  Thanks :user:`Isira-Seneviratne` for the PR.
+* Pin mypy version in tox (:pr:`674`).
+* Improve type annotations for ``__version_info__`` (:pr:`680`).
 
 8.0.1 (2021-08-12)
 ******************
