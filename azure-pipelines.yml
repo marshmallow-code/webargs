@@ -25,7 +25,6 @@ jobs:
 - template: job--python-tox.yml@sloria
   parameters:
     toxenvs:
-      - lint
       - mypy
       - py37
       - py37-mindeps
