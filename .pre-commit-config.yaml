@@ -4,6 +4,11 @@ repos:
   hooks:
   - id: pyupgrade
     args: ["--py37-plus"]
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.14.0
+  hooks:
+    - id: check-github-workflows
+    - id: check-readthedocs
 - repo: https://github.com/psf/black
   rev: 22.1.0
   hooks:
