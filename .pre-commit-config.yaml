@@ -31,3 +31,8 @@ repos:
     language_version: python3
     files: ^src/webargs/
     additional_dependencies: ["marshmallow>=3,<4", "packaging"]
+
+
+# mypy runs under tox in GitHub Actions, skip it in pre-commit.ci
+ci:
+  skip: [mypy]
