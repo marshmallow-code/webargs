@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+8.1.1 (Unreleased)
+******************
+
+Changes:
+
+* Set ``python_requires>=3.7.2`` in package metadata (:pr:`692`).
+  Thanks :user:`kasium` for the PR.
+
 8.1.0 (2022-01-12)
 ******************
 
