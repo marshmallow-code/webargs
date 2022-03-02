@@ -58,11 +58,5 @@ jobs:
         run: python -m build
       - name: check package metadata
         run: twine check dist/*
-      # tags starting with 'testpypi-' publish to test pypi
-      # those without that prefix publish to production pypi
-      - if: startsWith(github.ref, 'refs/tags/testpypi-')
-        name: publish to testpypi
-        run: twine upload --repository testpypi -u __token__ -p ${{ secrets.TEST_PYPI_API_TOKEN }} dist/*
-      - if: ${{ ! startsWith(github.ref, 'refs/tags/testpypi-') }}
-        name: publish
+      - name: publish
         run: twine upload -u __token__ -p ${{ secrets.PYPI_API_TOKEN }} dist/*
