@@ -23,6 +23,13 @@ from marshmallow.fields import *  # noqa: F40
 __all__ = ["DelimitedList", "DelimitedTuple"] + ma.fields.__all__
 
 
+# TODO: remove custom `Nested` in the next major release
+#
+# the `Nested` class is only needed on versions of marshmallow prior to v3.15.0
+# in that version, `ma.fields.Nested` gained the ability to consume dict inputs
+# prior to that, this subclass adds this capability
+#
+# if we drop support for ma.__version_info__ < (3, 15) we can do this
 class Nested(ma.fields.Nested):  # type: ignore[no-redef]
     """Same as `marshmallow.fields.Nested`, except can be passed a dictionary as
     the first argument, which will be converted to a `marshmallow.Schema`.
