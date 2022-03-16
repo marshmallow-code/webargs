@@ -13,8 +13,8 @@ Flask support is available via the :mod:`webargs.flaskparser` module.
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` and :meth:`use_args <webargs.flaskparser.FlaskParser.use_args_async>`
-decorators, the arguments dictionary will be *before* any URL variable parameters.
+When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>`
+decorator, the arguments dictionary will be *before* any URL variable parameters.
 
 .. code-block:: python
 
@@ -25,13 +25,6 @@ decorators, the arguments dictionary will be *before* any URL variable parameter
     @app.route("/user/<int:uid>")
     @use_args({"per_page": fields.Int()}, location="query")
     def user_detail(args, uid):
-        return ("The user page for user {uid}, showing {per_page} posts.").format(
-            uid=uid, per_page=args["per_page"]
-        )
-
-    @app.route("/user_async/<int:uid>")
-    @use_args_async({"per_page": fields.Int()}, location="query")
-    async def user_detail_async(args, uid):
         return ("The user page for user {uid}, showing {per_page} posts.").format(
             uid=uid, per_page=args["per_page"]
         )

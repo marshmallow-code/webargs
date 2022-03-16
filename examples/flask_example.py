@@ -17,7 +17,7 @@ import datetime as dt
 
 from flask import Flask, jsonify
 from webargs import fields, validate
-from webargs.flaskparser import use_args, use_kwargs, use_kwargs_async
+from webargs.flaskparser import use_args, use_kwargs
 
 app = Flask(__name__)
 
@@ -42,9 +42,9 @@ def add(x, y):
 
 
 @app.route("/subtract", methods=["POST"])
-@use_kwargs_async(add_args)
+@use_kwargs(add_args)
 async def subtract(x, y):
-    """An async addition endpoint."""
+    """An async subtraction endpoint."""
     return jsonify({"result": x - y})
 
 

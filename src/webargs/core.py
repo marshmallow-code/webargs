@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import functools
 import typing
 import logging
@@ -38,6 +39,8 @@ C = typing.TypeVar("C", bound=typing.Callable)
 # type var for a callable which is an error handler
 # used to ensure that the error_handler decorator is type preserving
 ErrorHandlerT = typing.TypeVar("ErrorHandlerT", bound=ErrorHandler)
+
+AsyncErrorHandler = typing.Callable[..., typing.Awaitable[typing.NoReturn]]
 
 
 # a value used as the default for arguments, so that when `None` is passed, it
@@ -198,19 +201,23 @@ class Parser:
 
     def _load_location_data(
         self, *, schema: ma.Schema, req: Request, location: str
-    ) -> typing.Mapping:
+    ) -> typing.Any:
         """Return a dictionary-like object for the location on the given request.
 
         Needs to have the schema in hand in order to correctly handle loading
         lists from multidict objects and `many=True` schemas.
         """
         loader_func = self._get_loader(location)
-        data = loader_func(req, schema)
-        # when the desired location is empty (no data), provide an empty
-        # dict as the default so that optional arguments in a location
-        # (e.g. optional JSON body) work smoothly
-        if data is missing:
-            data = {}
+        return loader_func(req, schema)
+
+    async def _async_load_location_data(self, schema, req, location):
+        # an async variant of the _load_location_data method
+        # the loader function itself may or may not be async
+        loader_func = self._get_loader(location)
+        if asyncio.iscoroutinefunction(loader_func):
+            data = await loader_func(req, schema)
+        else:
+            data = loader_func(req, schema)
         return data
 
     def _on_validation_error(
@@ -237,6 +244,40 @@ class Parser:
             error_status_code=error_status_code,
             error_headers=error_headers,
         )
+
+    async def _async_on_validation_error(
+        self,
+        error: ValidationError,
+        req: Request,
+        schema: ma.Schema,
+        location: str,
+        *,
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None,
+    ) -> typing.NoReturn:
+        # an async-aware variant of the _on_validation_error method
+        error.messages = {location: error.messages}
+        error_handler = self.error_callback or self.handle_error
+        # an async error handler was registered, await it
+        if asyncio.iscoroutinefunction(error_handler):
+            async_error_handler = typing.cast(AsyncErrorHandler, error_handler)
+            await async_error_handler(
+                error,
+                req,
+                schema,
+                error_status_code=error_status_code,
+                error_headers=error_headers,
+            )
+        # the error handler was synchronous (e.g. Parser.handle_error) so it
+        # will raise an error
+        else:
+            error_handler(
+                error,
+                req,
+                schema,
+                error_status_code=error_status_code,
+                error_headers=error_headers,
+            )
 
     def _validate_arguments(self, data: typing.Any, validators: CallableList) -> None:
         # although `data` is typically a Mapping, nothing forbids a `schema.load`
@@ -266,6 +307,61 @@ class Parser:
         else:
             raise TypeError(f"argmap was of unexpected type {type(argmap)}")
         return schema
+
+    def _prepare_for_parse(
+        self,
+        argmap: ArgMap,
+        req: Request | None = None,
+        location: str | None = None,
+        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
+        validate: ValidateArg = None,
+    ) -> tuple[None, Request, str, CallableList, ma.Schema]:
+        # validate parse() arguments and handle defaults
+        # (shared between sync and async variants)
+        req = req if req is not None else self.get_default_request()
+        if req is None:
+            raise ValueError("Must pass req object")
+        location = location or self.location
+        validators = _ensure_list_of_callables(validate)
+        schema = self._get_schema(argmap, req)
+        return (None, req, location, validators, schema)
+
+    def _process_location_data(
+        self,
+        location_data: typing.Any,
+        schema: ma.Schema,
+        req: Request,
+        location: str,
+        unknown: str | None,
+        validators: CallableList,
+    ):
+        # after the data has been fetched from a registered location,
+        # this is how it is processed
+        # (shared between sync and async variants)
+
+        # when the desired location is empty (no data), provide an empty
+        # dict as the default so that optional arguments in a location
+        # (e.g. optional JSON body) work smoothly
+        if location_data is missing:
+            location_data = {}
+
+        # precedence order: explicit, instance setting, default per location
+        unknown = (
+            unknown
+            if unknown != _UNKNOWN_DEFAULT_PARAM
+            else (
+                self.unknown
+                if self.unknown != _UNKNOWN_DEFAULT_PARAM
+                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
+            )
+        )
+        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if unknown else {}
+        preprocessed_data = self.pre_load(
+            location_data, schema=schema, req=req, location=location
+        )
+        data = schema.load(preprocessed_data, **load_kwargs)
+        self._validate_arguments(data, validators)
+        return data
 
     def parse(
         self,
@@ -302,35 +398,57 @@ class Parser:
 
          :return: A dictionary of parsed arguments
         """
-        req = req if req is not None else self.get_default_request()
-        location = location or self.location
-        # precedence order: explicit, instance setting, default per location
-        unknown = (
-            unknown
-            if unknown != _UNKNOWN_DEFAULT_PARAM
-            else (
-                self.unknown
-                if self.unknown != _UNKNOWN_DEFAULT_PARAM
-                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
-            )
+        data, req, location, validators, schema = self._prepare_for_parse(
+            argmap, req, location, unknown, validate
         )
-        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if unknown else {}
-        if req is None:
-            raise ValueError("Must pass req object")
-        data = None
-        validators = _ensure_list_of_callables(validate)
-        schema = self._get_schema(argmap, req)
         try:
             location_data = self._load_location_data(
                 schema=schema, req=req, location=location
             )
-            preprocessed_data = self.pre_load(
-                location_data, schema=schema, req=req, location=location
+            data = self._process_location_data(
+                location_data, schema, req, location, unknown, validators
             )
-            data = schema.load(preprocessed_data, **load_kwargs)
-            self._validate_arguments(data, validators)
         except ma.exceptions.ValidationError as error:
             self._on_validation_error(
+                error,
+                req,
+                schema,
+                location,
+                error_status_code=error_status_code,
+                error_headers=error_headers,
+            )
+            raise ValueError(
+                "_on_validation_error hook did not raise an exception"
+            ) from error
+        return data
+
+    async def async_parse(
+        self,
+        argmap: ArgMap,
+        req: Request | None = None,
+        *,
+        location: str | None = None,
+        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
+        validate: ValidateArg = None,
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None,
+    ) -> typing.Mapping | None:
+        """Coroutine variant of `webargs.core.Parser.parse`.
+
+        Receives the same arguments as `webargs.core.Parser.parse`.
+        """
+        data, req, location, validators, schema = self._prepare_for_parse(
+            argmap, req, location, unknown, validate
+        )
+        try:
+            location_data = await self._async_load_location_data(
+                schema=schema, req=req, location=location
+            )
+            data = self._process_location_data(
+                location_data, schema, req, location, unknown, validators
+            )
+        except ma.exceptions.ValidationError as error:
+            await self._async_on_validation_error(
                 error,
                 req,
                 schema,
@@ -426,32 +544,56 @@ class Parser:
         if isinstance(argmap, dict):
             argmap = self.schema_class.from_dict(argmap)()
 
-        def decorator(func):
+        def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
 
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                req_obj = req_
+            if asyncio.iscoroutinefunction(func):
 
-                if not req_obj:
-                    req_obj = self.get_request_from_view_args(func, args, kwargs)
+                @functools.wraps(func)
+                async def wrapper(*args, **kwargs):
+                    req_obj = req_
 
-                # NOTE: At this point, argmap may be a Schema, or a callable
-                parsed_args = self.parse(
-                    argmap,
-                    req=req_obj,
-                    location=location,
-                    unknown=unknown,
-                    validate=validate,
-                    error_status_code=error_status_code,
-                    error_headers=error_headers,
-                )
-                args, kwargs = self._update_args_kwargs(
-                    args, kwargs, parsed_args, as_kwargs
-                )
-                return func(*args, **kwargs)
+                    if not req_obj:
+                        req_obj = self.get_request_from_view_args(func, args, kwargs)
+                    # NOTE: At this point, argmap may be a Schema, callable, or dict
+                    parsed_args = await self.async_parse(
+                        argmap,
+                        req=req_obj,
+                        location=location,
+                        unknown=unknown,
+                        validate=validate,
+                        error_status_code=error_status_code,
+                        error_headers=error_headers,
+                    )
+                    args, kwargs = self._update_args_kwargs(
+                        args, kwargs, parsed_args, as_kwargs
+                    )
+                    return await func(*args, **kwargs)
 
-            wrapper.__wrapped__ = func
+            else:
+
+                @functools.wraps(func)  # type: ignore
+                def wrapper(*args, **kwargs):
+                    req_obj = req_
+
+                    if not req_obj:
+                        req_obj = self.get_request_from_view_args(func, args, kwargs)
+                    # NOTE: At this point, argmap may be a Schema, callable, or dict
+                    parsed_args = self.parse(
+                        argmap,
+                        req=req_obj,
+                        location=location,
+                        unknown=unknown,
+                        validate=validate,
+                        error_status_code=error_status_code,
+                        error_headers=error_headers,
+                    )
+                    args, kwargs = self._update_args_kwargs(
+                        args, kwargs, parsed_args, as_kwargs
+                    )
+                    return func(*args, **kwargs)
+
+            wrapper.__wrapped__ = func  # type: ignore
             return wrapper
 
         return decorator
