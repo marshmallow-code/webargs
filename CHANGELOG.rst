@@ -15,8 +15,9 @@ Features:
   also async. They will call the non-async ``parse`` method when used to
   decorate non-async functions.
 
-* As a result of the changes to ``webargs.Parser``, ``FlaskParser`` now
-  supports async views. Thanks :user:`Isira-Seneviratne` for the PR.
+* As a result of the changes to ``webargs.Parser``, ``FlaskParser``,
+  ``DjangoParser``, and ``FalconParser`` now all support async views.
+  Thanks :user:`Isira-Seneviratne` for the initial PR.
 
 Changes:
 

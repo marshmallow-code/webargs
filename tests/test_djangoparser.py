@@ -27,3 +27,9 @@ class TestDjangoParser(CommonTestCase):
     def test_use_args_in_class_based_view_with_path_param(self, testapp):
         res = testapp.get("/echo_use_args_with_path_param_cbv/42?name=Fred")
         assert res.json == {"name": "Fred"}
+
+    def test_parse_querystring_args_async(self, testapp):
+        assert testapp.get("/async_echo?name=Fred").json == {"name": "Fred"}
+
+    def test_async_use_args_decorator(self, testapp):
+        assert testapp.get("/async_echo_use_args?name=Fred").json == {"name": "Fred"}

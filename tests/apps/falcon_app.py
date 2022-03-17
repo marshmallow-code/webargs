@@ -1,4 +1,5 @@
 import falcon
+import falcon.asgi
 import marshmallow as ma
 
 from webargs import fields
@@ -22,6 +23,12 @@ hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 class Echo:
     def on_get(self, req, resp):
         parsed = parser.parse(hello_args, req, location="query")
+        resp.body = json.dumps(parsed)
+
+
+class AsyncEcho:
+    async def on_get(self, req, resp):
+        parsed = await parser.async_parse(hello_args, req, location="query")
         resp.body = json.dumps(parsed)
 
 
@@ -52,6 +59,12 @@ class EchoJSONOrForm:
 class EchoUseArgs:
     @use_args(hello_args, location="query")
     def on_get(self, req, resp, args):
+        resp.body = json.dumps(args)
+
+
+class AsyncEchoUseArgs:
+    @use_args(hello_args, location="query")
+    async def on_get(self, req, resp, args):
         resp.body = json.dumps(args)
 
 
@@ -187,4 +200,11 @@ def create_app():
     app.add_route("/echo_nested", EchoNested())
     app.add_route("/echo_nested_many", EchoNestedMany())
     app.add_route("/echo_use_args_hook", EchoUseArgsHook())
+    return app
+
+
+def create_async_app():
+    app = falcon.asgi.App()
+    app.add_route("/async_echo", AsyncEcho())
+    app.add_route("/async_echo_use_args", AsyncEchoUseArgs())
     return app
