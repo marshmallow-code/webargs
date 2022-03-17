@@ -1,5 +1,4 @@
 import falcon
-import falcon.asgi
 import marshmallow as ma
 
 from webargs import fields
@@ -8,6 +7,9 @@ from webargs.falconparser import parser, use_args, use_kwargs
 
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
+
+FALCON_MAJOR_VERSION = int(falcon.__version__.split(".")[0])
+FALCON_SUPPORTS_ASYNC = FALCON_MAJOR_VERSION >= 3
 
 
 class HelloSchema(ma.Schema):
@@ -204,6 +206,9 @@ def create_app():
 
 
 def create_async_app():
+    # defer import (async-capable versions only)
+    import falcon.asgi
+
     app = falcon.asgi.App()
     app.add_route("/async_echo", AsyncEcho())
     app.add_route("/async_echo_use_args", AsyncEchoUseArgs())

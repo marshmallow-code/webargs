@@ -2,7 +2,7 @@ import pytest
 import falcon.testing
 
 from webargs.testing import CommonTestCase
-from tests.apps.falcon_app import create_app, create_async_app
+from tests.apps.falcon_app import create_app, create_async_app, FALCON_SUPPORTS_ASYNC
 
 
 class TestFalconParser(CommonTestCase):
@@ -73,11 +73,17 @@ class TestFalconParser(CommonTestCase):
         )
         assert res.json == {"name": "Fred"}
 
+    @pytest.mark.skipif(
+        not FALCON_SUPPORTS_ASYNC, reason="requires a falcon version with async support"
+    )
     def test_parse_querystring_args_async(self):
         app = create_async_app()
         client = falcon.testing.TestClient(app)
         assert client.simulate_get("/async_echo?name=Fred").json == {"name": "Fred"}
 
+    @pytest.mark.skipif(
+        not FALCON_SUPPORTS_ASYNC, reason="requires a falcon version with async support"
+    )
     def test_async_use_args_decorator(self):
         app = create_async_app()
         client = falcon.testing.TestClient(app)
