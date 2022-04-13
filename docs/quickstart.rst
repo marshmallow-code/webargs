@@ -186,8 +186,10 @@ Then decorate that function with :func:`Parser.error_handler <webargs.core.Parse
 
     from webargs.flaskparser import parser
 
+
     class CustomError(Exception):
         pass
+
 
     @parser.error_handler
     def handle_error(error, req, schema, *, error_status_code, error_headers):
