@@ -184,9 +184,7 @@ Then decorate that function with :func:`Parser.error_handler <webargs.core.Parse
 
 .. code-block:: python
 
-    from webargs import flaskparser
-
-    parser = flaskparser.FlaskParser()
+    from webargs.flaskparser import parser
 
 
     class CustomError(Exception):
