@@ -97,7 +97,7 @@ class FlaskParser(core.Parser):
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
-        return self._makeproxy(req.files, schema)
+        return self._makeproxy(req.files or req.form, schema)
 
     def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current HTTP request and
