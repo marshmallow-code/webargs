@@ -56,3 +56,4 @@ Contributors (chronological)
 * Legolas Bloom `@TTWShell <https://github.com/TTWShell>`_
 * Kevin Kirsche  `@kkirsche <https://github.com/kkirsche>`_
 * Isira Seneviratne `@Isira-Seneviratne <https://github.com/Isira-Seneviratne>`_
+* Anton Ostapenko `@AVOstap <https://github.com/AVOstap>`_
