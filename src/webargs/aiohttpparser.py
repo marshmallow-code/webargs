@@ -167,7 +167,7 @@ class AIOHTTPParser(AsyncParser):
             raise LookupError(f"No exception for {error_status_code}")
         headers = error_headers
         raise error_class(
-            body=json.dumps(error.messages).encode("utf-8"),
+            text=json.dumps(error.messages),
             headers=headers,
             content_type="application/json",
         )
@@ -177,9 +177,7 @@ class AIOHTTPParser(AsyncParser):
     ) -> typing.NoReturn:
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}
-        raise error_class(
-            body=json.dumps(messages).encode("utf-8"), content_type="application/json"
-        )
+        raise error_class(text=json.dumps(messages), content_type="application/json")
 
 
 parser = AIOHTTPParser()
