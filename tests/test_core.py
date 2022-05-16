@@ -99,10 +99,15 @@ def test_load_nondefault_called_by_parse_with_location(location, web_request):
         assert load_json.call_count == 1
 
 
-def test_parse(parser, web_request):
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["parse", "async_parse"])
+async def test_parse(parser, web_request, method):
     web_request.json = {"username": 42, "password": 42}
     argmap = {"username": fields.Field(), "password": fields.Field()}
-    ret = parser.parse(argmap, web_request)
+    if method == "async_parse":
+        ret = await parser.async_parse(argmap, web_request)
+    else:
+        ret = parser.parse(argmap, web_request)
     assert {"username": 42, "password": 42} == ret
 
 
@@ -219,11 +224,16 @@ def test_parse_with_default_unknown_cleared_uses_schema_value(
     assert {"username": 42, "password": 42, "fjords": 42} == ret
 
 
-def test_parse_required_arg_raises_validation_error(parser, web_request):
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["parse", "async_parse"])
+async def test_parse_required_arg_raises_validation_error(parser, web_request, method):
     web_request.json = {}
     args = {"foo": fields.Field(required=True)}
     with pytest.raises(ValidationError, match="Missing data for required field."):
-        parser.parse(args, web_request)
+        if method == "parse":
+            parser.parse(args, web_request)
+        else:
+            await parser.async_parse(args, web_request)
 
 
 def test_arg_not_required_excluded_in_parsed_output(parser, web_request):
@@ -339,6 +349,29 @@ def test_handle_error_called_when_parsing_raises_error(handle_error, web_request
     assert handle_error.call_count == 2
 
 
+@pytest.mark.asyncio
+async def test_handle_error_called_when_async_parsing_raises_error(web_request):
+    with mock.patch("webargs.core.Parser.handle_error") as handle_error:
+        # handle_error must raise an error to be valid
+        handle_error.side_effect = ValidationError("parsing failed")
+
+        def always_fail(*args, **kwargs):
+            raise ValidationError("error occurred")
+
+        p = Parser()
+        assert handle_error.call_count == 0
+        with pytest.raises(ValidationError):
+            await p.async_parse(
+                {"foo": fields.Field()}, web_request, validate=always_fail
+            )
+        assert handle_error.call_count == 1
+        with pytest.raises(ValidationError):
+            await p.async_parse(
+                {"foo": fields.Field()}, web_request, validate=always_fail
+            )
+        assert handle_error.call_count == 2
+
+
 def test_handle_error_reraises_errors(web_request):
     p = Parser()
     with pytest.raises(ValidationError):
@@ -397,6 +430,37 @@ def test_custom_error_handler_decorator(web_request):
 
     with pytest.raises(CustomError):
         parser.parse(mock_schema, web_request)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("async_handler", [True, False])
+async def test_custom_error_handler_decorator_in_async_parse(
+    web_request, async_handler
+):
+    class CustomError(Exception):
+        pass
+
+    mock_schema = mock.Mock(spec=Schema)
+    mock_schema.strict = True
+    mock_schema.load.side_effect = ValidationError("parsing json failed")
+    parser = Parser()
+
+    if async_handler:
+
+        @parser.error_handler
+        async def handle_error(error, req, schema, *, error_status_code, error_headers):
+            assert isinstance(schema, Schema)
+            raise CustomError(error)
+
+    else:
+
+        @parser.error_handler
+        def handle_error(error, req, schema, *, error_status_code, error_headers):
+            assert isinstance(schema, Schema)
+            raise CustomError(error)
+
+    with pytest.raises(CustomError):
+        await parser.async_parse(mock_schema, web_request)
 
 
 def test_custom_error_handler_must_reraise(web_request):
@@ -630,6 +694,18 @@ def test_use_args(web_request, parser):
         return args
 
     assert viewfunc() == {"username": "foo", "password": "bar"}
+
+
+async def test_use_args_on_async(web_request, parser):
+    user_args = {"username": fields.Str(), "password": fields.Str()}
+    web_request.json = {"username": "foo", "password": "bar"}
+
+    @parser.use_args(user_args, web_request)
+    async def viewfunc(args):
+        return args
+
+    data = await viewfunc()
+    assert data == {"username": "foo", "password": "bar"}
 
 
 def test_use_args_stacked(web_request, parser):

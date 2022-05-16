@@ -1,10 +1,30 @@
 Changelog
 ---------
 
-8.1.1 (Unreleased)
+8.2.0 (Unreleased)
 ******************
 
+Features:
+
+* A new method, ``webargs.Parser.async_parse``, can be used for async-aware
+  parsing from the base parser class. This can handle async location loader
+  functions and async error handlers.
+
+* ``webargs.Parser.use_args`` and ``use_kwargs`` can now be used to decorate
+  async functions, and will use  ``async_parse`` if the decorated function is
+  also async. They will call the non-async ``parse`` method when used to
+  decorate non-async functions.
+
+* As a result of the changes to ``webargs.Parser``, ``FlaskParser``,
+  ``DjangoParser``, and ``FalconParser`` now all support async views.
+  Thanks :user:`Isira-Seneviratne` for the initial PR.
+
 Changes:
+
+* The implementation of ``AsyncParser`` has changed. Now that
+  ``webargs.Parser`` has built-in support for async usage, the primary
+  purpose of ``AsyncParser`` is to redefine ``parse`` as an alias for
+  ``async_parse``
 
 * Set ``python_requires>=3.7.2`` in package metadata (:pr:`692`).
   Thanks :user:`kasium` for the PR.

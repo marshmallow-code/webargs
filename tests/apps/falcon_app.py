@@ -8,6 +8,9 @@ from webargs.falconparser import parser, use_args, use_kwargs
 hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
 
+FALCON_MAJOR_VERSION = int(falcon.__version__.split(".")[0])
+FALCON_SUPPORTS_ASYNC = FALCON_MAJOR_VERSION >= 3
+
 
 class HelloSchema(ma.Schema):
     name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
@@ -22,6 +25,12 @@ hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 class Echo:
     def on_get(self, req, resp):
         parsed = parser.parse(hello_args, req, location="query")
+        resp.body = json.dumps(parsed)
+
+
+class AsyncEcho:
+    async def on_get(self, req, resp):
+        parsed = await parser.async_parse(hello_args, req, location="query")
         resp.body = json.dumps(parsed)
 
 
@@ -52,6 +61,12 @@ class EchoJSONOrForm:
 class EchoUseArgs:
     @use_args(hello_args, location="query")
     def on_get(self, req, resp, args):
+        resp.body = json.dumps(args)
+
+
+class AsyncEchoUseArgs:
+    @use_args(hello_args, location="query")
+    async def on_get(self, req, resp, args):
         resp.body = json.dumps(args)
 
 
@@ -187,4 +202,14 @@ def create_app():
     app.add_route("/echo_nested", EchoNested())
     app.add_route("/echo_nested_many", EchoNestedMany())
     app.add_route("/echo_use_args_hook", EchoUseArgsHook())
+    return app
+
+
+def create_async_app():
+    # defer import (async-capable versions only)
+    import falcon.asgi
+
+    app = falcon.asgi.App()
+    app.add_route("/async_echo", AsyncEcho())
+    app.add_route("/async_echo_use_args", AsyncEchoUseArgs())
     return app

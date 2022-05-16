@@ -5,10 +5,12 @@ from tests.apps.django_app.echo import views
 
 urlpatterns = [
     re_path(r"^echo$", views.echo),
+    re_path(r"^async_echo$", views.async_echo),
     re_path(r"^echo_form$", views.echo_form),
     re_path(r"^echo_json$", views.echo_json),
     re_path(r"^echo_json_or_form$", views.echo_json_or_form),
     re_path(r"^echo_use_args$", views.echo_use_args),
+    re_path(r"^async_echo_use_args$", views.async_echo_use_args),
     re_path(r"^echo_use_args_validated$", views.echo_use_args_validated),
     re_path(r"^echo_ignoring_extra_data$", views.echo_ignoring_extra_data),
     re_path(r"^echo_use_kwargs$", views.echo_use_kwargs),

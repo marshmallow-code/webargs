@@ -9,6 +9,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http GET :5001/
     $ http GET :5001/ name==Ada
     $ http POST :5001/add x=40 y=2
+    $ http POST :5001/subtract x=40 y=2
     $ http POST :5001/dateadd value=1973-04-10 addend=63
     $ http POST :5001/dateadd value=2014-10-23 addend=525600 unit=minutes
 """
@@ -38,6 +39,13 @@ add_args = {"x": fields.Float(required=True), "y": fields.Float(required=True)}
 def add(x, y):
     """An addition endpoint."""
     return jsonify({"result": x + y})
+
+
+@app.route("/subtract", methods=["POST"])
+@use_kwargs(add_args)
+async def subtract(x, y):
+    """An async subtraction endpoint."""
+    return jsonify({"result": x - y})
 
 
 dateadd_args = {

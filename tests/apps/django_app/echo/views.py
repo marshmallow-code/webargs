@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.views.generic import View
+import asyncio
 import marshmallow as ma
 
 from webargs import fields
@@ -26,13 +27,25 @@ def json_response(data, **kwargs):
 
 
 def handle_view_errors(f):
-    def wrapped(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except ma.ValidationError as err:
-            return json_response(err.messages, status=422)
-        except json.JSONDecodeError:
-            return json_response({"json": ["Invalid JSON body."]}, status=400)
+    if asyncio.iscoroutinefunction(f):
+
+        async def wrapped(*args, **kwargs):
+            try:
+                return await f(*args, **kwargs)
+            except ma.ValidationError as err:
+                return json_response(err.messages, status=422)
+            except json.JSONDecodeError:
+                return json_response({"json": ["Invalid JSON body."]}, status=400)
+
+    else:
+
+        def wrapped(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except ma.ValidationError as err:
+                return json_response(err.messages, status=422)
+            except json.JSONDecodeError:
+                return json_response({"json": ["Invalid JSON body."]}, status=400)
 
     return wrapped
 
@@ -40,6 +53,13 @@ def handle_view_errors(f):
 @handle_view_errors
 def echo(request):
     return json_response(parser.parse(hello_args, request, location="query"))
+
+
+@handle_view_errors
+async def async_echo(request):
+    return json_response(
+        await parser.async_parse(hello_args, request, location="query")
+    )
 
 
 @handle_view_errors
@@ -60,6 +80,12 @@ def echo_json_or_form(request):
 @handle_view_errors
 @use_args(hello_args, location="query")
 def echo_use_args(request, args):
+    return json_response(args)
+
+
+@handle_view_errors
+@use_args(hello_args, location="query")
+async def async_echo_use_args(request, args):
     return json_response(args)
 
 

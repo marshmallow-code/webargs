@@ -13,7 +13,8 @@ Flask support is available via the :mod:`webargs.flaskparser` module.
 Decorator Usage
 +++++++++++++++
 
-When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>` decorator, the arguments dictionary will be *before* any URL variable parameters.
+When using the :meth:`use_args <webargs.flaskparser.FlaskParser.use_args>`
+decorator, the arguments dictionary will be *before* any URL variable parameters.
 
 .. code-block:: python
 
