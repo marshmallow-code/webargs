@@ -21,6 +21,7 @@ Example: ::
         )
 """
 from __future__ import annotations
+from typing import NoReturn
 
 import flask
 from werkzeug.exceptions import HTTPException
@@ -30,7 +31,7 @@ import marshmallow as ma
 from webargs import core
 
 
-def abort(http_status_code, exc=None, **kwargs):
+def abort(http_status_code, exc=None, **kwargs) -> NoReturn:
     """Raise a HTTPException for the given http_status_code. Attach any keyword
     arguments to the exception for later processing.
 
@@ -39,8 +40,8 @@ def abort(http_status_code, exc=None, **kwargs):
     try:
         flask.abort(http_status_code)
     except HTTPException as err:
-        err.data = kwargs
-        err.exc = exc
+        err.data = kwargs  # type: ignore
+        err.exc = exc  # type: ignore
         raise err
 
 
