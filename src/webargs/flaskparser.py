@@ -40,8 +40,8 @@ def abort(http_status_code, exc=None, **kwargs) -> NoReturn:
     try:
         flask.abort(http_status_code)
     except HTTPException as err:
-        err.data = kwargs
-        err.exc = exc
+        err.data = kwargs  # type: ignore
+        err.exc = exc  # type: ignore
         raise err
 
 
