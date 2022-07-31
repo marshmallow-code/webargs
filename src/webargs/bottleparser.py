@@ -36,7 +36,7 @@ class BottleParser(core.Parser):
         except AttributeError:
             return core.missing
 
-        # unfortunately, bottle does not distinguish between an emtpy body, "",
+        # unfortunately, bottle does not distinguish between an empty body, "",
         # and a body containing the valid JSON value null, "null"
         # so these can't be properly disambiguated
         # as our best-effort solution, treat None as missing and ignore the
