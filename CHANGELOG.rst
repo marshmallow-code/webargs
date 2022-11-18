@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+8.3.0 (unreleased)
+******************
+
+Other changes:
+
+- Test against Python 3.11 (:pr:`787`).
+
 8.2.0 (2022-07-11)
 ******************
 
