@@ -46,7 +46,6 @@ class AddResource(Resource):
 
 
 class DateAddResource(Resource):
-
     dateadd_args = {
         "value": fields.Date(required=False),
         "addend": fields.Int(required=True, validate=validate.Range(min=1)),
