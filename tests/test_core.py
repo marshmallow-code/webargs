@@ -510,7 +510,6 @@ def test_custom_location_loader_with_data_key(web_request):
 
 
 def test_full_input_validation(parser, web_request):
-
     web_request.json = {"foo": 41, "bar": 42}
 
     args = {"foo": fields.Int(), "bar": fields.Int()}
@@ -775,7 +774,6 @@ def test_multiple_arg_required_with_int_conversion(web_request, parser):
 
 
 def test_parse_with_callable(web_request, parser):
-
     web_request.json = {"foo": 42}
 
     class MySchema(Schema):
@@ -827,7 +825,6 @@ class TestPassingSchema:
         assert result == {"email": "foo@bar.com", "password": "bar"}
 
     def test_use_args_can_be_passed_a_schema(self, web_request, parser):
-
         web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         @parser.use_args(self.UserSchema(), web_request)
@@ -861,7 +858,6 @@ class TestPassingSchema:
         assert viewfunc() == {"email": "foo@bar.com", "password": "bar"}
 
     def test_use_kwargs_can_be_passed_a_schema(self, web_request, parser):
-
         web_request.json = {"email": "foo@bar.com", "password": "bar"}
 
         @parser.use_kwargs(self.UserSchema(), web_request)
