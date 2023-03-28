@@ -29,7 +29,7 @@ EXTRAS_REQUIRE = {
     "docs": [
         "Sphinx==6.1.3",
         "sphinx-issues==3.0.1",
-        "furo==2023.3.23",
+        "furo==2023.3.27",
     ]
     + FRAMEWORKS,
 }
