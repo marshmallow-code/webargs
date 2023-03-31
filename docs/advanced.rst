@@ -485,7 +485,7 @@ Returning HTTP 400 Responses
 If you'd prefer validation errors to return status code ``400`` instead
 of ``422``, you can override ``DEFAULT_VALIDATION_STATUS`` on a :class:`Parser <webargs.core.Parser>`.
 
-Sublcass the parser for your framework to do so. For example, using Falcon:
+Subclass the parser for your framework to do so. For example, using Falcon:
 
 .. code-block:: python
 
