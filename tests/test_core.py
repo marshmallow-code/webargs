@@ -49,7 +49,7 @@ class MockRequestParser(Parser):
         return req.cookies
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def web_request():
     req = mock.Mock()
     req.query = {}
