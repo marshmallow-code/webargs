@@ -47,7 +47,7 @@ def add_args(argmap, **kwargs):
 class HelloResource:
     """A welcome page."""
 
-    hello_args = {"name": fields.Str(missing="Friend", location="query")}
+    hello_args = {"name": fields.Str(load_default="Friend", location="query")}
 
     @use_args(hello_args)
     def on_get(self, req, resp, args):
@@ -71,7 +71,7 @@ class DateAddResource:
         "value": fields.Date(required=False),
         "addend": fields.Int(required=True, validate=validate.Range(min=1)),
         "unit": fields.Str(
-            missing="days", validate=validate.OneOf(["minutes", "days"])
+            load_default="days", validate=validate.OneOf(["minutes", "days"])
         ),
     }
 

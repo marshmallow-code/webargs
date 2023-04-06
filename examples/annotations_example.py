@@ -96,7 +96,7 @@ db = {"users": {}}
 
 
 @route("/", methods=["GET"])
-def index(name: fields.Str(missing="Friend")):  # noqa: F821
+def index(name: fields.Str(load_default="Friend")):  # noqa: F821
     return {"message": f"Hello, {name}!"}
 
 

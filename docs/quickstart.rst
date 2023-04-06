@@ -18,7 +18,7 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
         # OR use marshmallow's built-in validators
         "password": fields.Str(validate=validate.Length(min=6)),
         # Default value when argument is missing
-        "display_per_page": fields.Int(missing=10),
+        "display_per_page": fields.Int(load_default=10),
         # Repeated parameter, e.g. "/?nickname=Fred&nickname=Freddie"
         "nickname": fields.List(fields.Str()),
         # Delimited list, e.g. "/?languages=python,javascript"

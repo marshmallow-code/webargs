@@ -1117,7 +1117,7 @@ Your code will need to be updated to use ``Fields`` rather than ``Args``.
     args = {
         "name": fields.Str(required=True),
         "password": fields.Str(validate=lambda p: len(p) >= 6),
-        "display_per_page": fields.Int(missing=10),
+        "display_per_page": fields.Int(load_default=10),
         "nickname": fields.List(fields.Str()),
         "content_type": fields.Str(load_from="Content-Type"),
         "location": fields.Nested({"city": fields.Str(), "state": fields.Str()}),

@@ -49,7 +49,7 @@ class MockRequestParser(Parser):
         return req.cookies
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def web_request():
     req = mock.Mock()
     req.query = {}
@@ -299,14 +299,14 @@ def test_default_location():
 
 def test_missing_with_default(parser, web_request):
     web_request.json = {}
-    args = {"val": fields.Field(missing="pizza")}
+    args = {"val": fields.Field(load_default="pizza")}
     result = parser.parse(args, web_request)
     assert result["val"] == "pizza"
 
 
 def test_default_can_be_none(parser, web_request):
     web_request.json = {}
-    args = {"val": fields.Field(missing=None, allow_none=True)}
+    args = {"val": fields.Field(load_default=None, allow_none=True)}
     result = parser.parse(args, web_request)
     assert result["val"] is None
 
@@ -316,7 +316,7 @@ def test_arg_with_default_and_location(parser, web_request):
     web_request.json = {}
     args = {
         "p": fields.Int(
-            missing=1,
+            load_default=1,
             validate=lambda p: p > 0,
             error="La page demandée n'existe pas",
             location="querystring",
@@ -656,7 +656,7 @@ def test_parse_nested_with_missing_key_and_data_key(web_request):
     web_request.json = {"nested_arg": {}}
     args = {
         "nested_arg": fields.Nested(
-            {"found": fields.Field(missing=None, allow_none=True, data_key="miss")}
+            {"found": fields.Field(load_default=None, allow_none=True, data_key="miss")}
         )
     }
 
@@ -668,7 +668,7 @@ def test_parse_nested_with_default(web_request):
     parser = MockRequestParser()
 
     web_request.json = {"nested_arg": {}}
-    args = {"nested_arg": fields.Nested({"miss": fields.Field(missing="<foo>")})}
+    args = {"nested_arg": fields.Nested({"miss": fields.Field(load_default="<foo>")})}
 
     parsed = parser.parse(args, web_request)
     assert parsed == {"nested_arg": {"miss": "<foo>"}}

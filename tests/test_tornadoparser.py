@@ -25,7 +25,7 @@ value = "value"
 
 
 class AuthorSchema(ma.Schema):
-    name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
     works = fields.List(fields.Str())
 
 

@@ -6,12 +6,12 @@ from webargs.bottleparser import parser, use_args, use_kwargs
 from webargs.core import json
 
 
-hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
 
 
 hello_many_schema = HelloSchema(many=True)
