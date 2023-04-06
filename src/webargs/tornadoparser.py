@@ -8,7 +8,7 @@ Example: ::
 
     class HelloHandler(tornado.web.RequestHandler):
 
-        @use_args({'name': fields.Str(missing='World')})
+        @use_args({'name': fields.Str(load_default='World')})
         def get(self, args):
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)

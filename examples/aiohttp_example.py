@@ -20,7 +20,7 @@ from aiohttp.web import json_response
 from webargs import fields, validate
 from webargs.aiohttpparser import use_args, use_kwargs
 
-hello_args = {"name": fields.Str(missing="Friend")}
+hello_args = {"name": fields.Str(load_default="Friend")}
 
 
 @use_args(hello_args)
@@ -41,7 +41,9 @@ async def add(request, x, y):
 dateadd_args = {
     "value": fields.Date(required=False),
     "addend": fields.Int(required=True, validate=validate.Range(min=1)),
-    "unit": fields.Str(missing="days", validate=validate.OneOf(["minutes", "days"])),
+    "unit": fields.Str(
+        load_default="days", validate=validate.OneOf(["minutes", "days"])
+    ),
 }
 
 

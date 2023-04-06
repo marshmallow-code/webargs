@@ -7,7 +7,7 @@ Example: ::
     from webargs.bottleparser import use_args
 
     hello_args = {
-        'name': fields.Str(missing='World')
+        'name': fields.Str(load_default='World')
     }
     @route('/', method='GET', apply=use_args(hello_args))
     def index(args):

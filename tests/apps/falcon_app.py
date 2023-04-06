@@ -5,7 +5,7 @@ from webargs import fields
 from webargs.core import json
 from webargs.falconparser import parser, use_args, use_kwargs
 
-hello_args = {"name": fields.Str(missing="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 FALCON_MAJOR_VERSION = int(falcon.__version__.split(".")[0])
@@ -13,7 +13,7 @@ FALCON_SUPPORTS_ASYNC = FALCON_MAJOR_VERSION >= 3
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(missing="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
 
 
 hello_many_schema = HelloSchema(many=True)
@@ -137,7 +137,7 @@ class AlwaysError:
 class EchoHeaders:
     def on_get(self, req, resp):
         class HeaderSchema(ma.Schema):
-            NAME = fields.Str(missing="World")
+            NAME = fields.Str(load_default="World")
 
         resp.body = json.dumps(parser.parse(HeaderSchema(), req, location="headers"))
 

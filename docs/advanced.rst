@@ -103,8 +103,8 @@ When you need more flexibility in defining input schemas, you can pass a marshma
         id = fields.Int(dump_only=True)  # read-only (won't be parsed by webargs)
         username = fields.Str(required=True)
         password = fields.Str(load_only=True)  # write-only
-        first_name = fields.Str(missing="")
-        last_name = fields.Str(missing="")
+        first_name = fields.Str(load_default="")
+        last_name = fields.Str(load_default="")
         date_registered = fields.DateTime(dump_only=True)
 
 
@@ -121,7 +121,7 @@ When you need more flexibility in defining input schemas, you can pass a marshma
 
 
     # You can add additional parameters
-    @use_kwargs({"posts_per_page": fields.Int(missing=10)}, location="query")
+    @use_kwargs({"posts_per_page": fields.Int(load_default=10)}, location="query")
     @use_args(UserSchema())
     def profile_posts(args, posts_per_page):
         username = args["username"]
@@ -305,8 +305,8 @@ Consider the following use cases:
         id = fields.Int(dump_only=True)
         username = fields.Str(required=True)
         password = fields.Str(load_only=True)
-        first_name = fields.Str(missing="")
-        last_name = fields.Str(missing="")
+        first_name = fields.Str(load_default="")
+        last_name = fields.Str(load_default="")
         date_registered = fields.DateTime(dump_only=True)
 
 

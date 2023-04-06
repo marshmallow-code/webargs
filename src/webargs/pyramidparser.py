@@ -9,7 +9,7 @@ Example usage: ::
     from webargs.pyramidparser import use_args
 
     hello_args = {
-        'name': fields.Str(missing='World')
+        'name': fields.Str(load_default='World')
     }
 
     @use_args(hello_args)

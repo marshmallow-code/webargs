@@ -21,7 +21,7 @@ from webargs.flaskparser import use_args, use_kwargs
 
 app = Flask(__name__)
 
-hello_args = {"name": fields.Str(missing="Friend")}
+hello_args = {"name": fields.Str(load_default="Friend")}
 
 
 @app.route("/", methods=["GET"])
@@ -51,7 +51,9 @@ async def subtract(x, y):
 dateadd_args = {
     "value": fields.Date(required=False),
     "addend": fields.Int(required=True, validate=validate.Range(min=1)),
-    "unit": fields.Str(missing="days", validate=validate.OneOf(["minutes", "days"])),
+    "unit": fields.Str(
+        load_default="days", validate=validate.OneOf(["minutes", "days"])
+    ),
 }
 
 

@@ -23,7 +23,7 @@ from webargs import fields, validate
 from webargs.pyramidparser import use_args, use_kwargs
 
 
-hello_args = {"name": fields.Str(missing="Friend")}
+hello_args = {"name": fields.Str(load_default="Friend")}
 
 
 @view_config(route_name="hello", request_method="GET", renderer="json")
@@ -46,7 +46,9 @@ def add(request, x, y):
 dateadd_args = {
     "value": fields.Date(required=False),
     "addend": fields.Int(required=True, validate=validate.Range(min=1)),
-    "unit": fields.Str(missing="days", validate=validate.OneOf(["minutes", "days"])),
+    "unit": fields.Str(
+        load_default="days", validate=validate.OneOf(["minutes", "days"])
+    ),
 }
 
 

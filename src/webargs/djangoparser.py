@@ -8,7 +8,7 @@ Example usage: ::
     from webargs.djangoparser import use_args
 
     hello_args = {
-        'name': fields.Str(missing='World')
+        'name': fields.Str(load_default='World')
     }
 
     class MyView(View):

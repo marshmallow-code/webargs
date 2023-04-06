@@ -111,7 +111,7 @@ def user_detail(reqargs, user_id):
 
 # You can add additional arguments with use_kwargs
 @app.route("/users/", methods=["GET", "POST"])
-@use_kwargs({"limit": fields.Int(missing=10, location="query")})
+@use_kwargs({"limit": fields.Int(load_default=10, location="query")})
 @use_schema(UserSchema, list_view=True)
 def user_list(reqargs, limit):
     users = db["users"].values()
