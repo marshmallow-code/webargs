@@ -125,8 +125,8 @@ class Parser:
 
     :param str location: Default location to use for data
     :param str unknown: A default value to pass for ``unknown`` when calling the
-        schema's ``load`` method. Defaults to EXCLUDE for non-body
-        locations and RAISE for request bodies. Pass ``None`` to use the
+        schema's ``load`` method. Defaults to ``marshmallow.EXCLUDE`` for non-body
+        locations and ``marshmallow.RAISE`` for request bodies. Pass ``None`` to use the
         schema's setting instead.
     :param callable error_handler: Custom error handler function.
     """
@@ -385,9 +385,9 @@ class Parser:
             default, that means one of ``('json', 'query', 'querystring',
             'form', 'headers', 'cookies', 'files', 'json_or_form')``.
         :param str unknown: A value to pass for ``unknown`` when calling the
-            schema's ``load`` method. Defaults to EXCLUDE for non-body
-            locations and RAISE for request bodies. Pass ``None`` to use the
-            schema's setting instead.
+            schema's ``load`` method. Defaults to ``marshmallow.EXCLUDE`` for non-body
+            locations and ``marshmallow.RAISE`` for request bodies. Pass ``None`` to use
+            the schema's setting instead.
         :param callable validate: Validation function or list of validation functions
             that receives the dictionary of parsed arguments. Validator either returns a
             boolean or raises a :exc:`ValidationError`.
