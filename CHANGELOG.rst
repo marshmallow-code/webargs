@@ -10,6 +10,11 @@ Features:
   over the type of the request object. Various framework-specific parsers are
   parametrized over their relevant request object classes.
 
+* ``webargs.Parser`` and its subclasses now support passing arguments as a
+  single keyword argument without expanding the parsed data into its
+  components. For more details, see advanced docs on
+  ``Argument Passing and arg_name``.
+
 Other changes:
 
 * Type annotations have been improved to allow ``Mapping`` for dict-like

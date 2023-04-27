@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import functools
-import typing
-import logging
 import json
+import logging
+import typing
 
 import marshmallow as ma
 from marshmallow import ValidationError
@@ -154,6 +154,9 @@ class Parser(typing.Generic[Request]):
     DEFAULT_VALIDATION_MESSAGE: str = "Invalid value."
     #: field types which should always be treated as if they set `is_multiple=True`
     KNOWN_MULTI_FIELDS: list[type] = [ma.fields.List, ma.fields.Tuple]
+    #: set use_args to use a positional argument (rather than a keyword argument)
+    #  defaults to True, but will become False in a future major version
+    USE_ARGS_POSITIONAL: bool = True
 
     #: Maps location => method name
     __location_map__: dict[str, str | typing.Callable] = {
@@ -495,13 +498,19 @@ class Parser(typing.Generic[Request]):
         kwargs: dict[str, typing.Any],
         parsed_args: tuple,
         as_kwargs: bool,
+        arg_name: str | None,
     ) -> tuple[tuple, typing.Mapping]:
         """Update args or kwargs with parsed_args depending on as_kwargs"""
         if as_kwargs:
+            # expand parsed_args into kwargs
             kwargs.update(parsed_args)
         else:
-            # Add parsed_args after other positional arguments
-            args += (parsed_args,)
+            if arg_name:
+                # add parsed_args as a specific kwarg
+                kwargs[arg_name] = parsed_args
+            else:
+                # Add parsed_args after other positional arguments
+                args += (parsed_args,)
         return args, kwargs
 
     def use_args(
@@ -512,6 +521,7 @@ class Parser(typing.Generic[Request]):
         location: str | None = None,
         unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         as_kwargs: bool = False,
+        arg_name: str | None = None,
         validate: ValidateArg = None,
         error_status_code: int | None = None,
         error_headers: typing.Mapping[str, str] | None = None,
@@ -522,8 +532,8 @@ class Parser(typing.Generic[Request]):
 
             @app.route('/echo', methods=['get', 'post'])
             @parser.use_args({'name': fields.Str()}, location="querystring")
-            def greet(args):
-                return 'Hello ' + args['name']
+            def greet(querystring_args):
+                return 'Hello ' + querystring_args['name']
 
         :param argmap: Either a `marshmallow.Schema`, a `dict`
             of argname -> `marshmallow.fields.Field` pairs, or a callable
@@ -532,6 +542,8 @@ class Parser(typing.Generic[Request]):
         :param str unknown: A value to pass for ``unknown`` when calling the
             schema's ``load`` method.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
+        :param str arg_name: Keyword argument name to use for arguments. Mutually
+            exclusive with as_kwargs.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
@@ -542,6 +554,12 @@ class Parser(typing.Generic[Request]):
         """
         location = location or self.location
         request_obj = req
+
+        if arg_name is not None and as_kwargs:
+            raise ValueError("arg_name and as_kwargs are mutually exclusive")
+        if arg_name is None and not self.USE_ARGS_POSITIONAL:
+            arg_name = f"{location}_args"
+
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, typing.Mapping):
@@ -571,7 +589,7 @@ class Parser(typing.Generic[Request]):
                         error_headers=error_headers,
                     )
                     args, kwargs = self._update_args_kwargs(
-                        args, kwargs, parsed_args, as_kwargs
+                        args, kwargs, parsed_args, as_kwargs, arg_name
                     )
                     return await func(*args, **kwargs)
 
@@ -594,7 +612,7 @@ class Parser(typing.Generic[Request]):
                         error_headers=error_headers,
                     )
                     args, kwargs = self._update_args_kwargs(
-                        args, kwargs, parsed_args, as_kwargs
+                        args, kwargs, parsed_args, as_kwargs, arg_name
                     )
                     return func(*args, **kwargs)
 
@@ -603,7 +621,17 @@ class Parser(typing.Generic[Request]):
 
         return decorator
 
-    def use_kwargs(self, *args, **kwargs) -> typing.Callable:
+    def use_kwargs(
+        self,
+        argmap: ArgMap,
+        req: Request | None = None,
+        *,
+        location: str | None = None,
+        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
+        validate: ValidateArg = None,
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None,
+    ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view function or method
         as keyword arguments.
 
@@ -618,8 +646,16 @@ class Parser(typing.Generic[Request]):
 
         Receives the same ``args`` and ``kwargs`` as :meth:`use_args`.
         """
-        kwargs["as_kwargs"] = True
-        return self.use_args(*args, **kwargs)
+        return self.use_args(
+            argmap,
+            req=req,
+            as_kwargs=True,
+            location=location,
+            unknown=unknown,
+            validate=validate,
+            error_status_code=error_status_code,
+            error_headers=error_headers,
+        )
 
     def location_loader(self, name: str) -> typing.Callable[[C], C]:
         """Decorator that registers a function for loading a request location.

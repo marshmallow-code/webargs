@@ -394,7 +394,6 @@ To add your own parser, extend :class:`Parser <webargs.core.Parser>` and impleme
 
     import re
 
-    from webargs import core
     from webargs.flaskparser import FlaskParser
 
 
@@ -655,6 +654,77 @@ To reduce boilerplate, you could create shortcuts, like so:
         page = query_parsed["page"]
         name = json_parsed["name"]
         # ...
+
+Argument Passing and ``arg_name``
+---------------------------------
+
+.. NOTE::
+
+    This section describes behaviors which are planned to change in ``webargs``
+    version 9. In version 8, behavior will be as follows. In version 9,
+    ``USE_ARGS_POSITIONAL`` will be removed and will always be ``False``.
+
+By default, ``webargs`` provides two ways of passing arguments via decorators,
+`Parser.use_args <webargs.core.Parser.use_args>`, and `Parser.use_kwargs <webargs.core.Parser.use_kwargs>`.
+``use_args`` passes parsed arguments as positionals, and ``use_kwargs`` expands
+dict-like parsed arguments into keyword arguments.
+
+For ``use_args``, the result is that sometimes it is non-obvious which order
+arguments will be passed in. Consider the following two example snippets, one
+of which are nearly identical:
+
+.. code-block:: python
+
+    # correct ordering, top-to-bottom
+    @use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
+    @use_args({"baz": fields.Str()}, location="json")
+    def viewfunc(query_args, json_args):
+        ...
+
+    # incorrect ordering, bottom-to-top
+    @use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
+    @use_args({"baz": fields.Str()}, location="json")
+    def viewfunc(json_args, query_args):
+        ...
+
+
+To resolve this ambiguity, ``webargs`` version 9 will pass arguments from
+``use_args`` as keyword arguments. You can opt-in to this behavior today by
+setting ``USE_ARGS_POSITIONAL = False`` on a parser class. This will cause
+webargs to pass arguments named ``{location}_args`` for each location used.
+For example,
+
+.. code-block:: python
+
+    from webargs.flaskparser import FlaskParser
+    from flask import Flask
+
+    class KeywordOnlyParser(FlaskParser):
+        USE_ARGS_POSITIONAL = False
+
+    app = Flask(__name__)
+    parser = KeywordOnlyParser()
+
+    @app.route("/")
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
+    @parser.use_args({"baz": fields.Str()}, location="json")
+    def myview(*, query_args, json_args):
+        ...
+
+
+You can also customize the names of passed arguments using the ``arg_name``
+parameter:
+
+.. code-block:: python
+
+    @app.route("/")
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query", arg_name="query")
+    @parser.use_args({"baz": fields.Str()}, location="json", arg_name="payload")
+    def myview(*, query, payload):
+        ...
+
+Note that ``arg_name`` is available even on parsers where
+``USE_ARGS_POSITIONAL`` is not set.
 
 Next Steps
 ----------
