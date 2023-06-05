@@ -5,7 +5,7 @@ repos:
   - id: pyupgrade
     args: ["--py37-plus"]
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.23.0
+  rev: 0.23.1
   hooks:
     - id: check-github-workflows
     - id: check-readthedocs
