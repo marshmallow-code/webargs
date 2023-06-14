@@ -681,6 +681,7 @@ of which are nearly identical:
     def viewfunc(query_args, json_args):
         ...
 
+
     # incorrect ordering, bottom-to-top
     @use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
     @use_args({"baz": fields.Str()}, location="json")
@@ -699,11 +700,14 @@ For example,
     from webargs.flaskparser import FlaskParser
     from flask import Flask
 
+
     class KeywordOnlyParser(FlaskParser):
         USE_ARGS_POSITIONAL = False
 
+
     app = Flask(__name__)
     parser = KeywordOnlyParser()
+
 
     @app.route("/")
     @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
@@ -718,7 +722,9 @@ parameter:
 .. code-block:: python
 
     @app.route("/")
-    @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query", arg_name="query")
+    @parser.use_args(
+        {"foo": fields.Int(), "bar": fields.Str()}, location="query", arg_name="query"
+    )
     @parser.use_args({"baz": fields.Str()}, location="json", arg_name="payload")
     def myview(*, query, payload):
         ...
