@@ -22,7 +22,7 @@ class AsyncParser(core.Parser[core.Request]):
         validate: core.ValidateArg = None,
         error_status_code: int | None = None,
         error_headers: typing.Mapping[str, str] | None = None,
-    ) -> typing.Mapping | None:
+    ) -> typing.Any:
         """Coroutine variant of `webargs.core.Parser`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
