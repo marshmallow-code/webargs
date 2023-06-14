@@ -4,9 +4,19 @@ Changelog
 8.3.0 (unreleased)
 ******************
 
+Features:
+
+* ``webargs.Parser`` now inherits from ``typing.Generic`` and is parametrizable
+  over the type of the request object. Various framework-specific parsers are
+  parametrized over their relevant request object classes.
+
 Other changes:
 
-- Test against Python 3.11 (:pr:`787`).
+* Type annotations have been improved to allow ``Mapping`` for dict-like
+  schemas where previously ``dict`` was used. This makes the type covariant
+  rather than invariant (:issue:`836`).
+
+* Test against Python 3.11 (:pr:`787`).
 
 8.2.0 (2022-07-11)
 ******************

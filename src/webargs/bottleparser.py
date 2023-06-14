@@ -21,7 +21,7 @@ import bottle
 from webargs import core
 
 
-class BottleParser(core.Parser):
+class BottleParser(core.Parser[bottle.Request]):
     """Bottle.py request argument parser."""
 
     def _handle_invalid_json_error(self, error, req, *args, **kwargs):

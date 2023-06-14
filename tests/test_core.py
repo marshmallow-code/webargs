@@ -4,26 +4,21 @@ import typing
 from unittest import mock
 
 import pytest
+from bottle import MultiDict as BotMultiDict
+from django.utils.datastructures import MultiValueDict as DjMultiDict
 from marshmallow import (
+    EXCLUDE,
+    INCLUDE,
+    RAISE,
     Schema,
     post_load,
     pre_load,
     validates_schema,
-    EXCLUDE,
-    INCLUDE,
-    RAISE,
 )
-from werkzeug.datastructures import MultiDict as WerkMultiDict
-from django.utils.datastructures import MultiValueDict as DjMultiDict
-from bottle import MultiDict as BotMultiDict
-
-from webargs import fields, ValidationError
-from webargs.core import (
-    Parser,
-    is_json,
-    get_mimetype,
-)
+from webargs import ValidationError, fields
+from webargs.core import Parser, get_mimetype, is_json
 from webargs.multidictproxy import MultiDictProxy
+from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 
 class MockHTTPError(Exception):
@@ -1396,13 +1391,38 @@ def test_whitespace_stripping_parser_example(web_request):
     assert ret == {"ids": [1, 3, 4], "values": [" foo  ", " bar"]}
 
 
-def test_parse_rejects_non_dict_argmap_mapping(parser, web_request):
-    web_request.json = {"username": 42, "password": 42}
+def test_parse_allows_non_dict_argmap_mapping(parser, web_request):
+    web_request.json = {"username": "dadams", "password": 42}
+    # UserDict is dict-like in all meaningful ways, but not a subclass of `dict`
+    # it will therefore need to be converted when used
     argmap = collections.UserDict(
-        {"username": fields.Field(), "password": fields.Field()}
+        {"username": fields.String(), "password": fields.Field()}
     )
 
+    ret = parser.parse(argmap, web_request)
+    assert ret == {"username": "dadams", "password": 42}
+
+
+def test_use_args_allows_non_dict_argmap_mapping(parser, web_request):
+    web_request.json = {"username": "dadams", "password": 42}
     # UserDict is dict-like in all meaningful ways, but not a subclass of `dict`
-    # it will therefore be rejected with a TypeError when used
-    with pytest.raises(TypeError):
-        parser.parse(argmap, web_request)
+    # it will therefore need to be converted when used
+    argmap = collections.UserDict(
+        {"username": fields.String(), "password": fields.Field()}
+    )
+
+    @parser.use_args(argmap, web_request)
+    def viewfunc(args):
+        return args
+
+    assert viewfunc() == {"username": "dadams", "password": 42}
+
+
+def test_parse_rejects_unknown_argmap_type(parser, web_request):
+    web_request.json = {"username": "dadams", "password": 42}
+
+    class MyType:
+        pass
+
+    with pytest.raises(TypeError, match="argmap was of unexpected type"):
+        parser.parse(MyType(), web_request)

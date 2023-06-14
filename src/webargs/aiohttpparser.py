@@ -70,7 +70,7 @@ _find_exceptions()
 del _find_exceptions
 
 
-class AIOHTTPParser(AsyncParser):
+class AIOHTTPParser(AsyncParser[web.Request]):
     """aiohttp request argument parser."""
 
     DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {

@@ -1,9 +1,8 @@
 """Falcon request argument parsing module.
 """
 import falcon
-from falcon.util.uri import parse_query_string
-
 import marshmallow as ma
+from falcon.util.uri import parse_query_string
 
 from webargs import core
 
@@ -25,13 +24,13 @@ _find_exceptions()
 del _find_exceptions
 
 
-def is_json_request(req):
+def is_json_request(req: falcon.Request):
     content_type = req.get_header("Content-Type")
     return content_type and core.is_json(content_type)
 
 
 # NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
-def parse_form_body(req):
+def parse_form_body(req: falcon.Request):
     if (
         req.content_type is not None
         and "application/x-www-form-urlencoded" in req.content_type
@@ -69,7 +68,7 @@ class HTTPError(falcon.HTTPError):
         return ret
 
 
-class FalconParser(core.Parser):
+class FalconParser(core.Parser[falcon.Request]):
     """Falcon request argument parser.
 
     Defaults to using the `media` location. See :py:meth:`~FalconParser.load_media` for
@@ -94,11 +93,11 @@ class FalconParser(core.Parser):
     # values should be wrapped in lists due to the type of the destination
     # field
 
-    def load_querystring(self, req, schema):
+    def load_querystring(self, req: falcon.Request, schema):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.params, schema)
 
-    def load_form(self, req, schema):
+    def load_form(self, req: falcon.Request, schema):
         """Return form values from the request as a MultiDictProxy
 
         .. note::
@@ -110,7 +109,7 @@ class FalconParser(core.Parser):
             return form
         return self._makeproxy(form, schema)
 
-    def load_media(self, req, schema):
+    def load_media(self, req: falcon.Request, schema):
         """Return data unpacked and parsed by one of Falcon's media handlers.
         By default, Falcon only handles JSON payloads.
 
@@ -129,7 +128,7 @@ class FalconParser(core.Parser):
             return core.missing
         return req.media
 
-    def _raw_load_json(self, req):
+    def _raw_load_json(self, req: falcon.Request):
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -141,12 +140,12 @@ class FalconParser(core.Parser):
             return core.parse_json(body)
         return core.missing
 
-    def load_headers(self, req, schema):
+    def load_headers(self, req: falcon.Request, schema):
         """Return headers from the request."""
         # Falcon only exposes headers as a dict (not multidict)
         return req.headers
 
-    def load_cookies(self, req, schema):
+    def load_cookies(self, req: falcon.Request, schema):
         """Return cookies from the request."""
         # Cookies are expressed in Falcon as a dict, but the possibility of
         # multiple values for a cookie is preserved internally -- if desired in
@@ -163,19 +162,21 @@ class FalconParser(core.Parser):
             raise TypeError("Argument is not a falcon.Request")
         return req
 
-    def load_files(self, req, schema):
+    def load_files(self, req: falcon.Request, schema):
         raise NotImplementedError(
             f"Parsing files not yet supported by {self.__class__.__name__}"
         )
 
-    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
+    def handle_error(
+        self, error, req: falcon.Request, schema, *, error_status_code, error_headers
+    ):
         """Handles errors during parsing."""
         status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
         if status is None:
             raise LookupError(f"Status code {error_status_code} not supported")
         raise HTTPError(status, errors=error.messages, headers=error_headers)
 
-    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(self, error, req: falcon.Request, *args, **kwargs):
         status = status_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise HTTPError(status, errors=messages)
