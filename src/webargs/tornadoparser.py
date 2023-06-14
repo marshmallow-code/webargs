@@ -13,9 +13,10 @@ Example: ::
             response = {'message': 'Hello {}'.format(args['name'])}
             self.write(response)
 """
-import tornado.web
 import tornado.concurrent
+import tornado.web
 from tornado.escape import _unicode
+from tornado.httputil import HTTPServerRequest
 
 from webargs import core
 from webargs.multidictproxy import MultiDictProxy
@@ -30,7 +31,7 @@ class HTTPError(tornado.web.HTTPError):
         super().__init__(*args, **kwargs)
 
 
-def is_json_request(req):
+def is_json_request(req: HTTPServerRequest):
     content_type = req.headers.get("Content-Type")
     return content_type is not None and core.is_json(content_type)
 
@@ -77,10 +78,10 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
         return cookie.value
 
 
-class TornadoParser(core.Parser):
+class TornadoParser(core.Parser[HTTPServerRequest]):
     """Tornado request argument parser."""
 
-    def _raw_load_json(self, req):
+    def _raw_load_json(self, req: HTTPServerRequest):
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -95,23 +96,23 @@ class TornadoParser(core.Parser):
 
         return core.parse_json(req.body)
 
-    def load_querystring(self, req, schema):
+    def load_querystring(self, req: HTTPServerRequest, schema):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.query_arguments, schema, cls=WebArgsTornadoMultiDictProxy
         )
 
-    def load_form(self, req, schema):
+    def load_form(self, req: HTTPServerRequest, schema):
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
         )
 
-    def load_headers(self, req, schema):
+    def load_headers(self, req: HTTPServerRequest, schema):
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
 
-    def load_cookies(self, req, schema):
+    def load_cookies(self, req: HTTPServerRequest, schema):
         """Return cookies from the request as a MultiDictProxy."""
         # use the specialized subclass specifically for handling Tornado
         # cookies
@@ -119,11 +120,13 @@ class TornadoParser(core.Parser):
             req.cookies, schema, cls=WebArgsTornadoCookiesMultiDictProxy
         )
 
-    def load_files(self, req, schema):
+    def load_files(self, req: HTTPServerRequest, schema):
         """Return files from the request as a MultiDictProxy."""
         return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy)
 
-    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
+    def handle_error(
+        self, error, req: HTTPServerRequest, schema, *, error_status_code, error_headers
+    ):
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
@@ -140,7 +143,9 @@ class TornadoParser(core.Parser):
             headers=error_headers,
         )
 
-    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(
+        self, error, req: HTTPServerRequest, *args, **kwargs
+    ):
         raise HTTPError(
             400,
             log_message="Invalid JSON body.",

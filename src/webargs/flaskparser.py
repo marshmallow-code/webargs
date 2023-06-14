@@ -21,12 +21,12 @@ Example: ::
         )
 """
 from __future__ import annotations
+
 from typing import NoReturn
 
 import flask
-from werkzeug.exceptions import HTTPException
-
 import marshmallow as ma
+from werkzeug.exceptions import HTTPException
 
 from webargs import core
 
@@ -45,11 +45,11 @@ def abort(http_status_code, exc=None, **kwargs) -> NoReturn:
         raise err
 
 
-def is_json_request(req):
+def is_json_request(req: flask.Request):
     return core.is_json(req.mimetype)
 
 
-class FlaskParser(core.Parser):
+class FlaskParser(core.Parser[flask.Request]):
     """Flask request argument parser."""
 
     DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {
@@ -63,7 +63,7 @@ class FlaskParser(core.Parser):
         **core.Parser.__location_map__,
     )
 
-    def _raw_load_json(self, req):
+    def _raw_load_json(self, req: flask.Request):
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -73,34 +73,36 @@ class FlaskParser(core.Parser):
 
         return core.parse_json(req.get_data(cache=True))
 
-    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(self, error, req: flask.Request, *args, **kwargs):
         abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
-    def load_view_args(self, req, schema):
+    def load_view_args(self, req: flask.Request, schema):
         """Return the request's ``view_args`` or ``missing`` if there are none."""
         return req.view_args or core.missing
 
-    def load_querystring(self, req, schema):
+    def load_querystring(self, req: flask.Request, schema):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.args, schema)
 
-    def load_form(self, req, schema):
+    def load_form(self, req: flask.Request, schema):
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(req.form, schema)
 
-    def load_headers(self, req, schema):
+    def load_headers(self, req: flask.Request, schema):
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema)
 
-    def load_cookies(self, req, schema):
+    def load_cookies(self, req: flask.Request, schema):
         """Return cookies from the request."""
         return req.cookies
 
-    def load_files(self, req, schema):
+    def load_files(self, req: flask.Request, schema):
         """Return files from the request as a MultiDictProxy."""
         return self._makeproxy(req.files, schema)
 
-    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
+    def handle_error(
+        self, error, req: flask.Request, schema, *, error_status_code, error_headers
+    ):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
@@ -113,7 +115,7 @@ class FlaskParser(core.Parser):
             headers=error_headers,
         )
 
-    def get_default_request(self):
+    def get_default_request(self) -> flask.Request:
         """Override to use Flask's thread-local request object by default"""
         return flask.request
 

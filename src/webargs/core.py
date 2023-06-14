@@ -26,9 +26,10 @@ __all__ = [
 Request = typing.TypeVar("Request")
 ArgMap = typing.Union[
     ma.Schema,
-    typing.Dict[str, typing.Union[ma.fields.Field, typing.Type[ma.fields.Field]]],
+    typing.Mapping[str, typing.Union[ma.fields.Field, typing.Type[ma.fields.Field]]],
     typing.Callable[[Request], ma.Schema],
 ]
+
 ValidateArg = typing.Union[None, typing.Callable, typing.Iterable[typing.Callable]]
 CallableList = typing.List[typing.Callable]
 ErrorHandler = typing.Callable[..., typing.NoReturn]
@@ -115,7 +116,7 @@ def _ensure_list_of_callables(obj: typing.Any) -> CallableList:
     return validators
 
 
-class Parser:
+class Parser(typing.Generic[Request]):
     """Base parser class that provides high-level implementation for parsing
     a request.
 
@@ -302,7 +303,9 @@ class Parser:
             schema = argmap()
         elif callable(argmap):
             schema = argmap(req)
-        elif isinstance(argmap, dict):
+        elif isinstance(argmap, typing.Mapping):
+            if not isinstance(argmap, dict):
+                argmap = dict(argmap)
             schema = self.schema_class.from_dict(argmap)()
         else:
             raise TypeError(f"argmap was of unexpected type {type(argmap)}")
@@ -541,7 +544,9 @@ class Parser:
         request_obj = req
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
-        if isinstance(argmap, dict):
+        if isinstance(argmap, typing.Mapping):
+            if not isinstance(argmap, dict):
+                argmap = dict(argmap)
             argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func: typing.Callable) -> typing.Callable:

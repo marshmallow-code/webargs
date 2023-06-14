@@ -17,6 +17,8 @@ Example usage: ::
         def get(self, args, request):
             return HttpResponse('Hello ' + args['name'])
 """
+import django
+
 from webargs import core
 
 
@@ -24,7 +26,7 @@ def is_json_request(req):
     return core.is_json(req.content_type)
 
 
-class DjangoParser(core.Parser):
+class DjangoParser(core.Parser[django.http.HttpRequest]):
     """Django request argument parser.
 
     .. warning::
@@ -35,7 +37,7 @@ class DjangoParser(core.Parser):
         the parser and returning the appropriate `HTTPResponse`.
     """
 
-    def _raw_load_json(self, req):
+    def _raw_load_json(self, req: django.http.HttpRequest):
         """Read a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -45,25 +47,25 @@ class DjangoParser(core.Parser):
 
         return core.parse_json(req.body)
 
-    def load_querystring(self, req, schema):
+    def load_querystring(self, req: django.http.HttpRequest, schema):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.GET, schema)
 
-    def load_form(self, req, schema):
+    def load_form(self, req: django.http.HttpRequest, schema):
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(req.POST, schema)
 
-    def load_cookies(self, req, schema):
+    def load_cookies(self, req: django.http.HttpRequest, schema):
         """Return cookies from the request."""
         return req.COOKIES
 
-    def load_headers(self, req, schema):
+    def load_headers(self, req: django.http.HttpRequest, schema):
         """Return headers from the request."""
         # Django's HttpRequest.headers is a case-insensitive dict type, but it
         # isn't a multidict, so this is not proxied
         return req.headers
 
-    def load_files(self, req, schema):
+    def load_files(self, req: django.http.HttpRequest, schema):
         """Return files from the request as a MultiDictProxy."""
         return self._makeproxy(req.FILES, schema)
 

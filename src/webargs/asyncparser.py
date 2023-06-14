@@ -6,7 +6,7 @@ import typing
 from webargs import core
 
 
-class AsyncParser(core.Parser):
+class AsyncParser(core.Parser[core.Request]):
     """Asynchronous variant of `webargs.core.Parser`.
 
     The ``parse`` method is redefined to be ``async``.

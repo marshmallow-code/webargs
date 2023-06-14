@@ -29,20 +29,20 @@ from __future__ import annotations
 import functools
 from collections.abc import Mapping
 
-from webob.multidict import MultiDict
-from pyramid.httpexceptions import exception_response
-
 import marshmallow as ma
+from pyramid.httpexceptions import exception_response
+from pyramid.request import Request
+from webob.multidict import MultiDict
 
 from webargs import core
 from webargs.core import json
 
 
-def is_json_request(req):
+def is_json_request(req: Request) -> bool:
     return core.is_json(req.headers.get("content-type"))
 
 
-class PyramidParser(core.Parser):
+class PyramidParser(core.Parser[Request]):
     """Pyramid request argument parser."""
 
     DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {
@@ -56,7 +56,7 @@ class PyramidParser(core.Parser):
         **core.Parser.__location_map__,
     )
 
-    def _raw_load_json(self, req):
+    def _raw_load_json(self, req: Request):
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -66,32 +66,34 @@ class PyramidParser(core.Parser):
 
         return core.parse_json(req.body, encoding=req.charset)
 
-    def load_querystring(self, req, schema):
+    def load_querystring(self, req: Request, schema):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.GET, schema)
 
-    def load_form(self, req, schema):
+    def load_form(self, req: Request, schema):
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(req.POST, schema)
 
-    def load_cookies(self, req, schema):
+    def load_cookies(self, req: Request, schema):
         """Return cookies from the request as a MultiDictProxy."""
         return self._makeproxy(req.cookies, schema)
 
-    def load_headers(self, req, schema):
+    def load_headers(self, req: Request, schema):
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema)
 
-    def load_files(self, req, schema):
+    def load_files(self, req: Request, schema):
         """Return files from the request as a MultiDictProxy."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
         return self._makeproxy(MultiDict(files), schema)
 
-    def load_matchdict(self, req, schema):
+    def load_matchdict(self, req: Request, schema):
         """Return the request's ``matchdict`` as a MultiDictProxy."""
         return self._makeproxy(req.matchdict, schema)
 
-    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
+    def handle_error(
+        self, error, req: Request, schema, *, error_status_code, error_headers
+    ):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
@@ -106,7 +108,7 @@ class PyramidParser(core.Parser):
         response.body = body.encode("utf-8") if isinstance(body, str) else body
         raise response
 
-    def _handle_invalid_json_error(self, error, req, *args, **kwargs):
+    def _handle_invalid_json_error(self, error, req: Request, *args, **kwargs):
         messages = {"json": ["Invalid JSON body."]}
         response = exception_response(
             400, detail=str(messages), content_type="application/json"
@@ -118,7 +120,7 @@ class PyramidParser(core.Parser):
     def use_args(
         self,
         argmap,
-        req=None,
+        req: Request | None = None,
         *,
         location=core.Parser.DEFAULT_LOCATION,
         unknown=None,
@@ -151,6 +153,8 @@ class PyramidParser(core.Parser):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, Mapping):
+            if not isinstance(argmap, dict):
+                argmap = dict(argmap)
             argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func):
