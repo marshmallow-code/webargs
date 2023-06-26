@@ -21,7 +21,7 @@ EXTRAS_REQUIRE = {
     ]
     + FRAMEWORKS,
     "lint": [
-        "mypy==1.4.0",
+        "mypy==1.4.1",
         "flake8==6.0.0",
         "flake8-bugbear==23.6.5",
         "pre-commit>=2.4,<4.0",
