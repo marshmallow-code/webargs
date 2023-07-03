@@ -1514,3 +1514,33 @@ def test_use_args_explicit_arg_names(web_request, use_positional_setting):
         return (j, q)
 
     assert viewfunc() == ({"foo": "bar"}, {"bar": "baz"})
+
+
+def test_use_args_errors_on_explicit_arg_name_conflict(web_request):
+    parser = MockRequestParser()
+    web_request.json = {"foo": "bar"}
+    web_request.query = {"bar": "baz"}
+
+    with pytest.raises(ValueError, match="Attempted to pass `arg_name='q'`"):
+
+        @parser.use_args({"foo": fields.Field()}, web_request, arg_name="q")
+        @parser.use_args(
+            {"bar": fields.Field()}, web_request, location="query", arg_name="q"
+        )
+        def viewfunc(*, j, q):
+            return (j, q)
+
+
+def test_use_args_errors_on_implicit_arg_name_conflict(web_request):
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+    parser = MyParser()
+    web_request.json = {"foo": "bar"}
+
+    with pytest.raises(ValueError, match="Attempted to pass `arg_name='json_args'`"):
+
+        @parser.use_args({"foo": fields.Field()}, web_request)
+        @parser.use_args({"foo": fields.Field()}, web_request)
+        def viewfunc(*, j, q):
+            return (j, q)

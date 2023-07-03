@@ -51,6 +51,12 @@ _UNKNOWN_DEFAULT_PARAM = "_default"
 DEFAULT_VALIDATION_STATUS: int = 422
 
 
+def _record_arg_name(f: typing.Callable[..., typing.Any], argname: str) -> None:
+    if not hasattr(f, "__webargs_argnames__"):
+        f.__webargs_argnames__ = []  # type: ignore[attr-defined]
+    f.__webargs_argnames__.append(argname)  # type: ignore[attr-defined]
+
+
 def _iscallable(x) -> bool:
     # workaround for
     #   https://github.com/python/mypy/issues/9778
@@ -569,6 +575,18 @@ class Parser(typing.Generic[Request]):
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
+
+            # check at decoration time that a unique name is being used
+            # (no arg_name conflicts)
+            if arg_name is not None and not as_kwargs:
+                existing_arg_names = getattr(func, "__webargs_argnames__", [])
+                if arg_name in existing_arg_names:
+                    raise ValueError(
+                        f"Attempted to pass `arg_name='{arg_name}'` via use_args() but "
+                        "that name was already used. If this came from stacked webargs "
+                        "decorators, try setting `arg_name` to distinguish usages."
+                    )
+                _record_arg_name(func, arg_name)
 
             if asyncio.iscoroutinefunction(func):
 
