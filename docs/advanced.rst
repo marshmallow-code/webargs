@@ -670,8 +670,8 @@ By default, ``webargs`` provides two ways of passing arguments via decorators,
 dict-like parsed arguments into keyword arguments.
 
 For ``use_args``, the result is that sometimes it is non-obvious which order
-arguments will be passed in. Consider the following two example snippets, one
-of which are nearly identical:
+arguments will be passed in. Consider the following nearly identical example
+snippets:
 
 .. code-block:: python
 
