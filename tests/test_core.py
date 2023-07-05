@@ -1544,3 +1544,38 @@ def test_use_args_errors_on_implicit_arg_name_conflict(web_request):
         @parser.use_args({"foo": fields.Field()}, web_request)
         def viewfunc(*, j, q):
             return (j, q)
+
+
+def test_use_args_with_arg_name_supports_multi_stacked_decorators(web_request):
+    # this test case specifically explores the use-case in which a view function is
+    # decorated with one `use_args` call, and then "permuted" by decorating it with
+    # other `use_args` calls
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+    parser = MyParser()
+
+    # create two body variants of the same route, from a single function
+    # they share the same query params
+    with_body_foo = parser.use_args({"foo": fields.Field()}, web_request)
+    with_body_bar = parser.use_args({"bar": fields.Field()}, web_request)
+
+    @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+    def mypartial(*, json_args, query_args):
+        return (json_args, query_args)
+
+    route_foo = with_body_foo(mypartial)
+    route_bar = with_body_bar(mypartial)
+
+    # first, test that these behave as expected
+    web_request.json = {"foo": "bar"}
+    web_request.query = {"snork": 2}
+    assert route_foo() == ({"foo": "bar"}, {"snork": 2})
+
+    web_request.json = {"bar": "baz"}
+    assert route_bar() == ({"bar": "baz"}, {"snork": 2})
+
+    # now, inspect their internal state
+    assert mypartial.__webargs_argnames__ == ("query_args",)
+    assert route_foo.__webargs_argnames__ == ("query_args", "json_args")
+    assert route_bar.__webargs_argnames__ == ("query_args", "json_args")
