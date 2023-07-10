@@ -9,7 +9,7 @@ from marshmallow import validate
 from webargs.core import ValidationError
 from webargs import fields
 
-__version__ = "8.2.0"
+__version__ = "8.3.0"
 __parsed_version__ = Version(__version__)
 __version_info__: tuple[int, int, int] | tuple[
     int, int, int, str, int
