@@ -716,6 +716,13 @@ def test_use_args_stacked(web_request, parser):
     assert viewfunc() == {"json": {"username": "foo"}, "query": {"page": 42}}
 
 
+def test_use_args_forbids_invalid_usages(parser):
+    with pytest.raises(
+        ValueError, match="arg_name and as_kwargs are mutually exclusive"
+    ):
+        parser.use_args({}, web_request, arg_name="foo", as_kwargs=True)
+
+
 def test_use_kwargs_stacked(web_request, parser):
     query_args = {
         "page": fields.Int(error_messages={"invalid": "{input} not a valid integer"})
@@ -1426,3 +1433,149 @@ def test_parse_rejects_unknown_argmap_type(parser, web_request):
 
     with pytest.raises(TypeError, match="argmap was of unexpected type"):
         parser.parse(MyType(), web_request)
+
+
+def test_parser_opt_out_positional_args(web_request):
+    class OptOutParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+    parser = MockRequestParser()
+    opt_out_parser = OptOutParser()
+    web_request.json = {"foo": "bar"}
+
+    # first, test the behavior of a base parser for comparison
+    #
+    # no specific arg name, default parser, everything works
+    # works for 'args', 'json_args', or any other name
+    @parser.use_args({"foo": fields.Field()}, web_request)
+    def viewfunc1(args):
+        return args
+
+    @parser.use_args({"foo": fields.Field()}, web_request)
+    def viewfunc2(json_args):
+        return json_args
+
+    assert viewfunc1() == {"foo": "bar"}
+    assert viewfunc2() == {"foo": "bar"}
+
+    # second, test the behavior of a parser which sets USE_ARGS_POSITIONAL=False
+    #
+    # `json_args` as the arg name works as a positional or keyword-only
+    # but `args` as the arg name does not
+    @opt_out_parser.use_args({"foo": fields.Field()}, web_request)
+    def viewfunc3(json_args):
+        return json_args
+
+    @opt_out_parser.use_args({"foo": fields.Field()}, web_request)
+    def viewfunc4(*, json_args):
+        return json_args
+
+    @opt_out_parser.use_args({"foo": fields.Field()}, web_request)
+    def viewfunc5(args):
+        return args
+
+    assert viewfunc3() == {"foo": "bar"}
+    assert viewfunc4() == {"foo": "bar"}
+
+    with pytest.raises(TypeError):
+        assert viewfunc5()
+
+
+def test_use_args_implicit_arg_names(web_request):
+    class OptOutParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+    parser = OptOutParser()
+    web_request.json = {"foo": "bar"}
+    web_request.query = {"bar": "baz"}
+
+    @parser.use_args({"foo": fields.Field()}, web_request)
+    @parser.use_args({"bar": fields.Field()}, web_request, location="query")
+    def viewfunc(*, json_args, query_args):
+        return (json_args, query_args)
+
+    assert viewfunc() == ({"foo": "bar"}, {"bar": "baz"})
+
+
+@pytest.mark.parametrize("use_positional_setting", (True, False))
+def test_use_args_explicit_arg_names(web_request, use_positional_setting):
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = use_positional_setting
+
+    parser = MyParser()
+    web_request.json = {"foo": "bar"}
+    web_request.query = {"bar": "baz"}
+
+    @parser.use_args({"foo": fields.Field()}, web_request, arg_name="j")
+    @parser.use_args(
+        {"bar": fields.Field()}, web_request, location="query", arg_name="q"
+    )
+    def viewfunc(*, j, q):
+        return (j, q)
+
+    assert viewfunc() == ({"foo": "bar"}, {"bar": "baz"})
+
+
+def test_use_args_errors_on_explicit_arg_name_conflict(web_request):
+    parser = MockRequestParser()
+    web_request.json = {"foo": "bar"}
+    web_request.query = {"bar": "baz"}
+
+    with pytest.raises(ValueError, match="Attempted to pass `arg_name='q'`"):
+
+        @parser.use_args({"foo": fields.Field()}, web_request, arg_name="q")
+        @parser.use_args(
+            {"bar": fields.Field()}, web_request, location="query", arg_name="q"
+        )
+        def viewfunc(*, j, q):
+            return (j, q)
+
+
+def test_use_args_errors_on_implicit_arg_name_conflict(web_request):
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+    parser = MyParser()
+    web_request.json = {"foo": "bar"}
+
+    with pytest.raises(ValueError, match="Attempted to pass `arg_name='json_args'`"):
+
+        @parser.use_args({"foo": fields.Field()}, web_request)
+        @parser.use_args({"foo": fields.Field()}, web_request)
+        def viewfunc(*, j, q):
+            return (j, q)
+
+
+def test_use_args_with_arg_name_supports_multi_stacked_decorators(web_request):
+    # this test case specifically explores the use-case in which a view function is
+    # decorated with one `use_args` call, and then "permuted" by decorating it with
+    # other `use_args` calls
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+    parser = MyParser()
+
+    # create two body variants of the same route, from a single function
+    # they share the same query params
+    with_body_foo = parser.use_args({"foo": fields.Field()}, web_request)
+    with_body_bar = parser.use_args({"bar": fields.Field()}, web_request)
+
+    @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+    def mypartial(*, json_args, query_args):
+        return (json_args, query_args)
+
+    route_foo = with_body_foo(mypartial)
+    route_bar = with_body_bar(mypartial)
+
+    # first, test that these behave as expected
+    web_request.json = {"foo": "bar"}
+    web_request.query = {"snork": 2}
+    assert route_foo() == ({"foo": "bar"}, {"snork": 2})
+
+    web_request.json = {"bar": "baz"}
+    assert route_bar() == ({"bar": "baz"}, {"snork": 2})
+
+    # now, inspect their internal state
+    assert mypartial.__webargs_argnames__ == ("query_args",)
+    assert route_foo.__webargs_argnames__ == ("query_args", "json_args")
+    assert route_bar.__webargs_argnames__ == ("query_args", "json_args")
