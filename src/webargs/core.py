@@ -26,6 +26,7 @@ __all__ = [
 Request = typing.TypeVar("Request")
 ArgMap = typing.Union[
     ma.Schema,
+    typing.Type[ma.Schema],
     typing.Mapping[str, typing.Union[ma.fields.Field, typing.Type[ma.fields.Field]]],
     typing.Callable[[Request], ma.Schema],
 ]
@@ -37,6 +38,8 @@ ErrorHandler = typing.Callable[..., typing.NoReturn]
 T = typing.TypeVar("T")
 # type var for callables, to make type-preserving decorators
 C = typing.TypeVar("C", bound=typing.Callable)
+# type var for multidict proxy classes
+MultiDictProxyT = typing.TypeVar("MultiDictProxyT", bound=MultiDictProxy)
 # type var for a callable which is an error handler
 # used to ensure that the error_handler decorator is type preserving
 ErrorHandlerT = typing.TypeVar("ErrorHandlerT", bound=ErrorHandler)
@@ -59,7 +62,7 @@ def _record_arg_name(f: typing.Callable[..., typing.Any], argname: str | None) -
     f.__webargs_argnames__ += (argname,)  # type: ignore[attr-defined]
 
 
-def _iscallable(x) -> bool:
+def _iscallable(x: typing.Any) -> bool:
     # workaround for
     #   https://github.com/python/mypy/issues/9778
     return callable(x)
@@ -185,13 +188,19 @@ class Parser(typing.Generic[Request]):
         unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         error_handler: ErrorHandler | None = None,
         schema_class: type[ma.Schema] | None = None,
-    ):
+    ) -> None:
         self.location = location or self.DEFAULT_LOCATION
         self.error_callback: ErrorHandler | None = _callable_or_raise(error_handler)
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
         self.unknown = unknown
 
-    def _makeproxy(self, multidict, schema: ma.Schema, cls: type = MultiDictProxy):
+    def _makeproxy(
+        self,
+        multidict: typing.Any,
+        schema: ma.Schema,
+        *,
+        cls: type[MultiDictProxyT] | type[MultiDictProxy] = MultiDictProxy,
+    ) -> MultiDictProxyT | MultiDictProxy:
         """Create a multidict proxy object with options from the current parser"""
         return cls(multidict, schema, known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS))
 
@@ -222,7 +231,9 @@ class Parser(typing.Generic[Request]):
         loader_func = self._get_loader(location)
         return loader_func(req, schema)
 
-    async def _async_load_location_data(self, schema, req, location):
+    async def _async_load_location_data(
+        self, schema: ma.Schema, req: Request, location: str
+    ) -> typing.Any:
         # an async variant of the _load_location_data method
         # the loader function itself may or may not be async
         loader_func = self._get_loader(location)
@@ -348,7 +359,7 @@ class Parser(typing.Generic[Request]):
         location: str,
         unknown: str | None,
         validators: CallableList,
-    ):
+    ) -> typing.Any:
         # after the data has been fetched from a registered location,
         # this is how it is processed
         # (shared between sync and async variants)
@@ -387,7 +398,7 @@ class Parser(typing.Generic[Request]):
         validate: ValidateArg = None,
         error_status_code: int | None = None,
         error_headers: typing.Mapping[str, str] | None = None,
-    ):
+    ) -> typing.Any:
         """Main request parsing method.
 
         :param argmap: Either a `marshmallow.Schema`, a `dict`
@@ -446,7 +457,7 @@ class Parser(typing.Generic[Request]):
         validate: ValidateArg = None,
         error_status_code: int | None = None,
         error_headers: typing.Mapping[str, str] | None = None,
-    ) -> typing.Mapping | None:
+    ) -> typing.Any:
         """Coroutine variant of `webargs.core.Parser.parse`.
 
         Receives the same arguments as `webargs.core.Parser.parse`.
@@ -504,10 +515,10 @@ class Parser(typing.Generic[Request]):
     def _update_args_kwargs(
         args: tuple,
         kwargs: dict[str, typing.Any],
-        parsed_args: tuple,
+        parsed_args: dict[str, typing.Any],
         as_kwargs: bool,
         arg_name: str | None,
-    ) -> tuple[tuple, typing.Mapping]:
+    ) -> tuple[tuple, dict[str, typing.Any]]:
         """Update args or kwargs with parsed_args depending on as_kwargs"""
         if as_kwargs:
             # expand parsed_args into kwargs
@@ -592,7 +603,9 @@ class Parser(typing.Generic[Request]):
             if asyncio.iscoroutinefunction(func):
 
                 @functools.wraps(func)
-                async def wrapper(*args, **kwargs):
+                async def wrapper(
+                    *args: typing.Any, **kwargs: typing.Any
+                ) -> typing.Any:
                     req_obj = req_
 
                     if not req_obj:
@@ -614,8 +627,8 @@ class Parser(typing.Generic[Request]):
 
             else:
 
-                @functools.wraps(func)  # type: ignore
-                def wrapper(*args, **kwargs):
+                @functools.wraps(func)
+                def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
                     req_obj = req_
 
                     if not req_obj:
@@ -749,8 +762,8 @@ class Parser(typing.Generic[Request]):
         self,
         error: json.JSONDecodeError | UnicodeDecodeError,
         req: Request,
-        *args,
-        **kwargs,
+        *args: typing.Any,
+        **kwargs: typing.Any,
     ) -> typing.NoReturn:
         """Internal hook for overriding treatment of JSONDecodeErrors.
 
@@ -779,7 +792,7 @@ class Parser(typing.Generic[Request]):
         except UnicodeDecodeError as exc:
             return self._handle_invalid_json_error(exc, req)
 
-    def load_json_or_form(self, req: Request, schema: ma.Schema):
+    def load_json_or_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load data from a request, accepting either JSON or form-encoded
         data.
 
@@ -793,7 +806,7 @@ class Parser(typing.Generic[Request]):
 
     # Abstract Methods
 
-    def _raw_load_json(self, req: Request):
+    def _raw_load_json(self, req: Request) -> typing.Any:
         """Internal hook method for implementing load_json()
 
         Get a request body for feeding in to `load_json`, and parse it either
@@ -809,29 +822,29 @@ class Parser(typing.Generic[Request]):
         """
         return missing
 
-    def load_querystring(self, req: Request, schema: ma.Schema):
+    def load_querystring(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load the query string of a request object or return `missing` if no
         value can be found.
         """
         return missing
 
-    def load_form(self, req: Request, schema: ma.Schema):
+    def load_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load the form data of a request object or return `missing` if no
         value can be found.
         """
         return missing
 
-    def load_headers(self, req: Request, schema: ma.Schema):
+    def load_headers(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load the headers or return `missing` if no value can be found."""
         return missing
 
-    def load_cookies(self, req: Request, schema: ma.Schema):
+    def load_cookies(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load the cookies from the request or return `missing` if no value
         can be found.
         """
         return missing
 
-    def load_files(self, req: Request, schema: ma.Schema):
+    def load_files(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load files from the request or return `missing` if no values can be
         found.
         """
