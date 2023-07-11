@@ -22,7 +22,8 @@ Example: ::
 """
 from __future__ import annotations
 
-from typing import NoReturn
+import json
+import typing
 
 import flask
 import marshmallow as ma
@@ -31,7 +32,9 @@ from werkzeug.exceptions import HTTPException
 from webargs import core
 
 
-def abort(http_status_code, exc=None, **kwargs) -> NoReturn:
+def abort(
+    http_status_code: int, exc: Exception | None = None, **kwargs: typing.Any
+) -> typing.NoReturn:
     """Raise a HTTPException for the given http_status_code. Attach any keyword
     arguments to the exception for later processing.
 
@@ -45,7 +48,7 @@ def abort(http_status_code, exc=None, **kwargs) -> NoReturn:
         raise err
 
 
-def is_json_request(req: flask.Request):
+def is_json_request(req: flask.Request) -> bool:
     return core.is_json(req.mimetype)
 
 
@@ -63,7 +66,7 @@ class FlaskParser(core.Parser[flask.Request]):
         **core.Parser.__location_map__,
     )
 
-    def _raw_load_json(self, req: flask.Request):
+    def _raw_load_json(self, req: flask.Request) -> typing.Any:
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -73,40 +76,52 @@ class FlaskParser(core.Parser[flask.Request]):
 
         return core.parse_json(req.get_data(cache=True))
 
-    def _handle_invalid_json_error(self, error, req: flask.Request, *args, **kwargs):
+    def _handle_invalid_json_error(
+        self,
+        error: json.JSONDecodeError | UnicodeDecodeError,
+        req: flask.Request,
+        *args: typing.Any,
+        **kwargs: typing.Any,
+    ) -> typing.NoReturn:
         abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
 
-    def load_view_args(self, req: flask.Request, schema):
+    def load_view_args(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return the request's ``view_args`` or ``missing`` if there are none."""
         return req.view_args or core.missing
 
-    def load_querystring(self, req: flask.Request, schema):
+    def load_querystring(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.args, schema)
 
-    def load_form(self, req: flask.Request, schema):
+    def load_form(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(req.form, schema)
 
-    def load_headers(self, req: flask.Request, schema):
+    def load_headers(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema)
 
-    def load_cookies(self, req: flask.Request, schema):
+    def load_cookies(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request."""
         return req.cookies
 
-    def load_files(self, req: flask.Request, schema):
+    def load_files(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
         return self._makeproxy(req.files, schema)
 
     def handle_error(
-        self, error, req: flask.Request, schema, *, error_status_code, error_headers
-    ):
+        self,
+        error: ma.ValidationError,
+        req: flask.Request,
+        schema: ma.Schema,
+        *,
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None,
+    ) -> typing.NoReturn:
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
-        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        status_code: int = error_status_code or self.DEFAULT_VALIDATION_STATUS
         abort(
             status_code,
             exc=error,

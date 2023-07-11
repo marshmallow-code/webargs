@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+8.3.1 (Unreleased)
+******************
+
+Changes:
+
+* Type annotations for ``FlaskParser`` have been improved
+
 8.3.0 (2023-07-10)
 ******************
 
