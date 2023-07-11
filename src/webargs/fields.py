@@ -15,6 +15,8 @@ tells webargs where to parse the request argument from.
 """
 from __future__ import annotations
 
+import typing
+
 import marshmallow as ma
 
 # Expose all fields from marshmallow.fields.
@@ -64,6 +66,8 @@ class DelimitedFieldMixin:
     delimiter: str = ","
     # delimited fields set is_multiple=False for webargs.core.is_multiple
     is_multiple: bool = False
+    # NOTE: in 8.x this defaults to "" but in 9.x it will be 'missing'
+    empty_value: typing.Any = ""
 
     def _serialize(self, value, attr, obj, **kwargs):
         # serializing will start with parent-class serialization, so that we correctly
@@ -77,6 +81,8 @@ class DelimitedFieldMixin:
         if not isinstance(value, (str, bytes)):
             raise self.make_error("invalid")
         values = value.split(self.delimiter) if value else []
+        # convert empty strings to the empty value; typically "" and therefore a no-op
+        values = [v or self.empty_value for v in values]
         return super()._deserialize(values, attr, data, **kwargs)
 
 
@@ -117,6 +123,12 @@ class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
 
     default_error_messages = {"invalid": "Not a valid delimited tuple."}
 
-    def __init__(self, tuple_fields, *, delimiter: str | None = None, **kwargs):
+    def __init__(
+        self,
+        tuple_fields,
+        *,
+        delimiter: str | None = None,
+        **kwargs,
+    ):
         self.delimiter = delimiter or self.delimiter
         super().__init__(tuple_fields, **kwargs)

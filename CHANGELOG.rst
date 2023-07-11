@@ -1,8 +1,33 @@
 Changelog
 ---------
 
-8.3.1 (Unreleased)
+8.4.0 (Unreleased)
 ******************
+
+Features:
+
+* Add a new class attribute, ``empty_value`` to ``DelimitedList`` and
+  ``DelimitedTuple``, with a default of ``""``.
+  This controls the value deserialized when an empty string is seen.
+
+``empty_value`` can be used to handle types other than strings more gracefully, e.g.
+
+.. code-block:: python
+
+    from webargs import fields
+
+
+    class IntList(fields.DelimitedList):
+        empty_value = 0
+
+
+    myfield = IntList(fields.Int())
+
+.. note::
+
+    ``empty_value`` will be changing in webargs v9.0 to be ``missing`` by
+    default. This will allow use of fields with ``load_default`` to specify
+    handling of the empty value.
 
 Changes:
 

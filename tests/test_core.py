@@ -11,6 +11,7 @@ from marshmallow import (
     INCLUDE,
     RAISE,
     Schema,
+    missing,
     post_load,
     pre_load,
     validates_schema,
@@ -1104,6 +1105,47 @@ def test_delimited_tuple_passed_invalid_type(web_request, parser):
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(schema, web_request)
     assert excinfo.value.messages == {"json": {"ids": ["Not a valid delimited tuple."]}}
+
+
+def test_delimited_list_custom_empty_value(web_request, parser):
+    class ZeroList(fields.DelimitedList):
+        empty_value = 0
+
+    web_request.json = {"ids": "1,,3"}
+    schema_cls = Schema.from_dict({"ids": ZeroList(fields.Int())})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["ids"] == [1, 0, 3]
+
+
+def test_delimited_tuple_custom_empty_value(web_request, parser):
+    class ZeroTuple(fields.DelimitedTuple):
+        empty_value = 0
+
+    web_request.json = {"ids": "1,,3"}
+    schema_cls = Schema.from_dict(
+        {"ids": ZeroTuple((fields.Int, fields.Int, fields.Int))}
+    )
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["ids"] == (1, 0, 3)
+
+
+def test_delimited_list_using_missing_for_empty(web_request, parser):
+    # this is "future" because we plan to make this the default for webargs v9.0
+    class FutureList(fields.DelimitedList):
+        empty_value = missing
+
+    web_request.json = {"ids": "foo,,bar"}
+    schema_cls = Schema.from_dict(
+        {"ids": FutureList(fields.String(load_default="nil"))}
+    )
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["ids"] == ["foo", "nil", "bar"]
 
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
