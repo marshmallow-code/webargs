@@ -47,7 +47,8 @@ class HTTPUnprocessableEntity(web.HTTPClientError):
 
 # Mapping of status codes to exception classes
 # Adapted from werkzeug
-exception_map = {422: HTTPUnprocessableEntity}
+exception_map: dict[int, type[web_exceptions.HTTPException]] = {}
+exception_map[422] = HTTPUnprocessableEntity
 
 
 def _find_exceptions() -> None:
