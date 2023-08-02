@@ -732,6 +732,78 @@ parameter:
 Note that ``arg_name`` is available even on parsers where
 ``USE_ARGS_POSITIONAL`` is not set.
 
+Using an Alternate Argument Name Convention
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As described above, the default naming convention for ``use_args`` arguments is
+``{location}_args``. You can customize this by creating a parser class and
+overriding the ``get_default_arg_name`` method.
+
+``get_default_arg_name`` takes the ``location`` and the ``schema`` as
+arguments. The default implementation is:
+
+.. code-block:: python
+
+    def get_default_arg_name(self, location, schema):
+        return f"{location}_args"
+
+You can customize this to set different arg names. For example,
+
+.. code-block:: python
+
+    from webargs.flaskparser import FlaskParser
+
+
+    class MyParser(FlaskParser):
+        USE_ARGS_POSITIONAL = False
+
+        def get_default_arg_name(self, location, schema):
+            if location in ("json", "form", "json_or_form"):
+                return "body"
+            elif location in ("query", "querystring"):
+                return "query"
+            return location
+
+
+    @app.route("/")
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
+    @parser.use_args({"baz": fields.Str()}, location="json")
+    def myview(*, query, body):
+        ...
+
+Additionally, this makes it possible to make custom schema classes which
+provide an argument name. For example,
+
+.. code-block:: python
+
+    from marshmallow import Schema
+    from webargs.flaskparser import FlaskParser
+
+
+    class RectangleSchema(Schema):
+        webargs_arg_name = "rectangle"
+
+        length = fields.Float()
+        width = fields.Float()
+
+
+    class MyParser(FlaskParser):
+        USE_ARGS_POSITIONAL = False
+
+        def get_default_arg_name(self, location, schema):
+            if hasattr(schema, "webargs_arg_name"):
+                if isinstance(schema.webargs_arg_name, str):
+                    return schema.webargs_arg_name
+            return super().get_default_arg_name(location, schema)
+
+
+    @app.route("/")
+    @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
+    @parser.use_args(RectangleSchema, location="json")
+    def myview(*, rectangle, query_args):
+        ...
+
+
 Next Steps
 ----------
 

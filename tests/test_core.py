@@ -1621,3 +1621,94 @@ def test_use_args_with_arg_name_supports_multi_stacked_decorators(web_request):
     assert mypartial.__webargs_argnames__ == ("query_args",)
     assert route_foo.__webargs_argnames__ == ("query_args", "json_args")
     assert route_bar.__webargs_argnames__ == ("query_args", "json_args")
+
+
+def test_default_arg_name_pattern_is_customizable(web_request):
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+        def get_default_arg_name(self, location, schema):
+            if location == "json":
+                return "body"
+            elif location == "query":
+                return "query"
+            else:
+                return super().get_default_arg_name(location, schema)
+
+    parser = MyParser()
+
+    @parser.use_args({"frob": fields.Field()}, web_request, location="json")
+    @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+    def myview(*, body, query):
+        return (body, query)
+
+    web_request.json = {"frob": "demuddler"}
+    web_request.query = {"snork": 2}
+    assert myview() == ({"frob": "demuddler"}, {"snork": 2})
+
+
+def test_default_arg_name_pattern_still_allows_conflict_detection():
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+        def get_default_arg_name(self, location, schema):
+            return "data"
+
+    parser = MyParser()
+
+    with pytest.raises(ValueError, match="Attempted to pass `arg_name='data'`"):
+
+        @parser.use_args({"frob": fields.Field()}, web_request, location="json")
+        @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+        def myview(*, body, query):
+            return (body, query)
+
+
+def test_parse_with_dict_passes_schema_to_argname_derivation(web_request):
+    default_argname_was_called = False
+
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+        def get_default_arg_name(self, location, schema):
+            assert isinstance(schema, Schema)
+            nonlocal default_argname_was_called
+            default_argname_was_called = True
+            return super().get_default_arg_name(location, schema)
+
+    parser = MyParser()
+
+    @parser.use_args({"foo": fields.Field()}, web_request, location="json")
+    def myview(*, json_args):
+        return json_args
+
+    web_request.json = {"foo": 42}
+    assert myview() == {"foo": 42}
+    assert default_argname_was_called
+
+
+def test_default_arg_name_pattern_can_pull_schema_attribute(web_request):
+    # this test matches a documentation example exactly
+    class RectangleSchema(Schema):
+        _webargs_arg_name = "rectangle"
+        length = fields.Integer()
+        width = fields.Integer()
+
+    class MyParser(MockRequestParser):
+        USE_ARGS_POSITIONAL = False
+
+        def get_default_arg_name(self, location, schema):
+            assert schema is not None
+            if hasattr(schema, "_webargs_arg_name"):
+                if isinstance(schema._webargs_arg_name, str):
+                    return schema._webargs_arg_name
+            return super().get_default_arg_name(location, schema)
+
+    parser = MyParser()
+
+    @parser.use_args(RectangleSchema, web_request, location="json")
+    def area(*, rectangle):
+        return rectangle["length"] * rectangle["width"]
+
+    web_request.json = {"length": 6, "width": 7}
+    assert area() == 42

@@ -574,17 +574,17 @@ class Parser(typing.Generic[Request]):
         location = location or self.location
         request_obj = req
 
-        if arg_name is not None and as_kwargs:
-            raise ValueError("arg_name and as_kwargs are mutually exclusive")
-        if arg_name is None and not self.USE_ARGS_POSITIONAL:
-            arg_name = f"{location}_args"
-
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, typing.Mapping):
             if not isinstance(argmap, dict):
                 argmap = dict(argmap)
             argmap = self.schema_class.from_dict(argmap)()
+
+        if arg_name is not None and as_kwargs:
+            raise ValueError("arg_name and as_kwargs are mutually exclusive")
+        if arg_name is None and not self.USE_ARGS_POSITIONAL:
+            arg_name = self.get_default_arg_name(location, argmap)
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
@@ -689,6 +689,18 @@ class Parser(typing.Generic[Request]):
             error_status_code=error_status_code,
             error_headers=error_headers,
         )
+
+    def get_default_arg_name(self, location: str, schema: ArgMap) -> str:
+        """This method provides the rule by which an argument name is derived for
+        :meth:`use_args` if no explicit ``arg_name`` is provided.
+
+        By default, the format used is ``{location}_args``. Users may override this method
+        to customize the default argument naming scheme.
+
+        ``schema`` will be the argument map or schema passed to :meth:`use_args` unless a
+        dict was used, in which case it will be the schema derived from that dict.
+        """
+        return f"{location}_args"
 
     def location_loader(self, name: str) -> typing.Callable[[C], C]:
         """Decorator that registers a function for loading a request location.
