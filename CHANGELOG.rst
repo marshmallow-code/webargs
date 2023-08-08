@@ -29,6 +29,10 @@ Features:
     default. This will allow use of fields with ``load_default`` to specify
     handling of the empty value.
 
+* The rule for default argument names has been made configurable by overriding
+  the ``get_default_arg_name`` method. This is described in the argument
+  passing documentation.
+
 Changes:
 
 * Type annotations for ``FlaskParser`` have been improved
