@@ -173,7 +173,7 @@ def test_abort_called_on_validation_error(mock_abort):
     assert abort_args[0] == 422
     expected_msg = "Invalid value."
     assert abort_kwargs["messages"]["json"]["value"] == [expected_msg]
-    assert type(abort_kwargs["exc"]) == ValidationError
+    assert type(abort_kwargs["exc"]) is ValidationError
 
 
 @pytest.mark.asyncio
@@ -202,7 +202,7 @@ async def test_abort_called_on_validation_error_async():
         assert abort_args[0] == 422
         expected_msg = "Invalid value."
         assert abort_kwargs["messages"]["json"]["value"] == [expected_msg]
-        assert type(abort_kwargs["exc"]) == ValidationError
+        assert type(abort_kwargs["exc"]) is ValidationError
 
 
 @pytest.mark.parametrize("mimetype", [None, "application/json"])
