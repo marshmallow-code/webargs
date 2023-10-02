@@ -74,6 +74,12 @@ def use_schema(schema_cls, list_view=False, locations=None):
             # Function wrapped with use_args
             func_with_args = use_args_wrapper(func)
             ret = func_with_args(*args, **kwargs)
+    
+            if isinstance(ret, tuple):
+                # Force flask response if status_code is present
+                # otherwise the status_code will be always ignored and 200 is always returned. 
+                return ret
+
             return schema.dump(ret, many=list_view)
 
         return wrapped
