@@ -77,7 +77,8 @@ def use_schema(schema_cls, list_view=False, locations=None):
 
             if isinstance(ret, tuple):
                 # Force flask response if status_code is present
-                # otherwise the status_code will be always ignored and 200 is always returned.
+                # otherwise the status_code will be always ignored
+                # and 200 is always returned.
                 return ret
 
             return schema.dump(ret, many=list_view)
