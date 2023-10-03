@@ -1,11 +1,11 @@
 repos:
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.13.0
+  rev: v3.14.0
   hooks:
   - id: pyupgrade
     args: ["--py37-plus"]
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.26.3
+  rev: 0.27.0
   hooks:
     - id: check-github-workflows
     - id: check-readthedocs
