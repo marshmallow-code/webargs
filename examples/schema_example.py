@@ -14,9 +14,9 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http GET :5001/users/ limit==1
 """
 import functools
-from flask import Flask, request
 import random
 
+from flask import Flask, request
 from marshmallow import Schema, fields, post_dump
 from webargs.flaskparser import parser, use_kwargs
 
@@ -74,6 +74,11 @@ def use_schema(schema_cls, list_view=False, locations=None):
             # Function wrapped with use_args
             func_with_args = use_args_wrapper(func)
             ret = func_with_args(*args, **kwargs)
+
+            # support (json, status) tuples
+            if isinstance(ret, tuple) and len(ret) == 2 and isinstance(ret[1], int):
+                return schema.dump(ret[0], many=list_view), ret[1]
+
             return schema.dump(ret, many=list_view)
 
         return wrapped
