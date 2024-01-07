@@ -6,8 +6,8 @@ webargs
     :target: https://pypi.org/project/webargs/
     :alt: PyPI version
 
-.. image:: https://dev.azure.com/sloria/sloria/_apis/build/status/marshmallow-code.webargs?branchName=dev
-    :target: https://dev.azure.com/sloria/sloria/_build/latest?definitionId=6&branchName=dev
+.. image:: https://github.com/marshmallow-code/webargs/actions/workflows/build-release.yml/badge.svg
+    :target: https://github.com/marshmallow-code/webargs/actions/workflows/build-release.yml
     :alt: Build status
 
 .. image:: https://readthedocs.org/projects/webargs/badge/
