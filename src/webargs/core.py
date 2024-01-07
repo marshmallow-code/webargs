@@ -868,8 +868,8 @@ class Parser(typing.Generic[Request]):
         req: Request,
         schema: ma.Schema,
         *,
-        error_status_code: int,
-        error_headers: typing.Mapping[str, str],
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None,
     ) -> typing.NoReturn:
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
