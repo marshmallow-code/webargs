@@ -54,7 +54,7 @@ Install
 
     pip install -U webargs
 
-webargs supports Python >= 3.7.
+webargs supports Python >= 3.8.
 
 
 Documentation

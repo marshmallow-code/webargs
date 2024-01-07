@@ -33,9 +33,10 @@ Features:
   the ``get_default_arg_name`` method. This is described in the argument
   passing documentation.
 
-Changes:
+Other changes:
 
-* Type annotations for ``FlaskParser`` have been improved
+* Drop support for Python 3.7, which is EOL.
+* Type annotations for ``FlaskParser`` have been improved.
 
 8.3.0 (2023-07-10)
 ******************

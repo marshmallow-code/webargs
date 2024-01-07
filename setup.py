@@ -78,7 +78,7 @@ setup(
     extras_require=EXTRAS_REQUIRE,
     license="MIT",
     zip_safe=False,
-    keywords=(
+    keywords=[
         "webargs",
         "http",
         "flask",
@@ -93,8 +93,8 @@ setup(
         "rest",
         "api",
         "marshmallow",
-    ),
-    python_requires=">=3.7.2",
+    ],
+    python_requires=">=3.8",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
