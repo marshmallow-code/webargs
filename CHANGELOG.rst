@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+8.5.0 (unreleased)
+******************
+
+Other changes:
+
+* Test against Python 3.12.
+
 8.4.0 (2024-01-07)
 ******************
 
