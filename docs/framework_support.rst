@@ -160,7 +160,6 @@ The :class:`webargs.tornadoparser.TornadoParser` parses arguments from a :class:
 
 
     class HelloHandler(tornado.web.RequestHandler):
-
         hello_args = {"name": fields.Str()}
 
         def post(self, id):

@@ -79,6 +79,7 @@ To get identical behavior:
 
     # assuming you have a schema named MySchema
 
+
     # webargs 6.x
     @parser.use_args(MySchema)
     def foo(args):
@@ -570,6 +571,7 @@ so:
 .. code-block:: python
 
     from webargs.pyramidparser import use_args
+
 
     # webargs 5.x
     # pass_userinfo is called first, webargs sees positional arguments of
