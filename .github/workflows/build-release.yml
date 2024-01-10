@@ -1,7 +1,10 @@
 name: build
 on:
   push:
+    branches: ["dev", "*.x-line"]
+    tags: ["*"]
   pull_request:
+
 jobs:
   tests:
     name: ${{ matrix.name }}

@@ -22,7 +22,7 @@ repos:
   rev: 1.16.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==22.12.0]
+    additional_dependencies: [black==22.12.1]
     args: ["--target-version", "py38"]
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.8.0
