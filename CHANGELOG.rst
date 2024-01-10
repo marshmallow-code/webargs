@@ -259,6 +259,7 @@ Usages are varied, but include
     import marshmallow as ma
     from webargs.flaskparser import FlaskParser
 
+
     # as well as...
     class MyParser(FlaskParser):
         DEFAULT_UNKNOWN_BY_LOCATION = {"query": ma.INCLUDE}
