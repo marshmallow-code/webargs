@@ -22,6 +22,7 @@ Example: ::
     app = web.Application()
     app.router.add_route('GET', '/', index)
 """
+
 from __future__ import annotations
 
 import typing

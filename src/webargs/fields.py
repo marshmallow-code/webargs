@@ -13,6 +13,7 @@ tells webargs where to parse the request argument from.
         "content_type": fields.Str(data_key="Content-Type", location="headers"),
     }
 """
+
 from __future__ import annotations
 
 import typing

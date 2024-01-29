@@ -16,6 +16,7 @@ Example: ::
     if __name__ == '__main__':
         run(debug=True)
 """
+
 import bottle
 
 from webargs import core

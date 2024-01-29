@@ -24,6 +24,7 @@ Example usage: ::
         server = make_server('0.0.0.0', 6543, app)
         server.serve_forever()
 """
+
 from __future__ import annotations
 
 import functools
