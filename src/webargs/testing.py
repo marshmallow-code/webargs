@@ -6,6 +6,7 @@ for testing parsers.
     Methods and functions in this module may change without
     warning and without a major version change.
 """
+
 import pytest
 import webtest
 

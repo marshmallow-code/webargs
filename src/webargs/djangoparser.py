@@ -17,6 +17,7 @@ Example usage: ::
         def get(self, args, request):
             return HttpResponse('Hello ' + args['name'])
 """
+
 import django
 
 from webargs import core

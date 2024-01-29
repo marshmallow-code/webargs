@@ -1,5 +1,6 @@
 """Falcon request argument parsing module.
 """
+
 import falcon
 import marshmallow as ma
 from falcon.util.uri import parse_query_string

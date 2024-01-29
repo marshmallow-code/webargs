@@ -20,6 +20,7 @@ Example: ::
             uid=uid, per_page=args["per_page"]
         )
 """
+
 from __future__ import annotations
 
 import json

@@ -13,6 +13,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http PATCH :5001/users/42 username=freddie
     $ http GET :5001/users/ limit==1
 """
+
 import functools
 import random
 
