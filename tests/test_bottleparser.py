@@ -1,7 +1,8 @@
 import pytest
 
-from .apps.bottle_app import app
 from webargs.testing import CommonTestCase
+
+from .apps.bottle_app import app
 
 
 class TestBottleParser(CommonTestCase):

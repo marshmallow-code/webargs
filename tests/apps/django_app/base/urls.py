@@ -2,7 +2,6 @@ from django.urls import re_path
 
 from tests.apps.django_app.echo import views
 
-
 urlpatterns = [
     re_path(r"^echo$", views.echo),
     re_path(r"^async_echo$", views.async_echo),

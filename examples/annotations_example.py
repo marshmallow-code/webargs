@@ -14,14 +14,14 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
     $ http GET :5001/users/42
 """
 
-import random
 import functools
+import random
 
 from flask import Flask, request
 from marshmallow import Schema
+
 from webargs import fields
 from webargs.flaskparser import parser
-
 
 app = Flask(__name__)
 

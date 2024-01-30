@@ -1,14 +1,14 @@
 from io import BytesIO
 from unittest import mock
 
+import pytest
 import webtest
 import webtest_aiohttp
-import pytest
 
+from tests.apps.aiohttp_app import create_app
 from webargs import fields
 from webargs.aiohttpparser import AIOHTTPParser
 from webargs.testing import CommonTestCase
-from tests.apps.aiohttp_app import create_app
 
 
 @pytest.fixture

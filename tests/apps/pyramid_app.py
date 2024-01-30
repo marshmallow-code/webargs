@@ -1,10 +1,10 @@
+import marshmallow as ma
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPBadRequest
-import marshmallow as ma
 
 from webargs import fields
-from webargs.pyramidparser import parser, use_args, use_kwargs
 from webargs.core import json
+from webargs.pyramidparser import parser, use_args, use_kwargs
 
 hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
@@ -31,31 +31,31 @@ def echo_form(request):
 def echo_json(request):
     try:
         return parser.parse(hello_args, request, location="json")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as err:
         error = HTTPBadRequest()
         error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
         error.content_type = "application/json"
-        raise error
+        raise error from err
 
 
 def echo_json_or_form(request):
     try:
         return parser.parse(hello_args, request, location="json_or_form")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as err:
         error = HTTPBadRequest()
         error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
         error.content_type = "application/json"
-        raise error
+        raise error from err
 
 
 def echo_json_ignore_extra_data(request):
     try:
         return parser.parse(hello_exclude_schema, request, unknown=None)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as err:
         error = HTTPBadRequest()
         error.body = json.dumps(["Invalid JSON."]).encode("utf-8")
         error.content_type = "application/json"
-        raise error
+        raise error from err
 
 
 def echo_query(request):

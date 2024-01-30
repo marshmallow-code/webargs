@@ -1,8 +1,8 @@
-import pytest
 import falcon.testing
+import pytest
 
+from tests.apps.falcon_app import FALCON_SUPPORTS_ASYNC, create_app, create_async_app
 from webargs.testing import CommonTestCase
-from tests.apps.falcon_app import create_app, create_async_app, FALCON_SUPPORTS_ASYNC
 
 
 class TestFalconParser(CommonTestCase):

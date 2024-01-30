@@ -19,7 +19,7 @@ from flask import Flask
 from flask_restful import Api, Resource
 
 from webargs import fields, validate
-from webargs.flaskparser import use_args, use_kwargs, parser, abort
+from webargs.flaskparser import abort, parser, use_args, use_kwargs
 
 app = Flask(__name__)
 api = Api(app)

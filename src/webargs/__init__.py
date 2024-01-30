@@ -1,14 +1,14 @@
 from __future__ import annotations
-import importlib.metadata
 
-from packaging.version import Version
-from marshmallow.utils import missing
+import importlib.metadata
 
 # Make marshmallow's validation functions importable from webargs
 from marshmallow import validate
+from marshmallow.utils import missing
+from packaging.version import Version
 
-from webargs.core import ValidationError
 from webargs import fields
+from webargs.core import ValidationError
 
 # TODO: Deprecate __version__ et al.
 __version__ = importlib.metadata.version("webargs")

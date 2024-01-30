@@ -1,5 +1,7 @@
 import marshmallow as ma
-from flask import Flask, jsonify as J, Response, request, __version__ as flask_version
+from flask import Flask, Response, request
+from flask import __version__ as flask_version
+from flask import jsonify as J
 from flask.views import MethodView
 
 from webargs import fields

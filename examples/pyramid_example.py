@@ -14,14 +14,14 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 """
 
 import datetime as dt
-
 from wsgiref.simple_server import make_server
+
 from pyramid.config import Configurator
-from pyramid.view import view_config
 from pyramid.renderers import JSON
+from pyramid.view import view_config
+
 from webargs import fields, validate
 from webargs.pyramidparser import use_args, use_kwargs
-
 
 hello_args = {"name": fields.Str(load_default="Friend")}
 
