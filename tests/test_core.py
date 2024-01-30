@@ -16,10 +16,11 @@ from marshmallow import (
     pre_load,
     validates_schema,
 )
+from werkzeug.datastructures import MultiDict as WerkMultiDict
+
 from webargs import ValidationError, fields
 from webargs.core import Parser, get_mimetype, is_json
 from webargs.multidictproxy import MultiDictProxy
-from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 
 class MockHTTPError(Exception):

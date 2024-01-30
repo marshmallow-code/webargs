@@ -1,7 +1,7 @@
 import pytest
-from tests.apps.django_app.base.wsgi import application
-from tests.apps.django_app import DJANGO_SUPPORTS_ASYNC
 
+from tests.apps.django_app import DJANGO_SUPPORTS_ASYNC
+from tests.apps.django_app.base.wsgi import application
 from webargs.testing import CommonTestCase
 
 

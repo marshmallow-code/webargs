@@ -15,10 +15,10 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 
 import datetime as dt
 
-from bottle import route, run, error, response
+from bottle import error, response, route, run
+
 from webargs import fields, validate
 from webargs.bottleparser import use_args, use_kwargs
-
 
 hello_args = {"name": fields.Str(load_default="Friend")}
 

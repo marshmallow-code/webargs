@@ -17,6 +17,7 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 import datetime as dt
 
 from flask import Flask, jsonify
+
 from webargs import fields, validate
 from webargs.flaskparser import use_args, use_kwargs
 

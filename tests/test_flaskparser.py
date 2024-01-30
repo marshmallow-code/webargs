@@ -1,16 +1,16 @@
 from unittest import mock
 
-from werkzeug.exceptions import HTTPException, BadRequest
 import pytest
-
-from marshmallow import Schema
 from flask import Flask
-from webargs import fields, ValidationError, missing
-from webargs.flaskparser import parser, abort
-from webargs.core import json
+from marshmallow import Schema
+from werkzeug.exceptions import BadRequest, HTTPException
 
-from .apps.flask_app import app, FLASK_SUPPORTS_ASYNC
+from webargs import ValidationError, fields, missing
+from webargs.core import json
+from webargs.flaskparser import abort, parser
 from webargs.testing import CommonTestCase
+
+from .apps.flask_app import FLASK_SUPPORTS_ASYNC, app
 
 
 class TestFlaskParser(CommonTestCase):

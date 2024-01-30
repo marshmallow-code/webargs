@@ -1,3 +1,110 @@
-[tool.black]
-line-length = 88
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+[project]
+name = "webargs"
+version = "8.4.0"
+description = "Declarative parsing and validation of HTTP request objects, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, Falcon, and aiohttp."
+readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [{ name = "Steven Loria", email = "sloria1@gmail.com" }]
+maintainers = [
+  { name = "Steven Loria", email = "sloria1@gmail.com" },
+  { name = "Jérôme Lafréchoux", email = "jerome@jolimont.fr" },
+  { name = "Stephen Rosen", email = "sirosen0@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+]
+keywords = [
+  "webargs",
+  "http",
+  "flask",
+  "django",
+  "bottle",
+  "tornado",
+  "aiohttp",
+  "request",
+  "arguments",
+  "validation",
+  "parameters",
+  "rest",
+  "api",
+  "marshmallow",
+]
+requires-python = ">=3.8"
+dependencies = ["marshmallow>=3.0.0", "packaging>=17.0"]
+
+[project.urls]
+Changelog = "https://webargs.readthedocs.io/en/latest/changelog.html"
+Funding = "https://opencollective.com/marshmallow"
+Issues = "https://github.com/marshmallow-code/webargs/issues"
+Source = "https://github.com/marshmallow-code/webargs"
+Tidelift = "https://tidelift.com/subscription/pkg/pypi-webargs?utm_source=pypi-webargs&utm_medium=pypi"
+
+[project.optional-dependencies]
+frameworks = [
+  "Flask>=0.12.5",
+  "Django>=2.2.0",
+  "bottle>=0.12.13",
+  "tornado>=4.5.2",
+  "pyramid>=1.9.1",
+  "falcon>=2.0.0",
+  "aiohttp>=3.0.8",
+]
+tests = [
+  "webargs[frameworks]",
+  "pytest",
+  "pytest-asyncio",
+  "webtest==3.0.0",
+  "webtest-aiohttp==2.0.0",
+  "pytest-aiohttp>=0.3.0",
+]
+docs = [
+  "webargs[frameworks]",
+  "Sphinx==7.2.6",
+  "sphinx-issues==4.0.0",
+  "furo==2024.1.29",
+]
+dev = ["webargs[tests]", "tox", "pre-commit~=3.5"]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = [
+  "docs/",
+  "tests/",
+  "CHANGELOG.rst",
+  "CONTRIBUTING.rst",
+  "SECURITY.md",
+  "NOTICE",
+  "tox.ini",
+]
+exclude = ["docs/_build/"]
+
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+show-source = true
+
+[tool.ruff.lint]
+ignore = ["E203", "E266", "E501", "E731"]
+select = [
+  "B",  # flake8-bugbear
+  "E",  # pycodestyle error
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+  "W",  # pycodestyle warning
+]

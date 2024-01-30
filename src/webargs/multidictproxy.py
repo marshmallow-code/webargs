@@ -1,5 +1,5 @@
-from collections.abc import Mapping
 import typing
+from collections.abc import Mapping
 
 import marshmallow as ma
 

@@ -1,6 +1,6 @@
 import aiohttp
-from aiohttp.web import json_response
 import marshmallow as ma
+from aiohttp.web import json_response
 
 from webargs import fields
 from webargs.aiohttpparser import parser, use_args, use_kwargs

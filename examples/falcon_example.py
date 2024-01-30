@@ -19,11 +19,11 @@ Try the following with httpie (a cURL-like utility, http://httpie.org):
 
 import datetime as dt
 
-from webargs.core import json
-
 import falcon
+
 from webargs import fields, validate
-from webargs.falconparser import use_args, use_kwargs, parser
+from webargs.core import json
+from webargs.falconparser import parser, use_args, use_kwargs
 
 ### Middleware and hooks ###
 

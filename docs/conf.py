@@ -1,13 +1,4 @@
-import sys
-import os
-import time
-import datetime as dt
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(os.path.join("..", "src")))
-import webargs  # noqa
+import importlib.metadata
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -30,20 +21,14 @@ intersphinx_mapping = {
 }
 
 
-# Use SOURCE_DATE_EPOCH for reproducible build output
-# https://reproducible-builds.org/docs/source-date-epoch/
-build_date = dt.datetime.utcfromtimestamp(
-    int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-)
-
 # The master toctree document.
 master_doc = "index"
 language = "en"
 html_domain_indices = False
 source_suffix = ".rst"
 project = "webargs"
-copyright = f"2014-{build_date:%Y}, Steven Loria and contributors"
-version = release = webargs.__version__
+copyright = "Steven Loria and contributors"
+version = release = importlib.metadata.version("webargs")
 templates_path = ["_templates"]
 exclude_patterns = ["_build"]
 

@@ -1,10 +1,9 @@
+import marshmallow as ma
 from bottle import Bottle, HTTPResponse, debug, request, response
 
-import marshmallow as ma
 from webargs import fields
 from webargs.bottleparser import parser, use_args, use_kwargs
 from webargs.core import json
-
 
 hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
 hello_multiple = {"name": fields.List(fields.Str())}
