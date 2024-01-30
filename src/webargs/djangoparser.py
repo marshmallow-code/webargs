@@ -19,6 +19,7 @@ Example usage: ::
 """
 
 import django
+import django.http
 
 from webargs import core
 
