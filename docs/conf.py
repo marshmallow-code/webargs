@@ -38,7 +38,6 @@ html_theme = "furo"
 
 html_theme_options = {
     "light_css_variables": {"color-brand-primary": "#268bd2"},
-    "description": "Declarative parsing and validation of HTTP request objects.",
 }
 html_logo = "_static/logo.png"
 

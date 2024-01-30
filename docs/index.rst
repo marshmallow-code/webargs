@@ -41,6 +41,7 @@ has support for:
 
 **Query Parameters**
 ::
+
   $ curl http://localhost:5000/\?name\='Freddie'
   Hello Freddie
 
