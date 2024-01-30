@@ -1,4 +1,5 @@
 from __future__ import annotations
+import importlib.metadata
 
 from packaging.version import Version
 from marshmallow.utils import missing
@@ -9,7 +10,8 @@ from marshmallow import validate
 from webargs.core import ValidationError
 from webargs import fields
 
-__version__ = "8.4.0"
+# TODO: Deprecate __version__ et al.
+__version__ = importlib.metadata.version("webargs")
 __parsed_version__ = Version(__version__)
 __version_info__: (
     tuple[int, int, int] | tuple[int, int, int, str, int]
