@@ -1,6 +1,7 @@
+import importlib.metadata
+
 import marshmallow as ma
 from flask import Flask, Response, request
-from flask import __version__ as flask_version
 from flask import jsonify as J
 from flask.views import MethodView
 
@@ -12,7 +13,7 @@ from webargs.flaskparser import (
     use_kwargs,
 )
 
-FLASK_MAJOR_VERSION = int(flask_version.split(".")[0])
+FLASK_MAJOR_VERSION = int(importlib.metadata.version("flask").split(".")[0])
 FLASK_SUPPORTS_ASYNC = FLASK_MAJOR_VERSION >= 2
 
 

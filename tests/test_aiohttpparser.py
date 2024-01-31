@@ -23,12 +23,12 @@ class TestAIOHTTPParser(CommonTestCase):
     def create_app(self):
         return create_app()
 
-    def create_testapp(self, app, loop):
-        return webtest_aiohttp.TestApp(app, loop=loop)
+    def create_testapp(self, app, event_loop):
+        return webtest_aiohttp.TestApp(app, loop=event_loop)
 
     @pytest.fixture
-    def testapp(self, loop):
-        return self.create_testapp(self.create_app(), loop)
+    def testapp(self, event_loop):
+        return self.create_testapp(self.create_app(), event_loop)
 
     @pytest.mark.skip(reason="files location not supported for aiohttpparser")
     def test_parse_files(self, testapp):
@@ -84,6 +84,7 @@ class TestAIOHTTPParser(CommonTestCase):
         assert res.json == {"json": {"name": ["Invalid value."]}}
 
 
+@pytest.mark.asyncio
 async def test_aiohttpparser_synchronous_error_handler(web_request):
     parser = AIOHTTPParser()
 
@@ -100,6 +101,7 @@ async def test_aiohttpparser_synchronous_error_handler(web_request):
         )
 
 
+@pytest.mark.asyncio
 async def test_aiohttpparser_asynchronous_error_handler(web_request):
     parser = AIOHTTPParser()
 

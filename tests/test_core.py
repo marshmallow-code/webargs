@@ -315,8 +315,10 @@ def test_arg_with_default_and_location(parser, web_request):
         "p": fields.Int(
             load_default=1,
             validate=lambda p: p > 0,
-            error="La page demandée n'existe pas",
-            location="querystring",
+            metadata={
+                "error": "La page demandée n'existe pas",
+                "location": "querystring",
+            },
         )
     }
     assert parser.parse(args, web_request) == {"p": 1}
@@ -692,6 +694,7 @@ def test_use_args(web_request, parser):
     assert viewfunc() == {"username": "foo", "password": "bar"}
 
 
+@pytest.mark.asyncio
 async def test_use_args_on_async(web_request, parser):
     user_args = {"username": fields.Str(), "password": fields.Str()}
     web_request.json = {"username": "foo", "password": "bar"}
@@ -1260,7 +1263,7 @@ def test_validation_errors_in_validator_are_passed_to_handle_error(parser, web_r
     def validate(value):
         raise ValidationError("Something went wrong.")
 
-    args = {"name": fields.Field(validate=validate, location="json")}
+    args = {"name": fields.Field(validate=validate, metadata={"location": "json"})}
     web_request.json = {"name": "invalid"}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)

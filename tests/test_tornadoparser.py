@@ -133,10 +133,11 @@ class TestJSONArgs:
         result = parser.load_json(request, author_schema)
         assert result == {}
 
-    def test_it_should_handle_type_error_on_load_json(self, loop):
+    @pytest.mark.usefixtures("event_loop")
+    def test_it_should_handle_type_error_on_load_json(self):
         # but this is different from the test above where the payload was valid
         # and empty -- missing vs {}
-        # NOTE: `loop` is the pytest-aiohttp event loop fixture, but it's
+        # NOTE: `event_loop` is the pytest-aiohttp event loop fixture, but it's
         # important to get an event loop here so that we can construct a future
         request = make_request(
             body=tornado.concurrent.Future(),

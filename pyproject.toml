@@ -108,3 +108,13 @@ select = [
   "UP", # pyupgrade
   "W",  # pycodestyle warning
 ]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+  # https://github.com/Pylons/pyramid/issues/3731
+  "ignore:.*pkg_resources.*:DeprecationWarning",
+  # https://github.com/Pylons/webob/issues/437
+  "ignore:.*'cgi' is deprecated.*:DeprecationWarning",
+  # https://github.com/sloria/webtest-aiohttp/issues/6
+  "ignore:.*The object should be created within an async function.*:DeprecationWarning",
+]
