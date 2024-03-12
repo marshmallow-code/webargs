@@ -1,5 +1,4 @@
-"""Falcon request argument parsing module.
-"""
+"""Falcon request argument parsing module."""
 
 import falcon
 import marshmallow as ma
