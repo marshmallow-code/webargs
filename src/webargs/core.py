@@ -5,6 +5,7 @@ import functools
 import json
 import logging
 import typing
+import inspect
 
 import marshmallow as ma
 from marshmallow import ValidationError
@@ -237,10 +238,12 @@ class Parser(typing.Generic[Request]):
         # an async variant of the _load_location_data method
         # the loader function itself may or may not be async
         loader_func = self._get_loader(location)
-        if asyncio.iscoroutinefunction(loader_func):
-            data = await loader_func(req, schema)
-        else:
-            data = loader_func(req, schema)
+
+        data = loader_func(req, schema)
+
+        if inspect.isawaitable(data):
+            return await data
+
         return data
 
     def _on_validation_error(
