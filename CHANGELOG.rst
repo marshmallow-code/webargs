@@ -8,6 +8,14 @@ Other changes:
 
 * Test against Python 3.12.
 
+* Async location loading now supports loader functions which are not themselves
+  async, but which return an awaitable result. This means that users who are
+  already handling awaitable objects can return them from non-async loaders and
+  expect ``webargs`` to ``await`` them. This allows some async interactions
+  with supported frameworks, where the ``webargs``-provided parser returns a
+  framework object and the framework can be set to return awaitables, e.g.,
+  the Falcon parser. Thanks :user:`j0k2r` for the PR! (:pr:`935`)
+
 8.4.0 (2024-01-07)
 ******************
 
