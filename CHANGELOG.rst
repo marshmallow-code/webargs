@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-8.5.0 (unreleased)
+8.5.0 (2024-04-25)
 ******************
 
 Other changes:

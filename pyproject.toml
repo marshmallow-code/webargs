@@ -1,6 +1,6 @@
 [project]
 name = "webargs"
-version = "8.4.0"
+version = "8.5.0"
 description = "Declarative parsing and validation of HTTP request objects, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, Falcon, and aiohttp."
 readme = "README.rst"
 license = { file = "LICENSE" }
