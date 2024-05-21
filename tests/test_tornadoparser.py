@@ -8,8 +8,8 @@ import tornado.http1connection
 import tornado.httpserver
 import tornado.httputil
 import tornado.ioloop
+import tornado.testing
 import tornado.web
-from tornado.testing import AsyncHTTPTestCase
 
 from webargs import fields, missing
 from webargs.core import json, parse_json
@@ -19,6 +19,22 @@ from webargs.tornadoparser import (
     use_args,
     use_kwargs,
 )
+
+
+class BaseAsyncTestCase(tornado.testing.AsyncHTTPTestCase):
+    # this isn't a real test case itself
+    __test__ = False
+
+    # Workaround for https://github.com/pytest-dev/pytest/issues/12263.
+    #
+    # this was suggested by one of the pytest maintainers while a patch
+    # for Tornado is pending
+    #
+    # we may need it even after the patch, since we want to support testing on
+    # older Tornado versions until we drop support for them
+    def runTest(self):
+        pass
+
 
 name = "name"
 value = "value"
@@ -460,7 +476,7 @@ echo_app = tornado.web.Application(
 )
 
 
-class TestApp(AsyncHTTPTestCase):
+class TestApp(BaseAsyncTestCase):
     def get_app(self):
         return echo_app
 
@@ -528,7 +544,7 @@ validate_app = tornado.web.Application(
 )
 
 
-class TestValidateApp(AsyncHTTPTestCase):
+class TestValidateApp(BaseAsyncTestCase):
     def get_app(self):
         return validate_app
 
