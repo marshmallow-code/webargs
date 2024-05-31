@@ -118,3 +118,25 @@ filterwarnings = [
   # https://github.com/sloria/webtest-aiohttp/issues/6
   "ignore:.*The object should be created within an async function.*:DeprecationWarning",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unreachable = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+# warn_return_any = true
+warn_no_return = true
+no_implicit_optional = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+disallow_untyped_defs = false
+module = [
+  "webargs.fields",
+  "webargs.multidictproxy",
+  "webargs.testing",
+  "webargs.aiohttpparser",
+  "webargs.bottleparser",
+  "webargs.djangoparser",
+  "webargs.falconparser",
+]
