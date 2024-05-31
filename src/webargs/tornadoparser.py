@@ -14,6 +14,8 @@ Example: ::
             self.write(response)
 """
 
+from __future__ import annotations
+
 import json
 import typing
 
