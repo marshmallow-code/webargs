@@ -14,6 +14,12 @@ Example: ::
             self.write(response)
 """
 
+from __future__ import annotations
+
+import json
+import typing
+
+import marshmallow as ma
 import tornado.concurrent
 import tornado.web
 from tornado.escape import _unicode
@@ -26,13 +32,13 @@ from webargs.multidictproxy import MultiDictProxy
 class HTTPError(tornado.web.HTTPError):
     """`tornado.web.HTTPError` that stores validation errors."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         self.messages = kwargs.pop("messages", {})
         self.headers = kwargs.pop("headers", None)
         super().__init__(*args, **kwargs)
 
 
-def is_json_request(req: HTTPServerRequest):
+def is_json_request(req: HTTPServerRequest) -> bool:
     content_type = req.headers.get("Content-Type")
     return content_type is not None and core.is_json(content_type)
 
@@ -43,7 +49,7 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
     requirements.
     """
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> typing.Any:
         try:
             value = self.data.get(key, core.missing)
             if value is core.missing:
@@ -70,7 +76,7 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
     Also, does not use the `_unicode` decoding step
     """
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> typing.Any:
         cookie = self.data.get(key, core.missing)
         if cookie is core.missing:
             return core.missing
@@ -82,7 +88,7 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
 class TornadoParser(core.Parser[HTTPServerRequest]):
     """Tornado request argument parser."""
 
-    def _raw_load_json(self, req: HTTPServerRequest):
+    def _raw_load_json(self, req: HTTPServerRequest) -> typing.Any:
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -97,23 +103,23 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
         return core.parse_json(req.body)
 
-    def load_querystring(self, req: HTTPServerRequest, schema):
+    def load_querystring(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.query_arguments, schema, cls=WebArgsTornadoMultiDictProxy
         )
 
-    def load_form(self, req: HTTPServerRequest, schema):
+    def load_form(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
         )
 
-    def load_headers(self, req: HTTPServerRequest, schema):
+    def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
 
-    def load_cookies(self, req: HTTPServerRequest, schema):
+    def load_cookies(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
         # use the specialized subclass specifically for handling Tornado
         # cookies
@@ -121,13 +127,19 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
             req.cookies, schema, cls=WebArgsTornadoCookiesMultiDictProxy
         )
 
-    def load_files(self, req: HTTPServerRequest, schema):
+    def load_files(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
         return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy)
 
     def handle_error(
-        self, error, req: HTTPServerRequest, schema, *, error_status_code, error_headers
-    ):
+        self,
+        error: ma.ValidationError,
+        req: HTTPServerRequest,
+        schema: ma.Schema,
+        *,
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None,
+    ) -> typing.NoReturn:
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
@@ -145,8 +157,12 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         )
 
     def _handle_invalid_json_error(
-        self, error, req: HTTPServerRequest, *args, **kwargs
-    ):
+        self,
+        error: json.JSONDecodeError | UnicodeDecodeError,
+        req: HTTPServerRequest,
+        *args: typing.Any,
+        **kwargs: typing.Any,
+    ) -> typing.NoReturn:
         raise HTTPError(
             400,
             log_message="Invalid JSON body.",
@@ -154,7 +170,12 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
             messages={"json": ["Invalid JSON body."]},
         )
 
-    def get_request_from_view_args(self, view, args, kwargs):
+    def get_request_from_view_args(
+        self,
+        view: typing.Any,
+        args: tuple[typing.Any, ...],
+        kwargs: typing.Mapping[str, typing.Any],
+    ) -> HTTPServerRequest:
         return args[0].request
 
 

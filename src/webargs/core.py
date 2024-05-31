@@ -651,7 +651,7 @@ class Parser(typing.Generic[Request]):
                     )
                     return func(*args, **kwargs)
 
-            wrapper.__wrapped__ = func  # type: ignore
+            wrapper.__wrapped__ = func
             _record_arg_name(wrapper, arg_name)
             return wrapper
 
