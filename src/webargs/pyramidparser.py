@@ -28,6 +28,7 @@ Example usage: ::
 from __future__ import annotations
 
 import functools
+import typing
 from collections.abc import Mapping
 
 import marshmallow as ma
@@ -37,6 +38,8 @@ from webob.multidict import MultiDict
 
 from webargs import core
 from webargs.core import json
+
+F = typing.TypeVar("F", bound=typing.Callable)
 
 
 def is_json_request(req: Request) -> bool:
@@ -57,7 +60,7 @@ class PyramidParser(core.Parser[Request]):
         **core.Parser.__location_map__,
     )
 
-    def _raw_load_json(self, req: Request):
+    def _raw_load_json(self, req: Request) -> typing.Any:
         """Return a json payload from the request for the core parser's load_json
 
         Checks the input mimetype and may return 'missing' if the mimetype is
@@ -67,34 +70,40 @@ class PyramidParser(core.Parser[Request]):
 
         return core.parse_json(req.body, encoding=req.charset)
 
-    def load_querystring(self, req: Request, schema):
+    def load_querystring(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.GET, schema)
 
-    def load_form(self, req: Request, schema):
+    def load_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(req.POST, schema)
 
-    def load_cookies(self, req: Request, schema):
+    def load_cookies(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
         return self._makeproxy(req.cookies, schema)
 
-    def load_headers(self, req: Request, schema):
+    def load_headers(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema)
 
-    def load_files(self, req: Request, schema):
+    def load_files(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
         files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
         return self._makeproxy(MultiDict(files), schema)
 
-    def load_matchdict(self, req: Request, schema):
+    def load_matchdict(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return the request's ``matchdict`` as a MultiDictProxy."""
         return self._makeproxy(req.matchdict, schema)
 
     def handle_error(
-        self, error, req: Request, schema, *, error_status_code, error_headers
-    ):
+        self,
+        error: ma.ValidationError,
+        req: Request,
+        schema: ma.Schema,
+        *,
+        error_status_code: int | None,
+        error_headers: typing.Mapping[str, str] | None,
+    ) -> typing.NoReturn:
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 400 error.
         """
@@ -109,7 +118,13 @@ class PyramidParser(core.Parser[Request]):
         response.body = body.encode("utf-8") if isinstance(body, str) else body
         raise response
 
-    def _handle_invalid_json_error(self, error, req: Request, *args, **kwargs):
+    def _handle_invalid_json_error(
+        self,
+        error: json.JSONDecodeError | UnicodeDecodeError,
+        req: Request,
+        *args: typing.Any,
+        **kwargs: typing.Any,
+    ) -> typing.NoReturn:
         messages = {"json": ["Invalid JSON body."]}
         response = exception_response(
             400, detail=str(messages), content_type="application/json"
@@ -120,17 +135,17 @@ class PyramidParser(core.Parser[Request]):
 
     def use_args(
         self,
-        argmap,
+        argmap: core.ArgMap,
         req: Request | None = None,
         *,
-        location=core.Parser.DEFAULT_LOCATION,
-        unknown=None,
-        as_kwargs=False,
-        arg_name=None,
-        validate=None,
-        error_status_code=None,
-        error_headers=None,
-    ):
+        location: str | None = core.Parser.DEFAULT_LOCATION,
+        unknown: str | None = None,
+        as_kwargs: bool = False,
+        arg_name: str | None = None,
+        validate: core.ValidateArg = None,
+        error_status_code: int | None = None,
+        error_headers: typing.Mapping[str, str] | None = None,
+    ) -> typing.Callable[..., typing.Callable]:
         """Decorator that injects parsed arguments into a view callable.
         Supports the *Class-based View* pattern where `request` is saved as an instance
         attribute on a view class.
@@ -167,9 +182,11 @@ class PyramidParser(core.Parser[Request]):
                 argmap = dict(argmap)
             argmap = self.schema_class.from_dict(argmap)()
 
-        def decorator(func):
+        def decorator(func: F) -> F:
             @functools.wraps(func)
-            def wrapper(obj, *args, **kwargs):
+            def wrapper(
+                obj: typing.Any, *args: typing.Any, **kwargs: typing.Any
+            ) -> typing.Any:
                 # The first argument is either `self` or `request`
                 try:  # get self.request
                     request = req or obj.request
@@ -191,7 +208,7 @@ class PyramidParser(core.Parser[Request]):
                 return func(obj, *args, **kwargs)
 
             wrapper.__wrapped__ = func
-            return wrapper
+            return wrapper  # type: ignore[return-value]
 
         return decorator
 
