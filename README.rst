@@ -2,19 +2,21 @@
 webargs
 *******
 
-.. image:: https://badgen.net/pypi/v/webargs
-    :target: https://pypi.org/project/webargs/
-    :alt: PyPI version
+|pypi| |build-status| |docs| |marshmallow3|
 
-.. image:: https://github.com/marshmallow-code/webargs/actions/workflows/build-release.yml/badge.svg
+.. |pypi| image:: https://badgen.net/pypi/v/webargs
+    :target: https://pypi.org/project/webargs/
+    :alt: PyPI package
+
+.. |build-status| image:: https://github.com/marshmallow-code/webargs/actions/workflows/build-release.yml/badge.svg
     :target: https://github.com/marshmallow-code/webargs/actions/workflows/build-release.yml
     :alt: Build status
 
-.. image:: https://readthedocs.org/projects/webargs/badge/
+.. |docs| image:: https://readthedocs.org/projects/webargs/badge/
    :target: https://webargs.readthedocs.io/
    :alt: Documentation
 
-.. image:: https://badgen.net/badge/marshmallow/3
+.. |marshmallow3| image:: https://badgen.net/badge/marshmallow/3
     :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
     :alt: marshmallow 3 compatible
 
