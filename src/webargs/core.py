@@ -552,10 +552,10 @@ class Parser(typing.Generic[Request]):
 
         Example usage with Flask: ::
 
-            @app.route('/echo', methods=['get', 'post'])
-            @parser.use_args({'name': fields.Str()}, location="querystring")
+            @app.route("/echo", methods=["get", "post"])
+            @parser.use_args({"name": fields.Str()}, location="querystring")
             def greet(querystring_args):
-                return 'Hello ' + querystring_args['name']
+                return "Hello " + querystring_args["name"]
 
         :param argmap: Either a `marshmallow.Schema`, a `dict`
             of argname -> `marshmallow.fields.Field` pairs, or a callable
@@ -675,10 +675,10 @@ class Parser(typing.Generic[Request]):
 
         Example usage with Flask: ::
 
-            @app.route('/echo', methods=['get', 'post'])
-            @parser.use_kwargs({'name': fields.Str()})
+            @app.route("/echo", methods=["get", "post"])
+            @parser.use_kwargs({"name": fields.Str()})
             def greet(name):
-                return 'Hello ' + name
+                return "Hello " + name
 
         Receives the same ``args`` and ``kwargs`` as :meth:`use_args`.
         """
@@ -717,7 +717,9 @@ class Parser(typing.Generic[Request]):
         Example: ::
 
             from webargs import core
+
             parser = core.Parser()
+
 
             @parser.location_loader("name")
             def load_data(request, schema):
