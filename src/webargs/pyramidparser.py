@@ -8,20 +8,20 @@ Example usage: ::
     from marshmallow import fields
     from webargs.pyramidparser import use_args
 
-    hello_args = {
-        'name': fields.Str(load_default='World')
-    }
+    hello_args = {"name": fields.Str(load_default="World")}
+
 
     @use_args(hello_args)
     def hello_world(request, args):
-        return Response('Hello ' + args['name'])
+        return Response("Hello " + args["name"])
 
-    if __name__ == '__main__':
+
+    if __name__ == "__main__":
         config = Configurator()
-        config.add_route('hello', '/')
-        config.add_view(hello_world, route_name='hello')
+        config.add_route("hello", "/")
+        config.add_view(hello_world, route_name="hello")
         app = config.make_wsgi_app()
-        server = make_server('0.0.0.0', 6543, app)
+        server = make_server("0.0.0.0", 6543, app)
         server.serve_forever()
 """
 

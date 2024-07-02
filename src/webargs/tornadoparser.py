@@ -6,11 +6,11 @@ Example: ::
     from marshmallow import fields
     from webargs.tornadoparser import use_args
 
-    class HelloHandler(tornado.web.RequestHandler):
 
-        @use_args({'name': fields.Str(load_default='World')})
+    class HelloHandler(tornado.web.RequestHandler):
+        @use_args({"name": fields.Str(load_default="World")})
         def get(self, args):
-            response = {'message': 'Hello {}'.format(args['name'])}
+            response = {"message": "Hello {}".format(args["name"])}
             self.write(response)
 """
 

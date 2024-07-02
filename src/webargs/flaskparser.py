@@ -9,9 +9,8 @@ Example: ::
 
     app = Flask(__name__)
 
-    user_detail_args = {
-        'per_page': fields.Int()
-    }
+    user_detail_args = {"per_page": fields.Int()}
+
 
     @app.route("/user/<int:uid>")
     @use_args(user_detail_args)

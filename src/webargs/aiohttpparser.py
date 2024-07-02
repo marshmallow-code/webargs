@@ -9,18 +9,17 @@ Example: ::
     from webargs.aiohttpparser import use_args
 
 
-    hello_args = {
-        'name': fields.Str(required=True)
-    }
+    hello_args = {"name": fields.Str(required=True)}
+
+
     @asyncio.coroutine
     @use_args(hello_args)
     def index(request, args):
-        return web.Response(
-            body='Hello {}'.format(args['name']).encode('utf-8')
-        )
+        return web.Response(body="Hello {}".format(args["name"]).encode("utf-8"))
+
 
     app = web.Application()
-    app.router.add_route('GET', '/', index)
+    app.router.add_route("GET", "/", index)
 """
 
 from __future__ import annotations

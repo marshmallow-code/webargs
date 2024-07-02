@@ -7,15 +7,13 @@ Example usage: ::
     from marshmallow import fields
     from webargs.djangoparser import use_args
 
-    hello_args = {
-        'name': fields.Str(load_default='World')
-    }
+    hello_args = {"name": fields.Str(load_default="World")}
+
 
     class MyView(View):
-
         @use_args(hello_args)
         def get(self, args, request):
-            return HttpResponse('Hello ' + args['name'])
+            return HttpResponse("Hello " + args["name"])
 """
 
 import django
