@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import collections.abc
 import functools
 import inspect
 import json
@@ -323,15 +324,19 @@ class Parser(typing.Generic[Request]):
         :rtype: marshmallow.Schema
         """
         if isinstance(argmap, ma.Schema):
-            schema = argmap
+            schema: ma.Schema = argmap
         elif isinstance(argmap, type) and issubclass(argmap, ma.Schema):
             schema = argmap()
+        elif isinstance(argmap, collections.abc.Mapping):
+            if isinstance(argmap, dict):
+                argmap_dict = argmap
+            else:
+                argmap_dict = dict(argmap)
+            schema = self.schema_class.from_dict(argmap_dict)()
         elif callable(argmap):
-            schema = argmap(req)
-        elif isinstance(argmap, typing.Mapping):
-            if not isinstance(argmap, dict):
-                argmap = dict(argmap)
-            schema = self.schema_class.from_dict(argmap)()
+            # type-ignore because mypy seems to incorrectly deduce the type
+            # as `[def (Request) -> Schema] | object`
+            schema = argmap(req)  # type: ignore[call-arg, assignment]
         else:
             raise TypeError(f"argmap was of unexpected type {type(argmap)}")
         return schema
