@@ -620,8 +620,7 @@ be detected as a list when unpacking query string data:
     #   ...?foo=a&foo=b
     # and treats them as ["a"] and ["a", "b"] respectively
     @parser.use_args({"foo": CustomMultiplexingField()}, location="query")
-    def show_foos(foo):
-        ...
+    def show_foos(foo): ...
 
 
 Mixing Locations
@@ -680,15 +679,13 @@ snippets:
     # correct ordering, top-to-bottom
     @use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
     @use_args({"baz": fields.Str()}, location="json")
-    def viewfunc(query_args, json_args):
-        ...
+    def viewfunc(query_args, json_args): ...
 
 
     # incorrect ordering, bottom-to-top
     @use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
     @use_args({"baz": fields.Str()}, location="json")
-    def viewfunc(json_args, query_args):
-        ...
+    def viewfunc(json_args, query_args): ...
 
 
 To resolve this ambiguity, ``webargs`` version 9 will pass arguments from
@@ -714,8 +711,7 @@ For example,
     @app.route("/")
     @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
     @parser.use_args({"baz": fields.Str()}, location="json")
-    def myview(*, query_args, json_args):
-        ...
+    def myview(*, query_args, json_args): ...
 
 
 You can also customize the names of passed arguments using the ``arg_name``
@@ -728,8 +724,7 @@ parameter:
         {"foo": fields.Int(), "bar": fields.Str()}, location="query", arg_name="query"
     )
     @parser.use_args({"baz": fields.Str()}, location="json", arg_name="payload")
-    def myview(*, query, payload):
-        ...
+    def myview(*, query, payload): ...
 
 Note that ``arg_name`` is available even on parsers where
 ``USE_ARGS_POSITIONAL`` is not set.
@@ -770,8 +765,7 @@ You can customize this to set different arg names. For example,
     @app.route("/")
     @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
     @parser.use_args({"baz": fields.Str()}, location="json")
-    def myview(*, query, body):
-        ...
+    def myview(*, query, body): ...
 
 Additionally, this makes it possible to make custom schema classes which
 provide an argument name. For example,
@@ -802,8 +796,7 @@ provide an argument name. For example,
     @app.route("/")
     @parser.use_args({"foo": fields.Int(), "bar": fields.Str()}, location="query")
     @parser.use_args(RectangleSchema, location="json")
-    def myview(*, rectangle, query_args):
-        ...
+    def myview(*, rectangle, query_args): ...
 
 
 Next Steps

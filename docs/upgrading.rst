@@ -36,8 +36,7 @@ For example
 
 
     @parser.use_args(BodySchema)
-    def foo(data):
-        ...
+    def foo(data): ...
 
 
 In this case, under webargs 7.0 the schema ``unknown`` setting of ``EXCLUDE``
@@ -51,8 +50,7 @@ pass ``unknown`` to ``use_args``, as in
 .. code-block:: python
 
     @parser.use_args(BodySchema, unknown=ma.RAISE)
-    def foo(data):
-        ...
+    def foo(data): ...
 
 Upgrading to 7.0
 ++++++++++++++++
@@ -82,15 +80,13 @@ To get identical behavior:
 
     # webargs 6.x
     @parser.use_args(MySchema)
-    def foo(args):
-        ...
+    def foo(args): ...
 
 
     # webargs 7.x
     # as a parameter to use_args or parse
     @parser.use_args(MySchema, unknown=None)
-    def foo(args):
-        ...
+    def foo(args): ...
 
 
     # webargs 7.x
@@ -100,8 +96,7 @@ To get identical behavior:
 
 
     @parser.use_args(MySchema)
-    def foo(args):
-        ...
+    def foo(args): ...
 
 Upgrading to 6.0
 ++++++++++++++++
@@ -150,15 +145,13 @@ like so:
         },
         locations=("query", "headers"),
     )
-    def foo(q1, q2, h1):
-        ...
+    def foo(q1, q2, h1): ...
 
 
     # webargs 6.x
     @parser.use_kwargs({"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query")
     @parser.use_kwargs({"h1": ma.fields.Int()}, location="headers")
-    def foo(q1, q2, h1):
-        ...
+    def foo(q1, q2, h1): ...
 
 
 Fields No Longer Support location=...
@@ -228,8 +221,7 @@ order to filter out unknown fields. Like so:
     # this can assume that "q" is the only parameter passed, and all other
     # parameters will be ignored
     @parser.use_kwargs({"q": ma.fields.String()}, locations=("query",))
-    def foo(q):
-        ...
+    def foo(q): ...
 
 
     # webargs 6.x, Solution 1: declare a schema with Meta.unknown set
@@ -241,8 +233,7 @@ order to filter out unknown fields. Like so:
 
 
     @parser.use_kwargs(QuerySchema, location="query")
-    def foo(q):
-        ...
+    def foo(q): ...
 
 
     # webargs 6.x, Solution 2: instantiate a schema with unknown set
@@ -251,8 +242,7 @@ order to filter out unknown fields. Like so:
 
 
     @parser.use_kwargs(QuerySchema(unknown=ma.EXCLUDE), location="query")
-    def foo(q):
-        ...
+    def foo(q): ...
 
 
 This also allows usage which passes the unknown parameters through, like so:
@@ -266,8 +256,7 @@ This also allows usage which passes the unknown parameters through, like so:
 
     # will pass *all* query params through as "kwargs"
     @parser.use_kwargs(QuerySchema(unknown=ma.INCLUDE), location="query")
-    def foo(q, **kwargs):
-        ...
+    def foo(q, **kwargs): ...
 
 
 However, many types of request data are so-called "multidicts" -- dictionary-like
@@ -300,8 +289,7 @@ the data in-place. Such usages need rewrites like so:
 
 
     @use_kwargs(QuerySchema, locations=("query",))
-    def foo(q):
-        ...
+    def foo(q): ...
 
 
     # webargs 6.x
@@ -322,8 +310,7 @@ the data in-place. Such usages need rewrites like so:
 
 
     @parser.use_kwargs(QuerySchema, location="query")
-    def foo(q):
-        ...
+    def foo(q): ...
 
 
 DelimitedList Now Only Takes A String Input
@@ -339,15 +326,13 @@ for APIs which need to allow both usages, rewrites are possible like so:
     # this allows ...?x=1&x=2&x=3
     # as well as ...?x=1,2,3
     @use_kwargs({"x": webargs.fields.DelimitedList(ma.fields.Int)}, locations=("query",))
-    def foo(x):
-        ...
+    def foo(x): ...
 
 
     # webargs 6.x
     # this accepts x=1,2,3 but NOT x=1&x=2&x=3
     @use_kwargs({"x": webargs.fields.DelimitedList(ma.fields.Int)}, location="query")
-    def foo(x):
-        ...
+    def foo(x): ...
 
 
     # webargs 6.x
@@ -366,8 +351,7 @@ for APIs which need to allow both usages, rewrites are possible like so:
 
 
     @parser.use_kwargs(UnpackingDelimitedListSchema, location="query")
-    def foo(x):
-        ...
+    def foo(x): ...
 
 
 ValidationError Messages Are Namespaced Under The Location
@@ -419,14 +403,12 @@ arguments are now keyword-only and `status_code` and `headers` have been renamed
 
     # webargs 5.x
     @parser.error_handler
-    def custom_handle_error(error, req, schema, status_code, headers):
-        ...
+    def custom_handle_error(error, req, schema, status_code, headers): ...
 
 
     # webargs 6.x
     @parser.error_handler
-    def custom_handle_error(error, req, schema, *, error_status_code, error_headers):
-        ...
+    def custom_handle_error(error, req, schema, *, error_status_code, error_headers): ...
 
 
 Some Functions Take Keyword-Only Arguments Now
@@ -441,26 +423,22 @@ the changes.
 .. code-block:: python
 
     # webargs 5.x
-    def handle_error(error, req, schema, status_code, headers):
-        ...
+    def handle_error(error, req, schema, status_code, headers): ...
 
 
     # webargs 6.x
-    def handle_error(error, req, schema, *, error_status_code, error_headers):
-        ...
+    def handle_error(error, req, schema, *, error_status_code, error_headers): ...
 
 `parser.__init__` methods:
 
 .. code-block:: python
 
     # webargs 5.x
-    def __init__(self, location=None, error_handler=None, schema_class=None):
-        ...
+    def __init__(self, location=None, error_handler=None, schema_class=None): ...
 
 
     # webargs 6.x
-    def __init__(self, location=None, *, error_handler=None, schema_class=None):
-        ...
+    def __init__(self, location=None, *, error_handler=None, schema_class=None): ...
 
 `parser.parse`, `parser.use_args`, and `parser.use_kwargs` methods:
 
@@ -476,8 +454,7 @@ the changes.
         validate=None,
         error_status_code=None,
         error_headers=None,
-    ):
-        ...
+    ): ...
 
 
     # webargs 6.x
@@ -490,8 +467,7 @@ the changes.
         validate=None,
         error_status_code=None,
         error_headers=None,
-    ):
-        ...
+    ): ...
 
 
     # webargs 5.x
@@ -504,8 +480,7 @@ the changes.
         validate=None,
         error_status_code=None,
         error_headers=None,
-    ):
-        ...
+    ): ...
 
 
     # webargs 6.x
@@ -519,8 +494,7 @@ the changes.
         validate=None,
         error_status_code=None,
         error_headers=None,
-    ):
-        ...
+    ): ...
 
 
     # use_kwargs is just an alias for use_args with as_kwargs=True
@@ -530,13 +504,11 @@ and finally, the `dict2schema` function:
 .. code-block:: python
 
     # webargs 5.x
-    def dict2schema(dct, schema_class=ma.Schema):
-        ...
+    def dict2schema(dct, schema_class=ma.Schema): ...
 
 
     # webargs 6.x
-    def dict2schema(dct, *, schema_class=ma.Schema):
-        ...
+    def dict2schema(dct, *, schema_class=ma.Schema): ...
 
 
 PyramidParser Now Appends Arguments (Used To Prepend)
