@@ -253,8 +253,7 @@ This allows usages like
     @parser.use_kwargs(
         {"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query", unknown=ma.EXCLUDE
     )
-    def foo(q1, q2):
-        ...
+    def foo(q1, q2): ...
 
 * Defaults for ``unknown`` may be customized on parser classes via
   ``Parser.DEFAULT_UNKNOWN_BY_LOCATION``, which maps location names to values
@@ -441,15 +440,13 @@ Refactoring:
         },
         locations=("query", "headers"),
     )
-    def foo(q1, q2, h1):
-        ...
+    def foo(q1, q2, h1): ...
 
 
     # webargs 6.x
     @parser.use_args({"q1": ma.fields.Int(), "q2": ma.fields.Int()}, location="query")
     @parser.use_args({"h1": ma.fields.Int()}, location="headers")
-    def foo(q1, q2, h1):
-        ...
+    def foo(q1, q2, h1): ...
 
 * The `location_handler` decorator has been removed and replaced with
   `location_loader`. `location_loader` serves the same purpose (letting you
