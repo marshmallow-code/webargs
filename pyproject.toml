@@ -136,7 +136,6 @@ disallow_untyped_defs = true
 disallow_untyped_defs = false
 module = [
   "webargs.fields",
-  "webargs.multidictproxy",
   "webargs.testing",
   "webargs.aiohttpparser",
   "webargs.bottleparser",

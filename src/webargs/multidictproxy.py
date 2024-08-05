@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import typing
-from collections.abc import Mapping
+from collections.abc import MutableMapping
 
 import marshmallow as ma
 
 
-class MultiDictProxy(Mapping):
+class MultiDictProxy(MutableMapping):
     """
     A proxy object which wraps multidict types along with a matching schema
     Whenever a value is looked up, it is checked against the schema to see if
@@ -16,9 +18,9 @@ class MultiDictProxy(Mapping):
 
     def __init__(
         self,
-        multidict,
+        multidict: MutableMapping,
         schema: ma.Schema,
-        known_multi_fields: typing.Tuple[typing.Type, ...] = (
+        known_multi_fields: tuple[type, ...] = (
             ma.fields.List,
             ma.fields.Tuple,
         ),
@@ -36,7 +38,7 @@ class MultiDictProxy(Mapping):
             return is_multiple_attr
         return isinstance(field, self.known_multi_fields)
 
-    def _collect_multiple_keys(self, schema: ma.Schema):
+    def _collect_multiple_keys(self, schema: ma.Schema) -> set[str]:
         result = set()
         for name, field in schema.fields.items():
             if not self._is_multiple(field):
@@ -44,7 +46,7 @@ class MultiDictProxy(Mapping):
             result.add(field.data_key if field.data_key is not None else name)
         return result
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> typing.Any:
         val = self.data.get(key, ma.missing)
         if val is ma.missing or key not in self.multiple_keys:
             return val
@@ -58,24 +60,24 @@ class MultiDictProxy(Mapping):
             return None
         return [val]
 
-    def __str__(self):  # str(proxy) proxies to str(proxy.data)
+    def __str__(self) -> str:  # str(proxy) proxies to str(proxy.data)
         return str(self.data)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"MultiDictProxy(data={self.data!r}, multiple_keys={self.multiple_keys!r})"
         )
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         del self.data[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: typing.Any) -> None:
         self.data[key] = value
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> typing.Any:
         return getattr(self.data, name)
 
-    def __iter__(self):
+    def __iter__(self) -> typing.Iterator[str]:
         for x in iter(self.data):
             # special case for header dicts which produce an iterator of tuples
             # instead of an iterator of strings
@@ -84,14 +86,14 @@ class MultiDictProxy(Mapping):
             else:
                 yield x
 
-    def __contains__(self, x):
+    def __contains__(self, x: object) -> bool:
         return x in self.data
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return self.data == other
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return self.data != other

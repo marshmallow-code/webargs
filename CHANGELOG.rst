@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+Unreleased
+**********
+
+Other changes:
+
+* ``MultiDictProxy`` now inherits from ``MutableMapping`` rather than ``Mapping``.
+
 8.5.0 (2024-04-25)
 ******************
 
