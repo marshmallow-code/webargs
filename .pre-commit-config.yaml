@@ -26,6 +26,7 @@ repos:
       - flask
 
 
-# mypy runs under tox in GitHub Actions, skip it in pre-commit.ci
 ci:
+  # mypy runs under tox in GitHub Actions, skip it in pre-commit.ci
   skip: [mypy]
+  autoupdate_schedule: monthly
