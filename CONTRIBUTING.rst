@@ -48,7 +48,7 @@ Setting Up for Local Development
 ::
 
     # After activating your virtualenv
-    $ pip install -e '.[dev]'
+    $ pip install -e ".[dev]"
 
 3. (Optional, but recommended) Install the pre-commit hooks, which will format and lint your git staged files.
 
