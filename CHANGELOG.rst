@@ -4,6 +4,11 @@ Changelog
 Unreleased
 **********
 
+Bug fixes:
+
+* Fix the handling of invalid JSON bodies in the ``bottle`` parser to support
+  ``bottle`` versions ``>=0.13``.
+
 Other changes:
 
 * ``MultiDictProxy`` now inherits from ``MutableMapping`` rather than ``Mapping``.

@@ -37,6 +37,11 @@ class BottleParser(core.Parser[bottle.Request]):
             data = req.json
         except AttributeError:
             return core.missing
+        except bottle.HTTPError as err:
+            if err.body == "Invalid JSON":
+                self._handle_invalid_json_error(err, req)
+            else:
+                raise
 
         # unfortunately, bottle does not distinguish between an empty body, "",
         # and a body containing the valid JSON value null, "null"
