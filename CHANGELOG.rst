@@ -1,8 +1,13 @@
 Changelog
 ---------
 
-Unreleased
-**********
+8.6.0 (2024-09-11)
+******************
+
+Bug fixes:
+
+* Fix the handling of invalid JSON bodies in the ``bottle`` parser to support
+  ``bottle`` versions ``>=0.13``.
 
 Other changes:
 
