@@ -74,7 +74,7 @@ docs = [
   "sphinx-issues==4.1.0",
   "furo==2024.8.6",
 ]
-dev = ["webargs[tests]", "tox", "pre-commit~=3.5"]
+dev = ["webargs[tests]", "tox", "pre-commit>=3.5,<5.0"]
 
 [build-system]
 requires = ["flit_core<4"]
