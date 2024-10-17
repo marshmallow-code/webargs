@@ -75,9 +75,10 @@ def test_load_json_called_by_parse_default(load_json, web_request):
     "location", ["querystring", "form", "headers", "cookies", "files"]
 )
 def test_load_nondefault_called_by_parse_with_location(location, web_request):
-    with mock.patch(
-        f"webargs.core.Parser.load_{location}"
-    ) as mock_loadfunc, mock.patch("webargs.core.Parser.load_json") as load_json:
+    with (
+        mock.patch(f"webargs.core.Parser.load_{location}") as mock_loadfunc,
+        mock.patch("webargs.core.Parser.load_json") as load_json,
+    ):
         mock_loadfunc.return_value = {}
         load_json.return_value = {}
         p = Parser()
