@@ -28,13 +28,13 @@ __all__ = [
 Request = typing.TypeVar("Request")
 ArgMap = typing.Union[
     ma.Schema,
-    typing.Type[ma.Schema],
-    typing.Mapping[str, typing.Union[ma.fields.Field, typing.Type[ma.fields.Field]]],
+    type[ma.Schema],
+    typing.Mapping[str, typing.Union[ma.fields.Field, type[ma.fields.Field]]],
     typing.Callable[[Request], ma.Schema],
 ]
 
 ValidateArg = typing.Union[None, typing.Callable, typing.Iterable[typing.Callable]]
-CallableList = typing.List[typing.Callable]
+CallableList = list[typing.Callable]
 ErrorHandler = typing.Callable[..., typing.NoReturn]
 # generic type var with no particular meaning
 T = typing.TypeVar("T")
