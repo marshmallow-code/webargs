@@ -14,9 +14,9 @@ jobs:
       matrix:
         include:
           - { name: "3.9", python: "3.9", tox: py39-marshmallow3 }
-          - { name: "3.12", python: "3.12", tox: py312-marshmallow3 }
+          - { name: "3.13", python: "3.13", tox: py313-marshmallow3 }
           - { name: "lowest", python: "3.9", tox: py39-lowest }
-          - { name: "dev", python: "3.12", tox: py312-marshmallowdev }
+          - { name: "dev", python: "3.13", tox: py313-marshmallowdev }
     steps:
       - uses: actions/checkout@v4.0.0
       - uses: actions/setup-python@v5
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
       - name: Install pypa/build
         run: python -m pip install build
       - name: Build a binary wheel and a source tarball
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v4.0.0
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
       - run: python -m pip install tox
       - run: python -m tox -e lint
   publish-to-pypi:
