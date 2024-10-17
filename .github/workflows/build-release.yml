@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: "3.8", python: "3.8", tox: py38-marshmallow3 }
+          - { name: "3.9", python: "3.9", tox: py39-marshmallow3 }
           - { name: "3.12", python: "3.12", tox: py312-marshmallow3 }
-          - { name: "lowest", python: "3.8", tox: py38-lowest }
+          - { name: "lowest", python: "3.9", tox: py39-lowest }
           - { name: "dev", python: "3.12", tox: py312-marshmallowdev }
     steps:
       - uses: actions/checkout@v4.0.0
