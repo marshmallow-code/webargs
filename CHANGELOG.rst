@@ -1,17 +1,26 @@
 Changelog
 ---------
 
+8.7.0 (unreleased)
+******************
+
+Other changes:
+
+* Test against Python 3.13 (:pr:`982`).
+* Drop support for Python 3.8, which is EOL (:pr:`981`).
+
 8.6.0 (2024-09-11)
 ******************
 
 Bug fixes:
 
 * Fix the handling of invalid JSON bodies in the ``bottle`` parser to support
-  ``bottle`` versions ``>=0.13``.
+  ``bottle`` versions ``>=0.13`` (:pr:`974`).
 
 Other changes:
 
-* ``MultiDictProxy`` now inherits from ``MutableMapping`` rather than ``Mapping``.
+* ``MultiDictProxy`` now inherits from ``MutableMapping`` rather than
+    ``Mapping`` (:pr:`960`).
 
 8.5.0 (2024-04-25)
 ******************
