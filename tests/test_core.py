@@ -1,11 +1,10 @@
-import importlib.metadata
 import collections
 import datetime
+import importlib.metadata
 import typing
 from unittest import mock
 
 import pytest
-from packaging.version import Version
 from bottle import MultiDict as BotMultiDict
 from django.utils.datastructures import MultiValueDict as DjMultiDict
 from marshmallow import (
@@ -17,9 +16,10 @@ from marshmallow import (
     pre_load,
     validates_schema,
 )
+from packaging.version import Version
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
-from webargs import ValidationError, fields, validate
+from webargs import ValidationError, fields
 from webargs.core import Parser, get_mimetype, is_json
 from webargs.multidictproxy import MultiDictProxy
 
@@ -514,6 +514,7 @@ def test_custom_location_loader_with_data_key(web_request):
 
 def test_full_input_validation(parser, web_request):
     web_request.json = {"foo": 41, "bar": 42}
+
     def validator(args):
         if args["foo"] <= args["bar"]:
             raise ValidationError("foo must be > bar")
@@ -555,8 +556,12 @@ def test_required_with_custom_error(parser, web_request):
 
     assert "We need foo" in excinfo.value.messages["json"]["foo"]
 
+
 @pytest.mark.filterwarnings("ignore:Returning `False` from a validator is deprecated")
-@pytest.mark.skipif(MARSHMALLOW_VERSION.major >= 4, reason="marshmallow 4+ does not support validators returning False")
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION.major >= 4,
+    reason="marshmallow 4+ does not support validators returning False",
+)
 def test_required_with_custom_error_and_validation_error(parser, web_request):
     web_request.json = {"foo": ""}
     args = {
@@ -1322,6 +1327,7 @@ class MockRequestParserWithErrorHandler(MockRequestParser):
 def test_parse_with_error_status_code_and_headers(web_request):
     def always_fail(_):
         raise ValidationError("oops")
+
     parser = MockRequestParserWithErrorHandler()
     web_request.json = {"foo": 42}
     args = {"foo": fields.Raw(validate=always_fail)}
@@ -1557,9 +1563,7 @@ def test_use_args_explicit_arg_names(web_request, use_positional_setting):
     web_request.query = {"bar": "baz"}
 
     @parser.use_args({"foo": fields.Raw()}, web_request, arg_name="j")
-    @parser.use_args(
-        {"bar": fields.Raw()}, web_request, location="query", arg_name="q"
-    )
+    @parser.use_args({"bar": fields.Raw()}, web_request, location="query", arg_name="q")
     def viewfunc(*, j, q):
         return (j, q)
 

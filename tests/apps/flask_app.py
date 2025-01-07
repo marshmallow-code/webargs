@@ -60,14 +60,14 @@ def echo_json_or_form():
 def echo_use_args(args):
     return J(args)
 
+
 def validator(args):
     if args["value"] <= 42:
         raise ma.ValidationError("invalid")
 
+
 @app.route("/echo_use_args_validated", methods=["POST"])
-@use_args(
-    {"value": fields.Int()}, validate=validator, location="form"
-)
+@use_args({"value": fields.Int()}, validate=validator, location="form")
 def echo_use_args_validated(args):
     return J(args)
 
