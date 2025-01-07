@@ -2,16 +2,16 @@ import aiohttp
 import marshmallow as ma
 from aiohttp.web import json_response
 
-from webargs import fields
+from webargs import fields, validate
 from webargs.aiohttpparser import parser, use_args, use_kwargs
 from webargs.core import json
 
-hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=validate.Length(min=3))}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=validate.Length(min=3))
 
 
 hello_many_schema = HelloSchema(many=True)

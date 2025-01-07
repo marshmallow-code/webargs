@@ -5,7 +5,7 @@ from flask import Flask, Response, request
 from flask import jsonify as J
 from flask.views import MethodView
 
-from webargs import fields
+from webargs import fields, validate
 from webargs.core import json
 from webargs.flaskparser import (
     parser,
@@ -21,12 +21,12 @@ class TestAppConfig:
     TESTING = True
 
 
-hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=validate.Length(min=3))}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=validate.Length(min=3))
 
 
 hello_many_schema = HelloSchema(many=True)
@@ -60,10 +60,13 @@ def echo_json_or_form():
 def echo_use_args(args):
     return J(args)
 
+def validator(args):
+    if args["value"] <= 42:
+        raise ma.ValidationError("invalid")
 
 @app.route("/echo_use_args_validated", methods=["POST"])
 @use_args(
-    {"value": fields.Int()}, validate=lambda args: args["value"] > 42, location="form"
+    {"value": fields.Int()}, validate=validator, location="form"
 )
 def echo_use_args_validated(args):
     return J(args)

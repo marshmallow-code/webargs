@@ -3,11 +3,11 @@ import importlib.metadata
 import falcon
 import marshmallow as ma
 
-from webargs import fields
+from webargs import fields, validate
 from webargs.core import json
 from webargs.falconparser import parser, use_args, use_kwargs
 
-hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=validate.Length(min=3))}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 FALCON_MAJOR_VERSION = int(importlib.metadata.version("falcon").split(".")[0])
@@ -15,7 +15,7 @@ FALCON_SUPPORTS_ASYNC = FALCON_MAJOR_VERSION >= 3
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=validate.Length(min=3))
 
 
 hello_many_schema = HelloSchema(many=True)

@@ -157,7 +157,8 @@ def test_abort_called_on_validation_error(mock_abort):
     app = Flask("testapp")
 
     def validate(x):
-        return x == 42
+        if x != 42:
+            raise ValidationError("Invalid value.")
 
     argmap = {"value": fields.Raw(validate=validate)}
     with app.test_request_context(
@@ -186,7 +187,8 @@ async def test_abort_called_on_validation_error_async():
         app = Flask("testapp")
 
         def validate(x):
-            return x == 42
+            if x != 42:
+                raise ValidationError("Invalid value.")
 
         argmap = {"value": fields.Raw(validate=validate)}
         with app.test_request_context(

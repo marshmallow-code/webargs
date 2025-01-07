@@ -1,9 +1,11 @@
+import importlib.metadata
 import collections
 import datetime
 import typing
 from unittest import mock
 
 import pytest
+from packaging.version import Version
 from bottle import MultiDict as BotMultiDict
 from django.utils.datastructures import MultiValueDict as DjMultiDict
 from marshmallow import (
@@ -12,15 +14,16 @@ from marshmallow import (
     RAISE,
     Schema,
     missing,
-    post_load,
     pre_load,
     validates_schema,
 )
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
-from webargs import ValidationError, fields
+from webargs import ValidationError, fields, validate
 from webargs.core import Parser, get_mimetype, is_json
 from webargs.multidictproxy import MultiDictProxy
+
+MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))
 
 
 class MockHTTPError(Exception):
@@ -511,11 +514,14 @@ def test_custom_location_loader_with_data_key(web_request):
 
 def test_full_input_validation(parser, web_request):
     web_request.json = {"foo": 41, "bar": 42}
+    def validator(args):
+        if args["foo"] <= args["bar"]:
+            raise ValidationError("foo must be > bar")
 
     args = {"foo": fields.Int(), "bar": fields.Int()}
     with pytest.raises(ValidationError):
         # Test that `validate` receives dictionary of args
-        parser.parse(args, web_request, validate=lambda args: args["foo"] > args["bar"])
+        parser.parse(args, web_request, validate=validator)
 
 
 def test_full_input_validation_with_multiple_validators(web_request, parser):
@@ -549,7 +555,8 @@ def test_required_with_custom_error(parser, web_request):
 
     assert "We need foo" in excinfo.value.messages["json"]["foo"]
 
-
+@pytest.mark.filterwarnings("ignore:Returning `False` from a validator is deprecated")
+@pytest.mark.skipif(MARSHMALLOW_VERSION.major >= 4, reason="marshmallow 4+ does not support validators returning False")
 def test_required_with_custom_error_and_validation_error(parser, web_request):
     web_request.json = {"foo": ""}
     args = {
@@ -789,7 +796,7 @@ def test_parse_with_callable(web_request, parser):
 
     def make_schema(req):
         assert req is web_request
-        return MySchema(context={"request": req})
+        return MySchema()
 
     result = parser.parse(make_schema, web_request)
 
@@ -800,23 +807,17 @@ def test_use_args_callable(web_request, parser):
     class HelloSchema(Schema):
         name = fields.Str()
 
-        @post_load
-        def request_data(self, item, **kwargs):
-            item["data"] = self.context["request"].data
-            return item
-
     web_request.json = {"name": "foo"}
-    web_request.data = "request-data"
 
     def make_schema(req):
         assert req is web_request
-        return HelloSchema(context={"request": req})
+        return HelloSchema()
 
     @parser.use_args(make_schema, web_request)
     def viewfunc(args):
         return args
 
-    assert viewfunc() == {"name": "foo", "data": "request-data"}
+    assert viewfunc() == {"name": "foo"}
 
 
 class TestPassingSchema:
@@ -846,7 +847,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req})
+            return self.UserSchema()
 
         result = parser.parse(factory, web_request)
 
@@ -857,7 +858,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req})
+            return self.UserSchema()
 
         @parser.use_args(factory, web_request)
         def viewfunc(args):
@@ -879,7 +880,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req})
+            return self.UserSchema()
 
         @parser.use_kwargs(factory, web_request)
         def viewfunc(email, password):
@@ -1319,9 +1320,11 @@ class MockRequestParserWithErrorHandler(MockRequestParser):
 
 
 def test_parse_with_error_status_code_and_headers(web_request):
+    def always_fail(_):
+        raise ValidationError("oops")
     parser = MockRequestParserWithErrorHandler()
     web_request.json = {"foo": 42}
-    args = {"foo": fields.Raw(validate=lambda x: False)}
+    args = {"foo": fields.Raw(validate=always_fail)}
     with pytest.raises(MockHTTPError) as excinfo:
         parser.parse(
             args, web_request, error_status_code=418, error_headers={"X-Foo": "bar"}

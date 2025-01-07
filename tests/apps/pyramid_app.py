@@ -2,16 +2,16 @@ import marshmallow as ma
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPBadRequest
 
-from webargs import fields
+from webargs import fields, validate
 from webargs.core import json
 from webargs.pyramidparser import parser, use_args, use_kwargs
 
-hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=validate.Length(min=3))}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=validate.Length(min=3))
 
 
 hello_many_schema = HelloSchema(many=True)
