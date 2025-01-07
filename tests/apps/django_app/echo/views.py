@@ -4,16 +4,16 @@ import marshmallow as ma
 from django.http import HttpResponse
 from django.views.generic import View
 
-from webargs import fields
+from webargs import fields, validate
 from webargs.core import json
 from webargs.djangoparser import parser, use_args, use_kwargs
 
-hello_args = {"name": fields.Str(load_default="World", validate=lambda n: len(n) >= 3)}
+hello_args = {"name": fields.Str(load_default="World", validate=validate.Length(min=3))}
 hello_multiple = {"name": fields.List(fields.Str())}
 
 
 class HelloSchema(ma.Schema):
-    name = fields.Str(load_default="World", validate=lambda n: len(n) >= 3)
+    name = fields.Str(load_default="World", validate=validate.Length(min=3))
 
 
 hello_many_schema = HelloSchema(many=True)
@@ -161,7 +161,7 @@ def echo_cookie(request):
 
 @handle_view_errors
 def echo_file(request):
-    args = {"myfile": fields.Field()}
+    args = {"myfile": fields.Raw()}
     result = parser.parse(args, request, location="files")
     myfile = result["myfile"]
     content = myfile.read().decode("utf8")

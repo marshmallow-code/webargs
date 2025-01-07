@@ -2,7 +2,7 @@
 webargs
 *******
 
-|pypi| |build-status| |docs| |marshmallow3|
+|pypi| |build-status| |docs| |marshmallow-support|
 
 .. |pypi| image:: https://badgen.net/pypi/v/webargs
     :target: https://pypi.org/project/webargs/
@@ -16,9 +16,9 @@ webargs
    :target: https://webargs.readthedocs.io/
    :alt: Documentation
 
-.. |marshmallow3| image:: https://badgen.net/badge/marshmallow/3
+.. |marshmallow-support| image:: https://badgen.net/badge/marshmallow/3,4?list=1
     :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
-    :alt: marshmallow 3 compatible
+    :alt: marshmallow 3|4 compatible
 
 Homepage: https://webargs.readthedocs.io/
 

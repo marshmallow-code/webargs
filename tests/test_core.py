@@ -1,5 +1,6 @@
 import collections
 import datetime
+import importlib.metadata
 import typing
 from unittest import mock
 
@@ -12,15 +13,17 @@ from marshmallow import (
     RAISE,
     Schema,
     missing,
-    post_load,
     pre_load,
     validates_schema,
 )
+from packaging.version import Version
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 from webargs import ValidationError, fields
 from webargs.core import Parser, get_mimetype, is_json
 from webargs.multidictproxy import MultiDictProxy
+
+MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))
 
 
 class MockHTTPError(Exception):
@@ -64,7 +67,7 @@ def parser():
 
 @mock.patch("webargs.core.Parser.load_json")
 def test_load_json_called_by_parse_default(load_json, web_request):
-    schema = Schema.from_dict({"foo": fields.Field()})()
+    schema = Schema.from_dict({"foo": fields.Raw()})()
     load_json.return_value = {"foo": 1}
     p = Parser()
     p.parse(schema, web_request)
@@ -85,13 +88,13 @@ def test_load_nondefault_called_by_parse_with_location(location, web_request):
 
         # ensure that without location=..., the loader is not called (json is
         # called)
-        p.parse({"foo": fields.Field()}, web_request)
+        p.parse({"foo": fields.Raw()}, web_request)
         assert mock_loadfunc.call_count == 0
         assert load_json.call_count == 1
 
         # but when location=... is given, the loader *is* called and json is
         # not called
-        p.parse({"foo": fields.Field()}, web_request, location=location)
+        p.parse({"foo": fields.Raw()}, web_request, location=location)
         assert mock_loadfunc.call_count == 1
         # it was already 1, should not go up
         assert load_json.call_count == 1
@@ -101,7 +104,7 @@ def test_load_nondefault_called_by_parse_with_location(location, web_request):
 @pytest.mark.parametrize("method", ["parse", "async_parse"])
 async def test_parse(parser, web_request, method):
     web_request.json = {"username": 42, "password": 42}
-    argmap = {"username": fields.Field(), "password": fields.Field()}
+    argmap = {"username": fields.Raw(), "password": fields.Raw()}
     if method == "async_parse":
         ret = await parser.async_parse(argmap, web_request)
     else:
@@ -122,8 +125,8 @@ def test_parse_with_unknown_behavior_specified(parser, web_request, set_location
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
 
     class CustomSchema(Schema):
-        username = fields.Field()
-        password = fields.Field()
+        username = fields.Raw()
+        password = fields.Raw()
 
     def parse_with_desired_behavior(value):
         if set_location == "schema_instance":
@@ -167,8 +170,8 @@ def test_parse_with_explicit_unknown_overrides_schema(parser, web_request):
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
 
     class CustomSchema(Schema):
-        username = fields.Field()
-        password = fields.Field()
+        username = fields.Raw()
+        password = fields.Raw()
 
     # setting RAISE in the parse call overrides schema setting
     with pytest.raises(ValidationError, match="Unknown field."):
@@ -191,8 +194,8 @@ def test_parse_with_default_unknown_cleared_uses_schema_value(
     web_request.json = {"username": 42, "password": 42, "fjords": 42}
 
     class CustomSchema(Schema):
-        username = fields.Field()
-        password = fields.Field()
+        username = fields.Raw()
+        password = fields.Raw()
 
     if clear_method == "custom_class":
 
@@ -226,7 +229,7 @@ def test_parse_with_default_unknown_cleared_uses_schema_value(
 @pytest.mark.parametrize("method", ["parse", "async_parse"])
 async def test_parse_required_arg_raises_validation_error(parser, web_request, method):
     web_request.json = {}
-    args = {"foo": fields.Field(required=True)}
+    args = {"foo": fields.Raw(required=True)}
     with pytest.raises(ValidationError, match="Missing data for required field."):
         if method == "parse":
             parser.parse(args, web_request)
@@ -250,13 +253,13 @@ def test_arg_allow_none(parser, web_request):
 
 def test_parse_required_arg(parser, web_request):
     web_request.json = {"foo": 42}
-    result = parser.parse({"foo": fields.Field(required=True)}, web_request)
+    result = parser.parse({"foo": fields.Raw(required=True)}, web_request)
     assert result == {"foo": 42}
 
 
 def test_parse_required_list(parser, web_request):
     web_request.json = {"bar": []}
-    args = {"foo": fields.List(fields.Field(), required=True)}
+    args = {"foo": fields.List(fields.Raw(), required=True)}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
     assert (
@@ -267,13 +270,13 @@ def test_parse_required_list(parser, web_request):
 # Regression test for https://github.com/marshmallow-code/webargs/issues/107
 def test_parse_list_allow_none(parser, web_request):
     web_request.json = {"foo": None}
-    args = {"foo": fields.List(fields.Field(allow_none=True), allow_none=True)}
+    args = {"foo": fields.List(fields.Raw(allow_none=True), allow_none=True)}
     assert parser.parse(args, web_request) == {"foo": None}
 
 
 def test_parse_list_dont_allow_none(parser, web_request):
     web_request.json = {"foo": None}
-    args = {"foo": fields.List(fields.Field(), allow_none=False)}
+    args = {"foo": fields.List(fields.Raw(), allow_none=False)}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
     assert excinfo.value.messages["json"]["foo"][0] == "Field may not be null."
@@ -281,13 +284,13 @@ def test_parse_list_dont_allow_none(parser, web_request):
 
 def test_parse_empty_list(parser, web_request):
     web_request.json = {"things": []}
-    args = {"things": fields.List(fields.Field())}
+    args = {"things": fields.List(fields.Raw())}
     assert parser.parse(args, web_request) == {"things": []}
 
 
 def test_parse_missing_list(parser, web_request):
     web_request.json = {}
-    args = {"things": fields.List(fields.Field())}
+    args = {"things": fields.List(fields.Raw())}
     assert parser.parse(args, web_request) == {}
 
 
@@ -297,14 +300,14 @@ def test_default_location():
 
 def test_missing_with_default(parser, web_request):
     web_request.json = {}
-    args = {"val": fields.Field(load_default="pizza")}
+    args = {"val": fields.Raw(load_default="pizza")}
     result = parser.parse(args, web_request)
     assert result["val"] == "pizza"
 
 
 def test_default_can_be_none(parser, web_request):
     web_request.json = {}
-    args = {"val": fields.Field(load_default=None, allow_none=True)}
+    args = {"val": fields.Raw(load_default=None, allow_none=True)}
     result = parser.parse(args, web_request)
     assert result["val"] is None
 
@@ -326,7 +329,7 @@ def test_arg_with_default_and_location(parser, web_request):
 
 
 def test_value_error_raised_if_parse_called_with_invalid_location(parser, web_request):
-    field = fields.Field()
+    field = fields.Raw()
     with pytest.raises(ValueError, match="Invalid location argument: invalidlocation"):
         parser.parse({"foo": field}, web_request, location="invalidlocation")
 
@@ -342,10 +345,10 @@ def test_handle_error_called_when_parsing_raises_error(handle_error, web_request
     p = Parser()
     assert handle_error.call_count == 0
     with pytest.raises(ValidationError):
-        p.parse({"foo": fields.Field()}, web_request, validate=always_fail)
+        p.parse({"foo": fields.Raw()}, web_request, validate=always_fail)
     assert handle_error.call_count == 1
     with pytest.raises(ValidationError):
-        p.parse({"foo": fields.Field()}, web_request, validate=always_fail)
+        p.parse({"foo": fields.Raw()}, web_request, validate=always_fail)
     assert handle_error.call_count == 2
 
 
@@ -362,12 +365,12 @@ async def test_handle_error_called_when_async_parsing_raises_error(web_request):
         assert handle_error.call_count == 0
         with pytest.raises(ValidationError):
             await p.async_parse(
-                {"foo": fields.Field()}, web_request, validate=always_fail
+                {"foo": fields.Raw()}, web_request, validate=always_fail
             )
         assert handle_error.call_count == 1
         with pytest.raises(ValidationError):
             await p.async_parse(
-                {"foo": fields.Field()}, web_request, validate=always_fail
+                {"foo": fields.Raw()}, web_request, validate=always_fail
             )
         assert handle_error.call_count == 2
 
@@ -388,7 +391,7 @@ def test_handle_error_reraises_errors(web_request):
 def test_location_as_init_argument(load_headers, web_request):
     p = Parser(location="headers")
     load_headers.return_value = {}
-    p.parse({"foo": fields.Field()}, web_request)
+    p.parse({"foo": fields.Raw()}, web_request)
     assert load_headers.called
 
 
@@ -512,10 +515,14 @@ def test_custom_location_loader_with_data_key(web_request):
 def test_full_input_validation(parser, web_request):
     web_request.json = {"foo": 41, "bar": 42}
 
+    def validator(args):
+        if args["foo"] <= args["bar"]:
+            raise ValidationError("foo must be > bar")
+
     args = {"foo": fields.Int(), "bar": fields.Int()}
     with pytest.raises(ValidationError):
         # Test that `validate` receives dictionary of args
-        parser.parse(args, web_request, validate=lambda args: args["foo"] > args["bar"])
+        parser.parse(args, web_request, validate=validator)
 
 
 def test_full_input_validation_with_multiple_validators(web_request, parser):
@@ -550,6 +557,11 @@ def test_required_with_custom_error(parser, web_request):
     assert "We need foo" in excinfo.value.messages["json"]["foo"]
 
 
+@pytest.mark.filterwarnings("ignore:Returning `False` from a validator is deprecated")
+@pytest.mark.skipif(
+    MARSHMALLOW_VERSION.major >= 4,
+    reason="marshmallow 4+ does not support validators returning False",
+)
 def test_required_with_custom_error_and_validation_error(parser, web_request):
     web_request.json = {"foo": ""}
     args = {
@@ -624,7 +636,7 @@ def test_parse_with_data_key(web_request):
     web_request.json = {"Content-Type": "application/json"}
 
     parser = MockRequestParser()
-    args = {"content_type": fields.Field(data_key="Content-Type")}
+    args = {"content_type": fields.Raw(data_key="Content-Type")}
     parsed = parser.parse(args, web_request)
     assert parsed == {"content_type": "application/json"}
 
@@ -644,7 +656,7 @@ def test_parse_with_data_key_retains_field_name_in_error(web_request):
 def test_parse_nested_with_data_key(web_request):
     parser = MockRequestParser()
     web_request.json = {"nested_arg": {"wrong": "OK"}}
-    args = {"nested_arg": fields.Nested({"right": fields.Field(data_key="wrong")})}
+    args = {"nested_arg": fields.Nested({"right": fields.Raw(data_key="wrong")})}
 
     parsed = parser.parse(args, web_request)
     assert parsed == {"nested_arg": {"right": "OK"}}
@@ -656,7 +668,7 @@ def test_parse_nested_with_missing_key_and_data_key(web_request):
     web_request.json = {"nested_arg": {}}
     args = {
         "nested_arg": fields.Nested(
-            {"found": fields.Field(load_default=None, allow_none=True, data_key="miss")}
+            {"found": fields.Raw(load_default=None, allow_none=True, data_key="miss")}
         )
     }
 
@@ -668,7 +680,7 @@ def test_parse_nested_with_default(web_request):
     parser = MockRequestParser()
 
     web_request.json = {"nested_arg": {}}
-    args = {"nested_arg": fields.Nested({"miss": fields.Field(load_default="<foo>")})}
+    args = {"nested_arg": fields.Nested({"miss": fields.Raw(load_default="<foo>")})}
 
     parsed = parser.parse(args, web_request)
     assert parsed == {"nested_arg": {"miss": "<foo>"}}
@@ -785,11 +797,11 @@ def test_parse_with_callable(web_request, parser):
     web_request.json = {"foo": 42}
 
     class MySchema(Schema):
-        foo = fields.Field()
+        foo = fields.Raw()
 
     def make_schema(req):
         assert req is web_request
-        return MySchema(context={"request": req})
+        return MySchema()
 
     result = parser.parse(make_schema, web_request)
 
@@ -800,23 +812,17 @@ def test_use_args_callable(web_request, parser):
     class HelloSchema(Schema):
         name = fields.Str()
 
-        @post_load
-        def request_data(self, item, **kwargs):
-            item["data"] = self.context["request"].data
-            return item
-
     web_request.json = {"name": "foo"}
-    web_request.data = "request-data"
 
     def make_schema(req):
         assert req is web_request
-        return HelloSchema(context={"request": req})
+        return HelloSchema()
 
     @parser.use_args(make_schema, web_request)
     def viewfunc(args):
         return args
 
-    assert viewfunc() == {"name": "foo", "data": "request-data"}
+    assert viewfunc() == {"name": "foo"}
 
 
 class TestPassingSchema:
@@ -846,7 +852,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req})
+            return self.UserSchema()
 
         result = parser.parse(factory, web_request)
 
@@ -857,7 +863,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req})
+            return self.UserSchema()
 
         @parser.use_args(factory, web_request)
         def viewfunc(args):
@@ -879,7 +885,7 @@ class TestPassingSchema:
 
         def factory(req):
             assert req is web_request
-            return self.UserSchema(context={"request": req})
+            return self.UserSchema()
 
         @parser.use_kwargs(factory, web_request)
         def viewfunc(email, password):
@@ -903,7 +909,7 @@ class TestPassingSchema:
     ):
         class UserSchema(Schema):
             name = fields.Str()
-            location = fields.Field(required=False)
+            location = fields.Raw(required=False)
 
             @validates_schema(pass_original=True)
             def validate_schema(self, data, original_data, **kwargs):
@@ -1264,7 +1270,7 @@ def test_validation_errors_in_validator_are_passed_to_handle_error(parser, web_r
     def validate(value):
         raise ValidationError("Something went wrong.")
 
-    args = {"name": fields.Field(validate=validate, metadata={"location": "json"})}
+    args = {"name": fields.Raw(validate=validate, metadata={"location": "json"})}
     web_request.json = {"name": "invalid"}
     with pytest.raises(ValidationError) as excinfo:
         parser.parse(args, web_request)
@@ -1290,7 +1296,7 @@ def test_parse_raises_validation_error_if_data_invalid(web_request, parser):
 
 def test_nested_field_from_dict():
     # webargs.fields.Nested implements dict handling
-    argmap = {"nest": fields.Nested({"foo": fields.Field()})}
+    argmap = {"nest": fields.Nested({"foo": fields.Raw()})}
     schema_cls = Schema.from_dict(argmap)
     assert issubclass(schema_cls, Schema)
     schema = schema_cls()
@@ -1319,9 +1325,12 @@ class MockRequestParserWithErrorHandler(MockRequestParser):
 
 
 def test_parse_with_error_status_code_and_headers(web_request):
+    def always_fail(_):
+        raise ValidationError("oops")
+
     parser = MockRequestParserWithErrorHandler()
     web_request.json = {"foo": 42}
-    args = {"foo": fields.Field(validate=lambda x: False)}
+    args = {"foo": fields.Raw(validate=always_fail)}
     with pytest.raises(MockHTTPError) as excinfo:
         parser.parse(
             args, web_request, error_status_code=418, error_headers={"X-Foo": "bar"}
@@ -1450,7 +1459,7 @@ def test_parse_allows_non_dict_argmap_mapping(parser, web_request):
     # UserDict is dict-like in all meaningful ways, but not a subclass of `dict`
     # it will therefore need to be converted when used
     argmap = collections.UserDict(
-        {"username": fields.String(), "password": fields.Field()}
+        {"username": fields.String(), "password": fields.Raw()}
     )
 
     ret = parser.parse(argmap, web_request)
@@ -1462,7 +1471,7 @@ def test_use_args_allows_non_dict_argmap_mapping(parser, web_request):
     # UserDict is dict-like in all meaningful ways, but not a subclass of `dict`
     # it will therefore need to be converted when used
     argmap = collections.UserDict(
-        {"username": fields.String(), "password": fields.Field()}
+        {"username": fields.String(), "password": fields.Raw()}
     )
 
     @parser.use_args(argmap, web_request)
@@ -1494,11 +1503,11 @@ def test_parser_opt_out_positional_args(web_request):
     #
     # no specific arg name, default parser, everything works
     # works for 'args', 'json_args', or any other name
-    @parser.use_args({"foo": fields.Field()}, web_request)
+    @parser.use_args({"foo": fields.Raw()}, web_request)
     def viewfunc1(args):
         return args
 
-    @parser.use_args({"foo": fields.Field()}, web_request)
+    @parser.use_args({"foo": fields.Raw()}, web_request)
     def viewfunc2(json_args):
         return json_args
 
@@ -1509,15 +1518,15 @@ def test_parser_opt_out_positional_args(web_request):
     #
     # `json_args` as the arg name works as a positional or keyword-only
     # but `args` as the arg name does not
-    @opt_out_parser.use_args({"foo": fields.Field()}, web_request)
+    @opt_out_parser.use_args({"foo": fields.Raw()}, web_request)
     def viewfunc3(json_args):
         return json_args
 
-    @opt_out_parser.use_args({"foo": fields.Field()}, web_request)
+    @opt_out_parser.use_args({"foo": fields.Raw()}, web_request)
     def viewfunc4(*, json_args):
         return json_args
 
-    @opt_out_parser.use_args({"foo": fields.Field()}, web_request)
+    @opt_out_parser.use_args({"foo": fields.Raw()}, web_request)
     def viewfunc5(args):
         return args
 
@@ -1536,8 +1545,8 @@ def test_use_args_implicit_arg_names(web_request):
     web_request.json = {"foo": "bar"}
     web_request.query = {"bar": "baz"}
 
-    @parser.use_args({"foo": fields.Field()}, web_request)
-    @parser.use_args({"bar": fields.Field()}, web_request, location="query")
+    @parser.use_args({"foo": fields.Raw()}, web_request)
+    @parser.use_args({"bar": fields.Raw()}, web_request, location="query")
     def viewfunc(*, json_args, query_args):
         return (json_args, query_args)
 
@@ -1553,10 +1562,8 @@ def test_use_args_explicit_arg_names(web_request, use_positional_setting):
     web_request.json = {"foo": "bar"}
     web_request.query = {"bar": "baz"}
 
-    @parser.use_args({"foo": fields.Field()}, web_request, arg_name="j")
-    @parser.use_args(
-        {"bar": fields.Field()}, web_request, location="query", arg_name="q"
-    )
+    @parser.use_args({"foo": fields.Raw()}, web_request, arg_name="j")
+    @parser.use_args({"bar": fields.Raw()}, web_request, location="query", arg_name="q")
     def viewfunc(*, j, q):
         return (j, q)
 
@@ -1570,9 +1577,9 @@ def test_use_args_errors_on_explicit_arg_name_conflict(web_request):
 
     with pytest.raises(ValueError, match="Attempted to pass `arg_name='q'`"):
 
-        @parser.use_args({"foo": fields.Field()}, web_request, arg_name="q")
+        @parser.use_args({"foo": fields.Raw()}, web_request, arg_name="q")
         @parser.use_args(
-            {"bar": fields.Field()}, web_request, location="query", arg_name="q"
+            {"bar": fields.Raw()}, web_request, location="query", arg_name="q"
         )
         def viewfunc(*, j, q):
             return (j, q)
@@ -1587,8 +1594,8 @@ def test_use_args_errors_on_implicit_arg_name_conflict(web_request):
 
     with pytest.raises(ValueError, match="Attempted to pass `arg_name='json_args'`"):
 
-        @parser.use_args({"foo": fields.Field()}, web_request)
-        @parser.use_args({"foo": fields.Field()}, web_request)
+        @parser.use_args({"foo": fields.Raw()}, web_request)
+        @parser.use_args({"foo": fields.Raw()}, web_request)
         def viewfunc(*, j, q):
             return (j, q)
 
@@ -1604,10 +1611,10 @@ def test_use_args_with_arg_name_supports_multi_stacked_decorators(web_request):
 
     # create two body variants of the same route, from a single function
     # they share the same query params
-    with_body_foo = parser.use_args({"foo": fields.Field()}, web_request)
-    with_body_bar = parser.use_args({"bar": fields.Field()}, web_request)
+    with_body_foo = parser.use_args({"foo": fields.Raw()}, web_request)
+    with_body_bar = parser.use_args({"bar": fields.Raw()}, web_request)
 
-    @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+    @parser.use_args({"snork": fields.Raw()}, web_request, location="query")
     def mypartial(*, json_args, query_args):
         return (json_args, query_args)
 
@@ -1642,8 +1649,8 @@ def test_default_arg_name_pattern_is_customizable(web_request):
 
     parser = MyParser()
 
-    @parser.use_args({"frob": fields.Field()}, web_request, location="json")
-    @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+    @parser.use_args({"frob": fields.Raw()}, web_request, location="json")
+    @parser.use_args({"snork": fields.Raw()}, web_request, location="query")
     def myview(*, body, query):
         return (body, query)
 
@@ -1663,8 +1670,8 @@ def test_default_arg_name_pattern_still_allows_conflict_detection():
 
     with pytest.raises(ValueError, match="Attempted to pass `arg_name='data'`"):
 
-        @parser.use_args({"frob": fields.Field()}, web_request, location="json")
-        @parser.use_args({"snork": fields.Field()}, web_request, location="query")
+        @parser.use_args({"frob": fields.Raw()}, web_request, location="json")
+        @parser.use_args({"snork": fields.Raw()}, web_request, location="query")
         def myview(*, body, query):
             return (body, query)
 
@@ -1683,7 +1690,7 @@ def test_parse_with_dict_passes_schema_to_argname_derivation(web_request):
 
     parser = MyParser()
 
-    @parser.use_args({"foo": fields.Field()}, web_request, location="json")
+    @parser.use_args({"foo": fields.Raw()}, web_request, location="json")
     def myview(*, json_args):
         return json_args
 

@@ -81,7 +81,7 @@ class TestAIOHTTPParser(CommonTestCase):
     def test_validation_error_returns_422_response(self, testapp):
         res = testapp.post_json("/echo_json", {"name": "b"}, expect_errors=True)
         assert res.status_code == 422
-        assert res.json == {"json": {"name": ["Invalid value."]}}
+        assert res.json == {"json": {"name": ["Shorter than minimum length 3."]}}
 
 
 @pytest.mark.asyncio

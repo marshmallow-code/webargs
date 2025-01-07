@@ -67,6 +67,7 @@ tests = [
   "webtest==3.0.2",
   "webtest-aiohttp==2.0.0",
   "pytest-aiohttp>=0.3.0",
+  "packaging>=17.0",
 ]
 docs = [
   "webargs[frameworks]",
@@ -141,4 +142,5 @@ module = [
   "webargs.bottleparser",
   "webargs.djangoparser",
   "webargs.falconparser",
+  "tests.*",
 ]
