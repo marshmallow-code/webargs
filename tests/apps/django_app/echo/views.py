@@ -161,7 +161,7 @@ def echo_cookie(request):
 
 @handle_view_errors
 def echo_file(request):
-    args = {"myfile": fields.Field()}
+    args = {"myfile": fields.Raw()}
     result = parser.parse(args, request, location="files")
     myfile = result["myfile"]
     content = myfile.read().decode("utf8")

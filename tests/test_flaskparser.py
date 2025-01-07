@@ -159,7 +159,7 @@ def test_abort_called_on_validation_error(mock_abort):
     def validate(x):
         return x == 42
 
-    argmap = {"value": fields.Field(validate=validate)}
+    argmap = {"value": fields.Raw(validate=validate)}
     with app.test_request_context(
         "/foo",
         method="post",
@@ -188,7 +188,7 @@ async def test_abort_called_on_validation_error_async():
         def validate(x):
             return x == 42
 
-        argmap = {"value": fields.Field(validate=validate)}
+        argmap = {"value": fields.Raw(validate=validate)}
         with app.test_request_context(
             "/foo",
             method="post",
@@ -210,7 +210,7 @@ def test_load_json_returns_missing_if_no_data(mimetype):
     req = mock.Mock()
     req.mimetype = mimetype
     req.get_data.return_value = ""
-    schema = Schema.from_dict({"foo": fields.Field()})()
+    schema = Schema.from_dict({"foo": fields.Raw()})()
     assert parser.load_json(req, schema) is missing
 
 

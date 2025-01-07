@@ -132,7 +132,7 @@ def echo_cookie():
 
 @app.route("/echo_file", method=["POST"])
 def echo_file():
-    args = {"myfile": fields.Field()}
+    args = {"myfile": fields.Raw()}
     result = parser.parse(args, location="files")
     myfile = result["myfile"]
     content = myfile.file.read().decode("utf8")
