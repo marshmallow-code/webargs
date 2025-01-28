@@ -26,11 +26,9 @@ __all__ = [
 
 
 Request = typing.TypeVar("Request")
+ArgMapCallable = typing.Callable[[Request], ma.Schema]
 ArgMap = typing.Union[
-    ma.Schema,
-    type[ma.Schema],
-    typing.Mapping[str, typing.Union[ma.fields.Field, type[ma.fields.Field]]],
-    typing.Callable[[Request], ma.Schema],
+    ma.Schema, type[ma.Schema], typing.Mapping[str, ma.fields.Field], ArgMapCallable
 ]
 
 ValidateArg = typing.Union[None, typing.Callable, typing.Iterable[typing.Callable]]
@@ -328,15 +326,11 @@ class Parser(typing.Generic[Request]):
         elif isinstance(argmap, type) and issubclass(argmap, ma.Schema):
             schema = argmap()
         elif isinstance(argmap, collections.abc.Mapping):
-            if isinstance(argmap, dict):
-                argmap_dict = argmap
-            else:
-                argmap_dict = dict(argmap)
+            argmap_dict = argmap if isinstance(argmap, dict) else dict(argmap)
             schema = self.schema_class.from_dict(argmap_dict)()
         elif callable(argmap):
-            # type-ignore because mypy seems to incorrectly deduce the type
-            # as `[def (Request) -> Schema] | object`
-            schema = argmap(req)  # type: ignore[call-arg, assignment]
+            argmap_callable = typing.cast(ArgMapCallable, argmap)
+            schema = argmap_callable(req)
         else:
             raise TypeError(f"argmap was of unexpected type {type(argmap)}")
         return schema
@@ -585,9 +579,8 @@ class Parser(typing.Generic[Request]):
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
         if isinstance(argmap, typing.Mapping):
-            if not isinstance(argmap, dict):
-                argmap = dict(argmap)
-            argmap = self.schema_class.from_dict(argmap)()
+            argmap_dict = argmap if isinstance(argmap, dict) else dict(argmap)
+            argmap = self.schema_class.from_dict(argmap_dict)()
 
         if arg_name is not None and as_kwargs:
             raise ValueError("arg_name and as_kwargs are mutually exclusive")
