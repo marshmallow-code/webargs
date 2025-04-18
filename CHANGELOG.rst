@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-8.7.0 (unreleased)
+8.7.0 (2025-04-18)
 ******************
 
 Other changes:
