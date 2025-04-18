@@ -8,7 +8,7 @@ Other changes:
 
 * Test against Python 3.13 (:pr:`982`).
 * Drop support for Python 3.8, which is EOL (:pr:`981`).
-* Support marshmallow 4.
+* Support marshmallow 4 (:pr:`987`).
 
 8.6.0 (2024-09-11)
 ******************
