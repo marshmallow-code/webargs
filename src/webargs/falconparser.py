@@ -1,5 +1,7 @@
 """Falcon request argument parsing module."""
 
+from __future__ import annotations
+
 import falcon
 import marshmallow as ma
 from falcon.util.uri import parse_query_string
@@ -35,17 +37,20 @@ def parse_form_body(req: falcon.Request):
         req.content_type is not None
         and "application/x-www-form-urlencoded" in req.content_type
     ):
-        body = req.stream.read(req.content_length or 0)
-        try:
-            body = body.decode("ascii")
-        except UnicodeDecodeError:
-            body = None
-            req.log_error(
-                "Non-ASCII characters found in form body "
-                "with Content-Type of "
-                "application/x-www-form-urlencoded. Body "
-                "will be ignored."
-            )
+        # the type of `req.stream.read()` is `str | Any` according to annotations
+        # but at runtime it's always `bytes`, so coerce by checking the type
+        body: str | bytes | None = req.stream.read(req.content_length or 0)
+        if isinstance(body, bytes):
+            try:
+                body = body.decode("ascii")
+            except UnicodeDecodeError:
+                body = None
+                req.log_error(
+                    "Non-ASCII characters found in form body "
+                    "with Content-Type of "
+                    "application/x-www-form-urlencoded. Body "
+                    "will be ignored."
+                )
 
         if body:
             return parse_query_string(body, keep_blank=req.options.keep_blank_qs_values)
