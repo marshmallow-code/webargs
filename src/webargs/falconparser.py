@@ -38,19 +38,18 @@ def parse_form_body(req: falcon.Request):
         and "application/x-www-form-urlencoded" in req.content_type
     ):
         # the type of `req.stream.read()` is `str | Any` according to annotations
-        # but at runtime it's always `bytes`, so coerce by checking the type
+        # but at runtime it's always `bytes`, so coerce the type for type checker
         body: str | bytes | None = req.stream.read(req.content_length or 0)
-        if isinstance(body, bytes):
-            try:
-                body = body.decode("ascii")
-            except UnicodeDecodeError:
-                body = None
-                req.log_error(
-                    "Non-ASCII characters found in form body "
-                    "with Content-Type of "
-                    "application/x-www-form-urlencoded. Body "
-                    "will be ignored."
-                )
+        try:
+            body = body.decode("ascii")  # type: ignore[union-attr]
+        except UnicodeDecodeError:
+            body = None
+            req.log_error(
+                "Non-ASCII characters found in form body "
+                "with Content-Type of "
+                "application/x-www-form-urlencoded. Body "
+                "will be ignored."
+            )
 
         if body:
             return parse_query_string(body, keep_blank=req.options.keep_blank_qs_values)
