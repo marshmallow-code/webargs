@@ -41,7 +41,12 @@ keywords = [
   "marshmallow",
 ]
 requires-python = ">=3.9"
-dependencies = ["marshmallow>=3.0.0", "packaging>=17.0"]
+dependencies = [
+    "marshmallow>=3.0.0",
+    "packaging>=17.0",
+    # depend on typing-extensions conditionally for annotations
+    'typing_extensions>=4.0; python_version<"3.10"',
+]
 
 [project.urls]
 Changelog = "https://webargs.readthedocs.io/en/latest/changelog.html"
