@@ -42,7 +42,7 @@ keywords = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "marshmallow>=3.0.0",
+    "marshmallow>=3.13.0,<5.0.0",
     "packaging>=17.0",
     # depend on typing-extensions conditionally for annotations
     'typing_extensions>=4.0; python_version<"3.10"',

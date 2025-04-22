@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+Unreleased
+**********
+
+Bug fixes:
+
+* Correct the package metadata for ``marshmallow`` versions which are supported
+  by ``webargs``
+
 8.7.0 (2025-04-18)
 ******************
 
