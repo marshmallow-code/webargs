@@ -69,7 +69,7 @@ tests = [
   "webargs[frameworks]",
   "pytest",
   "pytest-asyncio",
-  "webtest==3.0.4",
+  "webtest==3.0.6",
   "webtest-aiohttp==2.0.0",
   "pytest-aiohttp>=0.3.0",
   "packaging>=17.0",
