@@ -78,7 +78,7 @@ docs = [
   "webargs[frameworks]",
   "Sphinx==8.2.3",
   "sphinx-issues==5.0.1",
-  "furo==2024.8.6",
+  "furo==2025.7.19",
 ]
 dev = ["webargs[tests]", "tox", "pre-commit>=3.5,<5.0"]
 
