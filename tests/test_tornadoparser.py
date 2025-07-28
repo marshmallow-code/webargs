@@ -149,7 +149,6 @@ class TestJSONArgs:
         result = parser.load_json(request, author_schema)
         assert result == {}
 
-    @pytest.mark.usefixtures("event_loop")
     def test_it_should_handle_type_error_on_load_json(self):
         # but this is different from the test above where the payload was valid
         # and empty -- missing vs {}

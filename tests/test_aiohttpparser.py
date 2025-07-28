@@ -1,3 +1,4 @@
+import asyncio
 from io import BytesIO
 from unittest import mock
 
@@ -23,12 +24,12 @@ class TestAIOHTTPParser(CommonTestCase):
     def create_app(self):
         return create_app()
 
-    def create_testapp(self, app, event_loop):
-        return webtest_aiohttp.TestApp(app, loop=event_loop)
+    def create_testapp(self, app):
+        return webtest_aiohttp.TestApp(app, loop=asyncio.new_event_loop())
 
     @pytest.fixture
-    def testapp(self, event_loop):
-        return self.create_testapp(self.create_app(), event_loop)
+    def testapp(self):
+        return self.create_testapp(self.create_app())
 
     @pytest.mark.skip(reason="files location not supported for aiohttpparser")
     def test_parse_files(self, testapp):
