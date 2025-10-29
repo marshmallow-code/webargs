@@ -10,9 +10,11 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
 
     from webargs import fields, validate, ValidationError
 
+
     def validate_password(password):
         if len(password) < 6:
             raise ValidationError("Password must be at least 6 characters long")
+
 
     user_args = {
         # Required arguments
@@ -128,9 +130,11 @@ Each :class:`Field <marshmallow.fields.Field>` object can be validated individua
 
     from webargs import fields, ValidationError
 
+
     def is_positive(val):
         if val <= 0:
             raise ValidationError("Value must be positive")
+
 
     args = {"age": fields.Int(validate=is_positive)}
 
