@@ -11,6 +11,10 @@ Bug fixes:
 * Fix deprecation warning on Python 3.14 (:issue:`1013`). Thanks
   :user:`decaz` for reporting and for the PR.
 
+Other changes:
+
+* Test against Python 3.14 (:pr:`1016`).
+
 8.7.0 (2025-04-18)
 ******************
 
