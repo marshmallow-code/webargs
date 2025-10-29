@@ -16,7 +16,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -41,7 +40,7 @@ keywords = [
   "api",
   "marshmallow",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "marshmallow>=3.13.0,<5.0.0",
     "packaging>=17.0",

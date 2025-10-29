@@ -13,11 +13,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: "3.9", python: "3.9", tox: py39-marshmallow3 }
+          - { name: "3.10", python: "3.10", tox: py310-marshmallow3 }
           - { name: "3.14", python: "3.14", tox: py314-marshmallow3 }
-          - { name: "3.9", python: "3.9", tox: py39-marshmallow4 }
+          - { name: "3.10", python: "3.10", tox: py310-marshmallow4 }
           - { name: "3.14", python: "3.14", tox: py314-marshmallow4 }
-          - { name: "lowest", python: "3.9", tox: py39-lowest }
+          - { name: "lowest", python: "3.10", tox: py310-lowest }
           - { name: "dev", python: "3.14", tox: py314-marshmallowdev }
     steps:
       - uses: actions/checkout@v5
