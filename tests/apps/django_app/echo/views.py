@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 
 import marshmallow as ma
 from django.http import HttpResponse
@@ -27,7 +28,7 @@ def json_response(data, **kwargs):
 
 
 def handle_view_errors(f):
-    if asyncio.iscoroutinefunction(f):
+    if inspect.iscoroutinefunction(f):
 
         async def wrapped(*args, **kwargs):
             try:

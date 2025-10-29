@@ -287,7 +287,7 @@ class Parser(typing.Generic[Request]):
         error.messages = {location: error.messages}
         error_handler = self.error_callback or self.handle_error
         # an async error handler was registered, await it
-        if asyncio.iscoroutinefunction(error_handler):
+        if inspect.iscoroutinefunction(error_handler):
             async_error_handler: AsyncErrorHandler = error_handler
             await async_error_handler(
                 error,
@@ -604,7 +604,7 @@ class Parser(typing.Generic[Request]):
                         "decorators, try setting `arg_name` to distinguish usages."
                     )
 
-            if asyncio.iscoroutinefunction(func):
+            if inspect.iscoroutinefunction(func):
 
                 @functools.wraps(func)
                 async def wrapper(
