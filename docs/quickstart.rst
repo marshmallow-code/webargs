@@ -8,13 +8,19 @@ Arguments are specified as a dictionary of name -> :class:`Field <marshmallow.fi
 
 .. code-block:: python
 
-    from webargs import fields, validate
+    from webargs import fields, validate, ValidationError
+
+
+    def validate_password(password):
+        if len(password) < 6:
+            raise ValidationError("Password must be at least 6 characters long")
+
 
     user_args = {
         # Required arguments
         "username": fields.Str(required=True),
         # Validation
-        "password": fields.Str(validate=lambda p: len(p) >= 6),
+        "password": fields.Str(validate=validate_password),
         # OR use marshmallow's built-in validators
         "password": fields.Str(validate=validate.Length(min=6)),
         # Default value when argument is missing
@@ -122,9 +128,15 @@ Each :class:`Field <marshmallow.fields.Field>` object can be validated individua
 
 .. code-block:: python
 
-    from webargs import fields
+    from webargs import fields, ValidationError
 
-    args = {"age": fields.Int(validate=lambda val: val > 0)}
+
+    def is_positive(val):
+        if val <= 0:
+            raise ValidationError("Value must be positive")
+
+
+    args = {"age": fields.Int(validate=is_positive)}
 
 The validator must raise a :exc:`ValidationError <webargs.core.ValidationError>` for validation failures.
 

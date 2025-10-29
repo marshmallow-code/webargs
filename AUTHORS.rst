@@ -59,3 +59,4 @@ Contributors (chronological)
 * Anton Ostapenko `@AVOstap <https://github.com/AVOstap>`_
 * Tumuer `@un4gt <https://github.com/un4gt>`_
 * Marat Sharafutdinov `@decaz <https://github.com/decaz>`_
+* Felix Engelmann `@dorthrithil <https://github.com/dorthrithil>`_
