@@ -1,4 +1,3 @@
-import asyncio
 import inspect
 
 import marshmallow as ma
