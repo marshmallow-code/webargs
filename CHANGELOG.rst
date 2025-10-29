@@ -1,8 +1,8 @@
 Changelog
 ---------
 
-Unreleased
-**********
+8.7.1 (unreleased)
+******************
 
 Bug fixes:
 
