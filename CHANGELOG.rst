@@ -13,7 +13,7 @@ Bug fixes:
 
 Other changes:
 
-* Test against Python 3.14.
+* Test against Python 3.14 (:pr:`1016`).
 
 8.7.0 (2025-04-18)
 ******************
