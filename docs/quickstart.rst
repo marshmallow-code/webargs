@@ -126,7 +126,7 @@ Each :class:`Field <marshmallow.fields.Field>` object can be validated individua
 
     args = {"age": fields.Int(validate=lambda val: val > 0)}
 
-The validator may return either a `boolean` or raise a :exc:`ValidationError <webargs.core.ValidationError>`.
+The validator must raise a :exc:`ValidationError <webargs.core.ValidationError>` for validation failures.
 
 .. code-block:: python
 
@@ -143,7 +143,7 @@ The validator may return either a `boolean` or raise a :exc:`ValidationError <we
 
 .. note::
 
-    If a validator returns ``None``, validation will pass. A validator must return ``False`` or raise a `ValidationError <webargs.core.ValidationError>`
+    If a validator returns ``None``, validation will pass. A validator must raise a `ValidationError <webargs.core.ValidationError>`
     for validation to fail.
 
 
