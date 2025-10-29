@@ -59,7 +59,7 @@ Tidelift = "https://tidelift.com/subscription/pkg/pypi-webargs?utm_source=pypi-w
 frameworks = [
   "Flask>=0.12.5",
   "Django>=2.2.0",
-  "bottle>=0.12.13",
+  "bottle>=0.13.0",
   "tornado>=4.5.2",
   "pyramid>=1.9.1",
   "falcon>=2.0.0",
