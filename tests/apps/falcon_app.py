@@ -1,5 +1,3 @@
-import importlib.metadata
-
 import falcon
 import marshmallow as ma
 
@@ -9,9 +7,6 @@ from webargs.falconparser import parser, use_args, use_kwargs
 
 hello_args = {"name": fields.Str(load_default="World", validate=validate.Length(min=3))}
 hello_multiple = {"name": fields.List(fields.Str())}
-
-FALCON_MAJOR_VERSION = int(importlib.metadata.version("falcon").split(".")[0])
-FALCON_SUPPORTS_ASYNC = FALCON_MAJOR_VERSION >= 3
 
 
 class HelloSchema(ma.Schema):
@@ -25,10 +20,7 @@ hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 
 
 def set_text(resp, value):
-    if FALCON_MAJOR_VERSION >= 3:
-        resp.text = value
-    else:
-        resp.body = value
+    resp.text = value
 
 
 class Echo:
@@ -191,11 +183,7 @@ class EchoUseArgsHook:
 
 
 def create_app():
-    if FALCON_MAJOR_VERSION >= 3:
-        app = falcon.App()
-    else:
-        app = falcon.API()
-
+    app = falcon.App()
     app.add_route("/echo", Echo())
     app.add_route("/echo_form", EchoForm())
     app.add_route("/echo_json", EchoJSON())

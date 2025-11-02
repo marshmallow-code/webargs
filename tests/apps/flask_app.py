@@ -1,5 +1,3 @@
-import importlib.metadata
-
 import marshmallow as ma
 from flask import Flask, Response, request
 from flask import jsonify as J
@@ -12,9 +10,6 @@ from webargs.flaskparser import (
     use_args,
     use_kwargs,
 )
-
-FLASK_MAJOR_VERSION = int(importlib.metadata.version("flask").split(".")[0])
-FLASK_SUPPORTS_ASYNC = FLASK_MAJOR_VERSION >= 2
 
 
 class TestAppConfig:
@@ -138,12 +133,10 @@ def echo_headers_raising(args):
     return J(args)
 
 
-if FLASK_SUPPORTS_ASYNC:
-
-    @app.route("/echo_headers_raising_async")
-    @use_args(HelloSchema(), location="headers", unknown=None)
-    async def echo_headers_raising_async(args):
-        return J(args)
+@app.route("/echo_headers_raising_async")
+@use_args(HelloSchema(), location="headers", unknown=None)
+async def echo_headers_raising_async(args):
+    return J(args)
 
 
 @app.route("/echo_cookie")
@@ -165,14 +158,12 @@ def echo_view_arg(view_arg):
     return J(parser.parse({"view_arg": fields.Int()}, location="view_args"))
 
 
-if FLASK_SUPPORTS_ASYNC:
-
-    @app.route("/echo_view_arg_async/<view_arg>")
-    async def echo_view_arg_async(view_arg):
-        parsed_view_arg = await parser.async_parse(
-            {"view_arg": fields.Int()}, location="view_args"
-        )
-        return J(parsed_view_arg)
+@app.route("/echo_view_arg_async/<view_arg>")
+async def echo_view_arg_async(view_arg):
+    parsed_view_arg = await parser.async_parse(
+        {"view_arg": fields.Int()}, location="view_args"
+    )
+    return J(parsed_view_arg)
 
 
 @app.route("/echo_view_arg_use_args/<view_arg>")
@@ -181,12 +172,10 @@ def echo_view_arg_with_use_args(args, **kwargs):
     return J(args)
 
 
-if FLASK_SUPPORTS_ASYNC:
-
-    @app.route("/echo_view_arg_use_args_async/<view_arg>")
-    @use_args({"view_arg": fields.Int()}, location="view_args")
-    async def echo_view_arg_with_use_args_async(args, **kwargs):
-        return J(args)
+@app.route("/echo_view_arg_use_args_async/<view_arg>")
+@use_args({"view_arg": fields.Int()}, location="view_args")
+async def echo_view_arg_with_use_args_async(args, **kwargs):
+    return J(args)
 
 
 @app.route("/echo_nested", methods=["POST"])
@@ -211,16 +200,12 @@ def echo_nested_many_with_data_key():
     return J(parser.parse(args))
 
 
-if FLASK_SUPPORTS_ASYNC:
-
-    @app.route("/echo_nested_many_data_key_async", methods=["POST"])
-    async def echo_nested_many_with_data_key_async():
-        args = {
-            "x_field": fields.Nested(
-                {"id": fields.Int()}, many=True, data_key="X-Field"
-            )
-        }
-        return J(await parser.async_parse(args))
+@app.route("/echo_nested_many_data_key_async", methods=["POST"])
+async def echo_nested_many_with_data_key_async():
+    args = {
+        "x_field": fields.Nested({"id": fields.Int()}, many=True, data_key="X-Field")
+    }
+    return J(await parser.async_parse(args))
 
 
 class EchoMethodViewUseArgs(MethodView):
@@ -235,17 +220,16 @@ app.add_url_rule(
 )
 
 
-if FLASK_SUPPORTS_ASYNC:
+class EchoMethodViewUseArgsAsync(MethodView):
+    @use_args({"val": fields.Int()})
+    async def post(self, args):
+        return J(args)
 
-    class EchoMethodViewUseArgsAsync(MethodView):
-        @use_args({"val": fields.Int()})
-        async def post(self, args):
-            return J(args)
 
-    app.add_url_rule(
-        "/echo_method_view_use_args_async",
-        view_func=EchoMethodViewUseArgsAsync.as_view("echo_method_view_use_args_async"),
-    )
+app.add_url_rule(
+    "/echo_method_view_use_args_async",
+    view_func=EchoMethodViewUseArgsAsync.as_view("echo_method_view_use_args_async"),
+)
 
 
 class EchoMethodViewUseKwargs(MethodView):
@@ -259,19 +243,17 @@ app.add_url_rule(
     view_func=EchoMethodViewUseKwargs.as_view("echo_method_view_use_kwargs"),
 )
 
-if FLASK_SUPPORTS_ASYNC:
 
-    class EchoMethodViewUseKwargsAsync(MethodView):
-        @use_kwargs({"val": fields.Int()})
-        async def post(self, val):
-            return J({"val": val})
+class EchoMethodViewUseKwargsAsync(MethodView):
+    @use_kwargs({"val": fields.Int()})
+    async def post(self, val):
+        return J({"val": val})
 
-    app.add_url_rule(
-        "/echo_method_view_use_kwargs_async",
-        view_func=EchoMethodViewUseKwargsAsync.as_view(
-            "echo_method_view_use_kwargs_async"
-        ),
-    )
+
+app.add_url_rule(
+    "/echo_method_view_use_kwargs_async",
+    view_func=EchoMethodViewUseKwargsAsync.as_view("echo_method_view_use_kwargs_async"),
+)
 
 
 @app.route("/echo_use_kwargs_missing", methods=["post"])
@@ -281,13 +263,11 @@ def echo_use_kwargs_missing(username, **kwargs):
     return J({"username": username})
 
 
-if FLASK_SUPPORTS_ASYNC:
-
-    @app.route("/echo_use_kwargs_missing_async", methods=["post"])
-    @use_kwargs({"username": fields.Str(required=True), "password": fields.Str()})
-    async def echo_use_kwargs_missing_async(username, **kwargs):
-        assert "password" not in kwargs
-        return J({"username": username})
+@app.route("/echo_use_kwargs_missing_async", methods=["post"])
+@use_kwargs({"username": fields.Str(required=True), "password": fields.Str()})
+async def echo_use_kwargs_missing_async(username, **kwargs):
+    assert "password" not in kwargs
+    return J({"username": username})
 
 
 # Return validation errors as JSON
