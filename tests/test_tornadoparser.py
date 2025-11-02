@@ -25,16 +25,6 @@ class BaseAsyncTestCase(tornado.testing.AsyncHTTPTestCase):
     # this isn't a real test case itself
     __test__ = False
 
-    # Workaround for https://github.com/pytest-dev/pytest/issues/12263.
-    #
-    # this was suggested by one of the pytest maintainers while a patch
-    # for Tornado is pending
-    #
-    # we may need it even after the patch, since we want to support testing on
-    # older Tornado versions until we drop support for them
-    def runTest(self):
-        pass
-
 
 name = "name"
 value = "value"
