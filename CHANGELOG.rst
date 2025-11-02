@@ -7,8 +7,14 @@ Changelog
 Other changes:
 
 * Drop support for Python 3.9, which is EOL (:pr:`1019`).
-* Drop support for Tornado < 6.0 (:pr:`1019`).
 * Drop support for Bottle < 0.13 (:pr:`1019`).
+* Drop support for Flask < 3.1.0 (:pr:`1023`).
+* Drop support for Django < 5.2.0 (:pr:`1023`).
+* Drop support for Tornado < 6.5.0  (:pr:`1023`).
+* Drop support for Pyramid < 2.0.2 (:pr:`1023`).
+* Drop support for Falcon < 4.1.0 (:pr:`1023`).
+* Drop support for aiohttp < 3.13.0 (:pr:`1023`).
+* Drop support for marshmallow < 4.0.0 (:pr:`1023`).
 
 8.7.1 (2025-10-29)
 ******************
