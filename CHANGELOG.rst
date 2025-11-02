@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+9.0.0 (unreleased)
+******************
+
+Other changes:
+
+* Drop support for Python 3.9, which is EOL (:pr:`1019`).
+* Drop support for Tornado < 6.0 (:pr:`1019`).
+* Drop support for Bottle < 0.13 (:pr:`1019`).
+
 8.7.1 (2025-10-29)
 ******************
 
