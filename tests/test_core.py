@@ -1,6 +1,5 @@
 import collections
 import datetime
-import importlib.metadata
 import typing
 from unittest import mock
 
@@ -16,14 +15,11 @@ from marshmallow import (
     pre_load,
     validates_schema,
 )
-from packaging.version import Version
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 from webargs import ValidationError, fields
 from webargs.core import Parser, get_mimetype, is_json
 from webargs.multidictproxy import MultiDictProxy
-
-MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))
 
 
 class MockHTTPError(Exception):
@@ -555,27 +551,6 @@ def test_required_with_custom_error(parser, web_request):
         parser.parse(args, web_request)
 
     assert "We need foo" in excinfo.value.messages["json"]["foo"]
-
-
-@pytest.mark.filterwarnings("ignore:Returning `False` from a validator is deprecated")
-@pytest.mark.skipif(
-    MARSHMALLOW_VERSION.major >= 4,
-    reason="marshmallow 4+ does not support validators returning False",
-)
-def test_required_with_custom_error_and_validation_error(parser, web_request):
-    web_request.json = {"foo": ""}
-    args = {
-        "foo": fields.Str(
-            required="We need foo",
-            validate=lambda s: len(s) > 1,
-            error_messages={"validator_failed": "foo required length is 3"},
-        )
-    }
-    with pytest.raises(ValidationError) as excinfo:
-        # Test that `validate` receives dictionary of args
-        parser.parse(args, web_request)
-
-    assert "foo required length is 3" in excinfo.value.args[0]["foo"]
 
 
 def test_full_input_validator_receives_nonascii_input(web_request):

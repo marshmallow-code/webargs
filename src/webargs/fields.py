@@ -1,7 +1,6 @@
 """Field classes.
 
-Includes all fields from `marshmallow.fields` in addition to a custom
-`Nested` field and `DelimitedList`.
+Includes all fields from `marshmallow.fields` in addition to `DelimitedList`.
 
 All fields can optionally take a special `location` keyword argument, which
 tells webargs where to parse the request argument from.
@@ -24,30 +23,6 @@ import marshmallow as ma
 from marshmallow.fields import *  # noqa: F403
 
 __all__ = ["DelimitedList", "DelimitedTuple"] + ma.fields.__all__
-
-
-# TODO: remove custom `Nested` in the next major release
-#
-# the `Nested` class is only needed on versions of marshmallow prior to v3.15.0
-# in that version, `ma.fields.Nested` gained the ability to consume dict inputs
-# prior to that, this subclass adds this capability
-#
-# if we drop support for ma.__version_info__ < (3, 15) we can do this
-class Nested(ma.fields.Nested):  # type: ignore[no-redef]
-    """Same as `marshmallow.fields.Nested`, except can be passed a dictionary
-    as the first argument, which will be converted to a `marshmallow.Schema`.
-
-    .. note::
-
-        The schema class here will always be `marshmallow.Schema`, regardless
-        of whether a custom schema class is set on the parser. Pass an explicit schema
-        class if necessary.
-    """
-
-    def __init__(self, nested, *args, **kwargs):
-        if isinstance(nested, dict):
-            nested = ma.Schema.from_dict(nested)
-        super().__init__(nested, *args, **kwargs)
 
 
 class DelimitedFieldMixin:
