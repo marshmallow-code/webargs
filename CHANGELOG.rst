@@ -4,6 +4,12 @@ Changelog
 9.0.0 (unreleased)
 ******************
 
+Features:
+
+* *Backwards-incompatible*: Remove ``__version__``, ``__parsed_version__``, and
+  ``__version_info__`` constants from ``__init__.py`` file. Users should use
+  ``importlib.metadata`` instead (:pr:`1024`).
+
 Other changes:
 
 * Drop support for Python 3.9, which is EOL (:pr:`1019`).
