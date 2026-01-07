@@ -76,7 +76,7 @@ tests = [
 ]
 docs = [
   "webargs[frameworks]",
-  "Sphinx==8.2.3",
+  "Sphinx==9.1.0",
   "sphinx-issues==5.0.1",
   "furo==2025.12.19",
 ]
