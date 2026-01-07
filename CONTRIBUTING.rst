@@ -121,7 +121,7 @@ Contributions to the documentation are welcome. Documentation is written in `reS
 
 To build the docs in "watch" mode: ::
 
-   $ tox -e watch-docs
+   $ tox -e docs-serve
 
 Changes in the `docs/` directory will automatically trigger a rebuild.
 
