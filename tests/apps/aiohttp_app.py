@@ -24,18 +24,18 @@ hello_exclude_schema = HelloSchema(unknown=ma.EXCLUDE)
 
 
 async def echo(request):
-    parsed = await parser.parse(hello_args, request, location="query")
+    parsed = await parser.async_parse(hello_args, request, location="query")
     return json_response(parsed)
 
 
 async def echo_form(request):
-    parsed = await parser.parse(hello_args, request, location="form")
+    parsed = await parser.async_parse(hello_args, request, location="form")
     return json_response(parsed)
 
 
 async def echo_json(request):
     try:
-        parsed = await parser.parse(hello_args, request, location="json")
+        parsed = await parser.async_parse(hello_args, request, location="json")
     except json.JSONDecodeError as exc:
         raise aiohttp.web.HTTPBadRequest(
             text=json.dumps(["Invalid JSON."]),
@@ -46,7 +46,7 @@ async def echo_json(request):
 
 async def echo_json_or_form(request):
     try:
-        parsed = await parser.parse(hello_args, request, location="json_or_form")
+        parsed = await parser.async_parse(hello_args, request, location="json_or_form")
     except json.JSONDecodeError as exc:
         raise aiohttp.web.HTTPBadRequest(
             text=json.dumps(["Invalid JSON."]),
@@ -74,27 +74,27 @@ async def echo_use_args_validated(request, args):
 
 async def echo_ignoring_extra_data(request):
     return json_response(
-        await parser.parse(hello_exclude_schema, request, unknown=None)
+        await parser.async_parse(hello_exclude_schema, request, unknown=None)
     )
 
 
 async def echo_multi(request):
-    parsed = await parser.parse(hello_multiple, request, location="query")
+    parsed = await parser.async_parse(hello_multiple, request, location="query")
     return json_response(parsed)
 
 
 async def echo_multi_form(request):
-    parsed = await parser.parse(hello_multiple, request, location="form")
+    parsed = await parser.async_parse(hello_multiple, request, location="form")
     return json_response(parsed)
 
 
 async def echo_multi_json(request):
-    parsed = await parser.parse(hello_multiple, request)
+    parsed = await parser.async_parse(hello_multiple, request)
     return json_response(parsed)
 
 
 async def echo_many_schema(request):
-    parsed = await parser.parse(hello_many_schema, request)
+    parsed = await parser.async_parse(hello_many_schema, request)
     return json_response(parsed)
 
 
@@ -119,29 +119,29 @@ async def always_error(request):
         raise ma.ValidationError("something went wrong")
 
     args = {"text": fields.Str(validate=always_fail)}
-    parsed = await parser.parse(args, request)
+    parsed = await parser.async_parse(args, request)
     return json_response(parsed)
 
 
 async def echo_headers(request):
-    parsed = await parser.parse(hello_args, request, location="headers")
+    parsed = await parser.async_parse(hello_args, request, location="headers")
     return json_response(parsed)
 
 
 async def echo_cookie(request):
-    parsed = await parser.parse(hello_args, request, location="cookies")
+    parsed = await parser.async_parse(hello_args, request, location="cookies")
     return json_response(parsed)
 
 
 async def echo_nested(request):
     args = {"name": fields.Nested({"first": fields.Str(), "last": fields.Str()})}
-    parsed = await parser.parse(args, request)
+    parsed = await parser.async_parse(args, request)
     return json_response(parsed)
 
 
 async def echo_multiple_args(request):
     args = {"first": fields.Str(), "last": fields.Str()}
-    parsed = await parser.parse(args, request)
+    parsed = await parser.async_parse(args, request)
     return json_response(parsed)
 
 
@@ -149,7 +149,7 @@ async def echo_nested_many(request):
     args = {
         "users": fields.Nested({"id": fields.Int(), "name": fields.Str()}, many=True)
     }
-    parsed = await parser.parse(args, request)
+    parsed = await parser.async_parse(args, request)
     return json_response(parsed)
 
 
@@ -157,12 +157,12 @@ async def echo_nested_many_data_key(request):
     args = {
         "x_field": fields.Nested({"id": fields.Int()}, many=True, data_key="X-Field")
     }
-    parsed = await parser.parse(args, request)
+    parsed = await parser.async_parse(args, request)
     return json_response(parsed)
 
 
 async def echo_match_info(request):
-    parsed = await parser.parse(
+    parsed = await parser.async_parse(
         {"mymatch": fields.Int()}, request, location="match_info"
     )
     return json_response(parsed)
