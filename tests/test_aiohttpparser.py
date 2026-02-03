@@ -97,7 +97,7 @@ async def test_aiohttpparser_synchronous_error_handler(web_request):
         raise CustomError("foo")
 
     with pytest.raises(CustomError):
-        await parser.parse(
+        await parser.async_parse(
             {"foo": fields.Int(required=True)}, web_request, location="query"
         )
 
@@ -119,6 +119,6 @@ async def test_aiohttpparser_asynchronous_error_handler(web_request):
         await inner()
 
     with pytest.raises(CustomError):
-        await parser.parse(
+        await parser.async_parse(
             {"foo": fields.Int(required=True)}, web_request, location="query"
         )

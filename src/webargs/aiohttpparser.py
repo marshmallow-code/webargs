@@ -30,7 +30,6 @@ from aiohttp import web, web_exceptions
 from marshmallow import RAISE, Schema, ValidationError
 
 from webargs import core
-from webargs.asyncparser import AsyncParser
 from webargs.core import json
 from webargs.multidictproxy import MultiDictProxy
 
@@ -70,7 +69,7 @@ _find_exceptions()
 del _find_exceptions
 
 
-class AIOHTTPParser(AsyncParser[web.Request]):
+class AIOHTTPParser(core.Parser[web.Request]):
     """aiohttp request argument parser."""
 
     DEFAULT_UNKNOWN_BY_LOCATION: dict[str, str | None] = {
