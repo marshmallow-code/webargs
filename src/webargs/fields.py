@@ -42,8 +42,7 @@ class DelimitedFieldMixin:
     delimiter: str = ","
     # delimited fields set is_multiple=False for webargs.core.is_multiple
     is_multiple: bool = False
-    # NOTE: in 8.x this defaults to "" but in 9.x it will be 'missing'
-    empty_value: typing.Any = ""
+    empty_value: typing.Any = ma.missing
 
     def _serialize(self, value, attr, obj, **kwargs):
         # serializing will start with parent-class serialization, so that we correctly

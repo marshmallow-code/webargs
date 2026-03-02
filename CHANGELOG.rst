@@ -17,6 +17,11 @@ Other changes:
   Users should use ``await parser.async_parse()`` to access the async features
   of ``Parser``.
 
+* *Backwards-incompatible*: `DelimitedList` and `DelimitedTuple` fields have
+  changed their default `empty_value` from the empty string (`""`) to `missing`.
+  This allows nested fields with a `load_default` to be used to better customize
+  behavior.
+
 * Drop support for Python 3.9, which is EOL (:pr:`1019`).
 * Drop support for Bottle < 0.13 (:pr:`1019`).
 * Drop support for Flask < 3.1.0 (:pr:`1023`).

@@ -11,7 +11,6 @@ from marshmallow import (
     INCLUDE,
     RAISE,
     Schema,
-    missing,
     pre_load,
     validates_schema,
 )
@@ -1119,19 +1118,28 @@ def test_delimited_tuple_custom_empty_value(web_request, parser):
     assert parsed["ids"] == (1, 0, 3)
 
 
-def test_delimited_list_using_missing_for_empty(web_request, parser):
-    # this is "future" because we plan to make this the default for webargs v9.0
-    class FutureList(fields.DelimitedList):
-        empty_value = missing
-
+def test_delimited_list_missing_element_defaults_to_load_default(web_request, parser):
     web_request.json = {"ids": "foo,,bar"}
     schema_cls = Schema.from_dict(
-        {"ids": FutureList(fields.String(load_default="nil"))}
+        {"ids": fields.DelimitedList(fields.String(load_default="nil"))}
     )
     schema = schema_cls()
 
     parsed = parser.parse(schema, web_request)
     assert parsed["ids"] == ["foo", "nil", "bar"]
+
+
+def test_delimited_list_using_empty_string_for_empty(web_request, parser):
+    # this is "past" because it was the default for webargs v8.x
+    class PastList(fields.DelimitedList):
+        empty_value = ""
+
+    web_request.json = {"ids": "foo,,bar"}
+    schema_cls = Schema.from_dict({"ids": PastList(fields.String(load_default="nil"))})
+    schema = schema_cls()
+
+    parsed = parser.parse(schema, web_request)
+    assert parsed["ids"] == ["foo", "", "bar"]
 
 
 def test_missing_list_argument_not_in_parsed_result(web_request, parser):
