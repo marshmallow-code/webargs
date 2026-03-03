@@ -4,12 +4,15 @@ sphinx:
 formats:
   - pdf
 build:
-  os: ubuntu-22.04
-  tools:
-    python: "3.11"
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
+  os: ubuntu-24.04
+  commands:
+    # setup uv
+    - asdf plugin add uv
+    - asdf install uv latest
+    - asdf global uv latest
+    # setup tox + tox-uv
+    - uv tool install tox --with tox-uv --python "3.14" --managed-python
+    # setup the docs tox environment, but use `--notest` to skip commands
+    - uv tool run tox run -e docs --notest -vvv
+    # do the actual build step, to the RTD documented output directory
+    - uv tool run tox run -e docs --skip-pkg-install -q -- "${READTHEDOCS_OUTPUT}"/html -b dirhtml
