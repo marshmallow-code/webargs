@@ -20,6 +20,18 @@ intersphinx_mapping = {
     "marshmallow": ("http://marshmallow.readthedocs.io/en/latest/", None),
 }
 
+autodoc_mock_imports = [
+    "aiohttp",
+    "bottle",
+    "django",
+    "falcon",
+    "flask",
+    "pyramid",
+    "tornado",
+    "webob",
+    "werkzeug",
+]
+
 
 # The master toctree document.
 master_doc = "index"
