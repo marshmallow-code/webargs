@@ -24,12 +24,6 @@ webargs.multidictproxy
     :members:
 
 
-webargs.asyncparser
--------------------
-
-.. automodule:: webargs.asyncparser
-    :inherited-members:
-
 webargs.flaskparser
 -------------------
 
