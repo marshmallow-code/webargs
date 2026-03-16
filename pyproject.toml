@@ -63,7 +63,7 @@ build-backend = "flit_core.buildapi"
 docs = [
   "webargs",
   "Sphinx==9.1.0",
-  "sphinx-issues==5.0.1",
+  "sphinx-issues==6.0.0",
   "furo==2025.12.19",
 ]
 
