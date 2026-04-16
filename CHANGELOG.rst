@@ -12,6 +12,7 @@ Features:
 
 Other changes:
 
+
 * *Backwards-incompatible*: The ``AsyncParser`` class has been removed, since
   ``Parser`` now provides async functionality.
   Users should use ``await parser.async_parse()`` to access the async features
@@ -21,7 +22,7 @@ Other changes:
   changed their default `empty_value` from the empty string (`""`) to `missing`.
   This allows nested fields with a `load_default` to be used to better customize
   behavior.
-
+* Drop support for marshmallow 3, which is EOL.
 * Drop support for Python 3.9, which is EOL (:pr:`1019`).
 * Drop support for Bottle < 0.13 (:pr:`1019`).
 * Drop support for Flask < 3.1.0 (:pr:`1023`).
