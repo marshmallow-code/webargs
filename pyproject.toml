@@ -59,7 +59,7 @@ requires = ["flit_core<4"]
 build-backend = "flit_core.buildapi"
 
 [dependency-groups]
-docs = ["webargs", "Sphinx", "sphinx-issues", "furo"]
+docs = ["Sphinx", "sphinx-issues", "furo"]
 tests = [
   "pytest",
   "pytest-asyncio",
