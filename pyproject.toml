@@ -3,17 +3,16 @@ name = "webargs"
 version = "8.7.1"
 description = "Declarative parsing and validation of HTTP request objects, with built-in support for popular web frameworks, including Flask, Django, Bottle, Tornado, Pyramid, Falcon, and aiohttp."
 readme = "README.rst"
-license = { file = "LICENSE" }
-authors = [{ name = "Steven Loria", email = "sloria1@gmail.com" }]
+license = "MIT"
+authors = [{ name = "Steven Loria", email = "oss@stevenloria.com" }]
 maintainers = [
-  { name = "Steven Loria", email = "sloria1@gmail.com" },
+  { name = "Steven Loria", email = "oss@stevenloria.com" },
   { name = "Jérôme Lafréchoux", email = "jerome@jolimont.fr" },
   { name = "Stephen Rosen", email = "sirosen0@gmail.com" },
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -42,10 +41,10 @@ keywords = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "marshmallow>=4.0.0,<5.0.0",
-    "packaging>=17.0",
-    # depend on typing-extensions conditionally for annotations
-    'typing_extensions>=4.0; python_version<"3.10"',
+  "marshmallow>=4.0.0,<5.0.0",
+  "packaging>=17.0",
+  # depend on typing-extensions conditionally for annotations
+  'typing_extensions>=4.0; python_version<"3.10"',
 ]
 
 [project.urls]
@@ -60,13 +59,7 @@ requires = ["flit_core<4"]
 build-backend = "flit_core.buildapi"
 
 [dependency-groups]
-docs = [
-  "webargs",
-  "Sphinx==9.1.0",
-  "sphinx-issues==6.0.0",
-  "furo==2025.12.19",
-]
-
+docs = ["Sphinx", "sphinx-issues", "furo"]
 tests = [
   "pytest",
   "pytest-asyncio",
@@ -75,34 +68,35 @@ tests = [
   "pytest-aiohttp>=0.3.0",
   "packaging>=17.0",
 ]
-test-flask = ["Flask>=3.1.0", {include-group = "tests"}]
-test-django = ["Django>=5.2.0", {include-group = "tests"}]
-test-bottle = ["bottle>=0.13.0", {include-group = "tests"}]
-test-tornado = ["tornado>=6.5.0", {include-group = "tests"}]
+test-flask = ["Flask>=3.1.0", { include-group = "tests" }]
+test-django = ["Django>=5.2.0", { include-group = "tests" }]
+test-bottle = ["bottle>=0.13.0", { include-group = "tests" }]
+test-tornado = ["tornado>=6.5.0", { include-group = "tests" }]
 test-pyramid = [
-    "pyramid>=2.0.2", {include-group = "tests"},
-    # temporary pin: hold back `setuptools` so that `pyramid` testing works
-    # pyramid uses pkg_resources, which has been long deprecated and finally removed
-    #
-    # see https://github.com/Pylons/pyramid/issues/3731 for discussion within pyramid
-    "setuptools <82.0"
+  "pyramid>=2.0.2",
+  { include-group = "tests" },
+  # temporary pin: hold back `setuptools` so that `pyramid` testing works
+  # pyramid uses pkg_resources, which has been long deprecated and finally removed
+  #
+  # see https://github.com/Pylons/pyramid/issues/3731 for discussion within pyramid
+  "setuptools <82.0",
 ]
-test-falcon = ["falcon>=4.1.0", {include-group = "tests"}]
-test-aiohttp = ["aiohttp>=3.13.0", {include-group = "tests"}]
+test-falcon = ["falcon>=4.1.0", { include-group = "tests" }]
+test-aiohttp = ["aiohttp>=3.13.0", { include-group = "tests" }]
 # for efficiency of testing, we define this group and test all frameworks at once, because it works
 # however, each is declared separately in case we ever encounter conflicts and need to break one off
 # from the rest of the group
 test-all-frameworks = [
-  {include-group = "test-flask"},
-  {include-group = "test-django"},
-  {include-group = "test-bottle"},
-  {include-group = "test-tornado"},
-  {include-group = "test-pyramid"},
-  {include-group = "test-falcon"},
-  {include-group = "test-aiohttp"},
+  { include-group = "test-flask" },
+  { include-group = "test-django" },
+  { include-group = "test-bottle" },
+  { include-group = "test-tornado" },
+  { include-group = "test-pyramid" },
+  { include-group = "test-falcon" },
+  { include-group = "test-aiohttp" },
 ]
 
-dev = ["tox", "pre-commit>=3.5,<5.0", {include-group = "tests"}]
+dev = ["tox", "pre-commit>=3.5,<5.0", { include-group = "tests" }]
 
 [tool.flit.sdist]
 include = [
