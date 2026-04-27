@@ -98,6 +98,9 @@ test-all-frameworks = [
 
 dev = ["tox", "pre-commit>=3.5,<5.0", { include-group = "tests" }]
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [tool.flit.sdist]
 include = [
   "docs/",
