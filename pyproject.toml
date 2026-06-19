@@ -60,6 +60,7 @@ build-backend = "flit_core.buildapi"
 
 [dependency-groups]
 docs = ["Sphinx", "sphinx-issues", "furo"]
+lint = ["pre-commit>=3.5,<5.0"]
 tests = [
   "pytest",
   "pytest-asyncio",
@@ -96,7 +97,12 @@ test-all-frameworks = [
   { include-group = "test-aiohttp" },
 ]
 
-dev = ["tox", "pre-commit>=3.5,<5.0", { include-group = "tests" }]
+dev = [
+  { include-group = "tests" },
+  { include-group = "lint" },
+  "tox",
+  "tox-uv",
+]
 
 [tool.uv]
 exclude-newer = "1 week"
