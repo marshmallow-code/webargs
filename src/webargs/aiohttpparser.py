@@ -2,7 +2,6 @@
 
 Example: ::
 
-    import asyncio
     from aiohttp import web
 
     from webargs import fields
@@ -12,9 +11,8 @@ Example: ::
     hello_args = {"name": fields.Str(required=True)}
 
 
-    @asyncio.coroutine
     @use_args(hello_args)
-    def index(request, args):
+    async def index(request, args):
         return web.Response(body="Hello {}".format(args["name"]).encode("utf-8"))
 
 
