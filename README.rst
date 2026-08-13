@@ -61,7 +61,7 @@ Support webargs
 ===============
 
 webargs is maintained by a group of 
-`volunteers <https://webargs.readthedocs.io/en/latest/authors.html>`_.
+`volunteers <https://webargs.readthedocs.io/en/latest/authors/>`_.
 If you'd like to support the future of the project, please consider
 contributing to our Open Collective:
 
