@@ -6,7 +6,7 @@ import marshmallow as ma
 
 T = typing.TypeVar("T")
 
-# an arg-map is one of the following
+# An arg-map is one of the following:
 # - a schema
 # - a schema class
 # - a str->Field mapping
@@ -19,13 +19,13 @@ ArgMap: typing.TypeAlias = (
     | ArgMapCallable[T]
 )
 
-# a 'validate' value is a callable or collection ofcallables
+# A 'validate' value is a callable or collection of callables
 ValidateArg: typing.TypeAlias = (
     None | typing.Callable | typing.Iterable[typing.Callable]
 )
 CallableList: typing.TypeAlias = list[typing.Callable[..., typing.Any]]
 
-# error handlers are no-return callables
+# Error handlers are no-return callables
 ErrorHandler: typing.TypeAlias = typing.Callable[..., typing.NoReturn]
 AsyncErrorHandler: typing.TypeAlias = typing.Callable[
     ..., typing.Awaitable[typing.NoReturn]
