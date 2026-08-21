@@ -8,7 +8,7 @@ import marshmallow as ma
 
 class MultiDictProxy(MutableMapping):
     """
-    A proxy object which wraps multidict types along with a matching schema
+    A proxy object which wraps multidict types along with a matching schema.
     Whenever a value is looked up, it is checked against the schema to see if
     there is a matching field where `is_multiple` is True. If there is, then
     the data should be loaded as a list or tuple.

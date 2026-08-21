@@ -31,7 +31,7 @@ class DelimitedFieldMixin:
     which split on a pre-specified delimiter. By default, the delimiter will be ","
 
     Because we want the MRO to reach this class before the List or Tuple class,
-    it must be listed first in the superclasses
+    it must be listed first in the superclasses.
 
     For example, a DelimitedList-like type can be defined like so:
 
