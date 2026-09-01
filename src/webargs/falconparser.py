@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import typing
+
 import falcon
 import marshmallow as ma
 from falcon.util.uri import parse_query_string
@@ -18,7 +20,7 @@ status_map = {422: HTTP_422}
 def _find_exceptions():
     for name in filter(lambda n: n.startswith("HTTP"), dir(falcon.status_codes)):
         status = getattr(falcon.status_codes, name)
-        status_code = int(status.split(" ")[0])
+        status_code = falcon.http_status_to_code(status)
         status_map[status_code] = status
 
 
@@ -26,9 +28,8 @@ _find_exceptions()
 del _find_exceptions
 
 
-def is_json_request(req: falcon.Request):
-    content_type = req.get_header("Content-Type")
-    return content_type and core.is_json(content_type)
+def is_json_request(req: falcon.Request) -> bool:
+    return core.is_json(req.content_type)
 
 
 # NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
@@ -115,7 +116,9 @@ class FalconParser(core.Parser[falcon.Request]):
 
     def load_media(self, req: falcon.Request, schema):
         """Return data unpacked and parsed by one of Falcon's media handlers.
-        By default, Falcon only handles JSON payloads.
+
+        By default, Falcon handles JSON, URL-encoded and multipart form payloads.
+        (However, :meth:`load_files` does not support Falcon's multipart form yet.)
 
         To configure additional media handlers, see the
         `Falcon documentation on media types`__.
@@ -130,7 +133,7 @@ class FalconParser(core.Parser[falcon.Request]):
         # if there is no body, return missing instead of erroring
         if req.content_length in (None, 0):
             return core.missing
-        return req.media
+        return req.get_media()
 
     def _raw_load_json(self, req: falcon.Request):
         """Return a json payload from the request for the core parser's load_json
@@ -166,14 +169,14 @@ class FalconParser(core.Parser[falcon.Request]):
             raise TypeError("Argument is not a falcon.Request")
         return req
 
-    def load_files(self, req: falcon.Request, schema):
+    def load_files(self, req: falcon.Request, schema) -> typing.NoReturn:
         raise NotImplementedError(
             f"Parsing files not yet supported by {self.__class__.__name__}"
         )
 
     def handle_error(
         self, error, req: falcon.Request, schema, *, error_status_code, error_headers
-    ):
+    ) -> typing.NoReturn:
         """Handles errors during parsing."""
         status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
         if status is None:
