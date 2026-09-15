@@ -2126,7 +2126,7 @@ test-all-frameworks = [
     { name = "pytest" },
     { name = "pytest-aiohttp", specifier = ">=0.3.0" },
     { name = "pytest-asyncio" },
-    { name = "setuptools", specifier = "<82.0" },
+    { name = "setuptools", specifier = "<83.1" },
     { name = "tornado", specifier = ">=6.5.0" },
     { name = "webtest", specifier = "==3.0.7" },
     { name = "webtest-aiohttp", specifier = "==2.0.0" },
@@ -2173,7 +2173,7 @@ test-pyramid = [
     { name = "pytest" },
     { name = "pytest-aiohttp", specifier = ">=0.3.0" },
     { name = "pytest-asyncio" },
-    { name = "setuptools", specifier = "<82.0" },
+    { name = "setuptools", specifier = "<83.1" },
     { name = "webtest", specifier = "==3.0.7" },
     { name = "webtest-aiohttp", specifier = "==2.0.0" },
 ]
