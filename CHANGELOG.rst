@@ -4,6 +4,10 @@ Changelog
 9.0.0 (unreleased)
 ******************
 
+Bug fixes:
+
+* Recognize JSON media types case-insensitively when checking request content types.
+
 Features:
 
 * *Backwards-incompatible*: Remove ``__version__``, ``__parsed_version__``, and

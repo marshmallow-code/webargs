@@ -106,6 +106,13 @@ class TestJSONArgs:
         result = parser.load_json(request, author_schema)
         assert result["name"] == "Euripides"
 
+    @pytest.mark.parametrize(
+        "content_type", ["Application/JSON", "Application/Vnd.Api+JSON; charset=UTF-8"]
+    )
+    def test_parsing_request_with_mixed_case_content_type(self, content_type):
+        request = make_json_request({"name": "Euripides"}, content_type=content_type)
+        assert parser.parse(author_schema, request) == {"name": "Euripides"}
+
     def test_it_should_get_multiple_values(self):
         query = {"works": ["Medea", "Electra"]}
         request = make_json_request(query)

@@ -94,6 +94,7 @@ def is_json(mimetype: str | None) -> bool:
         return False
     if ";" in mimetype:  # Allow Content-Type header to be passed
         mimetype = get_mimetype(mimetype)
+    mimetype = mimetype.lower()
     if mimetype == "application/json":
         return True
     if mimetype.startswith("application/") and mimetype.endswith("+json"):

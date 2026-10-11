@@ -1295,6 +1295,24 @@ def test_is_json():
     assert is_json("application/vnd.api+json") is True
 
 
+@pytest.mark.parametrize(
+    "mimetype",
+    [
+        "Application/JSON",
+        "APPLICATION/JSON; charset=utf-8",
+        "application/vnd.api+JSON",
+        "Application/Vnd.Api+Json; charset=UTF-8",
+    ],
+)
+def test_is_json_case_insensitive(mimetype):
+    assert is_json(mimetype) is True
+
+
+@pytest.mark.parametrize("mimetype", ["Application/XML", "Text/JSON"])
+def test_is_json_case_insensitive_non_json(mimetype):
+    assert is_json(mimetype) is False
+
+
 def test_get_mimetype():
     assert get_mimetype("application/json") == "application/json"
     assert get_mimetype("application/json;charset=utf8") == "application/json"
