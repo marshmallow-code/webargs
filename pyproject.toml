@@ -80,7 +80,7 @@ test-pyramid = [
   # pyramid uses pkg_resources, which has been long deprecated and finally removed
   #
   # see https://github.com/Pylons/pyramid/issues/3731 for discussion within pyramid
-  "setuptools <82.0",
+  "setuptools<84.0",
 ]
 test-falcon = ["falcon>=4.1.0", { include-group = "tests" }]
 test-aiohttp = ["aiohttp>=3.13.0", { include-group = "tests" }]
