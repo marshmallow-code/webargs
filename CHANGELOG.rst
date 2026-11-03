@@ -16,7 +16,7 @@ Bug fixes:
   characters: Tornado joins repeated headers into a single comma-separated
   string, so loading such a header into a ``List`` field produced a list of
   single-character strings. It is now loaded as a single value, matching the
-  other parsers.
+  other parsers (:pr:`1108`).
 
 Other changes:
 
