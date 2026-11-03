@@ -10,6 +10,11 @@ Features:
   ``__version_info__`` constants from ``__init__.py`` file. Users should use
   ``importlib.metadata`` instead (:pr:`1024`).
 
+Bug fixes:
+
+* Multi-value headers in ``TornadoParser`` are now retrieved using ``get_list()``
+  rather than ``get()`` (:issue:`1109`).
+
 Other changes:
 
 
