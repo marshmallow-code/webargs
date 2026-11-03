@@ -171,6 +171,20 @@ class TestHeadersArgs:
         result = parser.load_headers(request, author_schema)
         assert result["works"] == ["Prometheus Bound", "Prometheus Unbound"]
 
+    def test_it_should_treat_a_repeated_header_as_one_value(self):
+        # Tornado collects repeated headers into a single comma-separated
+        # string, so a List field must see one value and not the string's
+        # characters.
+        headers = tornado.httputil.HTTPHeaders()
+        headers.add("name", "Euphorion")
+        headers.add("works", "Prometheus Bound")
+        headers.add("works", "Prometheus Unbound")
+        assert headers["works"] == "Prometheus Bound,Prometheus Unbound"
+
+        request = make_request(headers=headers)
+        result = parser.load_headers(request, author_schema)
+        assert result["works"] == ["Prometheus Bound,Prometheus Unbound"]
+
     def test_it_should_return_missing_if_not_present(self):
         request = make_request()
         result = parser.load_headers(request, author_schema)

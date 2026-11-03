@@ -10,6 +10,14 @@ Features:
   ``__version_info__`` constants from ``__init__.py`` file. Users should use
   ``importlib.metadata`` instead (:pr:`1024`).
 
+Bug fixes:
+
+* Fix the Tornado parser treating a repeated header as a sequence of
+  characters: Tornado joins repeated headers into a single comma-separated
+  string, so loading such a header into a ``List`` field produced a list of
+  single-character strings. It is now loaded as a single value, matching the
+  other parsers.
+
 Other changes:
 
 

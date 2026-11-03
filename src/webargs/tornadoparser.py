@@ -55,6 +55,12 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
             if value is core.missing:
                 return core.missing
             if key in self.multiple_keys:
+                # A str or bytes value is a single value, not a sequence of
+                # them: Tornado joins repeated headers into one comma-separated
+                # string (e.g. "a, b"), and iterating over it would yield its
+                # characters. Only genuine sequences are expanded.
+                if isinstance(value, (str, bytes)):
+                    return [_unicode(value)]
                 return [
                     _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
                 ]
