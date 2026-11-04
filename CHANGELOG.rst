@@ -23,7 +23,8 @@ Other changes:
   This allows nested fields with a `load_default` to be used to better customize
   behavior.
 * Drop support for marshmallow 3, which is EOL.
-* Drop support for Python 3.9, which is EOL (:pr:`1019`).
+* Drop support for Python 3.9 and 3.10, which are EOL (:pr:`1019`, :pr:`1111`).
+* Test against Python 3.15.
 * Drop support for Bottle < 0.13 (:pr:`1019`).
 * Drop support for Flask < 3.1.0 (:pr:`1023`).
 * Drop support for Django < 5.2.0 (:pr:`1023`).

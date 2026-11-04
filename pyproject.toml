@@ -15,11 +15,11 @@ classifiers = [
   "Intended Audience :: Developers",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
   "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
 ]
@@ -39,12 +39,10 @@ keywords = [
   "api",
   "marshmallow",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
   "marshmallow>=4.0.0,<5.0.0",
   "packaging>=17.0",
-  # depend on typing-extensions conditionally for annotations
-  'typing_extensions>=4.0; python_version<"3.10"',
 ]
 
 [project.urls]
