@@ -55,6 +55,8 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
             if value is core.missing:
                 return core.missing
             if key in self.multiple_keys:
+                if hasattr(self.data, "get_list"):
+                    value = self.data.get_list(key)
                 return [
                     _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
                 ]
