@@ -171,6 +171,21 @@ class TestHeadersArgs:
         result = parser.load_headers(request, author_schema)
         assert result["works"] == ["Prometheus Bound", "Prometheus Unbound"]
 
+    def test_it_should_get_repeated_headers_as_multiple_values(self):
+        headers = tornado.httputil.HTTPHeaders()
+        headers.add("works", "Prometheus Bound")
+        headers.add("works", "Prometheus Unbound")
+        request = make_request(headers=headers)
+        result = parser.load_headers(request, author_schema)
+        assert result["works"] == ["Prometheus Bound", "Prometheus Unbound"]
+
+    def test_it_should_get_a_single_header_as_one_value_list(self):
+        headers = tornado.httputil.HTTPHeaders()
+        headers.add("works", "Prometheus Bound")
+        request = make_request(headers=headers)
+        result = parser.load_headers(request, author_schema)
+        assert result["works"] == ["Prometheus Bound"]
+
     def test_it_should_return_missing_if_not_present(self):
         request = make_request()
         result = parser.load_headers(request, author_schema)

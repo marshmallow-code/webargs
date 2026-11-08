@@ -60,3 +60,4 @@ Contributors (chronological)
 * Tumuer `@un4gt <https://github.com/un4gt>`_
 * Marat Sharafutdinov `@decaz <https://github.com/decaz>`_
 * Felix Engelmann `@dorthrithil <https://github.com/dorthrithil>`_
+* X6M-Work `@X6M-Work <https://github.com/X6M-Work>`_

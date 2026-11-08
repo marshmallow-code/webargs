@@ -23,7 +23,7 @@ import marshmallow as ma
 import tornado.concurrent
 import tornado.web
 from tornado.escape import _unicode
-from tornado.httputil import HTTPServerRequest
+from tornado.httputil import HTTPHeaders, HTTPServerRequest
 
 from webargs import core
 from webargs.multidictproxy import MultiDictProxy
@@ -55,6 +55,10 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
             if value is core.missing:
                 return core.missing
             if key in self.multiple_keys:
+                # HTTPHeaders.get() joins repeated headers with commas,
+                # get_list() returns each value separately
+                if isinstance(self.data, HTTPHeaders):
+                    value = self.data.get_list(key)
                 return [
                     _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
                 ]

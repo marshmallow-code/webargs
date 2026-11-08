@@ -34,6 +34,12 @@ Other changes:
 * Drop support for aiohttp < 3.13.0 (:pr:`1023`).
 * Drop support for marshmallow < 4.0.0 (:pr:`1023`).
 
+Bug fixes:
+
+* `TornadoParser <webargs.tornadoparser.TornadoParser>`: Repeated headers are
+  parsed as separate values for multi-value fields such as ``List``, instead of
+  being split into characters of the comma-joined header (:issue:`1109`).
+
 8.7.1 (2025-10-29)
 ******************
 
