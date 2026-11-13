@@ -6,7 +6,6 @@ import typing
 
 import falcon
 import marshmallow as ma
-from falcon.util.uri import parse_query_string
 
 from webargs import core
 
@@ -30,32 +29,6 @@ del _find_exceptions
 
 def is_json_request(req: falcon.Request) -> bool:
     return core.is_json(req.content_type)
-
-
-# NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
-def parse_form_body(req: falcon.Request):
-    if (
-        req.content_type is not None
-        and "application/x-www-form-urlencoded" in req.content_type
-    ):
-        # the type of `req.stream.read()` is `str | Any` according to annotations
-        # but at runtime it's always `bytes`, so coerce the type for type checker
-        body: str | bytes | None = req.stream.read(req.content_length or 0)
-        try:
-            body = body.decode("ascii")  # type: ignore[union-attr]
-        except UnicodeDecodeError:
-            body = None
-            req.log_error(
-                "Non-ASCII characters found in form body "
-                "with Content-Type of "
-                "application/x-www-form-urlencoded. Body "
-                "will be ignored."
-            )
-
-        if body:
-            return parse_query_string(body, keep_blank=req.options.keep_blank_qs_values)
-
-    return core.missing
 
 
 class HTTPError(falcon.HTTPError):
@@ -105,13 +78,23 @@ class FalconParser(core.Parser[falcon.Request]):
     def load_form(self, req: falcon.Request, schema):
         """Return form values from the request as a MultiDictProxy
 
+        This uses Falcon's media type handling, but requires that the media type is
+        specifically form data. Multipart forms are not supported via this method: use
+        ``load_media`` and Falcon's media type handling for that use case.
+
         .. note::
 
             The request stream will be read and left at EOF.
         """
-        form = parse_form_body(req)
-        if form is core.missing:
-            return form
+        # if we do not see the canonical form media type, return 'missing', as there
+        # is no form data
+        if (
+            req.content_type is None
+            or "application/x-www-form-urlencoded" not in req.content_type
+        ):
+            return core.missing
+
+        form = req.get_media()
         return self._makeproxy(form, schema)
 
     def load_media(self, req: falcon.Request, schema):
