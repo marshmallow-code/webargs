@@ -52,6 +52,8 @@ class MultiDictProxy(MutableMapping):
             return val
         if hasattr(self.data, "getlist"):
             return self.data.getlist(key)
+        if hasattr(self.data, "get_list"):
+            return self.data.get_list(key)
         if hasattr(self.data, "getall"):
             return self.data.getall(key)
         if isinstance(val, (list, tuple)):
