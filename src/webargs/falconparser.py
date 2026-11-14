@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import typing
 
 import falcon
@@ -75,7 +76,7 @@ class FalconParser(core.Parser[falcon.Request]):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.params, schema)
 
-    def load_form(self, req: falcon.Request, schema):
+    def load_form(self, req: falcon.Request, schema: ma.Schema):
         """Return form values from the request as a MultiDictProxy
 
         This uses Falcon's media type handling, but requires that the media type is
@@ -95,6 +96,8 @@ class FalconParser(core.Parser[falcon.Request]):
             return core.missing
 
         form = req.get_media()
+        if inspect.isawaitable(form):
+            return self._makeproxy_awaitable(form, schema)
         return self._makeproxy(form, schema)
 
     def load_media(self, req: falcon.Request, schema):
