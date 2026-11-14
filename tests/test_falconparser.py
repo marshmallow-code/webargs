@@ -86,3 +86,13 @@ class TestFalconParser(CommonTestCase):
         assert client.simulate_get("/async_echo_use_args?name=Fred").json == {
             "name": "Fred"
         }
+
+    @pytest.mark.usefixtures("current_loop")
+    def test_parse_form_args_async(self):
+        app = create_async_app()
+        client = falcon.testing.TestClient(app)
+        assert client.simulate_post(
+            "/async_echo_form",
+            body="name=Fred",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        ).json == {"name": "Fred"}

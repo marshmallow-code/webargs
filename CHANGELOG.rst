@@ -33,6 +33,10 @@ Other changes:
 * Drop support for Falcon < 4.1.0 (:pr:`1023`).
 * Drop support for aiohttp < 3.13.0 (:pr:`1023`).
 * Drop support for marshmallow < 4.0.0 (:pr:`1023`).
+* The Falcon parser has been improved and simplified. In particular, `load_form`
+  now uses Falcon's `get_media` method after checking the media type. This means
+  that Falcon users who customize media handling will see their customizations
+  present in data loaded with `location="form"`. (:pr:`1080`)
 
 8.7.1 (2025-10-29)
 ******************
