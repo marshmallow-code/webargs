@@ -266,6 +266,20 @@ class TestParse:
         assert parsed["string"] == value
         assert parsed["integer"] == [1, 2]
 
+    def test_it_should_parse_httpheaders_with_multivalue(self):
+        attrs = {"string": fields.Str(), "integer": fields.List(fields.Int())}
+
+        headers = tornado.httputil.HTTPHeaders()
+        headers.add("string", "value")
+        headers.add("integer", "1")
+        headers.add("integer", "2")
+        request = make_request(headers=headers)
+
+        parsed = parser.parse(attrs, request, location="headers")
+
+        assert parsed["string"] == "value"
+        assert parsed["integer"] == [1, 2]
+
     def test_it_should_parse_cookies_arguments(self):
         attrs = {"string": fields.Str(), "integer": fields.List(fields.Int())}
 
