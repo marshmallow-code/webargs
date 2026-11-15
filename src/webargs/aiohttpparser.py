@@ -108,6 +108,10 @@ class AIOHTTPParser(core.Parser[web.Request]):
             return self._handle_invalid_json_error(exc, req)
         except UnicodeDecodeError as exc:
             return self._handle_invalid_json_error(exc, req)
+        except LookupError as exc:
+            # aiohttp decodes the body with the Content-Type charset, which may
+            # name an unknown codec
+            return self._handle_invalid_json_error(exc, req)
 
     def load_headers(self, req, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""
@@ -170,7 +174,11 @@ class AIOHTTPParser(core.Parser[web.Request]):
         )
 
     def _handle_invalid_json_error(
-        self, error: json.JSONDecodeError | UnicodeDecodeError, req, *args, **kwargs
+        self,
+        error: json.JSONDecodeError | UnicodeDecodeError | LookupError,
+        req,
+        *args,
+        **kwargs,
     ) -> typing.NoReturn:
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}

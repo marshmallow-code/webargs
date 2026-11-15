@@ -113,6 +113,14 @@ def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
                 doc=str(exc.object),
                 pos=exc.start,
             ) from exc
+        except LookupError as exc:
+            # the encoding (typically the charset from a Content-Type header) is not
+            # a known codec
+            raise json.JSONDecodeError(
+                f"Unknown encoding : {encoding}",
+                doc=str(s),
+                pos=0,
+            ) from exc
     return json.loads(decoded)
 
 

@@ -17,7 +17,7 @@ from marshmallow import (
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 from webargs import ValidationError, fields
-from webargs.core import Parser, get_mimetype, is_json
+from webargs.core import Parser, get_mimetype, is_json, json, parse_json
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -1298,6 +1298,11 @@ def test_is_json():
 def test_get_mimetype():
     assert get_mimetype("application/json") == "application/json"
     assert get_mimetype("application/json;charset=utf8") == "application/json"
+
+
+def test_parse_json_with_unknown_encoding_raises_json_decode_error():
+    with pytest.raises(json.JSONDecodeError):
+        parse_json(b'{"foo": 42}', encoding="not-a-charset")
 
 
 class MockRequestParserWithErrorHandler(MockRequestParser):

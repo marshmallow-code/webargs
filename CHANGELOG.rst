@@ -10,6 +10,15 @@ Features:
   ``__version_info__`` constants from ``__init__.py`` file. Users should use
   ``importlib.metadata`` instead (:pr:`1024`).
 
+Bug fixes:
+
+* `PyramidParser <webargs.pyramidparser.PyramidParser>` and
+  `AIOHTTPParser <webargs.aiohttpparser.AIOHTTPParser>`: Return a 400 "Invalid JSON
+  body." error instead of crashing with an uncaught ``LookupError`` (HTTP 500) when a
+  JSON request's ``Content-Type`` header names an unknown charset, e.g.
+  ``application/json; charset=not-a-charset``. `webargs.core.parse_json` now raises
+  ``JSONDecodeError`` for an unknown ``encoding``.
+
 Other changes:
 
 
