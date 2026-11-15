@@ -1,0 +1,87 @@
+name: enforce issue assignment
+
+on:
+  # zizmor: ignore[dangerous-triggers] -- pull_request_target is needed to close PRs
+  pull_request_target:
+    types: [opened, edited, reopened]
+
+permissions:
+  pull-requests: write
+  issues: read
+
+jobs:
+  # This job checks that PR submitters are assigned to the issues which their PR
+  # references and auto-closes the PR if they are not assigned.
+  # 
+  # The check is skipped or passes if any of the following hold:
+  #
+  # - the user is an internal collaborator
+  # - the `skip-assignment-check` label is present
+  # - there are no referenced issues in the PR
+  # - the author is assigned *all* of the referenced issues
+  check-assignment:
+    if: >
+      github.event.pull_request.author_association != 'MEMBER' &&
+      github.event.pull_request.author_association != 'OWNER' &&
+      github.event.pull_request.author_association != 'COLLABORATOR' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-assignment-check')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check referenced issues and close if unauthorized
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+
+            const query = `
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                    closingIssuesReferences(first: 20) {
+                      nodes {
+                        number
+                        assignees(first: 20) { nodes { login } }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            const result = await github.graphql(query, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              number: pr.number,
+            });
+
+            const refs = result.repository.pullRequest.closingIssuesReferences.nodes;
+            if (refs.length === 0) {
+              core.info('No closing issue references; nothing to enforce.');
+              return;
+            }
+
+            const unauthorized = refs.filter(
+              issue => !issue.assignees.nodes.some(a => a.login === author)
+            );
+            if (unauthorized.length === 0) {
+              core.info(`Author ${author} is assigned to all referenced issues.`);
+              return;
+            }
+
+            const issueList = unauthorized.map(i => `#${i.number}`).join(', ');
+            const body =
+              `@${author} You do not have permission to open a PR without ` +
+              `being assigned to the referenced issue (${issueList}).`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body,
+            });
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              state: 'closed',
+            });
