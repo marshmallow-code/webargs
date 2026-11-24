@@ -41,6 +41,12 @@ class EchoForm:
         set_text(resp, json.dumps(parsed))
 
 
+class AsyncEchoForm:
+    async def on_post(self, req, resp):
+        parsed = await parser.async_parse(hello_args, req, location="form")
+        set_text(resp, json.dumps(parsed))
+
+
 class EchoJSON:
     def on_post(self, req, resp):
         parsed = parser.parse(hello_args, req, location="json")
@@ -217,4 +223,5 @@ def create_async_app():
     app = falcon.asgi.App()
     app.add_route("/async_echo", AsyncEcho())
     app.add_route("/async_echo_use_args", AsyncEchoUseArgs())
+    app.add_route("/async_echo_form", AsyncEchoForm())
     return app

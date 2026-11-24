@@ -196,6 +196,16 @@ class Parser(typing.Generic[Request]):
         self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
         self.unknown = unknown
 
+    @typing.overload
+    def _makeproxy(
+        self, multidict: typing.Any, schema: ma.Schema
+    ) -> MultiDictProxy: ...
+
+    @typing.overload
+    def _makeproxy(
+        self, multidict: typing.Any, schema: ma.Schema, *, cls: type[MultiDictProxyT]
+    ) -> MultiDictProxyT: ...
+
     def _makeproxy(
         self,
         multidict: typing.Any,
@@ -205,6 +215,35 @@ class Parser(typing.Generic[Request]):
     ) -> MultiDictProxyT | MultiDictProxy:
         """Create a multidict proxy object with options from the current parser"""
         return cls(multidict, schema, known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS))
+
+    @typing.overload
+    def _makeproxy_awaitable(
+        self, multidict: typing.Any, schema: ma.Schema
+    ) -> typing.Awaitable[MultiDictProxy]: ...
+
+    @typing.overload
+    def _makeproxy_awaitable(
+        self, multidict: typing.Any, schema: ma.Schema, *, cls: type[MultiDictProxyT]
+    ) -> typing.Awaitable[MultiDictProxyT]: ...
+
+    def _makeproxy_awaitable(
+        self,
+        multidict: typing.Any,
+        schema: ma.Schema,
+        *,
+        cls: type[MultiDictProxyT] | type[MultiDictProxy] = MultiDictProxy,
+    ) -> typing.Awaitable[MultiDictProxyT | MultiDictProxy]:
+        """Create a multidict proxy object, wrapped in a coroutine which awaits the
+        multidict data, with options from the current parser."""
+
+        async def await_multidict() -> MultiDictProxyT | MultiDictProxy:
+            return cls(
+                await multidict,
+                schema,
+                known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS),
+            )
+
+        return await_multidict()
 
     def _get_loader(self, location: str) -> typing.Callable:
         """Get the loader function for the given location.
