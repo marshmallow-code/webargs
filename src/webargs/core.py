@@ -777,7 +777,7 @@ class Parser(typing.Generic[Request]):
 
     def _handle_invalid_json_error(
         self,
-        error: json.JSONDecodeError | UnicodeDecodeError,
+        error: json.JSONDecodeError | UnicodeDecodeError | LookupError,
         req: Request,
         *args: typing.Any,
         **kwargs: typing.Any,
@@ -806,7 +806,7 @@ class Parser(typing.Generic[Request]):
             if exc.doc == "":
                 return missing
             return self._handle_invalid_json_error(exc, req)
-        except UnicodeDecodeError as exc:
+        except (UnicodeDecodeError, LookupError) as exc:
             return self._handle_invalid_json_error(exc, req)
 
     def load_json_or_form(self, req: Request, schema: ma.Schema) -> typing.Any:

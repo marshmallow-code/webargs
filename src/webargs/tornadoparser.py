@@ -158,7 +158,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
     def _handle_invalid_json_error(
         self,
-        error: json.JSONDecodeError | UnicodeDecodeError,
+        error: json.JSONDecodeError | UnicodeDecodeError | LookupError,
         req: HTTPServerRequest,
         *args: typing.Any,
         **kwargs: typing.Any,

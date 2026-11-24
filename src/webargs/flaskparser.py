@@ -78,7 +78,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def _handle_invalid_json_error(
         self,
-        error: json.JSONDecodeError | UnicodeDecodeError,
+        error: json.JSONDecodeError | UnicodeDecodeError | LookupError,
         req: flask.Request,
         *args: typing.Any,
         **kwargs: typing.Any,

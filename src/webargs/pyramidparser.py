@@ -120,7 +120,7 @@ class PyramidParser(core.Parser[Request]):
 
     def _handle_invalid_json_error(
         self,
-        error: json.JSONDecodeError | UnicodeDecodeError,
+        error: json.JSONDecodeError | UnicodeDecodeError | LookupError,
         req: Request,
         *args: typing.Any,
         **kwargs: typing.Any,

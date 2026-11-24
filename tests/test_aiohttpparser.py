@@ -63,6 +63,17 @@ class TestAIOHTTPParser(CommonTestCase):
             "name": "Chandler"
         }
 
+    # https://github.com/marshmallow-code/webargs/issues/1120
+    def test_parse_json_with_unknown_charset(self, testapp):
+        res = testapp.post(
+            "/echo_json",
+            '{"name": "Steve"}',
+            headers={"Content-Type": "application/json; charset=not-a-charset"},
+            expect_errors=True,
+        )
+        assert res.status_code == 400
+        assert res.json == {"json": ["Invalid JSON body."]}
+
     # https://github.com/marshmallow-code/webargs/pull/297
     def test_empty_json_body(self, testapp):
         environ = {"CONTENT_TYPE": "application/json", "wsgi.input": BytesIO(b"")}
