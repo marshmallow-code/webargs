@@ -17,7 +17,7 @@ from marshmallow import (
 from werkzeug.datastructures import MultiDict as WerkMultiDict
 
 from webargs import ValidationError, fields
-from webargs.core import Parser, get_mimetype, is_json
+from webargs.core import Parser, get_mimetype, is_json, json, parse_json
 from webargs.multidictproxy import MultiDictProxy
 
 
@@ -1707,3 +1707,8 @@ def test_default_arg_name_pattern_can_pull_schema_attribute(web_request):
 
     web_request.json = {"length": 6, "width": 7}
     assert area() == 42
+
+
+def test_parse_json_unknown_charset():
+    with pytest.raises(json.JSONDecodeError, match="Unknown encoding"):
+        parse_json(b"{}", encoding="not-a-real-charset")

@@ -107,12 +107,16 @@ def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
     else:
         try:
             decoded = s.decode(encoding)
-        except UnicodeDecodeError as exc:
-            raise json.JSONDecodeError(
-                f"Bytes decoding error : {exc.reason}",
-                doc=str(exc.object),
-                pos=exc.start,
-            ) from exc
+        except (LookupError, UnicodeDecodeError) as exc:
+            if isinstance(exc, UnicodeDecodeError):
+                message = f"Bytes decoding error : {exc.reason}"
+                doc = str(exc.object)
+                pos = exc.start
+            else:
+                message = f"Unknown encoding: {encoding}"
+                doc = repr(s)
+                pos = 0
+            raise json.JSONDecodeError(message, doc=doc, pos=pos) from exc
     return json.loads(decoded)
 
 
